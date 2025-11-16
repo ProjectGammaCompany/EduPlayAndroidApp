@@ -60,7 +60,16 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    //hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+
+    //retrofit
+    implementation(libs.okhttp)
+    implementation(libs.retrofit)
+
+    //async images
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }
