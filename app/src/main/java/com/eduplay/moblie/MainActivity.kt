@@ -18,8 +18,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
+import dagger.hilt.android.AndroidEntryPoint
 import com.eduplay.moblie.ui.viewmodel.AuthViewModel
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
