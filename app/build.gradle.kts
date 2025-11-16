@@ -1,3 +1,6 @@
+
+import com.android.build.api.variant.BuildConfigField
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -27,8 +30,19 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            //TODO("заменить на реальный адрес бекэнда")
+            buildConfigField("String", "BACKEND_URL", "\"http://localhost:80\"")
+
+
         }
+        debug {
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
+            buildConfigField("String", "BACKEND_URL", "\"http://localhost:80\"")
+        }
+
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -38,6 +52,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -68,6 +83,8 @@ dependencies {
     //retrofit
     implementation(libs.okhttp)
     implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
 
     //async images
     implementation(libs.coil.compose)
