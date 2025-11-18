@@ -89,4 +89,10 @@ dependencies {
     //async images
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    // datastore
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.preferences.rxjava2)
+    implementation(libs.androidx.datastore.preferences.rxjava3)
 }
