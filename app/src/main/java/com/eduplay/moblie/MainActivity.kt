@@ -34,8 +34,7 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = "auth_screen") {
                     composable("auth_screen") {
                         AuthorizationScreen(
-                            navController = navController,
-                            null
+                            navController = navController
                         )
                     }
                 }

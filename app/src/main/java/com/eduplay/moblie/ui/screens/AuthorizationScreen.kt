@@ -34,12 +34,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.ui.viewmodel.AuthViewModel
 
 @Composable
-fun AuthorizationScreen(navController: NavController?, viewModel: AuthViewModel?) {
+fun AuthorizationScreen(navController: NavController?, viewModel: AuthViewModel = hiltViewModel()) {
     val minViewWidth = 0.5f
     val maxViewWidth = 0.8f
     val logoImage = painterResource(R.drawable.eduplaylogo)
@@ -104,7 +105,7 @@ private fun LoginForm(
     colorScheme: ColorScheme,
     typography: Typography,
     switchForms: () -> Unit,
-    viewModel: AuthViewModel?
+    viewModel: AuthViewModel
 ) {
     val login = rememberTextFieldState()
     val password = rememberTextFieldState()
@@ -136,7 +137,7 @@ private fun LoginForm(
 
     //submit btn
     Button(
-        onClick = { viewModel?.submitLoginForm() },
+        onClick = { viewModel.submitLoginForm() },
         modifier = Modifier.fillMaxWidth(0.9f)
     ) {
         Text(
@@ -174,7 +175,7 @@ private fun RegistrationForm(
     colorScheme: ColorScheme,
     typography: Typography,
     switchForms: () -> Unit,
-    viewModel: AuthViewModel?
+    viewModel: AuthViewModel
 ) {
     val login = rememberTextFieldState()
     val password = rememberTextFieldState()
@@ -206,7 +207,7 @@ private fun RegistrationForm(
 
     //submit btn
     Button(
-        onClick = { viewModel?.submitLoginForm() },
+        onClick = { viewModel.submitRegisterForm() },
         modifier = Modifier.fillMaxWidth(0.9f)
     ) {
         Text(

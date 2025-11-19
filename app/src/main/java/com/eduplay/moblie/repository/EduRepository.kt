@@ -1,15 +1,15 @@
-package com.eduplay.moblie.repository.webrepository
+package com.eduplay.moblie.repository
 
-import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.responseTypes.AuthResponse
+import com.eduplay.moblie.repository.webrepository.WebRepository
 import jakarta.inject.Inject
 
-
-class WebRepository @Inject constructor(
-    private val api: WebApi
+class EduRepository @Inject constructor(
+    private val webRepository: WebRepository
 ) : Repository {
+
     override suspend fun login(): AuthResponse {
-        return api.login()
+        return webRepository.login()
     }
 
     override suspend fun logout() {
@@ -19,6 +19,4 @@ class WebRepository @Inject constructor(
     override suspend fun register() {
         TODO("Not yet implemented")
     }
-
-
 }

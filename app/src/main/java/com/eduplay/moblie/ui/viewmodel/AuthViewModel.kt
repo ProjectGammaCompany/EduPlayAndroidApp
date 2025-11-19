@@ -4,7 +4,8 @@ import androidx.lifecycle.ViewModel
 
 class AuthViewModel(): ViewModel() {
 
-
+@HiltViewModel
+class AuthViewModel @Inject constructor(private val repository: EduRepository): ViewModel() {
     fun submitLoginForm() {
         //TODO()
     }
