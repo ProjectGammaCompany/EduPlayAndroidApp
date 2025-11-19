@@ -38,7 +38,7 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             isDebuggable = true
-            buildConfigField("String", "BACKEND_URL", "\"http://localhost:80\"")
+            buildConfigField("String", "BACKEND_URL", "\"http://192.168.1.227:5000/ \"")
         }
 
     }
@@ -95,4 +95,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.rxjava2)
     implementation(libs.androidx.datastore.preferences.rxjava3)
+
+    implementation(libs.kotlin.reflect)
 }
