@@ -40,7 +40,7 @@ import com.eduplay.moblie.R
 import com.eduplay.moblie.ui.viewmodel.AuthViewModel
 
 @Composable
-fun AuthorizationScreen(navController: NavController?, viewModel: AuthViewModel = hiltViewModel()) {
+fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel = hiltViewModel()) {
     val minViewWidth = 0.5f
     val maxViewWidth = 0.8f
     val logoImage = painterResource(R.drawable.eduplaylogo)

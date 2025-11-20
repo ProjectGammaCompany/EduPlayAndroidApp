@@ -1,8 +1,9 @@
 package com.eduplay.moblie.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
-
-class AuthViewModel(): ViewModel() {
+import com.eduplay.moblie.repository.EduRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(private val repository: EduRepository): ViewModel() {
