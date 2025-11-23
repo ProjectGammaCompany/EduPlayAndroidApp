@@ -4,4 +4,9 @@
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="register">Register</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="add_to_favourite">Add to favourite</string>
+    <string name="remove_from_favourite">Remove from favourite</string>
+    <string name="search_events">Search events</string>
+    <string name="app_menu">Menu</string>
 </resources>
