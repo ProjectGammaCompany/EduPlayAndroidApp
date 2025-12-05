@@ -38,7 +38,7 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             isDebuggable = true
-            buildConfigField("String", "BACKEND_URL", "\"http://192.168.1.227:5000/ \"")
+            buildConfigField("String", "BACKEND_URL", "\"http://192.168.1.227:8080/ \"")
         }
 
     }
