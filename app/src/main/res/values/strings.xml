@@ -4,4 +4,7 @@
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="register">Register</string>
+    <string name="badEmailOrPassword">Chaeck your email and password</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
 </resources>

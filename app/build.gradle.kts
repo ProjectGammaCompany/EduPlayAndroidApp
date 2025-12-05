@@ -97,4 +97,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences.rxjava3)
 
     implementation(libs.kotlin.reflect)
+
+    implementation(libs.androidx.compose.material.icons.extended)
 }
