@@ -137,7 +137,7 @@ private fun LoginForm(
 
     //submit btn
     Button(
-        onClick = { viewModel.submitLoginForm() },
+        onClick = { viewModel.submitLoginForm(login.text.toString(), password.text.toString()) },
         modifier = Modifier.fillMaxWidth(0.9f)
     ) {
         Text(
@@ -207,7 +207,7 @@ private fun RegistrationForm(
 
     //submit btn
     Button(
-        onClick = { viewModel.submitRegisterForm() },
+        onClick = { viewModel.submitRegisterForm(login.text.toString(), password.text.toString()) },
         modifier = Modifier.fillMaxWidth(0.9f)
     ) {
         Text(
