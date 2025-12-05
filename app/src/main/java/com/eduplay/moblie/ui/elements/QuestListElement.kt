@@ -3,6 +3,7 @@ package com.eduplay.moblie.ui.elements
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -73,32 +74,43 @@ fun QuestListElement(
             modifier = Modifier
                 .align(alignment = Alignment.CenterVertically)
                 .weight(1f)
-                .padding(start = 5.dp, end = 5.dp)
+                .padding(start = 5.dp, end = 1.dp)
         ) {
-            Row {
-                Text(
-                    text = questShortInfo.name,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    textAlign = TextAlign.Start,
-                    style = typography.titleLarge,
+            Row(
+                modifier = Modifier.padding(bottom = 5.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
                     modifier = Modifier
-                        .padding(start = 5.dp)
-                        .weight(1f)
-                )
-                if (questShortInfo.isDownloaded) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.download_24dp_1f1f1f_fill0_wght200_grad0_opsz24),
-                        contentDescription = stringResource(id = R.string.downloaded),
-                        modifier = Modifier
-                            .weight(0.25f)
-                            .align(Alignment.CenterVertically)
+
+                        //.weight(1f)
+                        .padding(start = 5.dp, end = 2.dp)
+                        .fillMaxWidth(0.7f)
+                ) {
+                    Text(
+                        text = questShortInfo.name,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        textAlign = TextAlign.Start,
+                        style = typography.titleLarge,
+                        modifier = Modifier.weight(1f)
                     )
+                    if (questShortInfo.isDownloaded) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.download_24dp_1f1f1f_fill0_wght200_grad0_opsz24),
+                            contentDescription = stringResource(id = R.string.downloaded),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .weight(0.15f)
+                        )
+                    }
                 }
                 Text(
                     text = String.format("%.2f⭐", questShortInfo.rate),
                     overflow = TextOverflow.Clip,
                     textAlign = TextAlign.End,
+                    style = typography.labelMedium,
                     modifier = Modifier
                         .weight(0.25f)
                         .align(Alignment.CenterVertically)
@@ -119,7 +131,8 @@ fun QuestListElement(
             {
                 isFavourite.value = !isFavourite.value
                 onFavouriteToggle(isFavourite.value)
-            }, modifier = Modifier.align(Alignment.CenterVertically)
+            }, modifier = Modifier
+                .align(Alignment.CenterVertically)
         ) {
             if (isFavourite.value) {
                 Icon(
@@ -158,35 +171,35 @@ fun QuestListElementPreview() {
     Column {
         QuestListElement(
             QuestShortInfo(
-            "id_funny",
-            "The very funny name",
-            "some url",
-            4.3333333,
-            true,
-            listOf("tag 1", "funny", "long as hell tag"),
-            true
-        ), {}, {})
+                "id_funny",
+                "The very funny name",
+                "some url",
+                4.3333333,
+                true,
+                listOf("tag 1", "funny", "long as hell tag"),
+                true
+            ), {}, {})
 
         QuestListElement(
             QuestShortInfo(
-            "id_funny",
-            "Название квеста",
-            "some url",
-            4.3333333,
-            false,
-            listOf("tag 1", "funny", "long as hell tag", "o", "long as hell tag"),
-            false
-        ), {}, {})
+                "id_funny",
+                "Название квеста",
+                "some url",
+                4.3333333,
+                false,
+                listOf("tag 1", "funny", "long as hell tag", "o", "long as hell tag"),
+                false
+            ), {}, {})
 
         QuestListElement(
             QuestShortInfo(
-            "id_funny",
-            "The very fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuunny name",
-            "some url",
-            5.00,
-            false,
-            listOf(),
-            false
-        ), {}, {})
+                "id_funny",
+                "The very fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuunny name",
+                "some url",
+                5.00,
+                false,
+                listOf(),
+                false
+            ), {}, {})
     }
 }

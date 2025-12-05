@@ -9,4 +9,7 @@
     <string name="remove_from_favourite">Remove from favourite</string>
     <string name="search_events">Search events</string>
     <string name="app_menu">Menu</string>
+    <string name="main_screen">Events</string>
+    <string name="my_events">My events</string>
+    <string name="profile">Profile</string>
 </resources>

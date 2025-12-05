@@ -5,21 +5,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
+import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import dagger.hilt.android.AndroidEntryPoint
-import com.eduplay.moblie.ui.viewmodel.AuthViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -29,16 +28,37 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             EduPlayTheme {
-
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "auth_screen") {
-                    composable("auth_screen") {
-                        AuthorizationScreen(
-                            navController = navController
-                        )
+                Scaffold(
+                    bottomBar = { BottomNavBar(navController) }
+                ) { innerPadding ->
+
+                    NavHost(navController = navController, startDestination = "main_screen") {
+                        composable("auth_screen") {
+                            AuthorizationScreen(
+                                navController = navController
+                            )
+                        }
+                        composable("main_screen") {
+                            MainScreen(innerPadding)
+                        }
                     }
+
                 }
             }
         }
     }
 }
+
+//@Preview
+//@Composable
+//fun funny() {
+//    val navController = rememberNavController()
+//    Scaffold(
+//        bottomBar = { BottomNavBar(navController) }
+//    ) { innerPadding ->
+//        Box(modifier = Modifier.padding(innerPadding)) {
+//            MainScreen()
+//        }
+//    }
+//}

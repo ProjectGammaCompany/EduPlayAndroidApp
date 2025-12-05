@@ -10,6 +10,7 @@ kotlinReflect = "2.0.21"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.10.0"
 composeBom = "2025.11.00"
+materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.6"
 hiltNavigationCompose = "1.2.0"
 coilCompose = "3.1.0"
@@ -22,6 +23,7 @@ datastorePreferencesRxjava2 = "1.1.0"
 datastorePreferencesRxjava3 = "1.1.0"
 
 [libraries]
+androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }

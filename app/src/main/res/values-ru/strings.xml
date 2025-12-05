@@ -10,4 +10,7 @@
     <string name="remove_from_favourite">Удалить из избранного</string>
     <string name="search_events">Поиск событий</string>
     <string name="app_menu">Меню</string>
+    <string name="main_screen">События</string>
+    <string name="my_events">Мои события</string>
+    <string name="profile">Профиль</string>
 </resources>
