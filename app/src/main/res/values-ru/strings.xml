@@ -13,4 +13,7 @@
     <string name="main_screen">События</string>
     <string name="my_events">Мои события</string>
     <string name="profile">Профиль</string>
+    <string name="badEmailOrPassword">Проверьте email и пароль</string>
+    <string name="show_password">Показать пароль</string>
+    <string name="hide_password">Скрыть пароль</string>
 </resources>

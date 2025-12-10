@@ -12,7 +12,7 @@
     <string name="main_screen">Events</string>
     <string name="my_events">My events</string>
     <string name="profile">Profile</string>
-    <string name="badEmailOrPassword">Chaeck your email and password</string>
+    <string name="badEmailOrPassword">Check your email and password</string>
     <string name="show_password">Show password</string>
     <string name="hide_password">Hide password</string>
 </resources>
