@@ -1,10 +1,14 @@
 package com.eduplay.moblie.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.webrepository.WebRepository
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 class EduRepository @Inject constructor(
     private val webRepository: WebRepository
@@ -22,7 +26,23 @@ class EduRepository @Inject constructor(
         return webRepository.register(auth)
     }
 
-    suspend fun getEvents(page: Int =1): List<QuestShortInfo> {
-        return webRepository.getEvents(page)
+    fun getEvents(
+        pageSize: Int = 20,
+        enablePlaceHolders: Boolean = false,
+        prefetchDistance: Int = 10,
+        initialLoadSize: Int = 20,
+        maxCacheSize: Int = 2000
+    ): Flow<PagingData<QuestShortInfo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = pageSize,
+                enablePlaceholders = enablePlaceHolders,
+                prefetchDistance = prefetchDistance,
+                initialLoadSize = initialLoadSize,
+                maxSize = maxCacheSize
+            ), pagingSourceFactory = {
+                AllEventsPagingWebSource(webRepository)
+            }
+        ).flow
     }
 }

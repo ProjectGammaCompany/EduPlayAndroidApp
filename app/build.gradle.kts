@@ -99,4 +99,6 @@ dependencies {
     implementation(libs.kotlin.reflect)
 
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.androidx.paging.runtime.ktx)
 }

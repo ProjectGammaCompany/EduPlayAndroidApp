@@ -7,10 +7,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -29,8 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.eduplay.moblie.R
-import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.QuestListElement
 import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
 
@@ -41,7 +40,7 @@ fun MainScreen(
     viewModel: MainScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val pagerState = rememberPagerState{0}
+    val pagerState = rememberPagerState { 5 }
 
     (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
 
@@ -82,15 +81,20 @@ fun MainScreen(
                 Text(stringResource(R.string.app_name))
             }
         )
-        VerticalPager(pagerState, modifier = Modifier.fillMaxSize()) { page ->
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(viewModel.events[page] ?: viewModel.getEventsByPage(page)) {
-                    QuestListElement(it, {}, {})
+
+        val events = viewModel.getImageList.collectAsLazyPagingItems()
+
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(events.itemCount) { position ->
+                val itemValue = events[position]
+                if (itemValue != null) {
+                    QuestListElement(itemValue, {}, {})
                 }
             }
         }
+
     }
 }
 
