@@ -19,4 +19,12 @@
     <string name="report_event">Пожаловаться на событие</string>
     <string name="download_event">Скачать событие</string>
     <string name="completed">Пройдено</string>
+    <string name="general_info">Основная информация</string>
+    <string name="rating">Рейтинг:</string>
+    <string name="opens">Откроется:</string>
+    <string name="closes">Закроется:</string>
+    <string name="time_for_completion">Время на выполнение:</string>
+    <string name="description">Описание</string>
+    <string name="start_event">Начать</string>
+    <string name="continue_event">Продолжить</string>
 </resources>
