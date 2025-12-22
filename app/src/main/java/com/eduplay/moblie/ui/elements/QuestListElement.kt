@@ -150,7 +150,7 @@ fun QuestListElement(
 }
 
 @Composable
-fun QuestTag(tagName: String) {
+private fun QuestTag(tagName: String) {
     Text(
         text = tagName,
         overflow = TextOverflow.Ellipsis,
