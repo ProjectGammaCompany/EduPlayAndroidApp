@@ -16,4 +16,7 @@
     <string name="badEmailOrPassword">Проверьте email и пароль</string>
     <string name="show_password">Показать пароль</string>
     <string name="hide_password">Скрыть пароль</string>
+    <string name="report_event">Пожаловаться на событие</string>
+    <string name="download_event">Скачать событие</string>
+    <string name="completed">Пройдено</string>
 </resources>

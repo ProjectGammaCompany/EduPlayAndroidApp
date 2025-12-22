@@ -15,4 +15,7 @@
     <string name="badEmailOrPassword">Check your email and password</string>
     <string name="show_password">Show password</string>
     <string name="hide_password">Hide password</string>
+    <string name="report_event">Report event</string>
+    <string name="download_event">Download event</string>
+    <string name="completed">Completed</string>
 </resources>
