@@ -2,8 +2,10 @@ package com.eduplay.moblie.ui.screens.EventScreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -11,8 +13,10 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -172,7 +176,9 @@ private fun EventScreenHeader(
             contentDescription = eventName,
             placeholder = painterResource(R.drawable.eduplaylogo),
             error = painterResource(id = R.drawable.ic_launcher_background),
-            modifier = Modifier.weight(0.3f)
+            modifier = Modifier
+                .width(130.dp)
+                .weight(0.35f)
         )
         Text(
             eventName,
@@ -185,7 +191,7 @@ private fun EventScreenHeader(
         )
     }
     Row(modifier = Modifier.padding(horizontal = 10.dp)) {
-        Box(modifier = Modifier.weight(0.3f)) {
+        Box(modifier = Modifier.width(120.dp).weight(0.35f)) {
             if (!eventCreatorMode && isCompleted) {
                 AssistChip(
                     onClick = {},
@@ -202,7 +208,10 @@ private fun EventScreenHeader(
                             Modifier.size(AssistChipDefaults.IconSize)
                         )
                     },
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier
+                        .align(Alignment.Center)
+
+
                 )
             }
         }
@@ -230,14 +239,14 @@ private fun GeneralUserBody(
     isContinuing: Boolean,
     startEvent: ()->Unit
 ) {
-    Column {
+    Column(verticalArrangement = Arrangement.Center) {
         Column(
             modifier = Modifier
                 .padding(horizontal = 10.dp, vertical = 10.dp)
-                .fillMaxHeight(if (isOpen) 0.9f else 1f)
+                .fillMaxHeight(if (isOpen) 0.85f else 1f)
                 .verticalScroll(rememberScrollState())
         ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
+            FlowRow (modifier = Modifier.fillMaxWidth()) {
                 tags.forEach { tagName ->
                     EventTag(tagName)
                 }
@@ -280,8 +289,10 @@ private fun GeneralUserBody(
             Button(
                 onClick = startEvent,
                 modifier = Modifier
+                    .padding(vertical=3.dp)
                     .fillMaxWidth(0.8f)
-                    .fillMaxHeight(0.8f)
+                    .height(50.dp)
+                    .weight(0.15f)
                     .align(Alignment.CenterHorizontally)
             ) {
                 Text(
@@ -290,7 +301,8 @@ private fun GeneralUserBody(
                     } else {
                         stringResource(R.string.continue_event)
                     },
-                    style = Typography.titleMedium
+                    style = Typography.titleMedium,
+                    modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
         }
@@ -306,7 +318,7 @@ private fun EventTag(tagName: String) {
         color = colorScheme.onPrimaryContainer,
         style = typography.labelLarge,
         modifier = Modifier
-            .padding(horizontal = 5.dp)
+            .padding(horizontal = 5.dp, vertical= 3.dp)
             .wrapContentWidth()
             .background(colorScheme.primaryContainer, shape = RoundedCornerShape(8.dp))
             .border(1.dp, colorScheme.tertiary, shape = RoundedCornerShape(8.dp))
