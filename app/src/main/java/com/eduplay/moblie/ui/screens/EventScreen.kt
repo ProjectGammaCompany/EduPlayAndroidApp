@@ -1,4 +1,4 @@
-package com.eduplay.moblie.ui.screens.EventScreen
+package com.eduplay.moblie.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,18 +24,31 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -57,7 +70,7 @@ import com.eduplay.moblie.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventScreen(innerPaddingValues: PaddingValues) {
-    val eventCreatorMode = false
+    val eventCreatorMode = true
     val isEventFavourite = false
     val isCompleted = true
     val isOpen = true
@@ -83,34 +96,79 @@ fun EventScreen(innerPaddingValues: PaddingValues) {
         nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
     """.trimIndent()
     val startEvent = {}
-
-    Column(
-        modifier = Modifier
-            .padding(
-                top = 0.dp, //innerPaddingValues.calculateTopPadding(),
-                bottom = innerPaddingValues.calculateBottomPadding(),
-                start = innerPaddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                end = innerPaddingValues.calculateEndPadding(LayoutDirection.Ltr)
-            )
-            .fillMaxSize()
-    ) {
-        TopAppBarEventScreen(eventCreatorMode, isEventFavourite)
-
-        EventScreenHeader(eventName, author, eventCreatorMode, isCompleted)
+    var showEditDialog by remember { mutableStateOf(false) }
+    val onEditEvent = {
+        showEditDialog = true
+    }
+    val onCloseEditEvent = {
+        showEditDialog = false
+    }
 
 
+        Column(
+            modifier = Modifier
+                .padding(
+                    top = 0.dp,
+                    bottom = innerPaddingValues.calculateBottomPadding(),
+                    start = innerPaddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                    end = innerPaddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                )
+                .fillMaxSize()
+        ) {
+            TopAppBarEventScreen(eventCreatorMode, isEventFavourite, onEditEvent)
 
-        if (eventCreatorMode) {
-            EventCreatorBody()
-        } else {
-            GeneralUserBody(tags, info, description, isOpen, isContinuing, startEvent)
+            EventScreenHeader(eventName, author, eventCreatorMode, isCompleted)
+
+            if (eventCreatorMode) {
+                EventCreatorBody(tags, info, description)
+            } else {
+                GeneralUserBody(tags, info, description, isOpen, isContinuing, startEvent)
+            }
+        }
+
+        if (showEditDialog) {
+            EditDialog(onCloseEditEvent)
         }
     }
+
+
+@Composable
+private fun EditDialog(onClose: ()-> Unit) {
+    AlertDialog(
+        title = {
+            Text(text = stringResource(R.string.edit_event))
+        },
+        text = {
+            Text(text = stringResource(R.string.to_edit_event))
+        },
+        onDismissRequest = {
+            onClose()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onClose()
+                }
+            ) {
+                Text(stringResource(R.string.proceed_to_website))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onClose()
+                }
+            ) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    )
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopAppBarEventScreen(eventCreatorMode: Boolean, isFavourite: Boolean) {
+private fun TopAppBarEventScreen(eventCreatorMode: Boolean, isFavourite: Boolean, onEditEvent:() -> Unit) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = colorScheme.primaryContainer,
@@ -150,6 +208,13 @@ private fun TopAppBarEventScreen(eventCreatorMode: Boolean, isFavourite: Boolean
                             contentDescription = stringResource(R.string.add_to_favourite)
                         )
                     }
+                }
+            } else {
+                IconButton(onClick = { onEditEvent() }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.edit),
+                        contentDescription = stringResource(R.string.edit_event)
+                    )
                 }
             }
         },
@@ -191,7 +256,11 @@ private fun EventScreenHeader(
         )
     }
     Row(modifier = Modifier.padding(horizontal = 10.dp)) {
-        Box(modifier = Modifier.width(120.dp).weight(0.35f)) {
+        Box(
+            modifier = Modifier
+                .width(120.dp)
+                .weight(0.35f)
+        ) {
             if (!eventCreatorMode && isCompleted) {
                 AssistChip(
                     onClick = {},
@@ -231,65 +300,78 @@ private fun EventScreenHeader(
 }
 
 @Composable
+private fun GeneralInfo(
+    tags: List<String>,
+    info: List<Pair<Int, String>>,
+    description: String
+) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 10.dp, vertical = 10.dp)
+            .fillMaxHeight()
+            .verticalScroll(rememberScrollState())
+    ) {
+        FlowRow(modifier = Modifier.fillMaxWidth()) {
+            tags.forEach { tagName ->
+                EventTag(tagName)
+            }
+        }
+        Column(
+            modifier = Modifier
+                .padding(vertical = 10.dp)
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(R.string.general_info),
+                style = typography.titleLarge,
+                modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
+            )
+            info.forEach { pair ->
+                Row {
+                    Text(
+                        text = stringResource(pair.first),
+                        style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                        modifier = Modifier.padding(end = 5.dp)
+                    )
+                    Text(
+                        text = pair.second,
+                        style = typography.bodyMedium
+                    )
+                }
+            }
+            Text(
+                text = stringResource(R.string.description),
+                style = typography.titleLarge,
+                modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
+            )
+            Text(
+                text = description,
+                style = typography.bodyMedium
+            )
+        }
+    }
+
+}
+
+@Composable
 private fun GeneralUserBody(
     tags: List<String>,
     info: List<Pair<Int, String>>,
     description: String,
     isOpen: Boolean,
     isContinuing: Boolean,
-    startEvent: ()->Unit
+    startEvent: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.Center) {
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 10.dp, vertical = 10.dp)
-                .fillMaxHeight(if (isOpen) 0.85f else 1f)
-                .verticalScroll(rememberScrollState())
-        ) {
-            FlowRow (modifier = Modifier.fillMaxWidth()) {
-                tags.forEach { tagName ->
-                    EventTag(tagName)
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .padding(vertical = 10.dp)
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(R.string.general_info),
-                    style = typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
-                )
-                info.forEach { pair ->
-                    Row {
-                        Text(
-                            text = stringResource(pair.first),
-                            style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            modifier = Modifier.padding(end = 5.dp)
-                        )
-                        Text(
-                            text = pair.second,
-                            style = typography.bodyMedium
-                        )
-                    }
-                }
-                Text(
-                    text = stringResource(R.string.description),
-                    style = typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
-                )
-                Text(
-                    text = description,
-                    style = typography.bodyMedium
-                )
-            }
+        Box(modifier = Modifier.fillMaxHeight(if (isOpen) 0.85f else 1f)) {
+            GeneralInfo(tags, info, description)
         }
+
         if (isOpen) {
             Button(
                 onClick = startEvent,
                 modifier = Modifier
-                    .padding(vertical=3.dp)
+                    .padding(vertical = 3.dp)
                     .fillMaxWidth(0.8f)
                     .height(50.dp)
                     .weight(0.15f)
@@ -318,7 +400,7 @@ private fun EventTag(tagName: String) {
         color = colorScheme.onPrimaryContainer,
         style = typography.labelLarge,
         modifier = Modifier
-            .padding(horizontal = 5.dp, vertical= 3.dp)
+            .padding(horizontal = 5.dp, vertical = 3.dp)
             .wrapContentWidth()
             .background(colorScheme.primaryContainer, shape = RoundedCornerShape(8.dp))
             .border(1.dp, colorScheme.tertiary, shape = RoundedCornerShape(8.dp))
@@ -327,8 +409,49 @@ private fun EventTag(tagName: String) {
 }
 
 @Composable
-private fun EventCreatorBody() {
+private fun EventCreatorBody(
+    tags: List<String>,
+    info: List<Pair<Int, String>>,
+    description: String
+) {
+    val tabs = remember<List<Int>> {
+        listOf<Int>(
+            R.string.general_info,
+            R.string.statistics,
+        )
+    }
+    var selectedTabIdx by remember { mutableIntStateOf(0) }
+    Column {
+        SecondaryTabRow(selectedTabIndex = selectedTabIdx) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTabIdx == index,
+                    onClick = { selectedTabIdx = index },
+                    text = {
+                        Text(
+                            text = stringResource(title),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    selectedContentColor = MaterialTheme.colorScheme.primary,
+                    unselectedContentColor = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+    }
+    when (selectedTabIdx) {
+        0 -> GeneralInfo(tags, info, description)
+        1 -> StatisticsInfo()
+        else -> Box{}
+    }
 
+}
+
+@Composable
+private fun StatisticsInfo() {
+    Text("Coming soon")
+    //TODO("статистики на экране статистик")
 }
 
 @Composable

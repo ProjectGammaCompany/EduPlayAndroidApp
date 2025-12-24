@@ -27,4 +27,9 @@
     <string name="description">Описание</string>
     <string name="start_event">Начать</string>
     <string name="continue_event">Продолжить</string>
+    <string name="statistics">Статистика</string>
+    <string name="edit_event">Редактировать событие</string>
+    <string name="to_edit_event">Чтобы отредактировать событие вым необходимо перейти в веб версию приложения.</string>
+    <string name="close">Закрыть</string>
+    <string name="proceed_to_website">Перейти на сайт</string>
 </resources>
