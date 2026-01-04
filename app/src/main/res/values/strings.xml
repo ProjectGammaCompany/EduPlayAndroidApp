@@ -31,4 +31,9 @@
     <string name="to_edit_event">To edit event you must porceed to the website.</string>
     <string name="close">Close</string>
     <string name="proceed_to_website">Proceed to website</string>
+    <string name="groups">Groups</string>
+    <string name="last_edition">Last edited on:</string>
+    <string name="private_event_flag">Privacy settings:</string>
+    <string name="private_event">private</string>
+    <string name="public_event">public</string>
 </resources>

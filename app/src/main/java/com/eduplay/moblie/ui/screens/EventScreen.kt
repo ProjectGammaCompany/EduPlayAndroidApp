@@ -24,26 +24,24 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -61,41 +60,27 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
 import com.eduplay.moblie.ui.theme.Typography
+import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventScreen(innerPaddingValues: PaddingValues) {
-    val eventCreatorMode = true
-    val isEventFavourite = false
-    val isCompleted = true
-    val isOpen = true
-    val isContinuing = false
-    val eventName = "Название события"
-    val author = "Автор"
-    val rating = "5.00⭐"
-    val opens = "12 ltrf,hfhfd 13:00"
-    val closes = "13 ltrf,hfhfd 13:00"
-    val duration = "15 xfcnj 11 lytq 32 vbyens 7 ctreyl"
-    val tags = listOf("tag 1", "funny", "long as hell tag", "o", "long as hell tag", "sdfsdfsdf")
-    val info = listOf(
-        Pair(R.string.rating, rating),
-        Pair(R.string.opens, opens),
-        Pair(R.string.closes, closes),
-        Pair(R.string.time_for_completion, duration),
-    )
-    val description = """
-        kmlkmlkmlkmlkmlkmlkmlkmlkmlkm
-        sdkfjnsjdfnksjndfijsndkjnskjdfnkjsnfdkjsnkdfjnskjdfnksjdfnkjsnfd
-        sdfkjnskjfnksjnnsijnkjnjnxkvjnkjnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
-        
-        nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
-    """.trimIndent()
-    val startEvent = {}
+fun EventScreen(
+    innerPaddingValues: PaddingValues,
+    eventId: String,
+    viewModel: EventScreenViewModel = hiltViewModel()
+) {
+    var dataFetched by remember { mutableStateOf(false) }
+    if (!dataFetched) {
+         viewModel.fetchData(eventId) {dataFetched = true}
+    }
+    val startEvent = {} //TODO("start event btn")
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
         showEditDialog = true
@@ -105,35 +90,57 @@ fun EventScreen(innerPaddingValues: PaddingValues) {
     }
 
 
-        Column(
-            modifier = Modifier
-                .padding(
-                    top = 0.dp,
-                    bottom = innerPaddingValues.calculateBottomPadding(),
-                    start = innerPaddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                    end = innerPaddingValues.calculateEndPadding(LayoutDirection.Ltr)
-                )
-                .fillMaxSize()
-        ) {
-            TopAppBarEventScreen(eventCreatorMode, isEventFavourite, onEditEvent)
+    Column(
+        modifier = Modifier
+            .padding(
+                top = 0.dp,
+                bottom = innerPaddingValues.calculateBottomPadding(),
+                start = innerPaddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                end = innerPaddingValues.calculateEndPadding(LayoutDirection.Ltr)
+            )
+            .fillMaxSize()
+    ) {
+        TopAppBarEventScreen(
+            viewModel.eventCreatorMode.value,
+            viewModel.isEventFavourite.value,
+            onEditEvent
+        )
 
-            EventScreenHeader(eventName, author, eventCreatorMode, isCompleted)
+        EventScreenHeader(
+            viewModel.eventName.value,
+            viewModel.author.value,
+            viewModel.eventCreatorMode.value,
+            viewModel.isCompleted.value,
+            viewModel.cover.value
+        )
 
-            if (eventCreatorMode) {
-                EventCreatorBody(tags, info, description)
-            } else {
-                GeneralUserBody(tags, info, description, isOpen, isContinuing, startEvent)
-            }
-        }
-
-        if (showEditDialog) {
-            EditDialog(onCloseEditEvent)
+        if (viewModel.eventCreatorMode.value) {
+            EventCreatorBody(
+                viewModel.tags,
+                viewModel.info,
+                viewModel.description.value,
+                viewModel.privateEvent.value
+            )
+        } else {
+            GeneralUserBody(
+                viewModel.tags,
+                viewModel.info,
+                viewModel.description.value,
+                viewModel.isOpen.value,
+                viewModel.isContinuing.value,
+                startEvent
+            )
         }
     }
 
+    if (showEditDialog) {
+        EditDialog(onCloseEditEvent)
+    }
+}
+
 
 @Composable
-private fun EditDialog(onClose: ()-> Unit) {
+private fun EditDialog(onClose: () -> Unit) {
     AlertDialog(
         title = {
             Text(text = stringResource(R.string.edit_event))
@@ -168,7 +175,11 @@ private fun EditDialog(onClose: ()-> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopAppBarEventScreen(eventCreatorMode: Boolean, isFavourite: Boolean, onEditEvent:() -> Unit) {
+private fun TopAppBarEventScreen(
+    eventCreatorMode: Boolean,
+    isFavourite: Boolean,
+    onEditEvent: () -> Unit
+) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = colorScheme.primaryContainer,
@@ -228,12 +239,13 @@ private fun EventScreenHeader(
     eventName: String,
     author: String,
     eventCreatorMode: Boolean,
-    isCompleted: Boolean
+    isCompleted: Boolean,
+    cover: String?
 ) {
     Row(Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data("")
+                .data(cover)
                 //.httpHeaders(headers = headers) //TODO("pass headers")
                 .networkCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
@@ -263,7 +275,7 @@ private fun EventScreenHeader(
         ) {
             if (!eventCreatorMode && isCompleted) {
                 AssistChip(
-                    onClick = {},
+                    onClick = {}, //так и должно быть при нажатии ничего не происходит
                     label = {
                         Text(
                             stringResource(R.string.completed),
@@ -302,7 +314,7 @@ private fun EventScreenHeader(
 @Composable
 private fun GeneralInfo(
     tags: List<String>,
-    info: List<Pair<Int, String>>,
+    info: List<Pair<Int, String?>>,
     description: String
 ) {
     Column(
@@ -327,16 +339,18 @@ private fun GeneralInfo(
                 modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
             )
             info.forEach { pair ->
-                Row {
-                    Text(
-                        text = stringResource(pair.first),
-                        style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                        modifier = Modifier.padding(end = 5.dp)
-                    )
-                    Text(
-                        text = pair.second,
-                        style = typography.bodyMedium
-                    )
+                if (pair.second != null) {
+                    Row {
+                        Text(
+                            text = stringResource(pair.first),
+                            style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                            modifier = Modifier.padding(end = 5.dp)
+                        )
+                        Text(
+                            text = pair.second ?: "",
+                            style = typography.bodyMedium
+                        )
+                    }
                 }
             }
             Text(
@@ -356,7 +370,7 @@ private fun GeneralInfo(
 @Composable
 private fun GeneralUserBody(
     tags: List<String>,
-    info: List<Pair<Int, String>>,
+    info: List<Pair<Int, String?>>,
     description: String,
     isOpen: Boolean,
     isContinuing: Boolean,
@@ -411,8 +425,9 @@ private fun EventTag(tagName: String) {
 @Composable
 private fun EventCreatorBody(
     tags: List<String>,
-    info: List<Pair<Int, String>>,
-    description: String
+    info: List<Pair<Int, String?>>,
+    description: String,
+    privateEvent: Boolean
 ) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
@@ -440,10 +455,15 @@ private fun EventCreatorBody(
             }
         }
     }
+    val infoP = info.toMutableList()
+    infoP.add(
+        Pair(R.string.private_event_flag,
+            if (privateEvent) stringResource(R.string.private_event) else stringResource(R.string.public_event)) ,
+    )
     when (selectedTabIdx) {
-        0 -> GeneralInfo(tags, info, description)
+        0 -> GeneralInfo(tags, infoP, description)
         1 -> StatisticsInfo()
-        else -> Box{}
+        else -> Box {}
     }
 
 }
@@ -452,10 +472,4 @@ private fun EventCreatorBody(
 private fun StatisticsInfo() {
     Text("Coming soon")
     //TODO("статистики на экране статистик")
-}
-
-@Composable
-@Preview
-fun PreviewEventScreen() {
-    EventScreen(PaddingValues(0.dp))
 }

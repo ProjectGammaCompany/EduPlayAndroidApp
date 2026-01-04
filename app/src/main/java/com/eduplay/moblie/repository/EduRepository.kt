@@ -4,6 +4,9 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.eduplay.moblie.models.AuthResult
+import com.eduplay.moblie.models.EventOwnerInfo
+import com.eduplay.moblie.models.EventPlayerInfo
+import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.webrepository.WebRepository
@@ -44,5 +47,17 @@ class EduRepository @Inject constructor(
                 AllEventsPagingWebSource(webRepository)
             }
         ).flow
+    }
+
+    suspend fun getRole(eventId: String): EventRole {
+        return webRepository.getRole(eventId)
+    }
+
+    suspend fun getEventInfoPlayer(eventId: String): EventPlayerInfo {
+        return webRepository.getPlayerEventInfo(eventId)
+    }
+
+    suspend fun getEventInfoOwner(eventId: String): EventOwnerInfo {
+        return webRepository.getOwnerEventInfo(eventId)
     }
 }

@@ -9,12 +9,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.screens.EventScreen
+import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -40,7 +43,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("main_screen") {
-                            EventScreen(innerPadding)
+                            MainScreen(innerPadding)
+                        }
+                        composable(
+                            "event_screen/{eventId}",
+                            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+                        ) { pathArgs ->
+                            EventScreen(innerPadding, pathArgs.arguments?.getString("userId") ?: "")
                         }
                     }
 
