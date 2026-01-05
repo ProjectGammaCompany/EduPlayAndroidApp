@@ -24,7 +24,7 @@ private enum class Destination(
 ) {
     MAIN("main_screen", R.drawable.search, R.drawable.search, R.string.main_screen),
     MY_QUESTS(
-        "my_quests",
+        "my_events",
         R.drawable.stars_circle,
         R.drawable.stars_circle_filled,
         R.string.my_events

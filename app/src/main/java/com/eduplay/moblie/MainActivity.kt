@@ -18,6 +18,7 @@ import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.screens.EventScreen
 import com.eduplay.moblie.ui.screens.MainScreen
+import com.eduplay.moblie.ui.screens.MyEventsScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -50,6 +51,10 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
                         ) { pathArgs ->
                             EventScreen(innerPadding, pathArgs.arguments?.getString("userId") ?: "", navController)
+                        }
+
+                        composable("my_events") {
+                            MyEventsScreen(innerPadding, navController)
                         }
                     }
 
