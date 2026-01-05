@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.eduplay.moblie.R
 import com.eduplay.moblie.ui.elements.QuestListElement
@@ -37,6 +38,7 @@ import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
 @Composable
 fun MainScreen(
     innerPaddingValues: PaddingValues,
+    navController: NavController,
     viewModel: MainScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -62,7 +64,7 @@ fun MainScreen(
                 titleContentColor = MaterialTheme.colorScheme.primary,
             ),
             navigationIcon = {
-                IconButton(onClick = { /* do something */ }) {
+                IconButton(onClick = {  }) { //TODO("меню на главном экане")
                     Icon(
                         imageVector = Icons.Filled.Menu,
                         contentDescription = stringResource(R.string.app_menu)
@@ -70,7 +72,7 @@ fun MainScreen(
                 }
             },
             actions = {
-                IconButton(onClick = { /* do something */ }) {
+                IconButton(onClick = { }) { //TODO("поиск")
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = stringResource(R.string.search_events)
@@ -90,7 +92,8 @@ fun MainScreen(
             items(events.itemCount) { position ->
                 val itemValue = events[position]
                 if (itemValue != null) {
-                    QuestListElement(itemValue, {}, {})
+                    val onEventClock = {navController.navigate("event_screen/"+itemValue.id)}
+                    QuestListElement(itemValue, onEventClock, {}) //TODO("добавление в избранное")
                 }
             }
         }

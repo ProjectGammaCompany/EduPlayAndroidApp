@@ -43,13 +43,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("main_screen") {
-                            MainScreen(innerPadding)
+                            MainScreen(innerPadding, navController)
                         }
                         composable(
                             "event_screen/{eventId}",
                             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
                         ) { pathArgs ->
-                            EventScreen(innerPadding, pathArgs.arguments?.getString("userId") ?: "")
+                            EventScreen(innerPadding, pathArgs.arguments?.getString("userId") ?: "", navController)
                         }
                     }
 

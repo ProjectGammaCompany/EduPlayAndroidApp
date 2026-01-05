@@ -41,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -57,7 +55,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -74,11 +71,12 @@ import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 fun EventScreen(
     innerPaddingValues: PaddingValues,
     eventId: String,
+    navController: NavController,
     viewModel: EventScreenViewModel = hiltViewModel()
 ) {
     var dataFetched by remember { mutableStateOf(false) }
     if (!dataFetched) {
-         viewModel.fetchData(eventId) {dataFetched = true}
+        viewModel.fetchData(eventId) { dataFetched = true }
     }
     val startEvent = {} //TODO("start event btn")
     var showEditDialog by remember { mutableStateOf(false) }
@@ -103,7 +101,8 @@ fun EventScreen(
         TopAppBarEventScreen(
             viewModel.eventCreatorMode.value,
             viewModel.isEventFavourite.value,
-            onEditEvent
+            onEditEvent,
+            navController
         )
 
         EventScreenHeader(
@@ -178,7 +177,8 @@ private fun EditDialog(onClose: () -> Unit) {
 private fun TopAppBarEventScreen(
     eventCreatorMode: Boolean,
     isFavourite: Boolean,
-    onEditEvent: () -> Unit
+    onEditEvent: () -> Unit,
+    navController: NavController
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -186,7 +186,7 @@ private fun TopAppBarEventScreen(
             titleContentColor = colorScheme.primary,
         ),
         navigationIcon = {
-            IconButton(onClick = { TODO("навигация на предыдущий экран") }) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.app_menu)
@@ -457,8 +457,10 @@ private fun EventCreatorBody(
     }
     val infoP = info.toMutableList()
     infoP.add(
-        Pair(R.string.private_event_flag,
-            if (privateEvent) stringResource(R.string.private_event) else stringResource(R.string.public_event)) ,
+        Pair(
+            R.string.private_event_flag,
+            if (privateEvent) stringResource(R.string.private_event) else stringResource(R.string.public_event)
+        ),
     )
     when (selectedTabIdx) {
         0 -> GeneralInfo(tags, infoP, description)

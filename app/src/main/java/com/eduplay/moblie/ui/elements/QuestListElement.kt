@@ -121,7 +121,6 @@ fun QuestListElement(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 questShortInfo.tags.forEach { tag ->
-
                     QuestTag(tag)
                 }
 
