@@ -36,4 +36,9 @@
     <string name="private_event_flag">Privacy settings:</string>
     <string name="private_event">private</string>
     <string name="public_event">public</string>
+    <string name="go_back">Go back</string>
+    <string name="favourite">Favourite</string>
+    <string name="my_created">Created</string>
+    <string name="next_page">Next page</string>
+    <string name="previous_page">Previous page</string>
 </resources>

@@ -189,7 +189,7 @@ private fun TopAppBarEventScreen(
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.app_menu)
+                    contentDescription = stringResource(R.string.go_back)
                 )
             }
         },

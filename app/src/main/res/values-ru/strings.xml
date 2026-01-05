@@ -37,4 +37,9 @@
     <string name="private_event_flag">Настройки приватности:</string>
     <string name="private_event">приватное</string>
     <string name="public_event">общедоступное</string>
+    <string name="go_back">Вернуться</string>
+    <string name="favourite">Избранное</string>
+    <string name="my_created">Созданые мной</string>
+    <string name="next_page">Следующая страница</string>
+    <string name="previous_page">Предыдущая страница</string>
 </resources>

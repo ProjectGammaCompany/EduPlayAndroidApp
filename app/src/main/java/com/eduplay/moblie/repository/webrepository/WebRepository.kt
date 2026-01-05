@@ -78,4 +78,31 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("No info for this event")
     }
 
+    override suspend fun getFavouriteEvents(page:Int, maxOnPage: Int): List<QuestShortInfo> {
+        val response = api.favouriteEvents(page, maxOnPage)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
+        } // TODO(оделать проверку на причины отказа)
+        return listOf()
+    }
+
+    override suspend fun getCreatedEvents(page:Int, maxOnPage: Int): List<QuestShortInfo> {
+        val response = api.createdEvents(page, maxOnPage)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
+        } // TODO(оделать проверку на причины отказа)
+        return listOf()
+    }
+
+    override suspend fun getCompletedEvents(page:Int, maxOnPage: Int): List<QuestShortInfo> {
+        val response = api.completedEvents(page, maxOnPage)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
+        } // TODO(оделать проверку на причины отказа)
+        return listOf()
+    }
+
 }

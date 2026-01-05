@@ -60,4 +60,16 @@ class EduRepository @Inject constructor(
     suspend fun getEventInfoOwner(eventId: String): EventOwnerInfo {
         return webRepository.getOwnerEventInfo(eventId)
     }
+
+    suspend fun getFavouriteEvents(page: Int): List<QuestShortInfo> {
+        return webRepository.getFavouriteEvents(page, 20)
+    }
+
+    suspend fun getCreatedEvents(page: Int): List<QuestShortInfo> {
+        return webRepository.getCreatedEvents(page, 20)
+    }
+
+    suspend fun getCompletedEvents(page: Int): List<QuestShortInfo> {
+        return webRepository.getCompletedEvents(page, 20)
+    }
 }

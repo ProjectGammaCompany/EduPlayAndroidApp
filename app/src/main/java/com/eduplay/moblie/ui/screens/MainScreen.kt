@@ -42,7 +42,6 @@ fun MainScreen(
     viewModel: MainScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val pagerState = rememberPagerState { 5 }
 
     (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
 
@@ -92,8 +91,8 @@ fun MainScreen(
             items(events.itemCount) { position ->
                 val itemValue = events[position]
                 if (itemValue != null) {
-                    val onEventClock = {navController.navigate("event_screen/"+itemValue.id)}
-                    QuestListElement(itemValue, onEventClock, {}) //TODO("добавление в избранное")
+                    val onEventClick = {navController.navigate("event_screen/"+itemValue.id)}
+                    QuestListElement(itemValue, onEventClick, {}) //TODO("добавление в избранное")
                 }
             }
         }

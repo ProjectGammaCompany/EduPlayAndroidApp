@@ -30,21 +30,42 @@ interface WebApi {
         @Query("active") active: Boolean = false
     ): Response<EventListResponse>
 
+    @GET("/events/personal/favourites")
+    @InjectAuth
+    suspend fun favouriteEvents(
+        @Query("page") page: Int = 1,
+        @Query("maxOnPage") maxOnPage: Int = 10,
+    ): Response<EventListResponse>
+
+    @GET("/events/personal/created")
+    @InjectAuth
+    suspend fun createdEvents(
+        @Query("page") page: Int = 1,
+        @Query("maxOnPage") maxOnPage: Int = 10,
+    ): Response<EventListResponse>
+
+    @GET("/events/personal/history")
+    @InjectAuth
+    suspend fun completedEvents(
+        @Query("page") page: Int = 1,
+        @Query("maxOnPage") maxOnPage: Int = 10,
+    ): Response<EventListResponse>
+
     @GET("/event/{eventId}/role")
     @InjectAuth
     suspend fun getUserEventRole(
         @Path("eventId") eventId: String
-    ) : Response<EventRole>
+    ): Response<EventRole>
 
     @GET("event/{eventId}/playerInfo")
     @InjectAuth
     suspend fun getEventInfoPlayer(
         @Path("eventId") eventId: String
-    ) : Response <EventPlayerInfo>
+    ): Response<EventPlayerInfo>
 
     @GET("event/{eventId}/ownerInfo")
     @InjectAuth
     suspend fun getEventInfoCreator(
         @Path("eventId") eventId: String
-    ) : Response <EventOwnerInfo>
+    ): Response<EventOwnerInfo>
 }
