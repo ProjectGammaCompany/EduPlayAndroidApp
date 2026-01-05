@@ -3,6 +3,7 @@ package com.eduplay.moblie.repository.webrepository
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.responseTypes.AuthResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
@@ -57,15 +58,21 @@ interface WebApi {
         @Path("eventId") eventId: String
     ): Response<EventRole>
 
-    @GET("event/{eventId}/playerInfo")
+    @GET("/event/{eventId}/playerInfo")
     @InjectAuth
     suspend fun getEventInfoPlayer(
         @Path("eventId") eventId: String
     ): Response<EventPlayerInfo>
 
-    @GET("event/{eventId}/ownerInfo")
+    @GET("/event/{eventId}/ownerInfo")
     @InjectAuth
     suspend fun getEventInfoCreator(
         @Path("eventId") eventId: String
     ): Response<EventOwnerInfo>
+
+    @GET("/profile")
+    @InjectAuth
+    suspend fun getProfile(): Response<ProfileInfo>
+
+
 }

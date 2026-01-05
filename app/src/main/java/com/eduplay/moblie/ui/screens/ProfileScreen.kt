@@ -10,11 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,19 +39,28 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.eduplay.moblie.R
+import com.eduplay.moblie.ui.viewmodel.ProfileViewModel
 
 @Composable
-fun ProfileScreen(innerPaddingValues: PaddingValues) {
+fun ProfileScreen(innerPaddingValues: PaddingValues, navController: NavController, viewModel: ProfileViewModel = hiltViewModel()) {
+
+    var gotProfile by remember { mutableStateOf(false) }
+    if (!gotProfile) {
+        viewModel.fetchProfileInfo(){gotProfile = true}
+
+    }
 
     var editEmail by remember { mutableStateOf(false) }
-    var email by remember { mutableStateOf("example@com") }
+
     var showPassword by remember { mutableStateOf(false) }
-    var password by remember { mutableStateOf("password") }
-    val updateEmail: (String)->Unit = { newEmail: String ->
-        email = newEmail
+
+    val updateEmail: (String) -> Unit = { newEmail: String ->
+        viewModel.email.value = newEmail
     }
-    val loginEmailHasErrors: ()->Boolean = {false}
+    val loginEmailHasErrors: () -> Boolean = { false }
 
     Column(
         modifier = Modifier
@@ -84,19 +90,21 @@ fun ProfileScreen(innerPaddingValues: PaddingValues) {
             )
             if (!editEmail) {
                 Text(
-                    text = email,
+                    text = viewModel.email.value,
                     style = typography.bodyLarge,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .padding(end = 5.dp)
                 )
-                IconButton(onClick = {editEmail = true}) {
-                    Icon(ImageVector.vectorResource(R.drawable.edit),
-                        stringResource(R.string.edit_email))
+                IconButton(onClick = { editEmail = true }) {
+                    Icon(
+                        ImageVector.vectorResource(R.drawable.edit),
+                        stringResource(R.string.edit_email)
+                    )
                 }
             } else {
                 OutlinedTextField(
-                    value = email,
+                    value = viewModel.email.value,
                     onValueChange = updateEmail,
                     maxLines = 1,
                     isError = false, //TODO("error check")
@@ -122,7 +130,7 @@ fun ProfileScreen(innerPaddingValues: PaddingValues) {
             )
             if (showPassword) {
                 Text(
-                    text = password,
+                    text = viewModel.password.value,
                     style = typography.bodyLarge,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
@@ -130,35 +138,31 @@ fun ProfileScreen(innerPaddingValues: PaddingValues) {
                 )
 
             }
-            IconButton(onClick = {showPassword = !showPassword}) {
-                Icon(if (!showPassword)Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                    stringResource(R.string.show_password))
+            IconButton(onClick = { showPassword = !showPassword }) {
+                Icon(
+                    if (!showPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                    stringResource(R.string.show_password)
+                )
             }
         }
 
         OutlinedButton(
-            onClick = { },
+            onClick = { viewModel.logout(navController) },
             colors = ButtonColors(
                 containerColor = colorScheme.errorContainer,
                 contentColor = colorScheme.errorContainer,
                 disabledContainerColor = colorScheme.errorContainer,
                 disabledContentColor = colorScheme.errorContainer
             ),
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)) { // TODO("logout")}
-            Text(stringResource(R.string.logout),
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
+        ) { // TODO("logout")}
+            Text(
+                stringResource(R.string.logout),
                 style = typography.labelLarge.copy(color = colorScheme.error)
-                )
+            )
         }
     }
 }
-
-@Preview
-@Composable
-fun profilePreview() {
-    ProfileScreen(PaddingValues())
-}
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

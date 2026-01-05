@@ -19,6 +19,7 @@ import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.screens.EventScreen
 import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.screens.MyEventsScreen
+import com.eduplay.moblie.ui.screens.ProfileScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -55,6 +56,10 @@ class MainActivity : ComponentActivity() {
 
                         composable("my_events") {
                             MyEventsScreen(innerPadding, navController)
+                        }
+
+                        composable("profile") {
+                            ProfileScreen(innerPadding, navController)
                         }
                     }
 

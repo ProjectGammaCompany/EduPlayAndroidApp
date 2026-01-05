@@ -7,6 +7,7 @@ import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.webrepository.WebRepository
@@ -71,5 +72,9 @@ class EduRepository @Inject constructor(
 
     suspend fun getCompletedEvents(page: Int): List<QuestShortInfo> {
         return webRepository.getCompletedEvents(page, 20)
+    }
+
+    suspend fun getProfile(): ProfileInfo {
+        return webRepository.getProfile()
     }
 }

@@ -4,6 +4,7 @@ import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.requestTypes.Auth
@@ -103,6 +104,15 @@ class WebRepository @Inject constructor(
             return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
         } // TODO(оделать проверку на причины отказа)
         return listOf()
+    }
+
+    override suspend fun getProfile(): ProfileInfo {
+        val response = api.getProfile()
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        } // TODO(оделать проверку на причины отказа)
+        return ProfileInfo("", "", "")
     }
 
 }
