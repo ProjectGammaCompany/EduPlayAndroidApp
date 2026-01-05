@@ -42,4 +42,7 @@
     <string name="my_created">Созданые мной</string>
     <string name="next_page">Следующая страница</string>
     <string name="previous_page">Предыдущая страница</string>
+    <string name="edit_email">Редактировать почту</string>
+    <string name="profile_info">Информация о профиле</string>
+    <string name="logout">Выйти</string>
 </resources>

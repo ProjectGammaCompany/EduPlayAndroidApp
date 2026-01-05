@@ -41,4 +41,7 @@
     <string name="my_created">Created</string>
     <string name="next_page">Next page</string>
     <string name="previous_page">Previous page</string>
+    <string name="edit_email">Edit email</string>
+    <string name="profile_info">Profile information</string>
+    <string name="logout">Logout</string>
 </resources>
