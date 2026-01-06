@@ -47,4 +47,5 @@
     <string name="logout">Выйти</string>
     <string name="answer">Ответить</string>
     <string name="proceed">Далее</string>
+    <string name="your_answer">Ваш ответ</string>
 </resources>

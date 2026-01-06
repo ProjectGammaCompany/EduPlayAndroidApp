@@ -46,4 +46,5 @@
     <string name="logout">Logout</string>
     <string name="answer">Submit answer</string>
     <string name="proceed">Proceed</string>
+    <string name="your_answer">Your answer</string>
 </resources>

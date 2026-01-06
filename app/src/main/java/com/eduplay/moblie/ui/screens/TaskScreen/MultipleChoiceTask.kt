@@ -53,7 +53,6 @@ fun MultipleChoiceTask() {
     }
     Box(modifier = Modifier
         .fillMaxSize()
-        //.heightIn(50.dp, max(50, maxHeight.value.toInt()/3).dp)
     ) {
         Column(
             modifier = Modifier

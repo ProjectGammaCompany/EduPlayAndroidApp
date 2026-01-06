@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.screens.TaskScreen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -49,7 +51,7 @@ import kotlin.math.max
 
 @Composable
 fun TaskScreen(innerPaddingValues: PaddingValues) {
-    val taskType = TaskType.MULTIPLE_CHOICE
+    val taskType = TaskType.TEXT
     BoxWithConstraints {
         val height = maxHeight
         Column(
@@ -61,6 +63,7 @@ fun TaskScreen(innerPaddingValues: PaddingValues) {
                     end = innerPaddingValues.calculateEndPadding(LayoutDirection.Ltr)
                 )
                 .fillMaxSize()
+                .background(color = colorScheme.background)
         ) {
             // top bar
             TaskTopBar()
@@ -76,7 +79,7 @@ fun TaskScreen(innerPaddingValues: PaddingValues) {
                     TaskType.INFO -> Box {} //TODO("info task type")
                     TaskType.SINGLE_CHOICE -> SingleChoiceTask()
                     TaskType.MULTIPLE_CHOICE -> MultipleChoiceTask()
-                    TaskType.TEXT -> Box {} //TODO("text type")
+                    TaskType.TEXT -> TextTask()
                     TaskType.QR -> Box {} //TODO("qr task text type")
                 }
             }
