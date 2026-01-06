@@ -45,4 +45,6 @@
     <string name="edit_email">Редактировать почту</string>
     <string name="profile_info">Информация о профиле</string>
     <string name="logout">Выйти</string>
+    <string name="answer">Ответить</string>
+    <string name="proceed">Далее</string>
 </resources>

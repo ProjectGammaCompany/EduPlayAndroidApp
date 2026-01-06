@@ -44,4 +44,6 @@
     <string name="edit_email">Edit email</string>
     <string name="profile_info">Profile information</string>
     <string name="logout">Logout</string>
+    <string name="answer">Submit answer</string>
+    <string name="proceed">Proceed</string>
 </resources>
