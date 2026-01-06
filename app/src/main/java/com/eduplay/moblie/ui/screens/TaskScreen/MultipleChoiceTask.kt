@@ -8,30 +8,32 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.models.AnswerOption
-import kotlin.math.max
 
 @Composable
-fun SingleChoiceTask() {
+fun MultipleChoiceTask() {
+
     val options = listOf<AnswerOption>(
         AnswerOption("0", "as1", false),
         AnswerOption(
@@ -46,7 +48,9 @@ fun SingleChoiceTask() {
         AnswerOption("6", "as4", false),
         AnswerOption("7", "as4", true),
     )
-    var selectedBtn by remember { mutableStateOf("") }
+    val checkedOptions: SnapshotStateMap<String, Boolean> = remember {
+        options.map { Pair<String, Boolean>(it.id, false) }.toMutableStateMap<String, Boolean>()
+    }
     Box(modifier = Modifier
         .fillMaxSize()
         //.heightIn(50.dp, max(50, maxHeight.value.toInt()/3).dp)
@@ -68,10 +72,10 @@ fun SingleChoiceTask() {
                         .clip(RoundedCornerShape(7.dp))
                         .background(color = colorScheme.primaryContainer)
                 ) {
-                    RadioButton(
-                        selected = selectedBtn == option.id,
-                        onClick = {
-                            selectedBtn = option.id
+                    Checkbox(
+                        checked = checkedOptions.get(option.id) ?: false,
+                        onCheckedChange = {
+                            checkedOptions.set(option.id, !(checkedOptions.get(option.id)!!))
                         },
                         modifier = Modifier
                             .align(Alignment.CenterVertically)

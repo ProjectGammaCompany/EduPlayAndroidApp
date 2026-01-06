@@ -49,7 +49,7 @@ import kotlin.math.max
 
 @Composable
 fun TaskScreen(innerPaddingValues: PaddingValues) {
-    val taskType = TaskType.SINGLE_CHOICE
+    val taskType = TaskType.MULTIPLE_CHOICE
     BoxWithConstraints {
         val height = maxHeight
         Column(
@@ -74,8 +74,8 @@ fun TaskScreen(innerPaddingValues: PaddingValues) {
             Box(modifier = Modifier.weight(2f)) {
                 when (taskType) {
                     TaskType.INFO -> Box {} //TODO("info task type")
-                    TaskType.SINGLE_CHOICE -> SingleChoiceTask(height)
-                    TaskType.MULTIPLE_CHOICE -> Box {} //TODO("multiple choice task type")
+                    TaskType.SINGLE_CHOICE -> SingleChoiceTask()
+                    TaskType.MULTIPLE_CHOICE -> MultipleChoiceTask()
                     TaskType.TEXT -> Box {} //TODO("text type")
                     TaskType.QR -> Box {} //TODO("qr task text type")
                 }
