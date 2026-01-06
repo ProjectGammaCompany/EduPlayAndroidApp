@@ -221,8 +221,7 @@ fun FileView() {
             files.forEach {
                 TextButton(
                     onClick = {
-                        uriHandler
-                            .openUri(uri = "https://developers.google.com/ml-kit/vision/barcode-scanning/android#try-it-out")
+                        uriHandler.openUri(uri = it)
                     }
                 ) {
                     Text(text = it)
