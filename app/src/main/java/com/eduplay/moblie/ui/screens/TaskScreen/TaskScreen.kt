@@ -25,6 +25,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,7 +53,7 @@ import kotlin.math.max
 
 @Composable
 fun TaskScreen(innerPaddingValues: PaddingValues) {
-    val taskType = TaskType.TEXT
+    val taskType = TaskType.INFO
     BoxWithConstraints {
         val height = maxHeight
         Column(
@@ -70,13 +72,13 @@ fun TaskScreen(innerPaddingValues: PaddingValues) {
 
 
             // header
-            TaskHeader(height)
+            TaskHeader(height, taskType)
 
             //task
 
             Box(modifier = Modifier.weight(2f)) {
                 when (taskType) {
-                    TaskType.INFO -> Box {} //TODO("info task type")
+                    TaskType.INFO -> {}
                     TaskType.SINGLE_CHOICE -> SingleChoiceTask()
                     TaskType.MULTIPLE_CHOICE -> MultipleChoiceTask()
                     TaskType.TEXT -> TextTask()
@@ -109,7 +111,7 @@ private fun TaskTopBar() {
 }
 
 @Composable
-private fun TaskHeader(maxHeight: Dp) {
+private fun TaskHeader(maxHeight: Dp, taskType: TaskType) {
     val title = "very Loooooooooooong and hard question"
     val description =
         """
@@ -123,8 +125,12 @@ private fun TaskHeader(maxHeight: Dp) {
     var currentProgress by remember { mutableFloatStateOf(0.5f) }
     val timeLeft by remember { mutableIntStateOf(30) }
 
-    // Timer
-    Column(modifier = Modifier.fillMaxWidth()) {
+
+    Column(modifier =
+       if (taskType == TaskType.INFO) Modifier.fillMaxWidth().fillMaxHeight(0.9f)
+        else Modifier.fillMaxWidth()
+    ) {
+        // Timer
         if (showTimer) {
             Column(
                 modifier = Modifier
@@ -150,43 +156,50 @@ private fun TaskHeader(maxHeight: Dp) {
         }
 
         // task title an description
-        Column(
-            Modifier
-                .align(Alignment.CenterHorizontally)
-                .fillMaxWidth(0.9f)
-                .heightIn(50.dp, max(50, maxHeight.value.toInt()/3).dp)
-                .padding(vertical = 15.dp)
-                .verticalScroll(rememberScrollState())
+        Box(
+            modifier = if (taskType == TaskType.INFO) Modifier.fillMaxWidth()
+            else Modifier
+                .heightIn(50.dp, max(50, maxHeight.value.toInt() / 3).dp)
+                .fillMaxWidth()
         ) {
-            // title
-            Text(
-                text = title,
-                style = typography.headlineSmall
-                    .copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-            )
+            Column(
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth(0.9f)
+                    .padding(vertical = 15.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // title
+                Text(
+                    text = title,
+                    style = typography.headlineSmall
+                        .copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                )
 
-            //description
-            Text(
-                text = description,
-                style = typography.bodyMedium,
-                //.copy(fontSize = 20.sp),
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(top = 15.dp)
-            )
+                //description
+                Text(
+                    text = description,
+                    style = typography.bodyMedium,
+                    //.copy(fontSize = 20.sp),
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(top = 15.dp)
+                )
+                FileView()
+            }
         }
     }
 }
 
 @Composable
 private fun SubmitBtn(taskType: TaskType) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = Modifier.fillMaxWidth().height(65.dp)) {
         Button(
             onClick = {},
             modifier = Modifier
-                .padding(vertical = 15.dp)
+                .padding(bottom = 15.dp, top = 5.dp)
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(0.9f)
         ) {
@@ -198,6 +211,24 @@ private fun SubmitBtn(taskType: TaskType) {
                 )
         }
     }
+}
+
+@Composable
+fun FileView() {
+    val uriHandler = LocalUriHandler.current
+    val files = listOf("file 1")
+        Column() {
+            files.forEach {
+                TextButton(
+                    onClick = {
+                        uriHandler
+                            .openUri(uri = "https://developers.google.com/ml-kit/vision/barcode-scanning/android#try-it-out")
+                    }
+                ) {
+                    Text(text = it)
+                }
+            }
+        }
 }
 
 @Preview
