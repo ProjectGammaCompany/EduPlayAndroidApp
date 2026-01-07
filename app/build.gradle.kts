@@ -101,4 +101,16 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.paging.compose)
     implementation(libs.androidx.paging.runtime.ktx)
+
+    //mlKit for qr code scanning
+    implementation(libs.barcode.scanning)
+
+    //cameraX for active scanning
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // permissions
+    implementation(libs.accompanist.permissions)
 }

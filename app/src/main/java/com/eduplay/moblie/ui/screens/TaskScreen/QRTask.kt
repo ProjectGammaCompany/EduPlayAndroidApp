@@ -1,10 +1,10 @@
 package com.eduplay.moblie.ui.screens.TaskScreen
 
+import android.Manifest
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -19,21 +19,44 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 
+//TODO("qr сделать так чтобы после согласия открывалась камера")
+
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit) {
+fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit, onScanQr: () -> Unit) {
+    val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
+    var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
+    var permissionRequestCompleted by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+
     var canScan by remember { mutableStateOf(true) }
     var answer by remember { mutableStateOf("") }
+
+    LaunchedEffect(cameraPermissionState.status) {
+        // Check if the permission state has changed after the request
+        if (hasRequestedPermission) {
+            permissionRequestCompleted = true
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -45,15 +68,39 @@ fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit) {
                 .fillMaxWidth(0.9f)
         ) {
             if (canScan) {
+                hideSubmitBtn()
                 Button(
-                    onClick = { TODO("scan qr") },
+                    onClick = {
+                        when (val status = cameraPermissionState.status) {
+                            is PermissionStatus.Granted -> {
+                                onScanQr()
+                            }
+                            is PermissionStatus.Denied -> {
+                                if (permissionRequestCompleted) {
+                                    // Show rationale only after the permission request is completed
+                                    if (status.shouldShowRationale) {
+                                        cameraPermissionState.launchPermissionRequest()
+                                        hasRequestedPermission = true
+                                    }
+                                } else {
+                                    cameraPermissionState.launchPermissionRequest()
+                                    hasRequestedPermission = true
+                                }
+                            }
+                        }
+                        if (cameraPermissionState.status.shouldShowRationale) {
+                            cameraPermissionState.launchPermissionRequest()
+                            hasRequestedPermission = true
+                        }
+
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorScheme.primaryContainer,
                         contentColor = colorScheme.onPrimaryContainer
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top=20.dp)
+                        .padding(top = 20.dp)
                         .heightIn(100.dp, 150.dp)
 
                 ) {
@@ -64,11 +111,10 @@ fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit) {
                 }
                 TextButton(
                     onClick = {
-                        canScan=false
-                        hideSubmitBtn()
-                              },
+                        canScan = false
+                    },
                     modifier = Modifier
-                        .padding(top=15.dp)
+                        .padding(top = 15.dp)
                         .fillMaxWidth()
                 ) {
                     Text(
@@ -77,6 +123,7 @@ fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit) {
                     )
                 }
             } else {
+                showSubmitBtn()
                 TextField(
                     value = answer,
                     placeholder = {
@@ -97,7 +144,7 @@ fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit) {
                         disabledPlaceholderColor = colorScheme.primary,
                     ),
                     textStyle = typography.bodyMedium
-                        .copy(color=colorScheme.onSecondaryContainer),
+                        .copy(color = colorScheme.onSecondaryContainer),
                     onValueChange = { answer = it },
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -112,11 +159,10 @@ fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit) {
                 )
                 TextButton(
                     onClick = {
-                        canScan=true
-                        showSubmitBtn()
+                        canScan = true
                     },
                     modifier = Modifier
-                        .padding(top=15.dp)
+                        .padding(top = 15.dp)
                         .fillMaxWidth()
                 ) {
                     Text(

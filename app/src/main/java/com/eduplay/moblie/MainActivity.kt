@@ -20,6 +20,7 @@ import com.eduplay.moblie.ui.screens.EventScreen
 import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.screens.MyEventsScreen
 import com.eduplay.moblie.ui.screens.ProfileScreen
+import com.eduplay.moblie.ui.screens.TaskScreen.TaskScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -38,7 +39,7 @@ class MainActivity : ComponentActivity() {
                     bottomBar = { BottomNavBar(navController) }
                 ) { innerPadding ->
 
-                    NavHost(navController = navController, startDestination = "main_screen") {
+                    NavHost(navController = navController, startDestination = "task") {
                         composable("auth_screen") {
                             AuthorizationScreen(
                                 navController = navController
@@ -60,6 +61,10 @@ class MainActivity : ComponentActivity() {
 
                         composable("profile") {
                             ProfileScreen(innerPadding, navController)
+                        }
+
+                        composable("task") {
+                            TaskScreen(innerPadding)
                         }
                     }
 

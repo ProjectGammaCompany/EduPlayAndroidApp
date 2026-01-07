@@ -62,41 +62,52 @@ fun TaskScreen(innerPaddingValues: PaddingValues) {
     var isSubmitBtnShown by remember { mutableStateOf(true) }
     val hideSubmitBtn = { isSubmitBtnShown = false }
     val showSubmitBtn = { isSubmitBtnShown = true }
-    BoxWithConstraints {
-        val height = maxHeight
-        Column(
-            modifier = Modifier
-                .padding(
-                    top = 0.dp,
-                    bottom = innerPaddingValues.calculateBottomPadding(),
-                    start = innerPaddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                    end = innerPaddingValues.calculateEndPadding(LayoutDirection.Ltr)
-                )
-                .fillMaxSize()
-                .background(color = colorScheme.background)
-        ) {
-            // top bar
-            TaskTopBar()
+    var showQr by remember { mutableStateOf(false) }
+    val onScanQr = {showQr = true}
+    if (taskType == TaskType.QR && showQr) {
+
+        QRCameraPreview(
+            innerPaddingValues,{
+            showQr = false
+        },
+            {showQr = false})
+    } else {
+        BoxWithConstraints {
+            val height = maxHeight
+            Column(
+                modifier = Modifier
+                    .padding(
+                        top = 0.dp,
+                        bottom = innerPaddingValues.calculateBottomPadding(),
+                        start = innerPaddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        end = innerPaddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                    )
+                    .fillMaxSize()
+                    .background(color = colorScheme.background)
+            ) {
+                // top bar
+                TaskTopBar()
 
 
-            // header
-            TaskHeader(height, taskType)
+                // header
+                TaskHeader(height, taskType)
 
-            //task
+                //task
 
-            Box(modifier = Modifier.weight(2f)) {
-                when (taskType) {
-                    TaskType.INFO -> {}
-                    TaskType.SINGLE_CHOICE -> SingleChoiceTask()
-                    TaskType.MULTIPLE_CHOICE -> MultipleChoiceTask()
-                    TaskType.TEXT -> TextTask()
-                    TaskType.QR -> QRTask(hideSubmitBtn, showSubmitBtn)
+                Box(modifier = Modifier.weight(2f)) {
+                    when (taskType) {
+                        TaskType.INFO -> {}
+                        TaskType.SINGLE_CHOICE -> SingleChoiceTask()
+                        TaskType.MULTIPLE_CHOICE -> MultipleChoiceTask()
+                        TaskType.TEXT -> TextTask()
+                        TaskType.QR -> QRTask(hideSubmitBtn, showSubmitBtn, onScanQr)
+                    }
                 }
-            }
 
-            //next btn
-            if (isSubmitBtnShown) {
-                SubmitBtn(taskType)
+                //next btn
+                if (isSubmitBtnShown) {
+                    SubmitBtn(taskType)
+                }
             }
         }
     }
