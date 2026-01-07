@@ -48,4 +48,6 @@
     <string name="answer">Ответить</string>
     <string name="proceed">Далее</string>
     <string name="your_answer">Ваш ответ</string>
+    <string name="scan_qr">Отсканировать QR код</string>
+    <string name="cant_scan">Не могу отскаировать код</string>
 </resources>

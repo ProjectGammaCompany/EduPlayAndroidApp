@@ -53,7 +53,10 @@ import kotlin.math.max
 
 @Composable
 fun TaskScreen(innerPaddingValues: PaddingValues) {
-    val taskType = TaskType.INFO
+    val taskType = TaskType.QR
+    var isSubmitBtnShown by remember { mutableStateOf(true) }
+    val hideSubmitBtn = {isSubmitBtnShown = false}
+    val showSubmitBtn = {isSubmitBtnShown = true}
     BoxWithConstraints {
         val height = maxHeight
         Column(
@@ -82,12 +85,14 @@ fun TaskScreen(innerPaddingValues: PaddingValues) {
                     TaskType.SINGLE_CHOICE -> SingleChoiceTask()
                     TaskType.MULTIPLE_CHOICE -> MultipleChoiceTask()
                     TaskType.TEXT -> TextTask()
-                    TaskType.QR -> Box {} //TODO("qr task text type")
+                    TaskType.QR -> QRTask(hideSubmitBtn, showSubmitBtn)
                 }
             }
 
             //next btn
-            SubmitBtn(taskType)
+            if (isSubmitBtnShown) {
+                SubmitBtn(taskType)
+            }
         }
     }
 }
@@ -217,17 +222,17 @@ private fun SubmitBtn(taskType: TaskType) {
 fun FileView() {
     val uriHandler = LocalUriHandler.current
     val files = listOf("file 1")
-        Column() {
-            files.forEach {
-                TextButton(
-                    onClick = {
-                        uriHandler.openUri(uri = it)
-                    }
-                ) {
-                    Text(text = it)
+    Column() {
+        files.forEach {
+            TextButton(
+                onClick = {
+                    uriHandler.openUri(uri = it)
                 }
+            ) {
+                Text(text = it)
             }
         }
+    }
 }
 
 @Preview

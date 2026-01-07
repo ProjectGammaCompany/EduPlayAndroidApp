@@ -47,4 +47,6 @@
     <string name="answer">Submit answer</string>
     <string name="proceed">Proceed</string>
     <string name="your_answer">Your answer</string>
+    <string name="scan_qr">Scan QR code</string>
+    <string name="cant_scan">Can\'t scan the code</string>
 </resources>
