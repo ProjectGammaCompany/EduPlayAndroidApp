@@ -47,12 +47,11 @@ fun TextTask() {
                 unfocusedTextColor = colorScheme.onBackground,
                 focusedContainerColor = colorScheme.background,
                 unfocusedContainerColor = colorScheme.background,
-                disabledTextColor = colorScheme.onSecondary,
-                disabledContainerColor = colorScheme.secondary,
-                focusedPlaceholderColor = colorScheme.tertiary,
-                unfocusedPlaceholderColor = colorScheme.tertiary,
-                errorPlaceholderColor = colorScheme.tertiary,
-                disabledPlaceholderColor = colorScheme.tertiary,
+                disabledTextColor = colorScheme.onPrimaryContainer,
+                disabledContainerColor = colorScheme.primaryContainer,
+                focusedPlaceholderColor = colorScheme.primary,
+                unfocusedPlaceholderColor = colorScheme.primary,
+                disabledPlaceholderColor = colorScheme.primary,
             ),
             textStyle = typography.bodyMedium
                 .copy(color=colorScheme.onSecondaryContainer),
@@ -65,10 +64,9 @@ fun TextTask() {
                 .clip(shape = RoundedCornerShape(8.dp))
                 .border(
                     width = 1.dp,
-                    color = colorScheme.secondary,
+                    color = colorScheme.primary,
                     shape = RoundedCornerShape(8.dp)
                 )
-                .background(color = colorScheme.secondaryContainer)
         )
     }
 }
