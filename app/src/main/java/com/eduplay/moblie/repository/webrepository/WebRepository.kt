@@ -8,8 +8,13 @@ import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.TaskAnswer
+import com.eduplay.moblie.repository.requestTypes.TaskStartTime
+import com.eduplay.moblie.repository.responseTypes.AnswerResult
+import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.services.TokenManager
 import jakarta.inject.Inject
+import java.time.LocalDateTime
 
 
 class WebRepository @Inject constructor(
@@ -113,6 +118,32 @@ class WebRepository @Inject constructor(
             return body
         } // TODO(оделать проверку на причины отказа)
         return ProfileInfo("", "", "")
+    }
+    override suspend fun getNextStage(eventId: String): EventStage {
+        val response = api.getNextStage(eventId)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        } // TODO(оделать проверку на причины отказа)
+        throw IllegalAccessException("cant enter next stage $eventId")
+    }
+
+    override suspend fun postTaskStartTime(eventId: String, blockId: String, taskId: String, startTime: LocalDateTime): Boolean {
+        val response = api.postTaskStartTime(eventId, blockId, taskId, TaskStartTime(startTime.toString()))
+        if (response.isSuccessful) {
+            return true
+        } // TODO(оделать проверку на причины отказа)
+        if (response.code() != 403) return false
+        throw IllegalAccessException("cant enter next stage $eventId")
+    }
+
+    override suspend fun postTaskAnswer(eventId: String, blockId: String, taskId: String, answers: List<String>): AnswerResult {
+        val response = api.postTaskAnswer(eventId, blockId, taskId, TaskAnswer(answers))
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        } // TODO(оделать проверку на причины отказа)
+        throw IllegalAccessException("cant enter next stage $eventId")
     }
 
 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
+import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -41,7 +42,12 @@ import com.google.accompanist.permissions.shouldShowRationale
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit, onScanQr: () -> Unit) {
+fun QRTask(
+    hideSubmitBtn: () -> Unit,
+    showSubmitBtn: () -> Unit,
+    onScanQr: () -> Unit,
+    viewModel: EventStageViewmodel
+) {
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
     var permissionRequestCompleted by rememberSaveable { mutableStateOf(false) }
@@ -70,6 +76,7 @@ fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit, onScanQr: () ->
             if (canScan) {
                 hideSubmitBtn()
                 Button(
+                    enabled = !viewModel.disableTask.value,
                     onClick = {
                         when (val status = cameraPermissionState.status) {
                             is PermissionStatus.Granted -> {
@@ -113,6 +120,7 @@ fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit, onScanQr: () ->
                     onClick = {
                         canScan = false
                     },
+                    enabled = !viewModel.disableTask.value,
                     modifier = Modifier
                         .padding(top = 15.dp)
                         .fillMaxWidth()
@@ -126,6 +134,7 @@ fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit, onScanQr: () ->
                 showSubmitBtn()
                 TextField(
                     value = answer,
+                    enabled = !viewModel.disableTask.value,
                     placeholder = {
                         Text(
                             text = stringResource(R.string.your_answer),
@@ -145,7 +154,11 @@ fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit, onScanQr: () ->
                     ),
                     textStyle = typography.bodyMedium
                         .copy(color = colorScheme.onSecondaryContainer),
-                    onValueChange = { answer = it },
+                    onValueChange = {
+                        answer = it
+                        viewModel.answers.clear()
+                        viewModel.answers.add(it)
+                                    },
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(20.dp)
@@ -161,6 +174,7 @@ fun QRTask(hideSubmitBtn: () -> Unit, showSubmitBtn: () -> Unit, onScanQr: () ->
                     onClick = {
                         canScan = true
                     },
+                    enabled = !viewModel.disableTask.value,
                     modifier = Modifier
                         .padding(top = 15.dp)
                         .fillMaxWidth()

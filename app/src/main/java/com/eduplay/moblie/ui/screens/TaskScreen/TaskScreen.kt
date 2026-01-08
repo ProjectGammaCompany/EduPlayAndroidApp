@@ -1,5 +1,7 @@
 package com.eduplay.moblie.ui.screens.TaskScreen
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -31,11 +33,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,25 +56,43 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.TaskType
+import com.eduplay.moblie.repository.responseTypes.Task
+import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.time.Duration
+import java.time.LocalDateTime
+import kotlin.math.abs
 import kotlin.math.max
 
 //TODO("optional scroll bar для column")
 
 @Composable
-fun TaskScreen(innerPaddingValues: PaddingValues) {
-    val taskType = TaskType.QR
+fun TaskScreen(
+    innerPaddingValues: PaddingValues,
+    eventId: String,
+    viewModel: EventStageViewmodel
+) {
+    val taskType = viewModel.currentTask.value!!.type
     var isSubmitBtnShown by remember { mutableStateOf(true) }
     val hideSubmitBtn = { isSubmitBtnShown = false }
     val showSubmitBtn = { isSubmitBtnShown = true }
     var showQr by remember { mutableStateOf(false) }
-    val onScanQr = {showQr = true}
+    val onScanQr = { showQr = true }
+    val onSubmit = {
+        viewModel.sendAnswer(eventId)
+    }
     if (taskType == TaskType.QR && showQr) {
 
         QRCameraPreview(
-            innerPaddingValues,{
-            showQr = false
-        },
-            {showQr = false})
+            innerPaddingValues,
+            { answer ->
+                showQr = false
+                viewModel.answers.add(answer)
+                viewModel.sendAnswer(eventId)
+            },
+            { showQr = false },
+        )
     } else {
         BoxWithConstraints {
             val height = maxHeight
@@ -90,23 +112,32 @@ fun TaskScreen(innerPaddingValues: PaddingValues) {
 
 
                 // header
-                TaskHeader(height, taskType)
+                TaskHeader(
+                    height,
+                    taskType,
+                    viewModel.currentTask.value!!.name,
+                    viewModel.currentTask.value!!.description ?: "",
+                    viewModel.currentTask.value!!.time,
+                    viewModel.taskStartTime,
+                    viewModel.currentTask.value!!.files,
+                    onSubmit
+                )
 
                 //task
 
                 Box(modifier = Modifier.weight(2f)) {
                     when (taskType) {
                         TaskType.INFO -> {}
-                        TaskType.SINGLE_CHOICE -> SingleChoiceTask()
-                        TaskType.MULTIPLE_CHOICE -> MultipleChoiceTask()
-                        TaskType.TEXT -> TextTask()
-                        TaskType.QR -> QRTask(hideSubmitBtn, showSubmitBtn, onScanQr)
+                        TaskType.SINGLE_CHOICE -> SingleChoiceTask(viewModel)
+                        TaskType.MULTIPLE_CHOICE -> MultipleChoiceTask(viewModel)
+                        TaskType.TEXT -> TextTask(viewModel)
+                        TaskType.QR -> QRTask(hideSubmitBtn, showSubmitBtn, onScanQr, viewModel)
                     }
                 }
 
                 //next btn
                 if (isSubmitBtnShown) {
-                    SubmitBtn(taskType)
+                    SubmitBtn(taskType, {viewModel.sendAnswer(eventId)})
                 }
             }
         }
@@ -131,17 +162,56 @@ private fun TaskTopBar() {
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
-private fun TaskHeader(maxHeight: Dp, taskType: TaskType) {
-    val title = "very Loooooooooooong and hard question"
-    val description =
-        """
-          Description
-        """.trimIndent()
-
+private fun TaskHeader(
+    maxHeight: Dp,
+    taskType: TaskType,
+    title: String,
+    description: String,
+    time: Int,
+    startTime: LocalDateTime,
+    files: List<String>,
+    invokeEndOnTime: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
     var showTimer by remember { mutableStateOf(true) }
-    var currentProgress by remember { mutableFloatStateOf(0.5f) }
-    val timeLeft by remember { mutableIntStateOf(30) }
+    var currentProgress by remember {
+        mutableFloatStateOf(
+            abs(Duration.between(LocalDateTime.now(), startTime).toSeconds()).toFloat() / time
+        )
+    }
+    LaunchedEffect(Any()) {
+        scope.launch {
+            while (currentProgress < 1f) {
+                currentProgress = abs(
+                    Duration.between(LocalDateTime.now(), startTime).toSeconds()
+                ).toFloat() / time
+                delay(500L)
+            }
+        }
+    }
+    var timeLeft by remember {
+        mutableLongStateOf(
+            time - abs(
+                Duration.between(
+                    LocalDateTime.now(),
+                    startTime
+                ).toSeconds()
+            )
+        )
+    }
+    LaunchedEffect(time) {
+        scope.launch {
+            while (timeLeft > 0) {
+                timeLeft -= 1
+                delay(1000L)
+            }
+            invokeEndOnTime()
+        }
+    }
+
+
 
 
     Column(
@@ -168,7 +238,7 @@ private fun TaskHeader(maxHeight: Dp, taskType: TaskType) {
 
                 )
                 Text(
-                    text = "${timeLeft / 60}:${timeLeft % 60}",
+                    text = (timeLeft / 60).toString() + ":" + (timeLeft % 60).toString(),
                     style = typography.titleLarge,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -208,19 +278,21 @@ private fun TaskHeader(maxHeight: Dp, taskType: TaskType) {
                         .align(Alignment.Start)
                         .padding(top = 15.dp)
                 )
-                FileView()
+                FileView(files)
             }
         }
     }
 }
 
 @Composable
-private fun SubmitBtn(taskType: TaskType) {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .height(65.dp)) {
+private fun SubmitBtn(taskType: TaskType, onSubmit: ()->Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(65.dp)
+    ) {
         Button(
-            onClick = {},
+            onClick = onSubmit,
             modifier = Modifier
                 .padding(bottom = 15.dp, top = 5.dp)
                 .align(Alignment.BottomCenter)
@@ -237,9 +309,8 @@ private fun SubmitBtn(taskType: TaskType) {
 }
 
 @Composable
-fun FileView() {
+fun FileView(files: List<String>) {
     val uriHandler = LocalUriHandler.current
-    val files = listOf("file 1")
     Column() {
         files.forEach {
             TextButton(
@@ -269,15 +340,30 @@ fun FileView() {
                     textAlign = TextAlign.Start,
                     style = typography.bodyMedium,
                     modifier = Modifier.fillMaxWidth()
-                    )
+                )
             }
         }
     }
 }
 
-@Preview
-@Composable
-fun TaskPreview() {
-    TaskScreen(PaddingValues())
-}
+//@Preview
+//@Composable
+//fun TaskPreview() {
+//    TaskScreen(
+//        PaddingValues(),
+//        {},
+//        Task(
+//            "1",
+//            "1",
+//            "taskaskaskask",
+//            "asdasdsad",
+//            TaskType.TEXT,
+//            null,
+//            listOf<String>(),
+//            15,
+//            LocalDateTime.now().toString()
+//        ),
+//        LocalDateTime.now()
+//    )
+//}
 

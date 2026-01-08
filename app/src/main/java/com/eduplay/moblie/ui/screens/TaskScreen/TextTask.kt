@@ -1,13 +1,10 @@
 package com.eduplay.moblie.ui.screens.TaskScreen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -26,9 +23,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
+import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 
 @Composable
-fun TextTask() {
+fun TextTask(viewModel: EventStageViewmodel) {
     var answer by remember { mutableStateOf("") }
     Box(
         modifier = Modifier
@@ -36,6 +34,12 @@ fun TextTask() {
     ) {
         TextField(
             value = answer,
+            onValueChange = { newText: String ->
+                answer = newText
+                viewModel.answers.clear()
+                viewModel.answers.add(newText)
+            },
+            enabled = !viewModel.disableTask.value,
             placeholder = {
                 Text(
                     text = stringResource(R.string.your_answer),
@@ -54,8 +58,7 @@ fun TextTask() {
                 disabledPlaceholderColor = colorScheme.primary,
             ),
             textStyle = typography.bodyMedium
-                .copy(color=colorScheme.onSecondaryContainer),
-            onValueChange = { answer = it },
+                .copy(color = colorScheme.onSecondaryContainer),
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(20.dp)

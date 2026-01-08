@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.EventStatus
 import com.eduplay.moblie.repository.EduRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -69,9 +70,10 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
             )
         )
 
-        isOpen.value = !data.completed
+        //TODO("check status")
+        isOpen.value = !data.completed && data.status != EventStatus.ENDED
                 && (data.startDate == null || LocalDateTime.now() >= LocalDateTime.parse(data.startDate))
-        isContinuing.value = isOpen.value
+        isContinuing.value = isOpen.value && data.status == EventStatus.STARTED
                 && (
                 data.endDate == null
                         || (LocalDateTime.now() >= LocalDateTime.parse(data.startDate)

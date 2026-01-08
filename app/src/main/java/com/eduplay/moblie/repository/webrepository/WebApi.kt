@@ -5,9 +5,14 @@ import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.TaskAnswer
+import com.eduplay.moblie.repository.requestTypes.TaskStartTime
+import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.AuthResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
+import com.eduplay.moblie.repository.responseTypes.EventStage
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -74,5 +79,27 @@ interface WebApi {
     @InjectAuth
     suspend fun getProfile(): Response<ProfileInfo>
 
+    @GET("/eventId/{eventId}/nextStage")
+    @InjectAuth
+    suspend fun getNextStage(
+        @Path("eventId") eventId: String
+    ): Response<EventStage>
 
+    @POST("event/{eventId}/block/{blockId}/task/{taskId}/timestamp")
+    @InjectAuth
+    suspend fun postTaskStartTime(
+        @Path("eventId") eventId: String,
+        @Path("blockId") blockId: String,
+        @Path("taskId") taskId: String,
+        @Body timeStamp: TaskStartTime
+    ): Response<Unit>
+
+    @POST("event/{eventId}/block/{blockId}/task/{taskId}/answer")
+    @InjectAuth
+    suspend fun postTaskAnswer(
+        @Path("eventId") eventId: String,
+        @Path("blockId") blockId: String,
+        @Path("taskId") taskId: String,
+        @Body answer: TaskAnswer
+    ): Response<AnswerResult>
 }

@@ -63,9 +63,9 @@ class MainActivity : ComponentActivity() {
                             ProfileScreen(innerPadding, navController)
                         }
 
-                        composable("task") {
-                            TaskScreen(innerPadding)
-                        }
+//                        composable("task") {
+//                            TaskScreen(innerPadding,)
+//                        }
                     }
 
                 }

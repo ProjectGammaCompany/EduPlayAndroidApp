@@ -10,9 +10,12 @@ import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.responseTypes.AnswerResult
+import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.WebRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 class EduRepository @Inject constructor(
     private val webRepository: WebRepository
@@ -76,5 +79,22 @@ class EduRepository @Inject constructor(
 
     suspend fun getProfile(): ProfileInfo {
         return webRepository.getProfile()
+    }
+
+    suspend fun getNextStage(eventId: String): EventStage {
+        return webRepository.getNextStage(eventId)
+    }
+
+    suspend fun postTaskStartTime(
+        eventId: String,
+        blockId: String,
+        taskId: String,
+        taskStartTime: LocalDateTime
+    ): Boolean {
+        return webRepository.postTaskStartTime(eventId, blockId, taskId, taskStartTime)
+    }
+
+    suspend fun postAnswer(eventId: String, blockId: String, taskId: String, answers: List<String>): AnswerResult {
+        return webRepository.postTaskAnswer(eventId, blockId, taskId, answers)
     }
 }
