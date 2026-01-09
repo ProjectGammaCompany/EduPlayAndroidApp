@@ -12,6 +12,7 @@ import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.services.TokenManager
 import jakarta.inject.Inject
 import java.time.LocalDateTime
@@ -142,6 +143,14 @@ class WebRepository @Inject constructor(
         val body = response.body()
         if (response.isSuccessful && body != null) {
             return body
+        } // TODO(оделать проверку на причины отказа)
+        throw IllegalAccessException("cant enter next stage $eventId")
+    }
+
+    suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
+        val response = api.postTaskChoice(eventId, TaskFromBlock(blockId, taskId))
+        if (response.isSuccessful ) {
+            return true
         } // TODO(оделать проверку на причины отказа)
         throw IllegalAccessException("cant enter next stage $eventId")
     }

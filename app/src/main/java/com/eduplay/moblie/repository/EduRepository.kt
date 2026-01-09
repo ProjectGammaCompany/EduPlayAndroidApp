@@ -97,4 +97,8 @@ class EduRepository @Inject constructor(
     suspend fun postAnswer(eventId: String, blockId: String, taskId: String, answers: List<String>): AnswerResult {
         return webRepository.postTaskAnswer(eventId, blockId, taskId, answers)
     }
+
+    suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
+        return webRepository.postTaskChoice(eventId, blockId, taskId)
+    }
 }

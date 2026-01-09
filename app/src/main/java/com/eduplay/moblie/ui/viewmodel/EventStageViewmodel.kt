@@ -97,7 +97,15 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
         }
     }
 
-    fun goBackToBlock() {
-        currentStageType.value = StageType.BLOCK
+    fun chooseTask(eventId:String, taskId: String) {
+        viewModelScope.launch() {
+            try {
+                repository.postTaskChoice(eventId, currentBlock.value?.id ?: "", taskId)
+            } catch (e: IllegalAccessException) {
+
+            } catch (e: Exception) {
+
+            }
+        }.invokeOnCompletion { currentStageType.value = StageType.NONE }
     }
 }

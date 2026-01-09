@@ -11,6 +11,7 @@ import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.AuthResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -83,6 +84,13 @@ interface WebApi {
     @InjectAuth
     suspend fun getNextStage(
         @Path("eventId") eventId: String
+    ): Response<EventStage>
+
+    @POST("/eventId/{eventId}/nextStage")
+    @InjectAuth
+    suspend fun postTaskChoice(
+        @Path("eventId") eventId: String,
+        @Body task: TaskFromBlock
     ): Response<EventStage>
 
     @POST("event/{eventId}/block/{blockId}/task/{taskId}/timestamp")
