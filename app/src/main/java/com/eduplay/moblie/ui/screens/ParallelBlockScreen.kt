@@ -132,37 +132,3 @@ private fun BlockTopBar() {
         }
     )
 }
-
-
-@Preview
-@Composable
-fun previewBlock() {
-    ParallelBlockScreen(
-        Block(
-            "aaaa",
-            "The Block",
-            listOf(
-                ShortTask(
-                    id = "",
-                    name = "task",
-                    time = 145,
-                    isCompleted = true
-                ),
-                ShortTask(
-                    id = "",
-                    name = "task",
-                    time = 145,
-                    isCompleted = false
-                ),
-                ShortTask(
-                    id = "",
-                    name = "task",
-                    time = 145,
-                    isCompleted = true
-                )
-            )
-        ),
-        { str -> str + "" },
-        innerPaddingValues = PaddingValues(0.dp),
-    )
-}
