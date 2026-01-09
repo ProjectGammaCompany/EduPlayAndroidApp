@@ -17,8 +17,7 @@ import java.time.LocalDateTime
 
 @HiltViewModel
 class EventStageViewmodel @Inject constructor(private val repository: EduRepository) : ViewModel() {
-    var currentStageType = mutableStateOf( StageType.NONE)
-        private set
+    val currentStageType = mutableStateOf( StageType.NONE)
 
     var currentTask = mutableStateOf<Task?>(null)
         private set
@@ -28,13 +27,18 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
         private set
     val answers = mutableStateListOf<String>()
     val disableTask = mutableStateOf(false)
+    val showResults = mutableStateOf(false)
+    val correctAnswer = mutableListOf<String>()
+    var points :Int? = null
+        private set
+    var isAnswerCorrect: Boolean? = false
+        private set
 
     fun getNextStage(eventId: String) {
         currentStageType.value = StageType.NONE
         viewModelScope.launch() {
             val result = repository.getNextStage(eventId)
-            answers.clear()
-            disableTask.value = false
+            clear()
             currentStageType.value = result.type
             currentTask.value = result.task
             currentBlock.value = result.block
@@ -44,6 +48,14 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                 sendStartTime(eventId)
             }
         }
+    }
+    private fun clear() {
+        answers.clear()
+        disableTask.value = false
+        showResults.value = false
+        correctAnswer.clear()
+        points = null
+        isAnswerCorrect = false
     }
 
     fun sendAnswer(eventId:String) {
@@ -56,12 +68,20 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                     } else {
                         listOf(answers.last())
                     }
-                repository.postAnswer(
+                val stageResult = repository.postAnswer(
                     eventId,
-                    currentTask.value?.blockId ?: "",
-                    currentTask.value?.id ?: "",
+                    currentTask.value?.blockId!!,
+                    currentTask.value?.id!!,
                     resultingAnswer
                 )
+                points = stageResult.points
+                isAnswerCorrect = stageResult.isCorrect
+                correctAnswer.addAll(stageResult.rightAnswer ?: listOf())
+                if (stageResult.rightAnswer == null && stageResult.points == null) {
+                    currentStageType.value = StageType.NONE
+                } else {
+                    showResults.value = true
+                }
             }
         }
     }

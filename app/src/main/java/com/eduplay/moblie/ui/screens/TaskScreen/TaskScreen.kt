@@ -346,24 +346,3 @@ fun FileView(files: List<String>) {
     }
 }
 
-//@Preview
-//@Composable
-//fun TaskPreview() {
-//    TaskScreen(
-//        PaddingValues(),
-//        {},
-//        Task(
-//            "1",
-//            "1",
-//            "taskaskaskask",
-//            "asdasdsad",
-//            TaskType.TEXT,
-//            null,
-//            listOf<String>(),
-//            15,
-//            LocalDateTime.now().toString()
-//        ),
-//        LocalDateTime.now()
-//    )
-//}
-

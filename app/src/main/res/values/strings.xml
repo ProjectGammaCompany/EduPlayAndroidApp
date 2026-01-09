@@ -50,4 +50,9 @@
     <string name="scan_qr">Scan QR code</string>
     <string name="cant_scan">Can\'t scan the code</string>
     <string name="close_cam">Close camera</string>
+    <string name="correct">Correct</string>
+    <string name="incorrect">Incorrect</string>
+    <string name="points">Points</string>
+    <string name="сorrect_answers">Correct answer</string>
+    <string name="done">Done</string>
 </resources>

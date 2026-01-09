@@ -51,4 +51,9 @@
     <string name="scan_qr">Отсканировать QR код</string>
     <string name="cant_scan">Не могу отскаировать код</string>
     <string name="close_cam">Закрыть камеру</string>
+    <string name="correct">Правильно</string>
+    <string name="incorrect">Не правильно</string>
+    <string name="points">Баллы</string>
+    <string name="сorrect_answers">Правильный ответ</string>
+    <string name="done">Выполнено</string>
 </resources>
