@@ -30,18 +30,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
 import com.eduplay.moblie.repository.responseTypes.Block
-import com.eduplay.moblie.repository.responseTypes.ShortTask
 
 @Composable
 fun ParallelBlockScreen(
     block: Block,
     onChooseTask: (String) -> Unit,
-    innerPaddingValues: PaddingValues
+    innerPaddingValues: PaddingValues,
+    onGoBack: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -54,7 +53,7 @@ fun ParallelBlockScreen(
             .fillMaxSize()
             .background(color = colorScheme.background)
     ) {
-        BlockTopBar()
+        BlockTopBar(onGoBack)
         Text(
             text = block.name,
             style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
@@ -117,12 +116,12 @@ private fun TaskItem(name: String, time: Int, isEnabled: Boolean, onChooseTask: 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BlockTopBar() {
+private fun BlockTopBar(onGoBack: ()->Unit) {
     TopAppBar(
         title = {},
         navigationIcon = {
             IconButton(
-                onClick = { TODO("task screen btn back") }
+                onClick = { onGoBack() }
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,

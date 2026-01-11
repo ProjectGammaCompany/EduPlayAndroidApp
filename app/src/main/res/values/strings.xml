@@ -58,4 +58,9 @@
     <string name="congratulation">Congratulations!</string>
     <string name="you_got">You got</string>
     <string name="ok">OK</string>
+    <string name="exit_event_warning">Are you shure you want to exit the event? If you are solving a time limited task, the count down will NOT stop.</string>
+    <string name="exit_event">Exit the event</string>
+    <string name="exit">Exit</string>
+    <string name="stay">Stay</string>
+    <string name="show_result">Show results</string>
 </resources>

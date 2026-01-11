@@ -78,13 +78,18 @@ fun EventScreen(
     if (!dataFetched) {
         viewModel.fetchData(eventId) { dataFetched = true }
     }
-    val startEvent = {} //TODO("start event btn")
+    val startEvent = {
+        navController.navigate("play_event/${eventId}")
+    }
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
         showEditDialog = true
     }
     val onCloseEditEvent = {
         showEditDialog = false
+    }
+    val showResults = {
+        navController.navigate("event_result/${eventId}")
     }
 
 
@@ -127,7 +132,9 @@ fun EventScreen(
                 viewModel.description.value,
                 viewModel.isOpen.value,
                 viewModel.isContinuing.value,
-                startEvent
+                viewModel.isCompleted.value,
+                startEvent,
+                showResults
             )
         }
     }
@@ -374,7 +381,9 @@ private fun GeneralUserBody(
     description: String,
     isOpen: Boolean,
     isContinuing: Boolean,
-    startEvent: () -> Unit
+    isCompleted: Boolean,
+    startEvent: () -> Unit,
+    showResults: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.Center) {
         Box(modifier = Modifier.fillMaxHeight(if (isOpen) 0.85f else 1f)) {
@@ -397,6 +406,24 @@ private fun GeneralUserBody(
                     } else {
                         stringResource(R.string.continue_event)
                     },
+                    style = Typography.titleMedium,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            }
+        }
+
+        if (isCompleted) {
+            Button(
+                onClick = {showResults()},
+                modifier = Modifier
+                    .padding(vertical = 3.dp)
+                    .fillMaxWidth(0.8f)
+                    .height(50.dp)
+                    .weight(0.15f)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    stringResource(R.string.show_result),
                     style = Typography.titleMedium,
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )

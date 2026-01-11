@@ -29,10 +29,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.eduplay.moblie.R
 
 @Composable
-fun EventResultScreen(innerPaddingValues: PaddingValues) {
+fun EventResultScreen(
+    innerPaddingValues: PaddingValues,
+    eventId: String,
+    navController: NavController
+) {
+    val onExitScreen = {
+        navController.navigate("event_screen/$eventId")
+    }
     val points = 33
     Column(
         modifier = Modifier
@@ -44,7 +52,7 @@ fun EventResultScreen(innerPaddingValues: PaddingValues) {
             )
             .fillMaxSize()
     ) {
-        ResultTopBar()
+        ResultTopBar(onExitScreen)
 
         Column(
             verticalArrangement = Arrangement.Center,
@@ -98,7 +106,7 @@ fun EventResultScreen(innerPaddingValues: PaddingValues) {
         }
 
         Button(
-            onClick = {},
+            onClick = onExitScreen,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .fillMaxWidth(0.9f)
@@ -110,12 +118,12 @@ fun EventResultScreen(innerPaddingValues: PaddingValues) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ResultTopBar() {
+private fun ResultTopBar(onExitScreen: () -> Unit) {
     TopAppBar(
         title = {},
         navigationIcon = {
             IconButton(
-                onClick = { TODO("result screen btn back") }
+                onClick = onExitScreen
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -124,10 +132,4 @@ private fun ResultTopBar() {
             }
         }
     )
-}
-
-@Preview
-@Composable
-fun ResulPreview() {
-    EventResultScreen(PaddingValues())
 }

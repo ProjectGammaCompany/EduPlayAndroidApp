@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,11 +14,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -26,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.ui.screens.TaskScreen.TaskScreen
@@ -35,8 +42,19 @@ import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 fun EventStageScreen(
     eventId: String,
     innerPadding: PaddingValues,
+    navController: NavController,
     viewModel: EventStageViewmodel = hiltViewModel()
 ) {
+    var showGoBackDialog by remember { mutableStateOf(false) }
+    val onGoBack = {
+        showGoBackDialog = true
+    }
+    val goBack = {
+        navController.popBackStack()
+    }
+    BackHandler() {
+        onGoBack()
+    }
     when (viewModel.currentStageType.value) {
         StageType.NONE -> {
             viewModel.getNextStage(eventId)
@@ -46,7 +64,8 @@ fun EventStageScreen(
             TaskScreen(
                 innerPadding,
                 eventId,
-                viewModel
+                onGoBack = onGoBack,
+                viewModel = viewModel
             )
         }
 
@@ -54,14 +73,15 @@ fun EventStageScreen(
             ParallelBlockScreen(
                 block = viewModel.currentBlock.value!!,
                 onChooseTask = { taskId: String ->
-                        viewModel.chooseTask(eventId, taskId)
+                    viewModel.chooseTask(eventId, taskId)
                 },
+                onGoBack = onGoBack,
                 innerPaddingValues = innerPadding
             )
         }
 
         StageType.END -> {
-            //navigate to end screen
+            navController.navigate("event_result/$eventId")
         }
     }
     if (viewModel.showResults.value) {
@@ -75,6 +95,41 @@ fun EventStageScreen(
 
         )
     }
+    if (showGoBackDialog) {
+        ExitEventDialog(
+            {
+                showGoBackDialog = false
+            },
+            goBack
+        )
+    }
+}
+
+@Composable
+private fun ExitEventDialog(hideDialog: () -> Unit, goBack: () -> Boolean) {
+    AlertDialog(
+        title = {
+            Text(text = stringResource(R.string.exit_event))
+        },
+        text = {
+            Text(text = stringResource(R.string.exit_event_warning))
+        },
+        onDismissRequest = hideDialog,
+        confirmButton = {
+            TextButton(
+                onClick = {goBack()}
+            ) {
+                Text(stringResource(R.string.exit))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = hideDialog
+            ) {
+                Text(stringResource(R.string.stay))
+            }
+        }
+    )
 }
 
 @Composable
@@ -82,7 +137,7 @@ private fun ResultDialog(
     isCorrect: Boolean?,
     answers: List<String>?,
     points: Int?,
-    proceedToNextTask:()->Unit
+    proceedToNextTask: () -> Unit
 ) {
     Dialog(
         onDismissRequest = proceedToNextTask
@@ -94,7 +149,7 @@ private fun ResultDialog(
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
-            Column (
+            Column(
                 modifier = Modifier
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -108,7 +163,7 @@ private fun ResultDialog(
                     },
                     style = typography.headlineSmall
                 )
-                if (isCorrect!= null) {
+                if (isCorrect != null) {
                     if (isCorrect) {
                         Image(
                             painter = painterResource(id = R.drawable.correct_answer),
@@ -117,7 +172,7 @@ private fun ResultDialog(
                     } else {
                         Image(
                             painter = painterResource(id = R.drawable.incorrect_answer),
-                            contentDescription = stringResource(R.string.correct),
+                            contentDescription = stringResource(R.string.incorrect),
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                         )
@@ -126,7 +181,7 @@ private fun ResultDialog(
                 if (points != null) {
                     Row {
                         Text(
-                            text = stringResource(R.string.points)+":",
+                            text = stringResource(R.string.points) + ":",
                             style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                         )
                         Text(
@@ -137,14 +192,14 @@ private fun ResultDialog(
                 }
                 if (answers != null) {
                     Text(
-                        text = stringResource(R.string.сorrect_answers)+":",
+                        text = stringResource(R.string.сorrect_answers) + ":",
                         style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                     )
-                    Column (
+                    Column(
                         modifier = Modifier
                             .heightIn(max = 100.dp)
                             .verticalScroll(rememberScrollState())
-                    ){
+                    ) {
                         answers.forEach { answer ->
                             Text(
                                 text = answer,
@@ -160,7 +215,7 @@ private fun ResultDialog(
                     onClick = {
                         proceedToNextTask()
                     },
-                    modifier = Modifier.padding(top=10.dp)
+                    modifier = Modifier.padding(top = 10.dp)
                 ) {
                     Text(
                         stringResource(R.string.proceed),

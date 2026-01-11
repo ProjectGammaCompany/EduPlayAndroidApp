@@ -50,13 +50,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.TaskType
-import com.eduplay.moblie.repository.responseTypes.Task
 import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -71,7 +69,8 @@ import kotlin.math.max
 fun TaskScreen(
     innerPaddingValues: PaddingValues,
     eventId: String,
-    viewModel: EventStageViewmodel
+    viewModel: EventStageViewmodel,
+    onGoBack: () -> Unit
 ) {
     val taskType = viewModel.currentTask.value!!.type
     var isSubmitBtnShown by remember { mutableStateOf(true) }
@@ -108,7 +107,7 @@ fun TaskScreen(
                     .background(color = colorScheme.background)
             ) {
                 // top bar
-                TaskTopBar()
+                TaskTopBar(onGoBack)
 
 
                 // header
@@ -146,12 +145,12 @@ fun TaskScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TaskTopBar() {
+private fun TaskTopBar(onGoBack: () -> Unit) {
     TopAppBar(
         title = {},
         navigationIcon = {
             IconButton(
-                onClick = { TODO("task screen btn back") }
+                onClick = { onGoBack() }
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,

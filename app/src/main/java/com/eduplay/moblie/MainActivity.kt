@@ -16,11 +16,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
+import com.eduplay.moblie.ui.screens.EventResultScreen
 import com.eduplay.moblie.ui.screens.EventScreen
+import com.eduplay.moblie.ui.screens.EventStageScreen
 import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.screens.MyEventsScreen
 import com.eduplay.moblie.ui.screens.ProfileScreen
-import com.eduplay.moblie.ui.screens.TaskScreen.TaskScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,7 +34,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             EduPlayTheme {
                 val context = LocalContext.current
-                (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                (context as? Activity)?.requestedOrientation =
+                    ActivityInfo.SCREEN_ORIENTATION_LOCKED
                 val navController = rememberNavController()
                 Scaffold(
                     bottomBar = { BottomNavBar(navController) }
@@ -52,7 +54,11 @@ class MainActivity : ComponentActivity() {
                             "event_screen/{eventId}",
                             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
                         ) { pathArgs ->
-                            EventScreen(innerPadding, pathArgs.arguments?.getString("userId") ?: "", navController)
+                            EventScreen(
+                                innerPadding,
+                                pathArgs.arguments?.getString("userId") ?: "",
+                                navController
+                            )
                         }
 
                         composable("my_events") {
@@ -62,10 +68,27 @@ class MainActivity : ComponentActivity() {
                         composable("profile") {
                             ProfileScreen(innerPadding, navController)
                         }
+                        composable(
+                            "event_result/{eventId}",
+                            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+                        ) { pathArgs ->
+                            EventResultScreen(
+                                innerPadding,
+                                pathArgs.arguments?.getString("eventId") ?: "",
+                                navController
+                            )
+                        }
 
-//                        composable("task") {
-//                            TaskScreen(innerPadding,)
-//                        }
+                        composable(
+                            "play_event/{eventId}",
+                            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+                        ) { pathArgs ->
+                            EventStageScreen(
+                                pathArgs.arguments?.getString("eventId") ?: "",
+                                innerPadding,
+                                navController
+                            )
+                        }
                     }
 
                 }

@@ -59,4 +59,9 @@
     <string name="congratulation">Поздравляем!</string>
     <string name="you_got">Вы получили</string>
     <string name="ok">ОК</string>
+    <string name="exit_event_warning">Вы уверены, что хотите уйти? Если вы решаете задание ограниченное по времени, обратный отсчет НЕ прекратится.</string>
+    <string name="exit_event">Покинуть событие</string>
+    <string name="exit">Уйти</string>
+    <string name="stay">Остаться</string>
+    <string name="show_result">Показать результаты</string>
 </resources>
