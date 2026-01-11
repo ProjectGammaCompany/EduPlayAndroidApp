@@ -55,4 +55,7 @@
     <string name="points">Points</string>
     <string name="сorrect_answers">Correct answer</string>
     <string name="done">Done</string>
+    <string name="congratulation">Congratulations!</string>
+    <string name="you_got">You got</string>
+    <string name="ok">OK</string>
 </resources>

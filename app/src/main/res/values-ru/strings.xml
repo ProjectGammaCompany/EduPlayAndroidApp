@@ -56,4 +56,7 @@
     <string name="points">Баллы</string>
     <string name="сorrect_answers">Правильный ответ</string>
     <string name="done">Выполнено</string>
+    <string name="congratulation">Поздравляем!</string>
+    <string name="you_got">Вы получили</string>
+    <string name="ok">ОК</string>
 </resources>
