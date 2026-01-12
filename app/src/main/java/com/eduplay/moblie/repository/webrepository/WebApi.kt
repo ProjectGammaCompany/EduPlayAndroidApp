@@ -17,12 +17,17 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface WebApi {
     @POST("/login")
     suspend fun login(auth: Auth): Response<AuthResponse>
+
+    @PUT("/logout")
+    @InjectAuth
+    suspend fun logout(): Response<Unit>
 
     @POST("/register")
     suspend fun register(auth: Auth): Response<AuthResponse>

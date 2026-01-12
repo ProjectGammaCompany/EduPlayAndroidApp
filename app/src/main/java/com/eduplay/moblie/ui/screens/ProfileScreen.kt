@@ -155,7 +155,7 @@ fun ProfileScreen(innerPaddingValues: PaddingValues, navController: NavControlle
                 disabledContentColor = colorScheme.errorContainer
             ),
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
-        ) { // TODO("logout")}
+        ) {
             Text(
                 stringResource(R.string.logout),
                 style = typography.labelLarge.copy(color = colorScheme.error)

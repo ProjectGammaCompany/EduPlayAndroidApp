@@ -35,8 +35,14 @@ class WebRepository @Inject constructor(
         return AuthResult.INVALID_USER
     }
 
-    override suspend fun logout() {
-        TODO("Not yet implemented")
+    override suspend fun logout(): Boolean {
+        val response = api.logout()
+        if (response.isSuccessful) {
+            tokenManager.saveAccessToken("")
+            tokenManager.saveRefreshToken("")
+            return true
+        }
+        return false
     }
 
     override suspend fun register(auth: Auth): AuthResult {

@@ -25,8 +25,8 @@ class EduRepository @Inject constructor(
         return webRepository.login(auth)
     }
 
-    suspend fun logout() {
-        TODO("Not yet implemented")
+    suspend fun logout(): Boolean {
+        return webRepository.logout()
     }
 
     suspend fun register(auth: Auth): AuthResult {
