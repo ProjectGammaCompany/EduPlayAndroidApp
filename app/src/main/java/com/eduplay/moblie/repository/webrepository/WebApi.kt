@@ -5,6 +5,7 @@ import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.EventComplaint
 import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
@@ -122,4 +123,8 @@ interface WebApi {
         @Path("taskId") taskId: String,
         @Body answer: TaskAnswer
     ): Response<AnswerResult>
+
+    @POST("/event/{eventId}/complaint")
+    @InjectAuth
+    suspend fun sendEventComplaint(@Path("eventId") eventId: String, @Body complaint: EventComplaint): Response<Unit>
 }

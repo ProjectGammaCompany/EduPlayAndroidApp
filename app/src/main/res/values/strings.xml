@@ -63,4 +63,6 @@
     <string name="exit">Exit</string>
     <string name="stay">Stay</string>
     <string name="show_result">Show results</string>
+    <string name="send">Send</string>
+    <string name="complaint">Complaint</string>
 </resources>

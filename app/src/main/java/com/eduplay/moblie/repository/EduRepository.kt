@@ -105,4 +105,8 @@ class EduRepository @Inject constructor(
     suspend fun addToFavourites(eventId: String, isFavorite: Boolean): Boolean {
         return webRepository.addToFavourite(eventId, isFavorite)
     }
+
+    suspend fun complain(eventId: String, reason: String) {
+        webRepository.complain(eventId, reason)
+    }
 }

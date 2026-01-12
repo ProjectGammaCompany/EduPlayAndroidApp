@@ -64,4 +64,6 @@
     <string name="exit">Уйти</string>
     <string name="stay">Остаться</string>
     <string name="show_result">Показать результаты</string>
+    <string name="send">Отправить</string>
+    <string name="complaint">Жалоба</string>
 </resources>

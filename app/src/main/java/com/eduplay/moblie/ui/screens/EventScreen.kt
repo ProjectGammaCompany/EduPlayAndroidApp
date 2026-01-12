@@ -20,6 +20,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -35,10 +38,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,6 +59,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -88,6 +94,16 @@ fun EventScreen(
     val onCloseEditEvent = {
         showEditDialog = false
     }
+    var showComplaintDialog by remember { mutableStateOf(false) }
+    val onShowComplaintDialog = {
+        showComplaintDialog = true
+    }
+    val onHideComplaint = {
+        showComplaintDialog = false
+    }
+    val onComplain = { reason: String ->
+        viewModel.complain(eventId, reason)
+    }
     val showResults = {
         navController.navigate("event_result/${eventId}")
     }
@@ -115,6 +131,7 @@ fun EventScreen(
             viewModel.isEventFavourite.value,
             onEditEvent,
             onAddToFavourite,
+            onShowComplaintDialog,
             navController
         )
 
@@ -149,6 +166,9 @@ fun EventScreen(
 
     if (showEditDialog) {
         EditDialog(onCloseEditEvent)
+    }
+    if (showComplaintDialog) {
+        ComplaintDialog(onHideComplaint, onComplain)
     }
 }
 
@@ -187,6 +207,50 @@ private fun EditDialog(onClose: () -> Unit) {
 
 }
 
+@Composable
+private fun ComplaintDialog(onClose: () -> Unit, onComplain: (String) -> Unit) {
+    val reasonSate = rememberTextFieldState()
+    AlertDialog(
+        title = {
+            Text(text = stringResource(R.string.report_event))
+        },
+        text = {
+            OutlinedTextField(
+                state = reasonSate,
+                label = { Text(stringResource(R.string.complaint)) },
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+            )
+        },
+        onDismissRequest = {
+            onClose()
+            reasonSate.clearText()
+
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onComplain(reasonSate.text.toString())
+                    reasonSate.clearText()
+                }
+            ) {
+                Text(stringResource(R.string.send))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onClose()
+                    reasonSate.clearText()
+                }
+            ) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    )
+
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopAppBarEventScreen(
@@ -194,6 +258,7 @@ private fun TopAppBarEventScreen(
     isFavourite: Boolean,
     onEditEvent: () -> Unit,
     onAddToFavourite: ()->Unit,
+    onComplain: ()-> Unit,
     navController: NavController
 ) {
     CenterAlignedTopAppBar(
@@ -211,7 +276,7 @@ private fun TopAppBarEventScreen(
         },
         actions = {
             if (!eventCreatorMode) {
-                IconButton(onClick = { TODO("реализовать кнопку пожаловаться") }) {
+                IconButton(onClick = { onComplain() }) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.hand),
                         contentDescription = stringResource(R.string.report_event)

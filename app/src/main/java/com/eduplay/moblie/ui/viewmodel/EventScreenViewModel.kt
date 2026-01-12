@@ -121,4 +121,10 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         }
         isEventFavourite.value = false
     }
+
+    fun complain(eventId: String, reason: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.complain(eventId, reason)
+        }
+    }
 }

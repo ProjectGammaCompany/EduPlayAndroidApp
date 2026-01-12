@@ -8,6 +8,7 @@ import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.EventComplaint
 import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
@@ -166,6 +167,14 @@ class WebRepository @Inject constructor(
         val response = api.addToFavourite(FavoriteEvent(eventId, isFavorite))
         if (response.isSuccessful) {
             return true
+        } // TODO(оделать проверку на причины отказа)
+        throw IllegalAccessException("cant add to favourites $eventId")
+    }
+
+    suspend fun complain(eventId: String, reason: String): Unit {
+        val response = api.sendEventComplaint(eventId, EventComplaint(reason))
+        if (response.isSuccessful) {
+            return
         } // TODO(оделать проверку на причины отказа)
         throw IllegalAccessException("cant add to favourites $eventId")
     }
