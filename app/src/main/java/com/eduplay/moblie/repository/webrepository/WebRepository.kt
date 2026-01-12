@@ -8,6 +8,7 @@ import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
@@ -153,6 +154,14 @@ class WebRepository @Inject constructor(
             return true
         } // TODO(оделать проверку на причины отказа)
         throw IllegalAccessException("cant enter next stage $eventId")
+    }
+
+    suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean {
+        val response = api.addToFavourite(FavoriteEvent(eventId, isFavorite))
+        if (response.isSuccessful) {
+            return true
+        } // TODO(оделать проверку на причины отказа)
+        throw IllegalAccessException("cant add to favourites $eventId")
     }
 
 }

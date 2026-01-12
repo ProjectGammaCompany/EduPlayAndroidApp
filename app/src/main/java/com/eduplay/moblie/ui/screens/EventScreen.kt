@@ -91,6 +91,13 @@ fun EventScreen(
     val showResults = {
         navController.navigate("event_result/${eventId}")
     }
+    val onAddToFavourite = {
+        if (!viewModel.isEventFavourite.value) {
+            viewModel.addToFavourite(eventId)
+        } else {
+            viewModel.removeFromFavourite(eventId)
+        }
+    }
 
 
     Column(
@@ -107,6 +114,7 @@ fun EventScreen(
             viewModel.eventCreatorMode.value,
             viewModel.isEventFavourite.value,
             onEditEvent,
+            onAddToFavourite,
             navController
         )
 
@@ -185,6 +193,7 @@ private fun TopAppBarEventScreen(
     eventCreatorMode: Boolean,
     isFavourite: Boolean,
     onEditEvent: () -> Unit,
+    onAddToFavourite: ()->Unit,
     navController: NavController
 ) {
     CenterAlignedTopAppBar(
@@ -214,7 +223,7 @@ private fun TopAppBarEventScreen(
                         contentDescription = stringResource(R.string.download_event)
                     )
                 }
-                IconButton(onClick = { TODO("реализовать кнопку добавить в избранное") }) {
+                IconButton(onClick = { onAddToFavourite() }) {
                     if (isFavourite) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.star_filled),

@@ -5,6 +5,7 @@ import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
@@ -57,6 +58,12 @@ interface WebApi {
         @Query("page") page: Int = 1,
         @Query("maxOnPage") maxOnPage: Int = 10,
     ): Response<EventListResponse>
+
+    @POST("/events/personal/addToFavourites")
+    @InjectAuth
+    suspend fun addToFavourite(
+        @Body event: FavoriteEvent
+    ): Response<Unit>
 
     @GET("/event/{eventId}/role")
     @InjectAuth

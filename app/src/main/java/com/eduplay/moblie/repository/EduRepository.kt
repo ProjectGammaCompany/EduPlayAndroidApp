@@ -101,4 +101,8 @@ class EduRepository @Inject constructor(
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
         return webRepository.postTaskChoice(eventId, blockId, taskId)
     }
+
+    suspend fun addToFavourites(eventId: String, isFavorite: Boolean): Boolean {
+        return webRepository.addToFavourite(eventId, isFavorite)
+    }
 }

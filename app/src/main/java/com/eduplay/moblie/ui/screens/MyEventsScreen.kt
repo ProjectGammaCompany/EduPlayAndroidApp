@@ -38,13 +38,15 @@ import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.MyEventsViewModel
 
 @Composable
 fun MyEventsScreen(
     innerPaddingValues: PaddingValues,
     navController: NavController,
-    viewModel: MyEventsViewModel = hiltViewModel()
+    viewModel: MyEventsViewModel = hiltViewModel(),
+    eventListViewModel: EventListViewModel = hiltViewModel()
 ) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
@@ -54,6 +56,9 @@ fun MyEventsScreen(
         )
     }
     var selectedTabIdx by remember { mutableIntStateOf(0) }
+    val onFavouriteToggle = { id: String, isFavourite: Boolean ->
+        eventListViewModel.changeFavourite(id, isFavourite)
+    }
 
     Column(
         modifier = Modifier
@@ -84,9 +89,30 @@ fun MyEventsScreen(
             }
         }
         when (selectedTabIdx) {
-            0 -> ListOfEvents(viewModel.favourite, navController, viewModel, MyEventsViewModel.ListType.FAVOURITE)
-            1 -> ListOfEvents(viewModel.completed, navController, viewModel, MyEventsViewModel.ListType.COMPLETED)
-            2 -> ListOfEvents(viewModel.created, navController, viewModel, MyEventsViewModel.ListType.CREATED)
+            0 -> ListOfEvents(
+                viewModel.favourite,
+                navController,
+                viewModel,
+                MyEventsViewModel.ListType.FAVOURITE,
+                onFavouriteToggle
+            )
+
+            1 -> ListOfEvents(
+                viewModel.completed,
+                navController,
+                viewModel,
+                MyEventsViewModel.ListType.COMPLETED,
+                onFavouriteToggle
+            )
+
+            2 -> ListOfEvents(
+                viewModel.created,
+                navController,
+                viewModel,
+                MyEventsViewModel.ListType.CREATED,
+                onFavouriteToggle
+            )
+
             else -> Box {}
         }
 
@@ -99,7 +125,8 @@ private fun ListOfEvents(
     events: List<QuestShortInfo>,
     navController: NavController,
     viewModel: MyEventsViewModel,
-    type: MyEventsViewModel.ListType
+    type: MyEventsViewModel.ListType,
+    onFavouriteToggle: (String, Boolean) -> Unit
 ) {
     Column {
         LazyColumn(
@@ -108,7 +135,11 @@ private fun ListOfEvents(
             items(events.size) { position ->
                 val itemValue = events[position]
                 val onEventClick = { navController.navigate("event_screen/" + itemValue.id) }
-                QuestListElement(itemValue, onEventClick, {}) //TODO("добавление в избранное")
+                QuestListElement(
+                    itemValue,
+                    onEventClick,
+                    { onFavouriteToggle(itemValue.id, itemValue.isFavourite) },
+                )
             }
         }
         Row(
