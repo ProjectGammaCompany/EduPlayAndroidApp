@@ -27,6 +27,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val hideBottomBarScreens = listOf("auth_screen", "play_event")
     @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,10 +39,10 @@ class MainActivity : ComponentActivity() {
                     ActivityInfo.SCREEN_ORIENTATION_LOCKED
                 val navController = rememberNavController()
                 Scaffold(
-                    bottomBar = { BottomNavBar(navController) }
+                    bottomBar = { /*BottomNavBar(navController, hideBottomBarScreens)*/ }
                 ) { innerPadding ->
 
-                    NavHost(navController = navController, startDestination = "task") {
+                    NavHost(navController = navController, startDestination = "main_screen") {
                         composable("auth_screen") {
                             AuthorizationScreen(
                                 navController = navController
@@ -96,16 +97,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-//@Preview
-//@Composable
-//fun funny() {
-//    val navController = rememberNavController()
-//    Scaffold(
-//        bottomBar = { BottomNavBar(navController) }
-//    ) { innerPadding ->
-//        Box(modifier = Modifier.padding(innerPadding)) {
-//            MainScreen()
-//        }
-//    }
-//}
