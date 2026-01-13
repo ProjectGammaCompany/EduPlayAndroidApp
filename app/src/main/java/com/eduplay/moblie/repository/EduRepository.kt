@@ -94,7 +94,12 @@ class EduRepository @Inject constructor(
         return webRepository.postTaskStartTime(eventId, blockId, taskId, taskStartTime)
     }
 
-    suspend fun postAnswer(eventId: String, blockId: String, taskId: String, answers: List<String>): AnswerResult {
+    suspend fun postAnswer(
+        eventId: String,
+        blockId: String,
+        taskId: String,
+        answers: List<String>
+    ): AnswerResult {
         return webRepository.postTaskAnswer(eventId, blockId, taskId, answers)
     }
 

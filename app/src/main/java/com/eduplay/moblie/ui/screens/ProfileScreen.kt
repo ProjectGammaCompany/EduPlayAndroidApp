@@ -36,7 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,11 +44,15 @@ import com.eduplay.moblie.R
 import com.eduplay.moblie.ui.viewmodel.ProfileViewModel
 
 @Composable
-fun ProfileScreen(innerPaddingValues: PaddingValues, navController: NavController, viewModel: ProfileViewModel = hiltViewModel()) {
+fun ProfileScreen(
+    innerPaddingValues: PaddingValues,
+    navController: NavController,
+    viewModel: ProfileViewModel = hiltViewModel()
+) {
 
     var gotProfile by remember { mutableStateOf(false) }
     if (!gotProfile) {
-        viewModel.fetchProfileInfo(){gotProfile = true}
+        viewModel.fetchProfileInfo { gotProfile = true }
 
     }
 
@@ -60,7 +63,7 @@ fun ProfileScreen(innerPaddingValues: PaddingValues, navController: NavControlle
     val updateEmail: (String) -> Unit = { newEmail: String ->
         viewModel.email.value = newEmail
     }
-    val loginEmailHasErrors: () -> Boolean = { false }
+    { false }
 
     Column(
         modifier = Modifier
@@ -169,8 +172,8 @@ fun ProfileScreen(innerPaddingValues: PaddingValues, navController: NavControlle
 private fun ProfileTopBar() {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
+            containerColor = colorScheme.primaryContainer,
+            titleContentColor = colorScheme.primary,
         ),
         title = {
             Text(stringResource(R.string.profile))

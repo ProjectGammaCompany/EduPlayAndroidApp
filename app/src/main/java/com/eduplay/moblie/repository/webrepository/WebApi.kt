@@ -126,5 +126,8 @@ interface WebApi {
 
     @POST("/event/{eventId}/complaint")
     @InjectAuth
-    suspend fun sendEventComplaint(@Path("eventId") eventId: String, @Body complaint: EventComplaint): Response<Unit>
+    suspend fun sendEventComplaint(
+        @Path("eventId") eventId: String,
+        @Body complaint: EventComplaint
+    ): Response<Unit>
 }

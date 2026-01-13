@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.responseTypes.Block
-import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +16,7 @@ import java.time.LocalDateTime
 
 @HiltViewModel
 class EventStageViewmodel @Inject constructor(private val repository: EduRepository) : ViewModel() {
-    val currentStageType = mutableStateOf( StageType.NONE)
+    val currentStageType = mutableStateOf(StageType.NONE)
 
     var currentTask = mutableStateOf<Task?>(null)
         private set
@@ -29,14 +28,14 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
     val disableTask = mutableStateOf(false)
     val showResults = mutableStateOf(false)
     val correctAnswer = mutableListOf<String>()
-    var points :Int? = null
+    var points: Int? = null
         private set
     var isAnswerCorrect: Boolean? = false
         private set
 
     fun getNextStage(eventId: String) {
         currentStageType.value = StageType.NONE
-        viewModelScope.launch() {
+        viewModelScope.launch {
             val result = repository.getNextStage(eventId)
             clear()
             currentStageType.value = result.type
@@ -49,6 +48,7 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
             }
         }
     }
+
     private fun clear() {
         answers.clear()
         disableTask.value = false
@@ -58,7 +58,7 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
         isAnswerCorrect = false
     }
 
-    fun sendAnswer(eventId:String) {
+    fun sendAnswer(eventId: String) {
         disableTask.value = true
         if (currentStageType.value == StageType.TASK) {
             viewModelScope.launch {
@@ -87,7 +87,7 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
     }
 
     private fun sendStartTime(eventId: String) {
-        viewModelScope.launch() {
+        viewModelScope.launch {
             repository.postTaskStartTime(
                 eventId,
                 currentTask.value?.blockId ?: "",
@@ -97,8 +97,8 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
         }
     }
 
-    fun chooseTask(eventId:String, taskId: String) {
-        viewModelScope.launch() {
+    fun chooseTask(eventId: String, taskId: String) {
+        viewModelScope.launch {
             try {
                 repository.postTaskChoice(eventId, currentBlock.value?.id ?: "", taskId)
             } catch (e: IllegalAccessException) {

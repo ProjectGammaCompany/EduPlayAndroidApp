@@ -8,7 +8,6 @@ import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
-import com.eduplay.moblie.repository.responseTypes.AuthResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import java.time.LocalDateTime
 
@@ -16,8 +15,8 @@ interface Repository {
     suspend fun login(auth: Auth): AuthResult
     suspend fun register(auth: Auth): AuthResult
     suspend fun logout(): Boolean
-    suspend fun getEvents(page:Int = 1): List<QuestShortInfo>
-    suspend fun getRole(eventId: String) : EventRole
+    suspend fun getEvents(page: Int = 1): List<QuestShortInfo>
+    suspend fun getRole(eventId: String): EventRole
     suspend fun getPlayerEventInfo(eventId: String): EventPlayerInfo
     suspend fun getOwnerEventInfo(eventId: String): EventOwnerInfo
     suspend fun getFavouriteEvents(page: Int, maxOnPage: Int): List<QuestShortInfo>

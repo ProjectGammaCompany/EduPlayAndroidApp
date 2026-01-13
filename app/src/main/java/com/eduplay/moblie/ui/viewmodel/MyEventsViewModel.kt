@@ -9,11 +9,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.collections.forEach
 import kotlin.math.max
 
 @HiltViewModel
-class MyEventsViewModel @Inject constructor(private val repository: EduRepository): ViewModel() {
+class MyEventsViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
     val favourite = mutableStateListOf<QuestShortInfo>()
     val completed = mutableStateListOf<QuestShortInfo>()
     val created = mutableStateListOf<QuestShortInfo>()
@@ -42,27 +41,27 @@ class MyEventsViewModel @Inject constructor(private val repository: EduRepositor
     }
 
     fun getNextPage(list: ListType) {
-        when(list) {
-            ListType.CREATED -> fillCreated(createdPage+1)
-            ListType.COMPLETED -> fillCompleted(completedPage+1)
-            ListType.FAVOURITE -> fillFavourite(favouritePage+1)
+        when (list) {
+            ListType.CREATED -> fillCreated(createdPage + 1)
+            ListType.COMPLETED -> fillCompleted(completedPage + 1)
+            ListType.FAVOURITE -> fillFavourite(favouritePage + 1)
         }
     }
 
     fun getPrevPage(list: ListType) {
-        when(list) {
-            ListType.CREATED -> fillCreated(max(createdPage-1, 0))
-            ListType.COMPLETED -> fillCompleted(max(completedPage-1, 0))
-            ListType.FAVOURITE -> fillFavourite(max(favouritePage-1, 0))
+        when (list) {
+            ListType.CREATED -> fillCreated(max(createdPage - 1, 0))
+            ListType.COMPLETED -> fillCompleted(max(completedPage - 1, 0))
+            ListType.FAVOURITE -> fillFavourite(max(favouritePage - 1, 0))
         }
     }
 
     private fun fillCreated(page: Int) {
-        if (totalCreated.size < pageSize*(page)) {
-            created.clear();
+        if (totalCreated.size < pageSize * (page)) {
+            created.clear()
             totalCreated
                 .forEachIndexed { idx, it ->
-                    if (idx <= pageSize*(page-1) && idx < pageSize*page ) {
+                    if (idx <= pageSize * (page - 1) && idx < pageSize * page) {
                         totalCreated.add(it)
                     }
                 }
@@ -81,11 +80,11 @@ class MyEventsViewModel @Inject constructor(private val repository: EduRepositor
     }
 
     private fun fillCompleted(page: Int) {
-        if (totalCompleted.size < pageSize*(page)) {
-            completed.clear();
+        if (totalCompleted.size < pageSize * (page)) {
+            completed.clear()
             totalCompleted
                 .forEachIndexed { idx, it ->
-                    if (idx <= pageSize*(page-1) && idx < pageSize*page ) {
+                    if (idx <= pageSize * (page - 1) && idx < pageSize * page) {
                         totalCompleted.add(it)
                     }
                 }
@@ -104,11 +103,11 @@ class MyEventsViewModel @Inject constructor(private val repository: EduRepositor
     }
 
     private fun fillFavourite(page: Int) {
-        if (totalFavourite.size < pageSize*(page)) {
-            favourite.clear();
+        if (totalFavourite.size < pageSize * (page)) {
+            favourite.clear()
             totalFavourite
                 .forEachIndexed { idx, it ->
-                    if (idx <= pageSize*(page-1) && idx < pageSize*page ) {
+                    if (idx <= pageSize * (page - 1) && idx < pageSize * page) {
                         totalFavourite.add(it)
                     }
                 }

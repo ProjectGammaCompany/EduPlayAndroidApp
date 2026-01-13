@@ -4,14 +4,14 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.webrepository.WebRepository
-import jakarta.inject.Inject
 
-class AllEventsPagingWebSource (private val webRepository: WebRepository) : PagingSource<Int,  QuestShortInfo>() {
+class AllEventsPagingWebSource(private val webRepository: WebRepository) :
+    PagingSource<Int, QuestShortInfo>() {
     private val numOfOffScreenPage: Int = 4
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, QuestShortInfo> {
         val pageIndex = params.key ?: 1
-        val pageSize = params.loadSize
+        params.loadSize
         return try {
             val responseData = webRepository.getEvents(pageIndex)
 
@@ -25,7 +25,7 @@ class AllEventsPagingWebSource (private val webRepository: WebRepository) : Pagi
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int,  QuestShortInfo>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, QuestShortInfo>): Int? {
         return state.anchorPosition?.let { anchor ->
             state.closestPageToPosition(anchor)?.prevKey?.plus(numOfOffScreenPage)
                 ?: state.closestPageToPosition(anchor)?.nextKey?.minus(numOfOffScreenPage)

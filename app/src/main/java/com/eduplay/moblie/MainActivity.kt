@@ -14,7 +14,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.screens.EventResultScreen
 import com.eduplay.moblie.ui.screens.EventScreen
@@ -28,6 +27,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val hideBottomBarScreens = listOf("auth_screen", "play_event")
+
     @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

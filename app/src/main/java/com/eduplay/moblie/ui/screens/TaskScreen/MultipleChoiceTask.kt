@@ -24,16 +24,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.eduplay.moblie.models.AnswerOption
 import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 
 @Composable
 fun MultipleChoiceTask(viewModel: EventStageViewmodel) {
     val checkedOptions: SnapshotStateMap<String, Boolean> = remember {
-        viewModel.currentTask.value!!.options!!.map { Pair<String, Boolean>(it.id, false) }.toMutableStateMap<String, Boolean>()
+        viewModel.currentTask.value!!.options!!.map { Pair<String, Boolean>(it.id, false) }
+            .toMutableStateMap<String, Boolean>()
     }
-    Box(modifier = Modifier
-        .fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
     ) {
         Column(
             modifier = Modifier
@@ -58,7 +59,11 @@ fun MultipleChoiceTask(viewModel: EventStageViewmodel) {
                         onCheckedChange = {
                             checkedOptions.set(option.id, !(checkedOptions.get(option.id)!!))
                             viewModel.answers.clear()
-                            checkedOptions.forEach { (key, value) -> if (value) viewModel.answers.add(key) }
+                            checkedOptions.forEach { (key, value) ->
+                                if (value) viewModel.answers.add(
+                                    key
+                                )
+                            }
                         },
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
@@ -70,7 +75,7 @@ fun MultipleChoiceTask(viewModel: EventStageViewmodel) {
                             .copy(color = colorScheme.onPrimaryContainer),
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(end=10.dp, top=5.dp, bottom=5.dp)
+                            .padding(end = 10.dp, top = 5.dp, bottom = 5.dp)
                     )
                 }
             }

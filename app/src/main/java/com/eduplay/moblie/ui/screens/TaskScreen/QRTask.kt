@@ -51,7 +51,7 @@ fun QRTask(
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
     var permissionRequestCompleted by rememberSaveable { mutableStateOf(false) }
-    val context = LocalContext.current
+    LocalContext.current
 
     var canScan by remember { mutableStateOf(true) }
     var answer by remember { mutableStateOf("") }
@@ -82,6 +82,7 @@ fun QRTask(
                             is PermissionStatus.Granted -> {
                                 onScanQr()
                             }
+
                             is PermissionStatus.Denied -> {
                                 if (permissionRequestCompleted) {
                                     // Show rationale only after the permission request is completed
@@ -158,7 +159,7 @@ fun QRTask(
                         answer = it
                         viewModel.answers.clear()
                         viewModel.answers.add(it)
-                                    },
+                    },
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(20.dp)

@@ -25,14 +25,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.eduplay.moblie.models.AnswerOption
 import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 
 @Composable
 fun SingleChoiceTask(viewModel: EventStageViewmodel) {
     var selectedBtn by remember { mutableStateOf("") }
-    Box(modifier = Modifier
-        .fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
         //.heightIn(50.dp, max(50, maxHeight.value.toInt()/3).dp)
     ) {
         Column(
@@ -70,7 +70,7 @@ fun SingleChoiceTask(viewModel: EventStageViewmodel) {
                             .copy(color = colorScheme.onPrimaryContainer),
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(end=10.dp, top=5.dp, bottom=5.dp)
+                            .padding(end = 10.dp, top = 5.dp, bottom = 5.dp)
                     )
                 }
             }

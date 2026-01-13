@@ -1,9 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -31,7 +28,7 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
         }
     }
 
-    fun fetchProfileInfo(onCompletion: ()->Unit) {
+    fun fetchProfileInfo(onCompletion: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             val result = repository.getProfile()
             email.value = result.email

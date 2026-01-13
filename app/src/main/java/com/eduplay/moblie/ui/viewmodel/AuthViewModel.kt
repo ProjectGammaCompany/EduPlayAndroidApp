@@ -66,17 +66,20 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
     fun updateLoginEmail(input: String) {
         loginEmail = input
     }
+
     fun updateRegisterEmail(input: String) {
         registerEmail = input
     }
+
     fun updateLoginPassword(input: String) {
         loginPassword = input
     }
+
     fun updateRegisterPassword(input: String) {
         registerPassword = input
     }
 
-    fun submitLoginForm(callBack: ()->Unit) {
+    fun submitLoginForm(callBack: () -> Unit) {
         if (!loginEmailHasErrors && !loginPasswordHasErrors) {
             viewModelScope.launch(Dispatchers.IO) {
                 repository.login(Auth(loginEmail, loginPassword))
@@ -86,7 +89,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
         }
     }
 
-    fun submitRegisterForm(callBack: ()->Unit) {
+    fun submitRegisterForm(callBack: () -> Unit) {
         if (!registerEmailHasErrors && !registerPasswordHasErrors) {
             viewModelScope.launch(Dispatchers.IO) {
                 repository.register(Auth(registerEmail, registerPassword))

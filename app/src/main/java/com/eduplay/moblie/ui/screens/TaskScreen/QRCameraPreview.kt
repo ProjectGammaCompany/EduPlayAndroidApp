@@ -2,7 +2,6 @@ package com.eduplay.moblie.ui.screens.TaskScreen
 
 import android.util.Log
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
@@ -22,7 +21,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -38,15 +36,20 @@ import java.util.concurrent.Executors
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun QRCameraPreview(innerPaddingValues: PaddingValues, onAnswerFound:(String)->Unit, onCloseScanner:()->Unit) {
+fun QRCameraPreview(
+    innerPaddingValues: PaddingValues,
+    onAnswerFound: (String) -> Unit,
+    onCloseScanner: () -> Unit
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var preview by remember { mutableStateOf<Preview?>(null) }
     val barCodeVal = remember { mutableStateOf("") }
 
-    Box(Modifier
-        .padding(innerPaddingValues)
-        .fillMaxSize()
+    Box(
+        Modifier
+            .padding(innerPaddingValues)
+            .fillMaxSize()
     ) {
         AndroidView(
             factory = { AndroidViewContext ->
@@ -103,9 +106,14 @@ fun QRCameraPreview(innerPaddingValues: PaddingValues, onAnswerFound:(String)->U
                 }, ContextCompat.getMainExecutor(context))
             }
         )
-        IconButton(onClick = onCloseScanner,
-            modifier = Modifier.padding(top=20.dp)) {
-            Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = stringResource(R.string.close_cam))
+        IconButton(
+            onClick = onCloseScanner,
+            modifier = Modifier.padding(top = 20.dp)
+        ) {
+            Icon(
+                Icons.AutoMirrored.Default.ArrowBack,
+                contentDescription = stringResource(R.string.close_cam)
+            )
         }
     }
 }

@@ -15,7 +15,7 @@ class AuthInterceptor @Inject constructor(private val tokenManager: TokenManager
         val request = chain.request()
 
         if (request.markedForInjection()) {
-            val token =  runBlocking {
+            val token = runBlocking {
                 tokenManager.getAccessToken().firstOrNull()
             }
             if (!token.isNullOrEmpty()) {

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -65,7 +64,7 @@ fun MainScreen(
                 titleContentColor = MaterialTheme.colorScheme.primary,
             ),
             navigationIcon = {
-                IconButton(onClick = {  }) { //TODO("меню на главном экане")
+                IconButton(onClick = { }) { //TODO("меню на главном экане")
                     Icon(
                         imageVector = Icons.Filled.Menu,
                         contentDescription = stringResource(R.string.app_menu)
@@ -93,11 +92,11 @@ fun MainScreen(
             items(events.itemCount) { position ->
                 val itemValue = events[position]
                 if (itemValue != null) {
-                    val onEventClick = {navController.navigate("event_screen/"+itemValue.id)}
+                    val onEventClick = { navController.navigate("event_screen/" + itemValue.id) }
                     QuestListElement(
                         itemValue,
                         onEventClick,
-                        {eventListViewModel.changeFavourite(itemValue.id, itemValue.isFavourite)}
+                        { eventListViewModel.changeFavourite(itemValue.id, itemValue.isFavourite) }
                     )
                 }
             }

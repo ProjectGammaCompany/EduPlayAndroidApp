@@ -1,6 +1,6 @@
 package com.eduplay.moblie.models
 
-data class EventPlayerInfo (
+data class EventPlayerInfo(
     val title: String,
     val description: String,
     val rate: Float,

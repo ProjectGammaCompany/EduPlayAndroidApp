@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 class QRAnalyser(
     private val onBarcodeDetected: (barcodes: List<Barcode>) -> Unit,
-) :  ImageAnalysis.Analyzer {
+) : ImageAnalysis.Analyzer {
     private var lastAnalyzedTimeStamp = 0L
 
     @OptIn(ExperimentalGetImage::class)
@@ -25,7 +25,8 @@ class QRAnalyser(
                     .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
                     .build()
                 val barcodeScanner = BarcodeScanning.getClient(options)
-                val imageToProcess = InputImage.fromMediaImage(imageToAnalyze, image.imageInfo.rotationDegrees)
+                val imageToProcess =
+                    InputImage.fromMediaImage(imageToAnalyze, image.imageInfo.rotationDegrees)
 
                 barcodeScanner.process(imageToProcess)
                     .addOnSuccessListener { barcodes ->

@@ -136,7 +136,7 @@ fun TaskScreen(
 
                 //next btn
                 if (isSubmitBtnShown) {
-                    SubmitBtn(taskType, {viewModel.sendAnswer(eventId)})
+                    SubmitBtn(taskType, { viewModel.sendAnswer(eventId) })
                 }
             }
         }
@@ -284,7 +284,7 @@ private fun TaskHeader(
 }
 
 @Composable
-private fun SubmitBtn(taskType: TaskType, onSubmit: ()->Unit) {
+private fun SubmitBtn(taskType: TaskType, onSubmit: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -310,7 +310,7 @@ private fun SubmitBtn(taskType: TaskType, onSubmit: ()->Unit) {
 @Composable
 fun FileView(files: List<String>) {
     val uriHandler = LocalUriHandler.current
-    Column() {
+    Column {
         files.forEach {
             TextButton(
                 onClick = {

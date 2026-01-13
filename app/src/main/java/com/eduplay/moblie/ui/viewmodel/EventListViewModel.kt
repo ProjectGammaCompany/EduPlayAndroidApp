@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class EventListViewModel @Inject constructor(private val repository: EduRepository): ViewModel() {
+class EventListViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
     fun changeFavourite(eventId: String, isFavorite: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.addToFavourites(eventId, isFavorite)

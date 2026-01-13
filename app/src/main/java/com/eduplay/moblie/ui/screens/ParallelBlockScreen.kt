@@ -102,7 +102,7 @@ private fun TaskItem(name: String, time: Int, isEnabled: Boolean, onChooseTask: 
             modifier = Modifier.fillMaxWidth()
         )
         Text(
-            text = ( time / 60 ).toString() + ":" + ( time % 60 ).toString(),
+            text = (time / 60).toString() + ":" + (time % 60).toString(),
             style = typography.bodySmall,
             textAlign = TextAlign.End,
             maxLines = 3,
@@ -116,7 +116,7 @@ private fun TaskItem(name: String, time: Int, isEnabled: Boolean, onChooseTask: 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BlockTopBar(onGoBack: ()->Unit) {
+private fun BlockTopBar(onGoBack: () -> Unit) {
     TopAppBar(
         title = {},
         navigationIcon = {

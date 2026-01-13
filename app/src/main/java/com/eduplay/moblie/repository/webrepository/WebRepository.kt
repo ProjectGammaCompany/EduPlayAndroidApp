@@ -57,7 +57,7 @@ class WebRepository @Inject constructor(
         return AuthResult.INVALID_USER
     }
 
-    override suspend fun getEvents(page:Int): List<QuestShortInfo> {
+    override suspend fun getEvents(page: Int): List<QuestShortInfo> {
         val response = api.allEvents(page = page)
         val body = response.body()
         if (response.isSuccessful && body != null) {
@@ -66,7 +66,7 @@ class WebRepository @Inject constructor(
         return listOf()
     }
 
-    override suspend fun getRole(eventId: String) : EventRole {
+    override suspend fun getRole(eventId: String): EventRole {
         val response = api.getUserEventRole(eventId)
         val body = response.body()
         if (response.isSuccessful && body != null) {
@@ -75,7 +75,7 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("No role for this event")
     }
 
-    override suspend fun getPlayerEventInfo(eventId: String) : EventPlayerInfo {
+    override suspend fun getPlayerEventInfo(eventId: String): EventPlayerInfo {
         val response = api.getEventInfoPlayer(eventId)
         val body = response.body()
         if (response.isSuccessful && body != null) {
@@ -84,7 +84,7 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("No info for this event")
     }
 
-    override suspend fun getOwnerEventInfo(eventId: String) : EventOwnerInfo {
+    override suspend fun getOwnerEventInfo(eventId: String): EventOwnerInfo {
         val response = api.getEventInfoCreator(eventId)
         val body = response.body()
         if (response.isSuccessful && body != null) {
@@ -93,7 +93,7 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("No info for this event")
     }
 
-    override suspend fun getFavouriteEvents(page:Int, maxOnPage: Int): List<QuestShortInfo> {
+    override suspend fun getFavouriteEvents(page: Int, maxOnPage: Int): List<QuestShortInfo> {
         val response = api.favouriteEvents(page, maxOnPage)
         val body = response.body()
         if (response.isSuccessful && body != null) {
@@ -102,7 +102,7 @@ class WebRepository @Inject constructor(
         return listOf()
     }
 
-    override suspend fun getCreatedEvents(page:Int, maxOnPage: Int): List<QuestShortInfo> {
+    override suspend fun getCreatedEvents(page: Int, maxOnPage: Int): List<QuestShortInfo> {
         val response = api.createdEvents(page, maxOnPage)
         val body = response.body()
         if (response.isSuccessful && body != null) {
@@ -111,7 +111,7 @@ class WebRepository @Inject constructor(
         return listOf()
     }
 
-    override suspend fun getCompletedEvents(page:Int, maxOnPage: Int): List<QuestShortInfo> {
+    override suspend fun getCompletedEvents(page: Int, maxOnPage: Int): List<QuestShortInfo> {
         val response = api.completedEvents(page, maxOnPage)
         val body = response.body()
         if (response.isSuccessful && body != null) {
@@ -128,6 +128,7 @@ class WebRepository @Inject constructor(
         } // TODO(оделать проверку на причины отказа)
         return ProfileInfo("", "", "")
     }
+
     override suspend fun getNextStage(eventId: String): EventStage {
         val response = api.getNextStage(eventId)
         val body = response.body()
@@ -137,8 +138,14 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("cant enter next stage $eventId")
     }
 
-    override suspend fun postTaskStartTime(eventId: String, blockId: String, taskId: String, startTime: LocalDateTime): Boolean {
-        val response = api.postTaskStartTime(eventId, blockId, taskId, TaskStartTime(startTime.toString()))
+    override suspend fun postTaskStartTime(
+        eventId: String,
+        blockId: String,
+        taskId: String,
+        startTime: LocalDateTime
+    ): Boolean {
+        val response =
+            api.postTaskStartTime(eventId, blockId, taskId, TaskStartTime(startTime.toString()))
         if (response.isSuccessful) {
             return true
         } // TODO(оделать проверку на причины отказа)
@@ -146,7 +153,12 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("cant enter next stage $eventId")
     }
 
-    override suspend fun postTaskAnswer(eventId: String, blockId: String, taskId: String, answers: List<String>): AnswerResult {
+    override suspend fun postTaskAnswer(
+        eventId: String,
+        blockId: String,
+        taskId: String,
+        answers: List<String>
+    ): AnswerResult {
         val response = api.postTaskAnswer(eventId, blockId, taskId, TaskAnswer(answers))
         val body = response.body()
         if (response.isSuccessful && body != null) {
@@ -157,7 +169,7 @@ class WebRepository @Inject constructor(
 
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
         val response = api.postTaskChoice(eventId, TaskFromBlock(blockId, taskId))
-        if (response.isSuccessful ) {
+        if (response.isSuccessful) {
             return true
         } // TODO(оделать проверку на причины отказа)
         throw IllegalAccessException("cant enter next stage $eventId")
@@ -171,7 +183,7 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("cant add to favourites $eventId")
     }
 
-    suspend fun complain(eventId: String, reason: String): Unit {
+    suspend fun complain(eventId: String, reason: String) {
         val response = api.sendEventComplaint(eventId, EventComplaint(reason))
         if (response.isSuccessful) {
             return

@@ -10,6 +10,7 @@ object ResponseConverter {
     fun convertListEventResponseToListQuestShortInfo(listResponse: EventListResponse): List<QuestShortInfo> {
         return listResponse.events.map { event -> convertEventResponseToQuestShortInfo(event) }
     }
+
     fun convertEventResponseToQuestShortInfo(eventResponse: EventResponse): QuestShortInfo {
         return QuestShortInfo(
             id = eventResponse.id,

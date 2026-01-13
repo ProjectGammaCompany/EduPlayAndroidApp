@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
@@ -43,7 +42,6 @@ import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,7 +57,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -257,8 +254,8 @@ private fun TopAppBarEventScreen(
     eventCreatorMode: Boolean,
     isFavourite: Boolean,
     onEditEvent: () -> Unit,
-    onAddToFavourite: ()->Unit,
-    onComplain: ()-> Unit,
+    onAddToFavourite: () -> Unit,
+    onComplain: () -> Unit,
     navController: NavController
 ) {
     CenterAlignedTopAppBar(
@@ -488,7 +485,7 @@ private fun GeneralUserBody(
 
         if (isCompleted) {
             Button(
-                onClick = {showResults()},
+                onClick = { showResults() },
                 modifier = Modifier
                     .padding(vertical = 3.dp)
                     .fillMaxWidth(0.8f)
@@ -550,8 +547,8 @@ private fun EventCreatorBody(
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-                    selectedContentColor = MaterialTheme.colorScheme.primary,
-                    unselectedContentColor = MaterialTheme.colorScheme.onSurface,
+                    selectedContentColor = colorScheme.primary,
+                    unselectedContentColor = colorScheme.onSurface,
                 )
             }
         }

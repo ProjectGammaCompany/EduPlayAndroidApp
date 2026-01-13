@@ -52,7 +52,7 @@ fun EventStageScreen(
     val goBack = {
         navController.popBackStack()
     }
-    BackHandler() {
+    BackHandler {
         onGoBack()
     }
     when (viewModel.currentStageType.value) {
@@ -117,7 +117,7 @@ private fun ExitEventDialog(hideDialog: () -> Unit, goBack: () -> Boolean) {
         onDismissRequest = hideDialog,
         confirmButton = {
             TextButton(
-                onClick = {goBack()}
+                onClick = { goBack() }
             ) {
                 Text(stringResource(R.string.exit))
             }
