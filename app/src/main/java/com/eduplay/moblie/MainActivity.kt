@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     bottomBar = { /*BottomNavBar(navController, hideBottomBarScreens)*/ }
                 ) { innerPadding ->
 
-                    NavHost(navController = navController, startDestination = "main_screen") {
+                    NavHost(navController = navController, startDestination = "auth_screen") {
                         composable("auth_screen") {
                             AuthorizationScreen(
                                 navController = navController

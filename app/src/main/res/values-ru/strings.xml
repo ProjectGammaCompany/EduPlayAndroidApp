@@ -66,4 +66,6 @@
     <string name="show_result">Показать результаты</string>
     <string name="send">Отправить</string>
     <string name="complaint">Жалоба</string>
+    <string name="no_internet">Нет подключения к интернету</string>
+    <string name="no_registration">Такого аккаунта не существует</string>
 </resources>

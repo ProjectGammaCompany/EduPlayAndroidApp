@@ -24,14 +24,14 @@ import retrofit2.http.Query
 
 interface WebApi {
     @POST("/login")
-    suspend fun login(auth: Auth): Response<AuthResponse>
+    suspend fun login(@Body auth: Auth): Response<AuthResponse>
 
     @PUT("/logout")
     @InjectAuth
     suspend fun logout(): Response<Unit>
 
     @POST("/register")
-    suspend fun register(auth: Auth): Response<AuthResponse>
+    suspend fun register(@Body auth: Auth): Response<AuthResponse>
 
     @GET("/events")
     @InjectAuth

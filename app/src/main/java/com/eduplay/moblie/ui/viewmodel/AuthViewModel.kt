@@ -1,47 +1,20 @@
 package com.eduplay.moblie.ui.viewmodel
 
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.requestTypes.Auth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.net.ConnectException
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
-    var loginEmail by mutableStateOf("")
-        private set
-
-    val loginEmailHasErrors by derivedStateOf {
-        emailHasErrors(loginEmail)
-    }
-
-    var registerEmail by mutableStateOf("")
-        private set
-
-    val registerEmailHasErrors by derivedStateOf {
-        emailHasErrors(registerEmail)
-    }
-
-    var loginPassword by mutableStateOf("")
-        private set
-
-    val loginPasswordHasErrors by derivedStateOf {
-        passwordHasErrors(loginPassword)
-    }
-
-    var registerPassword by mutableStateOf("")
-        private set
-
-    val registerPasswordHasErrors by derivedStateOf {
-        passwordHasErrors(registerPassword)
-    }
 
     fun emailHasErrors(email: String): Boolean {
         if (email.isNotEmpty()) {
@@ -50,6 +23,10 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
             return false
         }
     }
+
+    val authResult = mutableStateOf<AuthResult?>(null)
+    val noInternetConnection = mutableStateOf(false)
+
 
     fun passwordHasErrors(password: String): Boolean {
         if (password.isNotEmpty()) {
@@ -63,37 +40,38 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
         }
     }
 
-    fun updateLoginEmail(input: String) {
-        loginEmail = input
-    }
-
-    fun updateRegisterEmail(input: String) {
-        registerEmail = input
-    }
-
-    fun updateLoginPassword(input: String) {
-        loginPassword = input
-    }
-
-    fun updateRegisterPassword(input: String) {
-        registerPassword = input
-    }
-
-    fun submitLoginForm(callBack: () -> Unit) {
-        if (!loginEmailHasErrors && !loginPasswordHasErrors) {
+    fun submitLoginForm(
+        email: String,
+        password: String,
+        callBack: () -> Unit
+    ) {
+        if (!emailHasErrors(email) && !passwordHasErrors(password)) {
             viewModelScope.launch(Dispatchers.IO) {
-                repository.login(Auth(loginEmail, loginPassword))
+                try {
+                    authResult.value = repository.login(Auth(email, password))
+                } catch (e: ConnectException) {
+                    noInternetConnection.value = true
+                }
             }
         } else {
             callBack()
         }
     }
 
-    fun submitRegisterForm(callBack: () -> Unit) {
-        if (!registerEmailHasErrors && !registerPasswordHasErrors) {
+    fun submitRegisterForm(
+        email: String,
+        password: String,
+        callBack: () -> Unit
+    ) {
+        if (!emailHasErrors(email) && !passwordHasErrors(password)) {
             viewModelScope.launch(Dispatchers.IO) {
-                repository.register(Auth(registerEmail, registerPassword))
-            }.invokeOnCompletion { }
+                try {
+                    authResult.value = repository.register(Auth(email, password))
+                } catch (e: ConnectException) {
+                    noInternetConnection.value = true
+                }
+
+            }
         } else {
             callBack()
         }

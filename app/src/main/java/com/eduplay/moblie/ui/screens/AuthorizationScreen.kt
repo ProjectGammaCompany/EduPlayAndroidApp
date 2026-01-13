@@ -15,20 +15,20 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,32 +43,75 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.ui.viewmodel.AuthViewModel
 
 @Composable
 fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel = hiltViewModel()) {
-    val minViewWidth = 0.5f
-    val maxViewWidth = 0.8f
-    val logoImage = painterResource(R.drawable.eduplaylogo)
-    val colorScheme = MaterialTheme.colorScheme
-    val typography = MaterialTheme.typography
-
-    var isLoginForm by remember { mutableStateOf(true) }
-    val formScrollState = rememberScrollState()
 
     val context = LocalContext.current
+
+    val emailPasswordText = stringResource(R.string.badEmailOrPassword)
+    val noAccText = stringResource(R.string.no_registration)
+    val noInternetText = stringResource(R.string.no_internet)
+    val wrongEmailOrPassword = {
+        Toast.makeText(context, emailPasswordText, Toast.LENGTH_LONG).show()
+    }
+    val noAccount = {
+        Toast.makeText(context, noAccText, Toast.LENGTH_LONG).show()
+    }
+    val noInternet = {
+        Toast.makeText(context, noInternetText, Toast.LENGTH_LONG).show()
+    }
+    if (viewModel.noInternetConnection.value == true) {
+        noInternet()
+    }
+    when (viewModel.authResult.value) {
+        null -> {}
+        AuthResult.SUCCESSES -> navController.navigate("main_screen")
+        AuthResult.INVALID_USER -> noAccount()
+        AuthResult.INVALID_PASSWORD -> wrongEmailOrPassword()
+    }
+    AuthorizationScreen(
+        { it:String -> viewModel.emailHasErrors(it) },
+        { it:String -> viewModel.passwordHasErrors(it) },
+        { email: String, password: String ->
+            viewModel.submitLoginForm(
+                email,
+                password,
+                wrongEmailOrPassword
+            )
+        },
+        { email: String, password: String ->
+            viewModel.submitRegisterForm(
+                email,
+                password,
+                wrongEmailOrPassword
+            )
+        },
+    )
+
+}
+
+@Composable
+private fun AuthorizationScreen(
+    emailHasErrors: (String) -> Boolean,
+    passwordHasErrors: (String) -> Boolean,
+    onLogin: (String, String) -> Unit,
+    onRegister: (String, String) -> Unit
+) {
+    var isLoginForm by remember { mutableStateOf(true) }
     val switchForms = {
         isLoginForm = !isLoginForm
     }
-    val toastText = stringResource(R.string.badEmailOrPassword)
-    val displayToast = {
-        Toast.makeText(context, toastText, Toast.LENGTH_LONG).show()
-    }
-
+    val minViewWidth = 0.5f
+    val maxViewWidth = 0.8f
+    val formScrollState = rememberScrollState()
     Scaffold { innerPadding ->
         BoxWithConstraints(
             modifier = Modifier
@@ -84,7 +127,7 @@ fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel =
                     .fillMaxHeight(0.8f)
             ) {
                 Image(
-                    painter = logoImage,
+                    painter = painterResource(R.drawable.eduplaylogo),
                     contentDescription = stringResource(R.string.app_name),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -105,14 +148,22 @@ fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel =
                         .verticalScroll(formScrollState)
                 ) {
                     if (isLoginForm) {
-                        LoginForm(colorScheme, typography, switchForms, viewModel, displayToast)
-                    } else {
-                        RegistrationForm(
-                            colorScheme,
-                            typography,
+                        EmailPasswordForm(
                             switchForms,
-                            viewModel,
-                            displayToast
+                            isEmailError = emailHasErrors,
+                            isPasswordError = passwordHasErrors,
+                            onSubmitForm = onLogin,
+                            R.string.login,
+                            R.string.register
+                        )
+                    } else {
+                        EmailPasswordForm(
+                            switchForms,
+                            isEmailError = emailHasErrors,
+                            isPasswordError = passwordHasErrors,
+                            onSubmitForm = onRegister,
+                            R.string.register,
+                            R.string.login
                         )
                     }
                 }
@@ -123,16 +174,20 @@ fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel =
 }
 
 @Composable
-private fun LoginForm(
-    colorScheme: ColorScheme,
-    typography: Typography,
+private fun EmailPasswordForm(
     switchForms: () -> Unit,
-    viewModel: AuthViewModel,
-    displayToast: () -> Unit
-) {
+    isEmailError: (String) -> Boolean,
+    isPasswordError: (String) -> Boolean,
+    onSubmitForm: (String, String) -> Unit,
+    mainButtonLabel: Int,
+    switchButtonLabel: Int,
+
+    ) {
     var passwordVisible by remember { mutableStateOf(false) }
+    val email = rememberTextFieldState()
+    var password by remember { mutableStateOf("") }
     Text(
-        text = stringResource(R.string.login),
+        text = stringResource(mainButtonLabel),
         style = typography.headlineLarge,
         modifier = Modifier
             .padding(vertical = 30.dp)
@@ -140,10 +195,8 @@ private fun LoginForm(
 
     // email field
     OutlinedTextField(
-        value = viewModel.loginEmail,
-        onValueChange = viewModel::updateLoginEmail,
-        maxLines = 1,
-        isError = viewModel.loginEmailHasErrors,
+        state = email,
+        isError = isEmailError(email.text.toString()),
         label = { Text(stringResource(R.string.email)) },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Email
@@ -155,10 +208,9 @@ private fun LoginForm(
 
     // password field
     OutlinedTextField(
-        value = viewModel.loginPassword,
-        onValueChange = viewModel::updateLoginPassword,
-        maxLines = 1,
-        isError = viewModel.loginPasswordHasErrors,
+        value = password,
+        onValueChange = { it -> password = it },
+        isError = isPasswordError(password),
         label = { Text(text = stringResource(R.string.password)) },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password
@@ -183,11 +235,11 @@ private fun LoginForm(
 
     //submit btn
     Button(
-        onClick = { viewModel.submitLoginForm(displayToast) },
+        onClick = { onSubmitForm(email.text.toString(), password) },
         modifier = Modifier.fillMaxWidth(0.9f)
     ) {
         Text(
-            text = stringResource(R.string.login),
+            text = stringResource(mainButtonLabel),
             style = TextStyle(color = colorScheme.onPrimary)
 
         )
@@ -208,7 +260,7 @@ private fun LoginForm(
             .padding(bottom = 20.dp)
     ) {
         Text(
-            text = stringResource(R.string.register),
+            text = stringResource(switchButtonLabel),
             style = TextStyle(color = colorScheme.onBackground)
 
         )
@@ -216,96 +268,13 @@ private fun LoginForm(
 
 }
 
+@Preview
 @Composable
-private fun RegistrationForm(
-    colorScheme: ColorScheme,
-    typography: Typography,
-    switchForms: () -> Unit,
-    viewModel: AuthViewModel,
-    displayToast: () -> Unit
-) {
-    var passwordVisible by remember { mutableStateOf(false) }
-
-    Text(
-        text = stringResource(R.string.register),
-        style = typography.headlineLarge,
-        modifier = Modifier
-            .padding(vertical = 30.dp)
+private fun auth() {
+    AuthorizationScreen(
+        {false},
+        {false},
+        {a, b->},
+        {a, b->}
     )
-
-    // email field
-    OutlinedTextField(
-        value = viewModel.registerEmail,
-        onValueChange = viewModel::updateRegisterEmail,
-        maxLines = 1,
-        isError = viewModel.registerEmailHasErrors,
-        label = { Text(stringResource(R.string.email)) },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Email
-        ),
-        modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .padding(bottom = 15.dp)
-    )
-
-    // password field
-    OutlinedTextField(
-        value = viewModel.registerPassword,
-        onValueChange = viewModel::updateRegisterPassword,
-        maxLines = 1,
-        isError = viewModel.registerPasswordHasErrors,
-        label = { Text(text = stringResource(R.string.password)) },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Password
-        ),
-        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        trailingIcon = {
-            val image = if (passwordVisible)
-                Icons.Filled.Visibility
-            else Icons.Filled.VisibilityOff
-
-            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                Icon(
-                    imageVector = image, if (passwordVisible)
-                        stringResource(R.string.hide_password)
-                    else stringResource(R.string.show_password)
-                )
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .padding(bottom = 30.dp)
-    )
-
-    //submit btn
-    Button(
-        onClick = { viewModel.submitRegisterForm(displayToast) },
-        modifier = Modifier.fillMaxWidth(0.9f)
-    ) {
-        Text(
-            text = stringResource(R.string.register),
-            style = TextStyle(color = colorScheme.onPrimary)
-
-        )
-    }
-
-    //switch screens btn
-    Button(
-        onClick = switchForms,
-        colors = ButtonColors(
-            containerColor = colorScheme.background,
-            contentColor = colorScheme.background,
-            disabledContainerColor = colorScheme.background,
-            disabledContentColor = colorScheme.background
-        ),
-        modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .background(colorScheme.background)
-            .padding(bottom = 20.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.login),
-            style = TextStyle(color = colorScheme.onBackground)
-        )
-    }
 }
