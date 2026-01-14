@@ -23,10 +23,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
-import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
+import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 
 @Composable
-fun TextTask(viewModel: EventStageViewmodel) {
+fun TextTask(viewModel: EventStageViewModelInterface) {
     var answer by remember { mutableStateOf("") }
     Box(
         modifier = Modifier

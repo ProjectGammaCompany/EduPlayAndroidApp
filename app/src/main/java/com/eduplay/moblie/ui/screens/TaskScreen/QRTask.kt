@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
-import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
+import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -46,7 +46,7 @@ fun QRTask(
     hideSubmitBtn: () -> Unit,
     showSubmitBtn: () -> Unit,
     onScanQr: () -> Unit,
-    viewModel: EventStageViewmodel
+    viewModel: EventStageViewModelInterface
 ) {
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }

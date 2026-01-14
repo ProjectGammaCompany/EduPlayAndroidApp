@@ -15,25 +15,25 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 @HiltViewModel
-class EventStageViewmodel @Inject constructor(private val repository: EduRepository) : ViewModel() {
-    val currentStageType = mutableStateOf(StageType.NONE)
+class EventStageViewmodel @Inject constructor(private val repository: EduRepository) : ViewModel(), EventStageViewModelInterface {
+    override val currentStageType = mutableStateOf(StageType.NONE)
 
-    var currentTask = mutableStateOf<Task?>(null)
-        private set
-    var currentBlock = mutableStateOf<Block?>(null)
-        private set
-    var taskStartTime: LocalDateTime = LocalDateTime.MIN
-        private set
-    val answers = mutableStateListOf<String>()
-    val disableTask = mutableStateOf(false)
-    val showResults = mutableStateOf(false)
-    val correctAnswer = mutableListOf<String>()
-    var points: Int? = null
-        private set
-    var isAnswerCorrect: Boolean? = false
-        private set
+    override var currentTask = mutableStateOf<Task?>(null)
 
-    fun getNextStage(eventId: String) {
+    override var currentBlock = mutableStateOf<Block?>(null)
+
+    override var taskStartTime: LocalDateTime = LocalDateTime.MIN
+
+    override val answers = mutableStateListOf<String>()
+    override val disableTask = mutableStateOf(false)
+    override val showResults = mutableStateOf(false)
+    override val correctAnswer = mutableListOf<String>()
+    override var points: Int? = null
+
+    override var isAnswerCorrect: Boolean? = false
+
+
+    override fun getNextStage(eventId: String) {
         currentStageType.value = StageType.NONE
         viewModelScope.launch {
             val result = repository.getNextStage(eventId)
@@ -58,7 +58,7 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
         isAnswerCorrect = false
     }
 
-    fun sendAnswer(eventId: String) {
+    override fun sendAnswer(eventId: String) {
         disableTask.value = true
         if (currentStageType.value == StageType.TASK) {
             viewModelScope.launch {
@@ -97,7 +97,7 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
         }
     }
 
-    fun chooseTask(eventId: String, taskId: String) {
+    override fun chooseTask(eventId: String, taskId: String) {
         viewModelScope.launch {
             try {
                 repository.postTaskChoice(eventId, currentBlock.value?.id ?: "", taskId)

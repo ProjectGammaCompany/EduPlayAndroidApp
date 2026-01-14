@@ -25,10 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
+import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 
 @Composable
-fun SingleChoiceTask(viewModel: EventStageViewmodel) {
+fun SingleChoiceTask(viewModel: EventStageViewModelInterface) {
     var selectedBtn by remember { mutableStateOf("") }
     Box(
         modifier = Modifier

@@ -24,10 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
+import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 
 @Composable
-fun MultipleChoiceTask(viewModel: EventStageViewmodel) {
+fun MultipleChoiceTask(viewModel: EventStageViewModelInterface) {
     val checkedOptions: SnapshotStateMap<String, Boolean> = remember {
         viewModel.currentTask.value!!.options!!.map { Pair<String, Boolean>(it.id, false) }
             .toMutableStateMap<String, Boolean>()
