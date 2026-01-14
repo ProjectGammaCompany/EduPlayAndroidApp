@@ -9,15 +9,20 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.net.ConnectException
 
 @HiltViewModel
 class EventResultsViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
     val points = mutableIntStateOf(0)
 
-    fun fetchResults(eventId: String) {
+    fun fetchResults(eventId: String, onNoInternet: ()->Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val result = repository.getEventResults(eventId)
-            points.intValue = result.points
+            try {
+                val result = repository.getEventResults(eventId)
+                points.intValue = result.points
+            } catch (e: ConnectException) {
+                onNoInternet()
+            }
         }
     }
 }

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
+import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.viewmodel.EventResultsViewModel
 
 @Composable
@@ -48,9 +49,14 @@ fun EventResultScreen(
         navController.navigate("event_screen/$eventId")
     }
     var gotResults by remember { mutableStateOf(false) }
+    var noInternet by remember{mutableStateOf(false)}
+    val onNoInternet = {noInternet = true}
     if (!gotResults) {
-        viewModel.fetchResults(eventId)
+        viewModel.fetchResults(eventId, onNoInternet)
         gotResults = true
+    }
+    if (noInternet) {
+        NoInternetConnectionToast()
     }
 
     EventResultScreen(
