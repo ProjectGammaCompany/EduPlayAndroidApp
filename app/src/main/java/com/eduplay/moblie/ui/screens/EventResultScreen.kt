@@ -21,6 +21,10 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -29,19 +33,40 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
+import com.eduplay.moblie.ui.viewmodel.EventResultsViewModel
 
 @Composable
 fun EventResultScreen(
     innerPaddingValues: PaddingValues,
     eventId: String,
-    navController: NavController
+    navController: NavController,
+    viewModel: EventResultsViewModel = hiltViewModel()
 ) {
     val onExitScreen = {
         navController.navigate("event_screen/$eventId")
     }
-    val points = 33
+    var gotResults by remember { mutableStateOf(false) }
+    if (!gotResults) {
+        viewModel.fetchResults(eventId)
+        gotResults = true
+    }
+
+    EventResultScreen(
+        innerPaddingValues,
+        onExitScreen,
+        viewModel.points.intValue
+    )
+}
+
+@Composable
+private fun EventResultScreen(
+    innerPaddingValues: PaddingValues,
+    onExitScreen: () -> Unit,
+    points: Int
+) {
     Column(
         modifier = Modifier
             .padding(

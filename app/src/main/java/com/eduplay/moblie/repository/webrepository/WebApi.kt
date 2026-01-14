@@ -11,6 +11,7 @@ import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.AuthResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import retrofit2.Response
 import retrofit2.http.Body
@@ -110,4 +111,8 @@ interface WebApi {
         @Path("taskId") taskId: String,
         @Body answer: TaskAnswer
     ): Response<AnswerResult>
+
+    @GET("/event/{eventId}/playerStats")
+    @InjectAuth
+    suspend fun getPlayerStats(@Path("eventId") eventId: String) : Response<PlayerStats>
 }
