@@ -1,0 +1,52 @@
+package com.eduplay.moblie
+
+import android.content.Context
+import com.eduplay.moblie.repository.webrepository.AuthInterceptor
+import com.eduplay.moblie.repository.webrepository.WebApi
+import com.eduplay.moblie.services.TokenManager
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Singleton
+
+
+@Module
+@InstallIn(SingletonComponent::class)
+class Providers {
+
+    private var tokenManager: TokenManager? = null
+
+    @Provides
+    @Singleton
+    fun provideTokenManager(@ApplicationContext context: Context): TokenManager {
+        if (tokenManager == null) {
+            tokenManager = TokenManager(context)
+        }
+        return tokenManager!!
+    }
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(tokenManager: TokenManager): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(tokenManager))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient): WebApi {
+        val url = BuildConfig.BACKEND_URL
+        return Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+            .create(WebApi::class.java)
+    }
+}
