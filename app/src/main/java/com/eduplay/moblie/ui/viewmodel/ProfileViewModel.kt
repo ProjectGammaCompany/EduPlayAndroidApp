@@ -15,16 +15,11 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
 
     val email = mutableStateOf("")
     val password = mutableStateOf("")
-    private var canLogout = false
+    val canLogout = mutableStateOf(false)
 
-    fun logout(navController: NavController) {
+    fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
-            canLogout = repository.logout()
-        }.invokeOnCompletion {
-            if (canLogout) {
-                navController.clearBackStack<Any>()
-                navController.navigate("auth_screen")
-            }
+            canLogout.value = repository.logout()
         }
     }
 
@@ -34,5 +29,13 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
             email.value = result.email
             password.value = result.password
         }.invokeOnCompletion { onCompletion() }
+    }
+
+    fun checkEmail(email: String): Boolean {
+        if (email.isNotEmpty()) {
+            return !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        } else {
+            return false
+        }
     }
 }
