@@ -26,17 +26,21 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.QuestShortInfo
+import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.MyEventsViewModel
@@ -48,6 +52,55 @@ fun MyEventsScreen(
     viewModel: MyEventsViewModel = hiltViewModel(),
     eventListViewModel: EventListViewModel = hiltViewModel()
 ) {
+
+    var dataFetched by remember { mutableStateOf(false) }
+    var noInternetConnection by remember { mutableStateOf(false) }
+    if (!dataFetched) {
+        noInternetConnection = false
+        viewModel.fetchData({dataFetched = true}, {noInternetConnection = true})
+    }
+
+    if (noInternetConnection) {
+        NoInternetConnectionToast()
+    }
+
+
+    val onFavouriteToggle = { id: String, isFavourite: Boolean ->
+        eventListViewModel.changeFavourite(id, isFavourite)
+    }
+    val onEventClick = { eventId: String -> navController.navigate("event_screen/$eventId") }
+    val getNextPage = { type: MyEventsViewModel.ListType -> viewModel.getNextPage(type) }
+    val getPrevPage = { type: MyEventsViewModel.ListType -> viewModel.getPrevPage(type) }
+
+
+
+    MyEventsScreen(
+        innerPaddingValues,
+        onFavouriteToggle,
+        viewModel.favourite,
+        viewModel.completed,
+        viewModel.created,
+        onEventClick,
+        getNextPage,
+        getPrevPage
+
+
+    )
+
+}
+
+@Composable
+private fun MyEventsScreen(
+    innerPaddingValues: PaddingValues,
+    onFavouriteToggle: (String, Boolean) -> Unit,
+    favorite: SnapshotStateList<QuestShortInfo>,
+    completed: SnapshotStateList<QuestShortInfo>,
+    created: SnapshotStateList<QuestShortInfo>,
+    onEventClick: (String) -> Unit,
+    getNextPage: (MyEventsViewModel.ListType) -> Unit,
+    getPrevPage: (MyEventsViewModel.ListType) -> Unit
+
+) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
             R.string.favourite,
@@ -56,9 +109,7 @@ fun MyEventsScreen(
         )
     }
     var selectedTabIdx by remember { mutableIntStateOf(0) }
-    val onFavouriteToggle = { id: String, isFavourite: Boolean ->
-        eventListViewModel.changeFavourite(id, isFavourite)
-    }
+
 
     Column(
         modifier = Modifier
@@ -90,43 +141,46 @@ fun MyEventsScreen(
         }
         when (selectedTabIdx) {
             0 -> ListOfEvents(
-                viewModel.favourite,
-                navController,
-                viewModel,
+                favorite,
                 MyEventsViewModel.ListType.FAVOURITE,
-                onFavouriteToggle
+                onFavouriteToggle,
+                onEventClick,
+                getNextPage,
+                getPrevPage
             )
 
             1 -> ListOfEvents(
-                viewModel.completed,
-                navController,
-                viewModel,
+                completed,
                 MyEventsViewModel.ListType.COMPLETED,
-                onFavouriteToggle
+                onFavouriteToggle,
+                onEventClick,
+                getNextPage,
+                getPrevPage
             )
 
             2 -> ListOfEvents(
-                viewModel.created,
-                navController,
-                viewModel,
+                created,
                 MyEventsViewModel.ListType.CREATED,
-                onFavouriteToggle
+                onFavouriteToggle,
+                onEventClick,
+                getNextPage,
+                getPrevPage
             )
 
             else -> Box {}
         }
 
     }
-
 }
 
 @Composable
 private fun ListOfEvents(
     events: List<QuestShortInfo>,
-    navController: NavController,
-    viewModel: MyEventsViewModel,
     type: MyEventsViewModel.ListType,
-    onFavouriteToggle: (String, Boolean) -> Unit
+    onFavouriteToggle: (String, Boolean) -> Unit,
+    onEventClick: (String) -> Unit,
+    getNextPage: (MyEventsViewModel.ListType) -> Unit,
+    getPrevPage: (MyEventsViewModel.ListType) -> Unit
 ) {
     Column {
         LazyColumn(
@@ -134,10 +188,9 @@ private fun ListOfEvents(
         ) {
             items(events.size) { position ->
                 val itemValue = events[position]
-                val onEventClick = { navController.navigate("event_screen/" + itemValue.id) }
                 QuestListElement(
                     itemValue,
-                    onEventClick,
+                    { onEventClick(itemValue.id) },
                     { onFavouriteToggle(itemValue.id, itemValue.isFavourite) },
                 )
             }
@@ -146,10 +199,10 @@ private fun ListOfEvents(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.padding(top = 5.dp)
         ) {
-            IconButton(onClick = { viewModel.getPrevPage(type) }) {
+            IconButton(onClick = { getPrevPage(type) }) {
                 Icon(Icons.Default.ChevronLeft, stringResource(R.string.previous_page))
             }
-            IconButton(onClick = { viewModel.getNextPage(type) }) {
+            IconButton(onClick = { getNextPage(type) }) {
                 Icon(Icons.Default.ChevronRight, stringResource(R.string.next_page))
             }
         }
@@ -168,4 +221,10 @@ private fun MyEventsTopBar() {
             Text(stringResource(R.string.my_events))
         }
     )
+}
+
+@Composable
+@Preview
+fun MyEventsPreview() {
+
 }

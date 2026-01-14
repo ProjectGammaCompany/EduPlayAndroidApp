@@ -9,6 +9,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.Callback
+import java.net.ConnectException
 import kotlin.math.max
 
 @HiltViewModel
@@ -33,9 +35,16 @@ class MyEventsViewModel @Inject constructor(private val repository: EduRepositor
         CREATED
     }
 
-    fun fetchData() {
+    fun fetchData(onLoadedCallBack: ()->Unit, onErrorCallBack: ()->Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.getFavouriteEvents(0).forEach { favourite.add(it); totalFavourite.add(it) }
+            try {
+                repository.getFavouriteEvents(0)
+                    .forEach { favourite.add(it); totalFavourite.add(it) }
+            } catch (e: ConnectException) {
+                onErrorCallBack()
+            }
+        }.invokeOnCompletion {
+            onLoadedCallBack()
         }
 
     }
