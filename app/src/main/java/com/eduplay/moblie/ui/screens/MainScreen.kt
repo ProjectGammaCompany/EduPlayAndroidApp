@@ -32,6 +32,7 @@ import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.eduplay.moblie.R
 import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +40,8 @@ import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
 fun MainScreen(
     innerPaddingValues: PaddingValues,
     navController: NavController,
-    viewModel: MainScreenViewModel = hiltViewModel()
+    viewModel: MainScreenViewModel = hiltViewModel(),
+    eventListViewModel: EventListViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 
@@ -92,7 +94,11 @@ fun MainScreen(
                 val itemValue = events[position]
                 if (itemValue != null) {
                     val onEventClick = {navController.navigate("event_screen/"+itemValue.id)}
-                    QuestListElement(itemValue, onEventClick, {}) //TODO("добавление в избранное")
+                    QuestListElement(
+                        itemValue,
+                        onEventClick,
+                        {eventListViewModel.changeFavourite(itemValue.id, itemValue.isFavourite)}
+                    )
                 }
             }
         }

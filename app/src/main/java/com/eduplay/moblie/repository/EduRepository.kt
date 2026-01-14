@@ -26,8 +26,8 @@ class EduRepository @Inject constructor(
         return webRepository.login(auth)
     }
 
-    suspend fun logout() {
-        TODO("Not yet implemented")
+    suspend fun logout(): Boolean {
+        return webRepository.logout()
     }
 
     suspend fun register(auth: Auth): AuthResult {
@@ -101,6 +101,14 @@ class EduRepository @Inject constructor(
 
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
         return webRepository.postTaskChoice(eventId, blockId, taskId)
+    }
+
+    suspend fun addToFavourites(eventId: String, isFavorite: Boolean): Boolean {
+        return webRepository.addToFavourite(eventId, isFavorite)
+    }
+
+    suspend fun complain(eventId: String, reason: String) {
+        webRepository.complain(eventId, reason)
     }
 
     suspend fun getEventResults(eventId: String): PlayerStats {

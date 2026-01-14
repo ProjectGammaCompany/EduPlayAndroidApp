@@ -5,6 +5,8 @@ import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.EventComplaint
+import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
@@ -17,12 +19,17 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface WebApi {
     @POST("/login")
     suspend fun login(auth: Auth): Response<AuthResponse>
+
+    @PUT("/logout")
+    @InjectAuth
+    suspend fun logout(): Response<Unit>
 
     @POST("/register")
     suspend fun register(auth: Auth): Response<AuthResponse>
@@ -58,6 +65,12 @@ interface WebApi {
         @Query("page") page: Int = 1,
         @Query("maxOnPage") maxOnPage: Int = 10,
     ): Response<EventListResponse>
+
+    @POST("/events/personal/addToFavourites")
+    @InjectAuth
+    suspend fun addToFavourite(
+        @Body event: FavoriteEvent
+    ): Response<Unit>
 
     @GET("/event/{eventId}/role")
     @InjectAuth
@@ -111,6 +124,10 @@ interface WebApi {
         @Path("taskId") taskId: String,
         @Body answer: TaskAnswer
     ): Response<AnswerResult>
+
+    @POST("/event/{eventId}/complaint")
+    @InjectAuth
+    suspend fun sendEventComplaint(@Path("eventId") eventId: String, @Body complaint: EventComplaint): Response<Unit>
 
     @GET("/event/{eventId}/playerStats")
     @InjectAuth

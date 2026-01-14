@@ -37,7 +37,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val privateEvent = mutableStateOf(true)
     val cover = mutableStateOf("")
 
-    fun fetchData(eventId: String, callBack:()->Unit) {
+    fun fetchData(eventId: String, callBack: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             val role = repository.getRole(eventId)
 
@@ -102,9 +102,29 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
                 Pair(R.string.rating, rating.value),
                 Pair(R.string.opens, opens.value),
                 Pair(R.string.closes, closes.value),
-                Pair( R.string.groups, data.groups.joinToString { ", " }),
+                Pair(R.string.groups, data.groups.joinToString { ", " }),
                 Pair(R.string.last_edition, data.lastEditionDate),
             )
         )
+    }
+
+    fun addToFavourite(eventId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.addToFavourites(eventId, true)
+        }
+        isEventFavourite.value = true
+    }
+
+    fun removeFromFavourite(eventId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.addToFavourites(eventId, false)
+        }
+        isEventFavourite.value = false
+    }
+
+    fun complain(eventId: String, reason: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.complain(eventId, reason)
+        }
     }
 }

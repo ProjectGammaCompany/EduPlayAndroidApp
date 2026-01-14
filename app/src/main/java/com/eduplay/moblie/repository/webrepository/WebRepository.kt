@@ -8,6 +8,8 @@ import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.EventComplaint
+import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
@@ -35,8 +37,14 @@ class WebRepository @Inject constructor(
         return AuthResult.INVALID_USER
     }
 
-    override suspend fun logout() {
-        TODO("Not yet implemented")
+    override suspend fun logout(): Boolean {
+        val response = api.logout()
+        if (response.isSuccessful) {
+            tokenManager.saveAccessToken("")
+            tokenManager.saveRefreshToken("")
+            return true
+        }
+        return false
     }
 
     override suspend fun register(auth: Auth): AuthResult {
@@ -163,6 +171,22 @@ class WebRepository @Inject constructor(
             return body
         } // TODO(оделать проверку на причины отказа)
         throw IllegalAccessException("cant enter next stage $eventId")
+    }
+
+    suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean {
+        val response = api.addToFavourite(FavoriteEvent(eventId, isFavorite))
+        if (response.isSuccessful) {
+            return true
+        } // TODO(оделать проверку на причины отказа)
+        throw IllegalAccessException("cant add to favourites $eventId")
+    }
+
+    suspend fun complain(eventId: String, reason: String): Unit {
+        val response = api.sendEventComplaint(eventId, EventComplaint(reason))
+        if (response.isSuccessful) {
+            return
+        } // TODO(оделать проверку на причины отказа)
+        throw IllegalAccessException("cant add to favourites $eventId")
     }
 
 }

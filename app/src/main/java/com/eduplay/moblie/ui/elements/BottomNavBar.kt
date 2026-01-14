@@ -33,32 +33,42 @@ private enum class Destination(
 }
 
 @Composable
-fun BottomNavBar(navController: NavController) {
+fun BottomNavBar(
+    navController: NavController,
+    screensToHide: List<String>
+) {
     val startDestination = Destination.MAIN
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
 
-    NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-        Destination.entries.forEachIndexed { index, destination ->
-            NavigationBarItem(
-                selected = selectedDestination == index,
-                onClick = {
-                    navController.navigate(route = destination.route)
-                    selectedDestination = index
-                },
-                icon = {
-                    Icon(
-                        ImageVector.vectorResource(
-                            if (destination.ordinal == selectedDestination)
-                                destination.selectedIcon
-                            else
-                                destination.icon
-                        ),
-                        contentDescription = stringResource(destination.contentDescription)
-                    )
-                },
-                label = { Text(stringResource(destination.contentDescription)) }
-            )
+    if (
+        screensToHide.any { screenName ->
+            navController.currentDestination?.route?.startsWith(screenName) ?: false
         }
-    }
+
+    )
+
+        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+            Destination.entries.forEachIndexed { index, destination ->
+                NavigationBarItem(
+                    selected = selectedDestination == index,
+                    onClick = {
+                        navController.navigate(route = destination.route)
+                        selectedDestination = index
+                    },
+                    icon = {
+                        Icon(
+                            ImageVector.vectorResource(
+                                if (destination.ordinal == selectedDestination)
+                                    destination.selectedIcon
+                                else
+                                    destination.icon
+                            ),
+                            contentDescription = stringResource(destination.contentDescription)
+                        )
+                    },
+                    label = { Text(stringResource(destination.contentDescription)) }
+                )
+            }
+        }
 
 }
