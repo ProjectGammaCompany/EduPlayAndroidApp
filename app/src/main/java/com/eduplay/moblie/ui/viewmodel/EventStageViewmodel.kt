@@ -49,7 +49,7 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
             }
         }.invokeOnCompletion {
             if (currentStageType.value == StageType.TASK && currentTask.value?.timeStamp == null) {
-                sendStartTime(eventId)
+                sendStartTime(eventId, onNoInternet)
             }
         }
     }
