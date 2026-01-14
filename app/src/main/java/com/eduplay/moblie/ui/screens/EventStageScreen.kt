@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.repository.responseTypes.StageType
+import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.screens.TaskScreen.TaskScreen
 import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 
@@ -52,12 +53,14 @@ fun EventStageScreen(
     val goBack = {
         navController.popBackStack()
     }
+    var noInternet by remember { mutableStateOf(false) }
+    var cantShowData by remember { mutableStateOf(false) }
     BackHandler {
         onGoBack()
     }
     when (viewModel.currentStageType.value) {
         StageType.NONE -> {
-            viewModel.getNextStage(eventId)
+            viewModel.getNextStage(eventId, {noInternet = true; cantShowData = true})
         }
 
         StageType.TASK -> {
@@ -65,7 +68,8 @@ fun EventStageScreen(
                 innerPadding,
                 eventId,
                 onGoBack = onGoBack,
-                viewModel = viewModel
+                viewModel = viewModel,
+                onNoInternet = {noInternet = true}
             )
         }
 
@@ -73,7 +77,7 @@ fun EventStageScreen(
             ParallelBlockScreen(
                 block = viewModel.currentBlock.value!!,
                 onChooseTask = { taskId: String ->
-                    viewModel.chooseTask(eventId, taskId)
+                    viewModel.chooseTask(eventId, taskId, {noInternet=true})
                 },
                 onGoBack = onGoBack,
                 innerPaddingValues = innerPadding
@@ -94,6 +98,12 @@ fun EventStageScreen(
             }
 
         )
+    }
+    if (noInternet) {
+        NoInternetConnectionToast()
+    }
+    if (cantShowData) {
+        navController.popBackStack()
     }
     if (showGoBackDialog) {
         ExitEventDialog(

@@ -78,7 +78,8 @@ fun TaskScreen(
     innerPaddingValues: PaddingValues,
     eventId: String,
     viewModel: EventStageViewModelInterface,
-    onGoBack: () -> Unit
+    onGoBack: () -> Unit,
+    onNoInternet: ()->Unit
 ) {
     val taskType = viewModel.currentTask.value!!.type
     var isSubmitBtnShown by remember { mutableStateOf(true) }
@@ -87,7 +88,7 @@ fun TaskScreen(
     var showQr by remember { mutableStateOf(false) }
     val onScanQr = { showQr = true }
     val onSubmit = {
-        viewModel.sendAnswer(eventId)
+        viewModel.sendAnswer(eventId, onNoInternet)
     }
     if (taskType == TaskType.QR && showQr) {
 
@@ -96,7 +97,7 @@ fun TaskScreen(
             { answer ->
                 showQr = false
                 viewModel.answers.add(answer)
-                viewModel.sendAnswer(eventId)
+                viewModel.sendAnswer(eventId, onNoInternet)
             },
             { showQr = false },
         )
@@ -144,7 +145,7 @@ fun TaskScreen(
 
                 //next btn
                 if (isSubmitBtnShown) {
-                    SubmitBtn(taskType, { viewModel.sendAnswer(eventId) })
+                    SubmitBtn(taskType, { viewModel.sendAnswer(eventId, onNoInternet) })
                 }
             }
         }
@@ -396,19 +397,23 @@ fun TaskPreview() {
                 get() = TODO("Not yet implemented")
                 set(value) {}
 
-            override fun getNextStage(eventId: String) {
+            override fun chooseTask(
+                eventId: String,
+                taskId: String,
+                onNoInternet: () -> Unit
+            ) {
                 TODO("Not yet implemented")
             }
 
-            override fun sendAnswer(eventId: String) {
+            override fun sendAnswer(eventId: String, onNoInternet: () -> Unit) {
                 TODO("Not yet implemented")
             }
 
-            override fun chooseTask(eventId: String, taskId: String) {
+            override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
                 TODO("Not yet implemented")
             }
-
         },
+        {},
         {}
     )
 }

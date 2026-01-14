@@ -12,6 +12,7 @@ import com.eduplay.moblie.repository.responseTypes.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
+import java.net.ConnectException
 import java.time.LocalDateTime
 
 @HiltViewModel
@@ -33,15 +34,19 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
     override var isAnswerCorrect: Boolean? = false
 
 
-    override fun getNextStage(eventId: String) {
+    override fun getNextStage(eventId: String, onNoInternet: ()->Unit) {
         currentStageType.value = StageType.NONE
         viewModelScope.launch {
-            val result = repository.getNextStage(eventId)
-            clear()
-            currentStageType.value = result.type
-            currentTask.value = result.task
-            currentBlock.value = result.block
-            taskStartTime = LocalDateTime.parse(result.task?.timeStamp) ?: LocalDateTime.now()
+            try {
+                val result = repository.getNextStage(eventId)
+                clear()
+                currentStageType.value = result.type
+                currentTask.value = result.task
+                currentBlock.value = result.block
+                taskStartTime = LocalDateTime.parse(result.task?.timeStamp) ?: LocalDateTime.now()
+            } catch (e: ConnectException) {
+                onNoInternet()
+            }
         }.invokeOnCompletion {
             if (currentStageType.value == StageType.TASK && currentTask.value?.timeStamp == null) {
                 sendStartTime(eventId)
@@ -58,7 +63,7 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
         isAnswerCorrect = false
     }
 
-    override fun sendAnswer(eventId: String) {
+    override fun sendAnswer(eventId: String,  onNoInternet: ()->Unit) {
         disableTask.value = true
         if (currentStageType.value == StageType.TASK) {
             viewModelScope.launch {
@@ -68,41 +73,51 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                     } else {
                         listOf(answers.last())
                     }
-                val stageResult = repository.postAnswer(
-                    eventId,
-                    currentTask.value?.blockId!!,
-                    currentTask.value?.id!!,
-                    resultingAnswer
-                )
-                points = stageResult.points
-                isAnswerCorrect = stageResult.isCorrect
-                correctAnswer.addAll(stageResult.rightAnswer ?: listOf())
-                if (stageResult.rightAnswer == null && stageResult.points == null) {
-                    currentStageType.value = StageType.NONE
-                } else {
-                    showResults.value = true
+                try {
+                    val stageResult = repository.postAnswer(
+                        eventId,
+                        currentTask.value?.blockId!!,
+                        currentTask.value?.id!!,
+                        resultingAnswer
+                    )
+                    points = stageResult.points
+                    isAnswerCorrect = stageResult.isCorrect
+                    correctAnswer.addAll(stageResult.rightAnswer ?: listOf())
+                    if (stageResult.rightAnswer == null && stageResult.points == null) {
+                        currentStageType.value = StageType.NONE
+                    } else {
+                        showResults.value = true
+                    }
+                } catch (e: ConnectException) {
+                    onNoInternet()
                 }
             }
         }
     }
 
-    private fun sendStartTime(eventId: String) {
+    private fun sendStartTime(eventId: String,  onNoInternet: ()->Unit) {
         viewModelScope.launch {
-            repository.postTaskStartTime(
-                eventId,
-                currentTask.value?.blockId ?: "",
-                currentTask.value?.id ?: "",
-                taskStartTime
-            )
+            try {
+                repository.postTaskStartTime(
+                    eventId,
+                    currentTask.value?.blockId ?: "",
+                    currentTask.value?.id ?: "",
+                    taskStartTime
+                )
+            } catch (e: ConnectException) {
+                onNoInternet()
+            }
         }
     }
 
-    override fun chooseTask(eventId: String, taskId: String) {
+    override fun chooseTask(eventId: String, taskId: String, onNoInternet: ()->Unit) {
         viewModelScope.launch {
             try {
                 repository.postTaskChoice(eventId, currentBlock.value?.id ?: "", taskId)
             } catch (e: IllegalAccessException) {
 
+            } catch (e: ConnectException){
+                onNoInternet()
             } catch (e: Exception) {
 
             }

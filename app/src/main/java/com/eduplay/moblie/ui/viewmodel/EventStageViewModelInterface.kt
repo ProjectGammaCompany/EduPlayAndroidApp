@@ -22,10 +22,7 @@ interface EventStageViewModelInterface {
     val correctAnswer: MutableList<String>
     var points: Int?
     var isAnswerCorrect: Boolean?
-
-    fun getNextStage(eventId: String)
-
-    fun sendAnswer(eventId: String)
-
-    fun chooseTask(eventId: String, taskId: String)
+    fun chooseTask(eventId: String, taskId: String, onNoInternet: () -> Unit)
+    fun sendAnswer(eventId: String, onNoInternet: () -> Unit)
+    fun getNextStage(eventId: String, onNoInternet: () -> Unit)
 }
