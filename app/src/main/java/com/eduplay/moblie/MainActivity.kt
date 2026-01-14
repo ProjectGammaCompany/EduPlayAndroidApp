@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.screens.EventResultScreen
 import com.eduplay.moblie.ui.screens.EventScreen
@@ -39,10 +40,10 @@ class MainActivity : ComponentActivity() {
                     ActivityInfo.SCREEN_ORIENTATION_LOCKED
                 val navController = rememberNavController()
                 Scaffold(
-                    bottomBar = { /*BottomNavBar(navController, hideBottomBarScreens)*/ }
+                    bottomBar = { BottomNavBar(navController, hideBottomBarScreens) }
                 ) { innerPadding ->
 
-                    NavHost(navController = navController, startDestination = "auth_screen") {
+                    NavHost(navController = navController, startDestination = "main_screen") {
                         composable("auth_screen") {
                             AuthorizationScreen(
                                 navController = navController

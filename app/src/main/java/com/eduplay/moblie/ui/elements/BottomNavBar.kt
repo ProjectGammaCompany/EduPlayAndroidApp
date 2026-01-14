@@ -41,7 +41,7 @@ fun BottomNavBar(
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
 
     if (
-        screensToHide.any { screenName ->
+        screensToHide.none { screenName ->
             navController.currentDestination?.route?.startsWith(screenName) ?: false
         }
 
