@@ -12,6 +12,7 @@ import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.webrepository.WebRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -113,5 +114,9 @@ class EduRepository @Inject constructor(
 
     suspend fun complain(eventId: String, reason: String) {
         webRepository.complain(eventId, reason)
+    }
+
+    suspend fun getEventResults(eventId: String): PlayerStats {
+        return webRepository.getResults(eventId)
     }
 }
