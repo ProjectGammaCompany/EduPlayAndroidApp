@@ -49,6 +49,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -111,8 +112,63 @@ fun EventScreen(
             viewModel.removeFromFavourite(eventId)
         }
     }
+    val onReturn = {
+        navController.popBackStack()
+    }
+    
 
+    if (showEditDialog) {
+        EditDialog(onCloseEditEvent)
+    }
+    if (showComplaintDialog) {
+        ComplaintDialog(onHideComplaint, onComplain)
+    }
+    
+    EventScreen(
+        innerPaddingValues,
+        viewModel.eventCreatorMode.value,
+        viewModel.isEventFavourite.value,
+        viewModel.eventName.value,
+        viewModel.tags,
+        viewModel.author.value,
+        viewModel.isCompleted.value,
+        viewModel.cover.value,
+        viewModel.info,
+        viewModel.description.value,
+        viewModel.privateEvent.value,
+        viewModel.isOpen.value,
+        viewModel.isContinuing.value,
+        onEditEvent,
+        onAddToFavourite,
+        onShowComplaintDialog,
+        startEvent,
+        showResults,
+        onReturn
+    )
+}
 
+@Composable
+private fun EventScreen(
+    innerPaddingValues: PaddingValues,
+    eventCreatorMode: Boolean,
+    isEventFavourite: Boolean,
+    eventName: String,
+    tags: List<String>,
+    author: String,
+    isCompleted: Boolean,
+    cover: String,
+    info: SnapshotStateList<Pair<Int, String?>>,
+    description:String,
+    privateEvent: Boolean,
+    isOpen: Boolean,
+    isContinuing: Boolean,
+    onEditEvent: ()->Unit,
+    onAddToFavourite: ()->Unit,
+    onShowComplaintDialog: ()->Unit,
+    startEvent: ()->Unit,
+    showResults: ()->Unit,
+    onReturn: ()->Boolean
+){
     Column(
         modifier = Modifier
             .padding(
@@ -124,48 +180,41 @@ fun EventScreen(
             .fillMaxSize()
     ) {
         TopAppBarEventScreen(
-            viewModel.eventCreatorMode.value,
-            viewModel.isEventFavourite.value,
+            eventCreatorMode,
+            isEventFavourite,
             onEditEvent,
             onAddToFavourite,
             onShowComplaintDialog,
-            navController
+            onReturn
         )
 
         EventScreenHeader(
-            viewModel.eventName.value,
-            viewModel.author.value,
-            viewModel.eventCreatorMode.value,
-            viewModel.isCompleted.value,
-            viewModel.cover.value
+            eventName,
+            author,
+            eventCreatorMode,
+            isCompleted,
+            cover
         )
 
-        if (viewModel.eventCreatorMode.value) {
+        if (eventCreatorMode) {
             EventCreatorBody(
-                viewModel.tags,
-                viewModel.info,
-                viewModel.description.value,
-                viewModel.privateEvent.value
+                tags,
+                info,
+                description,
+                privateEvent
             )
         } else {
             GeneralUserBody(
-                viewModel.tags,
-                viewModel.info,
-                viewModel.description.value,
-                viewModel.isOpen.value,
-                viewModel.isContinuing.value,
-                viewModel.isCompleted.value,
+                tags,
+                info,
+                description,
+                isOpen,
+                isContinuing,
+                isCompleted,
                 startEvent,
                 showResults
             )
         }
-    }
-
-    if (showEditDialog) {
-        EditDialog(onCloseEditEvent)
-    }
-    if (showComplaintDialog) {
-        ComplaintDialog(onHideComplaint, onComplain)
     }
 }
 
@@ -256,7 +305,7 @@ private fun TopAppBarEventScreen(
     onEditEvent: () -> Unit,
     onAddToFavourite: () -> Unit,
     onComplain: () -> Unit,
-    navController: NavController
+    onReturn:()->Boolean
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -264,7 +313,7 @@ private fun TopAppBarEventScreen(
             titleContentColor = colorScheme.primary,
         ),
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = { onReturn() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.go_back)
