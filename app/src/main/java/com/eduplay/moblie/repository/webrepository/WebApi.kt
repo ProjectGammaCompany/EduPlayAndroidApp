@@ -7,6 +7,7 @@ import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventComplaint
 import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
+import com.eduplay.moblie.repository.requestTypes.Refresh
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
@@ -24,16 +25,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface WebApi {
-    @POST("/login")
-    suspend fun login(@Body auth: Auth): Response<AuthResponse>
-
-    @PUT("/logout")
-    @InjectAuth
-    suspend fun logout(): Response<Unit>
-
-    @POST("/register")
-    suspend fun register(@Body auth: Auth): Response<AuthResponse>
-
     @GET("/events")
     @InjectAuth
     suspend fun allEvents(

@@ -23,11 +23,12 @@ import java.time.LocalDateTime
 
 class WebRepository @Inject constructor(
     private val api: WebApi,
+    private val authApi: AuthApi,
     private val tokenManager: TokenManager,
 
     ) : Repository {
     override suspend fun login(auth: Auth): AuthResult {
-        val response = api.login(auth)
+        val response = authApi.login(auth)
         val body = response.body()
         if (response.isSuccessful && body != null) {
             tokenManager.saveAccessToken(body.accessToken)
@@ -38,7 +39,7 @@ class WebRepository @Inject constructor(
     }
 
     override suspend fun logout(): Boolean {
-        val response = api.logout()
+        val response = authApi.logout()
         if (response.isSuccessful) {
             tokenManager.saveAccessToken("")
             tokenManager.saveRefreshToken("")
@@ -48,7 +49,7 @@ class WebRepository @Inject constructor(
     }
 
     override suspend fun register(auth: Auth): AuthResult {
-        val response = api.register(auth)
+        val response = authApi.register(auth)
         val body = response.body()
         if (response.isSuccessful && body != null) {
             tokenManager.saveAccessToken(body.accessToken)

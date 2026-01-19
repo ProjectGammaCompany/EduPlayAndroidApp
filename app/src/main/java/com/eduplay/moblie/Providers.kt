@@ -1,7 +1,9 @@
 package com.eduplay.moblie
 
 import android.content.Context
+import com.eduplay.moblie.repository.webrepository.AuthApi
 import com.eduplay.moblie.repository.webrepository.AuthInterceptor
+import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
 import com.eduplay.moblie.services.TokenManager
 import dagger.Module
@@ -32,9 +34,10 @@ class Providers {
 
     @Provides
     @Singleton
-    fun provideHttpClient(tokenManager: TokenManager): OkHttpClient {
+    fun provideHttpClient(tokenManager: TokenManager, autApi: AuthApi): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(AuthInterceptor(tokenManager))
+            .addInterceptor(RefreshInterceptor(tokenManager, autApi))
             .build()
     }
 
@@ -48,5 +51,21 @@ class Providers {
             .client(okHttpClient)
             .build()
             .create(WebApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRetrofit(tokenManager: TokenManager): AuthApi {
+        val url = BuildConfig.BACKEND_URL
+        return Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(
+                OkHttpClient.Builder()
+                    .addInterceptor(AuthInterceptor(tokenManager))
+                    .build()
+            )
+            .build()
+            .create(AuthApi::class.java)
     }
 }
