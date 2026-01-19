@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -63,6 +64,7 @@ import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.Task
+import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -238,6 +240,8 @@ private fun TaskHeader(
             ) {
                 LinearProgressIndicator(
                     progress = { currentProgress },
+                    color = colorScheme.secondary,
+                    trackColor = colorScheme.secondaryContainer,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .fillMaxWidth()
@@ -247,7 +251,8 @@ private fun TaskHeader(
                 )
                 Text(
                     text = (timeLeft / 60).toString() + ":" + (timeLeft % 60).toString(),
-                    style = typography.titleLarge,
+                    style = typography.titleLarge
+                        .copy(color = colorScheme.onSurface),
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
@@ -271,8 +276,12 @@ private fun TaskHeader(
                 // title
                 Text(
                     text = title,
-                    style = typography.headlineSmall
-                        .copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
+                    style = typography.headlineSmall.copy(color = colorScheme.onBackground)
+                        .copy(
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            //color = colorScheme.onSurface
+                        ),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                 )
@@ -280,8 +289,8 @@ private fun TaskHeader(
                 //description
                 Text(
                     text = description,
-                    style = typography.bodyMedium,
-                    //.copy(fontSize = 20.sp),
+                    style = typography.bodyMedium.copy(color = colorScheme.onBackground)
+                        .copy(color = colorScheme.onSurface),
                     modifier = Modifier
                         .align(Alignment.Start)
                         .padding(top = 15.dp)
@@ -357,63 +366,74 @@ fun FileView(files: List<String>) {
 @Preview
 @Composable
 fun TaskPreview() {
-    TaskScreen(
-        PaddingValues(),
-        "1",
-        object : EventStageViewModelInterface {
-            override val currentStageType: MutableState<StageType> = remember { mutableStateOf(StageType.TASK)}
-            override var currentTask: MutableState<Task?> = remember {
-                mutableStateOf<Task?>(
-                    Task(
-                        "1",
-                        "1",
-                        "Task",
-                        "task asjfnkjdsfnsskjndfkjn",
-                        TaskType.MULTIPLE_CHOICE,
-                        listOf(AnswerOption("1", "option1", false)),
-                        listOf("1", "option1"),
-                        30,
-                        LocalDateTime.now().toString()
+    EduPlayTheme(false) {
+        TaskScreen(
+            PaddingValues(),
+            "1",
+            object : EventStageViewModelInterface {
+                override val currentStageType: MutableState<StageType> =
+                    remember { mutableStateOf(StageType.TASK) }
+                override var currentTask: MutableState<Task?> = remember {
+                    mutableStateOf<Task?>(
+                        Task(
+                            "1",
+                            "1",
+                            "Task",
+                            "task asjfnkjdsfnsskjndfkjn",
+                            TaskType.TEXT,
+                            listOf(
+                                AnswerOption("1", "option1", false),
+                                AnswerOption("1", "option1", false),
+                                AnswerOption("1", "option1", false),
+                                AnswerOption("1", "option1", false),
+                                AnswerOption("1", "option1", false),
+                                AnswerOption("1", "option1", false)
+                            ),
+                            listOf("1", "option1"),
+                            30,
+                            LocalDateTime.now().toString()
+                        )
                     )
-                )
-            }
-                set(value) {}
-            override var currentBlock: MutableState<Block?>
-                get() = TODO("Not yet implemented")
-                set(value) {}
-            override var taskStartTime: LocalDateTime = LocalDateTime.now()
+                }
+                    set(value) {}
+                override var currentBlock: MutableState<Block?>
+                    get() = TODO("Not yet implemented")
+                    set(value) {}
+                override var taskStartTime: LocalDateTime = LocalDateTime.now()
 
-            override val answers: SnapshotStateList<String> = remember {  mutableStateListOf<String>()}
-            override val disableTask: MutableState<Boolean> = remember { mutableStateOf(false) }
+                override val answers: SnapshotStateList<String> =
+                    remember { mutableStateListOf<String>() }
+                override val disableTask: MutableState<Boolean> = remember { mutableStateOf(false) }
 
-            override val showResults: MutableState<Boolean> = remember { mutableStateOf(false) }
+                override val showResults: MutableState<Boolean> = remember { mutableStateOf(false) }
 
-            override val correctAnswer: MutableList<String>
-                get() = TODO("Not yet implemented")
-            override var points: Int?
-                get() = TODO("Not yet implemented")
-                set(value) {}
-            override var isAnswerCorrect: Boolean?
-                get() = TODO("Not yet implemented")
-                set(value) {}
+                override val correctAnswer: MutableList<String>
+                    get() = TODO("Not yet implemented")
+                override var points: Int?
+                    get() = TODO("Not yet implemented")
+                    set(value) {}
+                override var isAnswerCorrect: Boolean?
+                    get() = TODO("Not yet implemented")
+                    set(value) {}
 
-            override fun chooseTask(
-                eventId: String,
-                taskId: String,
-                onNoInternet: () -> Unit
-            ) {
-                TODO("Not yet implemented")
-            }
+                override fun chooseTask(
+                    eventId: String,
+                    taskId: String,
+                    onNoInternet: () -> Unit
+                ) {
+                    TODO("Not yet implemented")
+                }
 
-            override fun sendAnswer(eventId: String, onNoInternet: () -> Unit) {
-                TODO("Not yet implemented")
-            }
+                override fun sendAnswer(eventId: String, onNoInternet: () -> Unit) {
+                    TODO("Not yet implemented")
+                }
 
-            override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
-                TODO("Not yet implemented")
-            }
-        },
-        {},
-        {}
-    )
+                override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
+                    TODO("Not yet implemented")
+                }
+            },
+            {},
+            {}
+        )
+    }
 }

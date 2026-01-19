@@ -100,13 +100,13 @@ private fun ProfileScreen(
         // email
         Text(
             text = stringResource(R.string.profile_info),
-            style = typography.titleLarge,
+            style = typography.titleLarge.copy(color = colorScheme.onBackground),
             modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
         )
         Row {
             Text(
                 text = stringResource(R.string.email),
-                style = typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                style = typography.bodyLarge.copy(fontWeight = FontWeight.Medium).copy(color = colorScheme.onBackground),
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(end = 5.dp)
@@ -114,7 +114,7 @@ private fun ProfileScreen(
 //            if (!editEmail) {
                 Text(
                     text = emailValue,
-                    style = typography.bodyLarge,
+                    style = typography.bodyLarge.copy(color = colorScheme.onBackground),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .padding(end = 5.dp)

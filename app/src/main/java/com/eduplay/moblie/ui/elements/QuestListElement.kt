@@ -93,13 +93,15 @@ fun QuestListElement(
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         textAlign = TextAlign.Start,
-                        style = typography.titleLarge,
+                        style = typography.titleLarge
+                            .copy(color = colorScheme.onBackground),
                         modifier = Modifier.weight(1f)
                     )
                     if (questShortInfo.isDownloaded) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.download_24dp_1f1f1f_fill0_wght200_grad0_opsz24),
                             contentDescription = stringResource(id = R.string.downloaded),
+                            tint = colorScheme.onBackground,
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                                 .weight(0.15f)
@@ -110,7 +112,8 @@ fun QuestListElement(
                     text = String.format("%.2f⭐", questShortInfo.rate),
                     overflow = TextOverflow.Clip,
                     textAlign = TextAlign.End,
-                    style = typography.labelMedium,
+                    style = typography.labelMedium
+                        .copy(color = colorScheme.onBackground),
                     modifier = Modifier
                         .weight(0.25f)
                         .align(Alignment.CenterVertically)
@@ -136,12 +139,14 @@ fun QuestListElement(
             if (isFavourite.value) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.star_filled),
-                    contentDescription = stringResource(id = R.string.remove_from_favourite)
+                    contentDescription = stringResource(id = R.string.remove_from_favourite),
+                    tint = colorScheme.onBackground
                 )
             } else {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.star),
-                    contentDescription = stringResource(id = R.string.add_to_favourite)
+                    contentDescription = stringResource(id = R.string.add_to_favourite),
+                    tint = colorScheme.onBackground
                 )
             }
         }
@@ -155,7 +160,8 @@ private fun QuestTag(tagName: String) {
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         color = colorScheme.onSecondary,
-        style = typography.labelSmall,
+        style = typography.labelSmall
+            .copy(color = colorScheme.onSecondary),
         modifier = Modifier
             .padding(horizontal = 5.dp)
             .wrapContentWidth()

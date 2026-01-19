@@ -56,7 +56,7 @@ fun ParallelBlockScreen(
         BlockTopBar(onGoBack)
         Text(
             text = block.name,
-            style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            style = typography.headlineSmall.copy(color = colorScheme.onBackground).copy(fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Center,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
@@ -94,7 +94,7 @@ private fun TaskItem(name: String, time: Int, isEnabled: Boolean, onChooseTask: 
     ) {
         Text(
             text = name,
-            style = typography.bodyMedium,
+            style = typography.bodyMedium.copy(color = colorScheme.onBackground),
             textAlign = TextAlign.Start,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
@@ -103,7 +103,7 @@ private fun TaskItem(name: String, time: Int, isEnabled: Boolean, onChooseTask: 
         )
         Text(
             text = (time / 60).toString() + ":" + (time % 60).toString(),
-            style = typography.bodySmall,
+            style = typography.bodySmall.copy(color = colorScheme.onBackground),
             textAlign = TextAlign.End,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,

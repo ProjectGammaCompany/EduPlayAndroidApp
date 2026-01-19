@@ -51,11 +51,9 @@ fun TextTask(viewModel: EventStageViewModelInterface) {
                 unfocusedTextColor = colorScheme.onBackground,
                 focusedContainerColor = colorScheme.background,
                 unfocusedContainerColor = colorScheme.background,
-                disabledTextColor = colorScheme.onPrimaryContainer,
-                disabledContainerColor = colorScheme.primaryContainer,
-                focusedPlaceholderColor = colorScheme.primary,
-                unfocusedPlaceholderColor = colorScheme.primary,
-                disabledPlaceholderColor = colorScheme.primary,
+                focusedPlaceholderColor = colorScheme.tertiary,
+                unfocusedPlaceholderColor = colorScheme.tertiary,
+                disabledPlaceholderColor = colorScheme.tertiary,
             ),
             textStyle = typography.bodyMedium
                 .copy(color = colorScheme.onSecondaryContainer),
@@ -66,8 +64,8 @@ fun TextTask(viewModel: EventStageViewModelInterface) {
                 .fillMaxHeight()
                 .clip(shape = RoundedCornerShape(8.dp))
                 .border(
-                    width = 1.dp,
-                    color = colorScheme.primary,
+                    width = 2.dp,
+                    color = colorScheme.secondary,
                     shape = RoundedCornerShape(8.dp)
                 )
         )
