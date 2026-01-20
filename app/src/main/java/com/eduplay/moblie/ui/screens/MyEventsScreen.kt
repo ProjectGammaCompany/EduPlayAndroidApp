@@ -55,9 +55,10 @@ fun MyEventsScreen(
 
     var dataFetched by remember { mutableStateOf(false) }
     var noInternetConnection by remember { mutableStateOf(false) }
+    val onNoInternet = {noInternetConnection = true}
     if (!dataFetched) {
         noInternetConnection = false
-        viewModel.fetchData({dataFetched = true}, {noInternetConnection = true})
+        viewModel.fetchData({dataFetched = true}, onNoInternet)
     }
 
     if (noInternetConnection) {
@@ -73,8 +74,8 @@ fun MyEventsScreen(
         eventListViewModel.changeFavourite(id, isFavourite)
     }
     val onEventClick = { eventId: String -> navController.navigate("event_screen/$eventId") }
-    val getNextPage = { type: MyEventsViewModel.ListType -> viewModel.getNextPage(type) }
-    val getPrevPage = { type: MyEventsViewModel.ListType -> viewModel.getPrevPage(type) }
+    val getNextPage = { type: MyEventsViewModel.ListType -> viewModel.getNextPage(type, onNoInternet) }
+    val getPrevPage = { type: MyEventsViewModel.ListType -> viewModel.getPrevPage(type,  onNoInternet) }
 
 
 
