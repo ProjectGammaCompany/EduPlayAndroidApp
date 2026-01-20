@@ -3,6 +3,7 @@ package com.eduplay.moblie.ui.screens
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -19,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -28,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
@@ -42,6 +45,7 @@ import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
 import kotlinx.coroutines.flow.flowOf
@@ -88,6 +92,7 @@ private fun MainScreen(
 ) {
     Column(
         modifier = Modifier
+            .background(color = colorScheme.background)
             .padding(
                 top = 0.dp, //innerPaddingValues.calculateTopPadding(),
                 bottom = innerPaddingValues.calculateBottomPadding(),
@@ -171,12 +176,15 @@ fun MainScreenPreview() {
     ).collectAsLazyPagingItems()
     val nothing = {string:String -> string.forEach {  }}
     val nothingB = {string:String, bool: Boolean -> string.forEach {  }}
-    MainScreen(
-        PaddingValues(0.dp),
-        events,
-        nothing,
-        nothingB
-    )
+    EduPlayTheme {
+        MainScreen(
+            PaddingValues(0.dp),
+            events,
+            nothing,
+            nothingB
+        )
+    }
 
 
 }
+

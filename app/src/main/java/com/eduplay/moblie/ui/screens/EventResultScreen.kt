@@ -1,6 +1,7 @@
 package com.eduplay.moblie.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -17,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -30,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,6 +40,7 @@ import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
+import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventResultsViewModel
 
 @Composable
@@ -85,12 +89,14 @@ private fun EventResultScreen(
                 end = innerPaddingValues.calculateEndPadding(LayoutDirection.Ltr)
             )
             .fillMaxSize()
+            .background(color = colorScheme.surface)
     ) {
         ResultTopBar(onExitScreen)
 
         Column(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
+                .background(color = colorScheme.surface)
                 .fillMaxSize()
                 .weight(1f)
         ) {
@@ -98,7 +104,8 @@ private fun EventResultScreen(
 
             Text(
                 text = stringResource(R.string.congratulation),
-                style = typography.headlineMedium,
+                style = typography.headlineMedium
+                    .copy(color = colorScheme.onBackground),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(20.dp)
@@ -113,15 +120,18 @@ private fun EventResultScreen(
             ) {
                 Text(
                     text = stringResource(R.string.you_got) + ":",
-                    style = typography.titleLarge,
+                    style = typography.titleLarge
+                        .copy(color = colorScheme.onBackground),
                 )
                 Text(
                     text = " $points ",
                     style = typography.titleLarge
+                        .copy(color = colorScheme.onBackground)
                 )
                 Text(
                     text = stringResource(R.string.points),
-                    style = typography.titleLarge,
+                    style = typography.titleLarge
+                        .copy(color = colorScheme.onBackground),
                 )
             }
             Image(
@@ -142,6 +152,7 @@ private fun EventResultScreen(
         Button(
             onClick = onExitScreen,
             modifier = Modifier
+                .background(color = colorScheme.surface)
                 .align(Alignment.CenterHorizontally)
                 .fillMaxWidth(0.9f)
         ) {
@@ -166,4 +177,12 @@ private fun ResultTopBar(onExitScreen: () -> Unit) {
             }
         }
     )
+}
+
+@Preview
+@Composable
+private fun EventResultScreenPreview() {
+    EduPlayTheme {
+        EventResultScreen(PaddingValues(), {}, 30)
+    }
 }

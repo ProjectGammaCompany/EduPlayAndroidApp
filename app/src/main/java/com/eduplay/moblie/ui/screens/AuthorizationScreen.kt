@@ -29,6 +29,8 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.AuthResult
+import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.AuthViewModel
 
 @Composable
@@ -143,7 +146,7 @@ private fun AuthorizationScreen(
                         .weight(1f)
                         .fillMaxWidth(formWidth)
                         .wrapContentHeight()
-                        .border(1.dp, colorScheme.tertiary, RoundedCornerShape(10.dp))
+                        .border(1.dp, colorScheme.secondary, RoundedCornerShape(10.dp))
                         .padding(1.dp)
                         .verticalScroll(formScrollState)
                 ) {
@@ -271,10 +274,12 @@ private fun EmailPasswordForm(
 @Preview
 @Composable
 private fun auth() {
-    AuthorizationScreen(
-        {false},
-        {false},
-        {a, b->},
-        {a, b->}
-    )
+    EduPlayTheme {
+        AuthorizationScreen(
+            { false },
+            { false },
+            { a, b -> },
+            { a, b -> }
+        )
+    }
 }

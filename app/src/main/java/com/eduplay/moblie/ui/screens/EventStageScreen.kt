@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -175,7 +176,7 @@ private fun ResultDialog(
                         false -> stringResource(R.string.incorrect)
                         null -> stringResource(R.string.done)
                     },
-                    style = typography.headlineSmall
+                    style = typography.headlineSmall.copy(color = colorScheme.onBackground)
                 )
                 if (isCorrect != null) {
                     if (isCorrect) {
@@ -196,18 +197,18 @@ private fun ResultDialog(
                     Row {
                         Text(
                             text = stringResource(R.string.points) + ":",
-                            style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium).copy(color = colorScheme.onBackground)
                         )
                         Text(
                             text = points.toString(),
-                            style = typography.bodyMedium
+                            style = typography.bodyMedium.copy(color = colorScheme.onBackground)
                         )
                     }
                 }
                 if (answers != null) {
                     Text(
                         text = stringResource(R.string.сorrect_answers) + ":",
-                        style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                        style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium).copy(color = colorScheme.onBackground)
                     )
                     Column(
                         modifier = Modifier
@@ -217,7 +218,7 @@ private fun ResultDialog(
                         answers.forEach { answer ->
                             Text(
                                 text = answer,
-                                style = typography.bodyMedium
+                                style = typography.bodyMedium.copy(color = colorScheme.onBackground)
                             )
                         }
                     }

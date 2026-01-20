@@ -401,7 +401,8 @@ private fun EventScreenHeader(
         )
         Text(
             eventName,
-            style = typography.headlineMedium,
+            style = typography.headlineMedium
+                .copy(color = colorScheme.onBackground),
             maxLines = 3,
             modifier = Modifier
                 .weight(0.6f)
@@ -422,6 +423,7 @@ private fun EventScreenHeader(
                         Text(
                             stringResource(R.string.completed),
                             style = typography.labelSmall
+                                .copy(color = colorScheme.onBackground)
                         )
                     },
                     leadingIcon = {
@@ -441,7 +443,8 @@ private fun EventScreenHeader(
         if (!eventCreatorMode) {
             Text(
                 author,
-                style = typography.labelLarge,
+                style = typography.labelLarge
+                    .copy(color = colorScheme.onBackground),
                 maxLines = 1,
                 color = colorScheme.primary,
                 modifier = Modifier
@@ -477,7 +480,8 @@ private fun GeneralInfo(
         ) {
             Text(
                 text = stringResource(R.string.general_info),
-                style = typography.titleLarge,
+                style = typography.titleLarge
+                    .copy(color = colorScheme.onBackground),
                 modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
             )
             info.forEach { pair ->
@@ -485,24 +489,24 @@ private fun GeneralInfo(
                     Row {
                         Text(
                             text = stringResource(pair.first),
-                            style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                            style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium, color = colorScheme.onBackground),
                             modifier = Modifier.padding(end = 5.dp)
                         )
                         Text(
                             text = pair.second ?: "",
-                            style = typography.bodyMedium
+                            style = typography.bodyMedium.copy(color = colorScheme.onBackground)
                         )
                     }
                 }
             }
             Text(
                 text = stringResource(R.string.description),
-                style = typography.titleLarge,
+                style = typography.titleLarge.copy(color = colorScheme.onBackground),
                 modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
             )
             Text(
                 text = description,
-                style = typography.bodyMedium
+                style = typography.bodyMedium.copy(color = colorScheme.onBackground)
             )
         }
     }
@@ -574,7 +578,7 @@ private fun EventTag(tagName: String) {
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         color = colorScheme.onPrimaryContainer,
-        style = typography.labelLarge,
+        style = typography.labelLarge.copy(color = colorScheme.onPrimaryContainer),
         modifier = Modifier
             .padding(horizontal = 5.dp, vertical = 3.dp)
             .wrapContentWidth()

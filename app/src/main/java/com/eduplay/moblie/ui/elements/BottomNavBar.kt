@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.elements
 
+import android.util.Log
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -14,6 +15,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.toRoute
 import com.eduplay.moblie.R
 
 private enum class Destination(
@@ -39,13 +42,15 @@ fun BottomNavBar(
 ) {
     val startDestination = Destination.MAIN
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
-
+//    Log.d("SCREEN_BOTTOM", navController.currentDestination?.route.toString())
+//    Log.d("SCREEN_BOTTOM", navController.currentBackStackEntry?.toRoute() ?: "")
+//    Log.d("SCREEN_BOTTOM", navController.currentBackStackEntryAsState().value?.destination?.route ?: "")
     if (
         screensToHide.none { screenName ->
-            navController.currentDestination?.route?.startsWith(screenName) ?: false
+            navController.currentBackStackEntryAsState().value?.destination?.route?.startsWith(screenName) ?: false
         }
-
-    )
+    ) {
+        Log.d("SCREEN_BOTTOM", navController.currentDestination?.route ?: "")
 
         NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
             Destination.entries.forEachIndexed { index, destination ->
@@ -76,5 +81,5 @@ fun BottomNavBar(
                 )
             }
         }
-
+    }
 }

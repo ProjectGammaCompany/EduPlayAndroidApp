@@ -66,7 +66,7 @@ fun SingleChoiceTask(viewModel: EventStageViewModelInterface) {
 
                     Text(
                         text = option.value,
-                        style = typography.bodyMedium
+                        style = typography.bodyMedium.copy(color = colorScheme.onBackground)
                             .copy(color = colorScheme.onPrimaryContainer),
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
