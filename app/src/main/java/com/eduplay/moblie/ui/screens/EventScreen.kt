@@ -67,6 +67,7 @@ import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
+import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 
@@ -79,9 +80,22 @@ fun EventScreen(
     viewModel: EventScreenViewModel = hiltViewModel()
 ) {
     var dataFetched by remember { mutableStateOf(false) }
+    var noInternet by remember { mutableStateOf(false) }
+
     if (!dataFetched) {
-        viewModel.fetchData(eventId) { dataFetched = true }
+        viewModel.fetchData(
+            eventId,
+            { dataFetched = true },
+            {noInternet = true})
     }
+
+    if (viewModel.unauthorised.value) {
+        navController.navigate("auth_screen")
+    }
+    if (noInternet) {
+        NoInternetConnectionToast()
+    }
+
     val startEvent = {
         navController.navigate("play_event/${eventId}")
     }

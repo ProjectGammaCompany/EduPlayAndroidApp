@@ -58,6 +58,9 @@ fun EventResultScreen(
     if (noInternet) {
         NoInternetConnectionToast()
     }
+    if (viewModel.unauthorised.value){
+        navController.navigate("auth_screen")
+    }
 
     EventResultScreen(
         innerPaddingValues,

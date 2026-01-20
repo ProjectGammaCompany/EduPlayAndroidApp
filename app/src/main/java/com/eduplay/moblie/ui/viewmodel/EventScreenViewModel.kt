@@ -6,6 +6,7 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.R
+import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventStatus
 import com.eduplay.moblie.repository.EduRepository
@@ -13,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.net.ConnectException
 import java.time.LocalDateTime
 
 @HiltViewModel
@@ -36,16 +38,22 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val description = mutableStateOf("")
     val privateEvent = mutableStateOf(true)
     val cover = mutableStateOf("")
+    val unauthorised = mutableStateOf(false)
 
-    fun fetchData(eventId: String, callBack: () -> Unit) {
+    fun fetchData(eventId: String, callBack: () -> Unit, onNoInternet: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             val role = repository.getRole(eventId)
 
             eventCreatorMode.value = role == EventRole.AUTHOR
-
-            when (role) {
-                EventRole.AUTHOR -> fetchOwnerData(eventId)
-                EventRole.PARTICIPANT -> fetchPlayerData(eventId)
+            try {
+                when (role) {
+                    EventRole.AUTHOR -> fetchOwnerData(eventId)
+                    EventRole.PARTICIPANT -> fetchPlayerData(eventId)
+                }
+            } catch (e: ConnectException) {
+                onNoInternet()
+            } catch (e: NotAuthorisedException) {
+                unauthorised.value = true
             }
         }.invokeOnCompletion { callBack() }
     }

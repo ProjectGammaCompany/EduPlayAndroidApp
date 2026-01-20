@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.repository.EduRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -14,6 +15,7 @@ import java.net.ConnectException
 @HiltViewModel
 class EventResultsViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
     val points = mutableIntStateOf(0)
+    val unauthorised = mutableStateOf(false)
 
     fun fetchResults(eventId: String, onNoInternet: ()->Unit) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -22,6 +24,8 @@ class EventResultsViewModel @Inject constructor(private val repository: EduRepos
                 points.intValue = result.points
             } catch (e: ConnectException) {
                 onNoInternet()
+            } catch (e: NotAuthorisedException) {
+                unauthorised.value = true
             }
         }
     }

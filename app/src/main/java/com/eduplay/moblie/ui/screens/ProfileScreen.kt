@@ -7,19 +7,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -29,17 +24,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
+import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.viewmodel.ProfileViewModel
 
 @Composable
@@ -49,15 +42,30 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
 
+    var noInternet by remember { mutableStateOf(false) }
     var gotProfile by remember { mutableStateOf(false) }
+    val onNoInternet = { noInternet = true }
+    val onFetchedData = { gotProfile = true }
     if (!gotProfile) {
-        viewModel.fetchProfileInfo { gotProfile = true }
+        viewModel.fetchProfileInfo(onFetchedData, onNoInternet)
     }
+
+    if (noInternet) {
+        NoInternetConnectionToast()
+    }
+    if (viewModel.unauthorised.value) {
+        navController.navigate("auth_screen")
+    }
+
     val updateEmail: (String) -> Unit = { newEmail: String ->
         viewModel.email.value = newEmail
     }
     val hasEmailErrors = { email: String -> viewModel.checkEmail(email) }
-    val onLogout = { viewModel.logout() }
+    val onLogout = {
+        viewModel.logout(
+            onNoInternet
+        )
+    }
 
     if (viewModel.canLogout.value) {
         navController.clearBackStack<Any>()
@@ -112,13 +120,13 @@ private fun ProfileScreen(
                     .padding(end = 5.dp)
             )
 //            if (!editEmail) {
-                Text(
-                    text = emailValue,
-                    style = typography.bodyLarge,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(end = 5.dp)
-                )
+            Text(
+                text = emailValue,
+                style = typography.bodyLarge,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(end = 5.dp)
+            )
 //                IconButton(onClick = { editEmail = true }) {
 //                    Icon(
 //                        ImageVector.vectorResource(R.drawable.edit),
@@ -188,7 +196,7 @@ fun ProfilePreview() {
         PaddingValues(),
         {},
         "email",
-        {false},
+        { false },
         {}
-        )
+    )
 }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.responseTypes.Block
@@ -32,7 +33,7 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
     override var points: Int? = null
 
     override var isAnswerCorrect: Boolean? = false
-
+    val unauthorised = mutableStateOf(false)
 
     override fun getNextStage(eventId: String, onNoInternet: ()->Unit) {
         currentStageType.value = StageType.NONE
@@ -46,6 +47,8 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                 taskStartTime = LocalDateTime.parse(result.task?.timeStamp) ?: LocalDateTime.now()
             } catch (e: ConnectException) {
                 onNoInternet()
+            } catch (e: NotAuthorisedException) {
+                unauthorised.value = true
             }
         }.invokeOnCompletion {
             if (currentStageType.value == StageType.TASK && currentTask.value?.timeStamp == null) {
@@ -90,6 +93,8 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                     }
                 } catch (e: ConnectException) {
                     onNoInternet()
+                } catch (e: NotAuthorisedException) {
+                    unauthorised.value = true
                 }
             }
         }
@@ -106,6 +111,8 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                 )
             } catch (e: ConnectException) {
                 onNoInternet()
+            } catch (e: NotAuthorisedException) {
+                unauthorised.value = true
             }
         }
     }
@@ -118,8 +125,10 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
 
             } catch (e: ConnectException){
                 onNoInternet()
-            } catch (e: Exception) {
-
+            } catch (e: NotAuthorisedException) {
+                unauthorised.value = true
+            }
+            catch (e: Exception) {
             }
         }.invokeOnCompletion { currentStageType.value = StageType.NONE }
     }

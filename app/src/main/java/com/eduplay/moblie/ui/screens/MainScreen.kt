@@ -65,6 +65,9 @@ fun MainScreen(
     if (noInternetConnection) {
         NoInternetConnectionToast()
     }
+    if (viewModel.unauthorised.value || eventListViewModel.unauthorised.value) {
+        navController.navigate("auth_screen")
+    }
 
     MainScreen(
         innerPaddingValues,

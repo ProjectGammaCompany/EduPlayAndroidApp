@@ -102,6 +102,9 @@ fun EventStageScreen(
     if (noInternet) {
         NoInternetConnectionToast()
     }
+    if (viewModel.unauthorised.value) {
+        navController.navigate("auth_screen")
+    }
     if (cantShowData) {
         navController.popBackStack()
     }

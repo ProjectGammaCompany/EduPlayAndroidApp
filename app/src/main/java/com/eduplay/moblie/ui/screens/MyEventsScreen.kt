@@ -64,6 +64,10 @@ fun MyEventsScreen(
         NoInternetConnectionToast()
     }
 
+    if (viewModel.unauthorised.value || eventListViewModel.unauthorised.value) {
+        navController.navigate("auth_screen")
+    }
+
 
     val onFavouriteToggle = { id: String, isFavourite: Boolean ->
         eventListViewModel.changeFavourite(id, isFavourite)
