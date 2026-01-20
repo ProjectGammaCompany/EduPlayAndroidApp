@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
+import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.viewmodel.ProfileViewModel
 
@@ -54,7 +55,7 @@ fun ProfileScreen(
         NoInternetConnectionToast()
     }
     if (viewModel.unauthorised.value) {
-        navController.navigate("auth_screen")
+        AuthScreenNavigator(navController)
     }
 
     val updateEmail: (String) -> Unit = { newEmail: String ->
@@ -68,8 +69,7 @@ fun ProfileScreen(
     }
 
     if (viewModel.canLogout.value) {
-        navController.clearBackStack<Any>()
-        navController.navigate("auth_screen")
+        AuthScreenNavigator(navController)
     }
 
     ProfileScreen(

@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.QuestShortInfo
+import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
@@ -66,7 +67,7 @@ fun MyEventsScreen(
     }
 
     if (viewModel.unauthorised.value || eventListViewModel.unauthorised.value) {
-        navController.navigate("auth_screen")
+        AuthScreenNavigator(navController)
     }
 
 

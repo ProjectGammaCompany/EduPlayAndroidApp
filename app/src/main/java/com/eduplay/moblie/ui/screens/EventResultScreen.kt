@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
+import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.viewmodel.EventResultsViewModel
 
@@ -59,7 +60,7 @@ fun EventResultScreen(
         NoInternetConnectionToast()
     }
     if (viewModel.unauthorised.value){
-        navController.navigate("auth_screen")
+        AuthScreenNavigator(navController)
     }
 
     EventResultScreen(

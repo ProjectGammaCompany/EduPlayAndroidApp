@@ -52,7 +52,13 @@ fun BottomNavBar(
                 NavigationBarItem(
                     selected = selectedDestination == index,
                     onClick = {
-                        navController.navigate(route = destination.route)
+                        navController.navigate(route = destination.route) {
+                            navController.currentBackStackEntry?.destination?.route?.let {
+                                popUpTo(
+                                    it
+                                ) { inclusive = true }
+                            }
+                        }
                         selectedDestination = index
                     },
                     icon = {
