@@ -1,5 +1,6 @@
 package com.eduplay.moblie.repository.webrepository
 
+import android.util.Log
 import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
@@ -10,6 +11,7 @@ import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventComplaint
 import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
+import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
@@ -48,14 +50,16 @@ class WebRepository @Inject constructor(
         return false
     }
 
-    override suspend fun register(auth: Auth): AuthResult {
+    override suspend fun register(auth: RegistrationData): AuthResult {
         val response = authApi.register(auth)
         val body = response.body()
+        Log.d("AUTHORISATION", response.code().toString() + response.message())
         if (response.isSuccessful && body != null) {
             tokenManager.saveAccessToken(body.accessToken)
             tokenManager.saveRefreshToken(body.refreshToken)
             return AuthResult.SUCCESSES
-        } // TODO(оделать проверку на причины отказа)
+        }
+
         return AuthResult.INVALID_USER
     }
 
