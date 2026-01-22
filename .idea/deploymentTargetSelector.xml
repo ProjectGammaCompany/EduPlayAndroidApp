@@ -22,7 +22,7 @@
       <SelectionState runConfigName="testButtonClick()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="check_tag_list_is_displayed_when_there_are_tags()">
+      <SelectionState runConfigName="AuthScreenUiTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
