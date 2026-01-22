@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -52,6 +53,7 @@ fun QuestListElement(
             .border(1.dp, colorScheme.tertiary, RoundedCornerShape(10.dp))
             .padding(5.dp)
             .clickable(true, onClick = { onClick() })
+            .testTag("quest_element_main_container")
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -64,9 +66,11 @@ fun QuestListElement(
             placeholder = painterResource(R.drawable.eduplaylogo),
             error = painterResource(id = R.drawable.ic_launcher_background),
             modifier = Modifier
+                .testTag("quest_element_image")
                 .height(60.dp)
                 .width(60.dp)
                 .clip(RoundedCornerShape(10.dp))
+
 
         )
 
@@ -83,8 +87,6 @@ fun QuestListElement(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start,
                     modifier = Modifier
-
-                        //.weight(1f)
                         .padding(start = 5.dp, end = 2.dp)
                         .fillMaxWidth(0.7f)
                 ) {
@@ -95,7 +97,10 @@ fun QuestListElement(
                         textAlign = TextAlign.Start,
                         style = typography.titleLarge
                             .copy(color = colorScheme.onBackground),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .testTag("quest_element_title")
+                            .weight(1f)
+
                     )
                     if (questShortInfo.isDownloaded) {
                         Icon(
@@ -103,8 +108,10 @@ fun QuestListElement(
                             contentDescription = stringResource(id = R.string.downloaded),
                             tint = colorScheme.onBackground,
                             modifier = Modifier
+                                .testTag("quest_element_isDownloaded")
                                 .align(Alignment.CenterVertically)
                                 .weight(0.15f)
+
                         )
                     }
                 }
@@ -115,13 +122,15 @@ fun QuestListElement(
                     style = typography.labelMedium
                         .copy(color = colorScheme.onBackground),
                     modifier = Modifier
+                        .testTag("quest_element_rate")
                         .weight(0.25f)
                         .align(Alignment.CenterVertically)
+
                 )
             }
             // список тегов
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.testTag("tag_row").fillMaxWidth()
             ) {
                 questShortInfo.tags.forEach { tag ->
                     QuestTag(tag)
@@ -134,19 +143,23 @@ fun QuestListElement(
                 isFavourite.value = !isFavourite.value
                 onFavouriteToggle(isFavourite.value)
             }, modifier = Modifier
+                .testTag("quest_element_favourite_btn")
                 .align(Alignment.CenterVertically)
+
         ) {
             if (isFavourite.value) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.star_filled),
                     contentDescription = stringResource(id = R.string.remove_from_favourite),
-                    tint = colorScheme.onBackground
+                    tint = colorScheme.onBackground,
+                    modifier = Modifier.testTag("quest_element_is_favourite")
                 )
             } else {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.star),
                     contentDescription = stringResource(id = R.string.add_to_favourite),
-                    tint = colorScheme.onBackground
+                    tint = colorScheme.onBackground,
+                    modifier = Modifier.testTag("quest_element_isNotFavourite")
                 )
             }
         }
