@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -70,6 +71,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
                     authResult.value = repository
                         .register(RegistrationData(email, password, password))
                 } catch (e: ConnectException) {
+                    Log.d("AUTHORISATION", e.message.toString())
                     noInternetConnection.value = true
                 }
 
