@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -102,7 +103,7 @@ fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel =
 }
 
 @Composable
-private fun AuthorizationScreen(
+fun AuthorizationScreen(
     emailHasErrors: (String) -> Boolean,
     passwordHasErrors: (String) -> Boolean,
     onLogin: (String, String) -> Unit,
@@ -184,7 +185,6 @@ private fun EmailPasswordForm(
     onSubmitForm: (String, String) -> Unit,
     mainButtonLabel: Int,
     switchButtonLabel: Int,
-
     ) {
     var passwordVisible by remember { mutableStateOf(false) }
     val email = rememberTextFieldState()
@@ -194,6 +194,7 @@ private fun EmailPasswordForm(
         style = typography.headlineLarge,
         modifier = Modifier
             .padding(vertical = 30.dp)
+            .testTag("form_header")
     )
 
     // email field
@@ -207,6 +208,7 @@ private fun EmailPasswordForm(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 15.dp)
+            .testTag("email_field")
     )
 
     // password field
@@ -234,17 +236,18 @@ private fun EmailPasswordForm(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 30.dp)
+            .testTag("password_field")
     )
 
     //submit btn
     Button(
         onClick = { onSubmitForm(email.text.toString(), password) },
-        modifier = Modifier.fillMaxWidth(0.9f)
+        modifier = Modifier.fillMaxWidth(0.9f).testTag("main_btn")
     ) {
         Text(
             text = stringResource(mainButtonLabel),
-            style = TextStyle(color = colorScheme.onPrimary)
-
+            style = TextStyle(color = colorScheme.onPrimary),
+            modifier = Modifier.testTag("main_btn_text")
         )
     }
 
@@ -261,10 +264,12 @@ private fun EmailPasswordForm(
             .fillMaxWidth(0.9f)
             .background(colorScheme.background)
             .padding(bottom = 20.dp)
+            .testTag("secondary_btn")
     ) {
         Text(
             text = stringResource(switchButtonLabel),
-            style = TextStyle(color = colorScheme.onBackground)
+            style = TextStyle(color = colorScheme.onBackground),
+            modifier = Modifier.testTag("secondary_btn_text")
 
         )
     }
