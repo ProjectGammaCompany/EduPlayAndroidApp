@@ -83,7 +83,7 @@ fun EventScreen(
     eventId: String,
     navController: NavController,
     viewModel: EventScreenViewModel = hiltViewModel(),
-    imageHeaderViewModel: ImageHeaderViewModel
+    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
     var dataFetched by remember { mutableStateOf(false) }
     var noInternet by remember { mutableStateOf(false) }

@@ -15,6 +15,7 @@ object ResponseConverter {
         return QuestShortInfo(
             id = eventResponse.id,
             name = eventResponse.title,
+            description = eventResponse.description,
             imageUrl = eventResponse.cover,
             rate = eventResponse.rate,
             isFavourite = eventResponse.favorite,

@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,7 @@ import androidx.navigation.NavController
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import coil3.network.NetworkHeaders
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
@@ -47,6 +49,7 @@ import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
+import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
 import kotlinx.coroutines.flow.flowOf
 
@@ -55,7 +58,8 @@ fun MainScreen(
     innerPaddingValues: PaddingValues,
     navController: NavController,
     viewModel: MainScreenViewModel = hiltViewModel(),
-    eventListViewModel: EventListViewModel = hiltViewModel()
+    eventListViewModel: EventListViewModel = hiltViewModel(),
+    imageHeaderViewModel: ImageHeaderViewModel
 ) {
     var noInternetConnection by remember { mutableStateOf(false) }
 
@@ -78,7 +82,8 @@ fun MainScreen(
         innerPaddingValues,
         viewModel.getEventList { noInternetConnection = true }.collectAsLazyPagingItems(),
         onEventClick,
-        onFavourite
+        onFavourite,
+        imageHeaderViewModel.headers
     )
 }
 
@@ -88,7 +93,8 @@ private fun MainScreen(
     innerPaddingValues: PaddingValues,
     events: LazyPagingItems<QuestShortInfo>,
     onEventClick: (String) -> Unit,
-    onFavourite: (String, Boolean) -> Unit
+    onFavourite: (String, Boolean) -> Unit,
+    headers: State<NetworkHeaders>
 ) {
     Column(
         modifier = Modifier
@@ -137,7 +143,8 @@ private fun MainScreen(
                     QuestListElement(
                         itemValue,
                         onEventClick,
-                        { isFavourite -> onFavourite(itemValue.id, isFavourite) }
+                        { isFavourite -> onFavourite(itemValue.id, isFavourite) },
+                        headers
                     )
                 }
             }
@@ -150,12 +157,14 @@ private fun MainScreen(
 @Preview
 @Composable
 fun MainScreenPreview() {
+    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
     val events = flowOf<PagingData<QuestShortInfo>>(
         PagingData.from(
             listOf<QuestShortInfo>(
                 QuestShortInfo(
                     "1",
                     "test",
+                    "",
                     "",
                     1.0,
                     false,
@@ -165,6 +174,7 @@ fun MainScreenPreview() {
                 QuestShortInfo(
                     "2",
                     "test",
+                    "",
                     "",
                     1.0,
                     true,
@@ -181,7 +191,8 @@ fun MainScreenPreview() {
             PaddingValues(0.dp),
             events,
             nothing,
-            nothingB
+            nothingB,
+            headers
         )
     }
 
