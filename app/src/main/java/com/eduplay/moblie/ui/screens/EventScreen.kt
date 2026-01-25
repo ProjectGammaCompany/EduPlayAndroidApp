@@ -44,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +65,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
@@ -71,6 +74,7 @@ import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
+import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +82,8 @@ fun EventScreen(
     innerPaddingValues: PaddingValues,
     eventId: String,
     navController: NavController,
-    viewModel: EventScreenViewModel = hiltViewModel()
+    viewModel: EventScreenViewModel = hiltViewModel(),
+    imageHeaderViewModel: ImageHeaderViewModel
 ) {
     var dataFetched by remember { mutableStateOf(false) }
     var noInternet by remember { mutableStateOf(false) }
@@ -158,7 +163,8 @@ fun EventScreen(
         onShowComplaintDialog,
         startEvent,
         showResults,
-        onReturn
+        onReturn,
+        imageHeaderViewModel.headers
     )
 }
 
@@ -182,7 +188,8 @@ private fun EventScreen(
     onShowComplaintDialog: ()->Unit,
     startEvent: ()->Unit,
     showResults: ()->Unit,
-    onReturn: ()->Boolean
+    onReturn: ()->Boolean,
+    headers: State<NetworkHeaders>
 ){
     Column(
         modifier = Modifier
@@ -208,7 +215,8 @@ private fun EventScreen(
             author,
             eventCreatorMode,
             isCompleted,
-            cover
+            cover,
+            headers
         )
 
         if (eventCreatorMode) {
@@ -382,13 +390,14 @@ private fun EventScreenHeader(
     author: String,
     eventCreatorMode: Boolean,
     isCompleted: Boolean,
-    cover: String?
+    cover: String?,
+    headers: State<NetworkHeaders>
 ) {
     Row(Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(cover)
-                //.httpHeaders(headers = headers) //TODO("pass headers")
+                .httpHeaders(headers = headers.value) //TODO("pass headers")
                 .networkCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),

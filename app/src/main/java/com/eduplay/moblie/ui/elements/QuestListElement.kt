@@ -32,15 +32,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.QuestShortInfo
+import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 
 @Composable
 fun QuestListElement(
-    questShortInfo: QuestShortInfo, onClick: () -> Unit, onFavouriteToggle: (Boolean) -> Unit
+    questShortInfo: QuestShortInfo, onClick: () -> Unit, onFavouriteToggle: (Boolean) -> Unit,
+    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
 
     val isFavourite = remember { mutableStateOf(questShortInfo.isFavourite) }
@@ -56,7 +61,7 @@ fun QuestListElement(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(questShortInfo.imageUrl)
-                //.httpHeaders(headers = headers) //TODO("pass headers")
+                .httpHeaders( imageHeaderViewModel.headers.value)
                 .networkCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
