@@ -19,7 +19,7 @@ class RefreshInterceptor @Inject constructor(
         val request: Request = chain.request()
         val response: Response = chain.proceed(request);
 
-        if (response.code == 401) {
+        if (response.code >= 400 && response.code  < 500) {
             response.close()
 
             val refreshToken: String?
@@ -30,17 +30,18 @@ class RefreshInterceptor @Inject constructor(
                 throw NotAuthorisedException("no access token")
             }
 
-            val tokenResponse = api.refresh(Refresh(refreshToken))
+            val tokenResponse =
+                runBlocking {
+                    api.refresh(Refresh(refreshToken))
+                }
             val newTokens = tokenResponse.body()
             if (!tokenResponse.isSuccessful || newTokens == null) {
                 throw NotAuthorisedException("refresh token failed")
             }
 
             runBlocking {
-                launch {
-                    tokenManager.saveAccessToken(newTokens.accessToken)
-                    tokenManager.saveRefreshToken(newTokens.refreshToken)
-                }
+                tokenManager.saveAccessToken(newTokens.accessToken)
+                tokenManager.saveRefreshToken(newTokens.refreshToken)
             }
 
             val newRequest: Request = request

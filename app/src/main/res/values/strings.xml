@@ -67,4 +67,6 @@
     <string name="complaint">Complaint</string>
     <string name="no_internet">No internet connection</string>
     <string name="no_registration">This account is not registered</string>
+    <string name="partialy_correct">Partially correct</string>
+    <string name="try_again_later">An error occured, try again later.</string>
 </resources>

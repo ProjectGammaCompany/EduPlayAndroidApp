@@ -1,6 +1,6 @@
 package com.eduplay.moblie.repository.requestTypes
 
 data class Auth(
-    val login: String,
+    val email: String,
     val password: String
 )

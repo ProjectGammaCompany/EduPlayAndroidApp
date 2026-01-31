@@ -19,7 +19,7 @@ interface AuthApi {
 
     @POST("/auth/refresh")
     @InjectAuth
-    fun refresh(@Body refresh: Refresh): Response<AuthResponse>
+    suspend fun refresh(@Body refresh: Refresh): Response<AuthResponse>
 
     @POST("/auth/register")
     suspend fun register(@Body auth: RegistrationData): Response<AuthResponse>

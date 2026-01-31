@@ -34,7 +34,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
@@ -47,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,6 +60,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -70,6 +71,7 @@ import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.theme.Typography
@@ -174,21 +176,21 @@ private fun EventScreen(
     eventCreatorMode: Boolean,
     isEventFavourite: Boolean,
     eventName: String,
-    tags: List<String>,
+    tags: SnapshotStateList<EventTag>,
     author: String,
     isCompleted: Boolean,
     cover: String,
     info: SnapshotStateList<Pair<Int, String?>>,
-    description:String,
+    description: String,
     privateEvent: Boolean,
     isOpen: Boolean,
     isContinuing: Boolean,
-    onEditEvent: ()->Unit,
-    onAddToFavourite: ()->Unit,
-    onShowComplaintDialog: ()->Unit,
-    startEvent: ()->Unit,
-    showResults: ()->Unit,
-    onReturn: ()->Boolean,
+    onEditEvent: () -> Unit,
+    onAddToFavourite: () -> Unit,
+    onShowComplaintDialog: () -> Unit,
+    startEvent: () -> Unit,
+    showResults: () -> Unit,
+    onReturn: () -> Boolean,
     headers: State<NetworkHeaders>
 ){
     Column(
@@ -467,7 +469,7 @@ private fun EventScreenHeader(
 
 @Composable
 private fun GeneralInfo(
-    tags: List<String>,
+    tags: SnapshotStateList<EventTag>,
     info: List<Pair<Int, String?>>,
     description: String
 ) {
@@ -479,7 +481,7 @@ private fun GeneralInfo(
     ) {
         FlowRow(modifier = Modifier.fillMaxWidth()) {
             tags.forEach { tagName ->
-                EventTag(tagName)
+                EventTag(tagName.name)
             }
         }
         Column(
@@ -524,7 +526,7 @@ private fun GeneralInfo(
 
 @Composable
 private fun GeneralUserBody(
-    tags: List<String>,
+    tags: SnapshotStateList<EventTag>,
     info: List<Pair<Int, String?>>,
     description: String,
     isOpen: Boolean,
@@ -599,7 +601,7 @@ private fun EventTag(tagName: String) {
 
 @Composable
 private fun EventCreatorBody(
-    tags: List<String>,
+    tags: SnapshotStateList<EventTag>,
     info: List<Pair<Int, String?>>,
     description: String,
     privateEvent: Boolean
@@ -649,4 +651,31 @@ private fun EventCreatorBody(
 private fun StatisticsInfo() {
     Text("Coming soon")
     //TODO("статистики на экране статистик")
+}
+
+@Composable
+@Preview
+private fun Event() {
+    EventScreen(
+        PaddingValues(),
+        isEventFavourite = true,
+        eventCreatorMode = true,
+        eventName = "Событие",
+        tags = remember {  mutableStateListOf<EventTag>(EventTag("", "tag1"))},
+        author = "Author",
+        isCompleted = false,
+        cover = "",
+        info = remember {  mutableStateListOf<Pair<Int, String>>()} as SnapshotStateList<Pair<Int, String?>>,
+        description = "Some information",
+        privateEvent = false,
+        isOpen = false,
+        isContinuing = false,
+        onEditEvent = {},
+        onAddToFavourite = {  },
+        onShowComplaintDialog = {},
+        startEvent = {},
+        showResults = {  },
+        onReturn = {false},
+        headers = remember { mutableStateOf(NetworkHeaders.Builder().build())}
+    )
 }

@@ -19,6 +19,7 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
     val avatar = mutableStateOf("")
     val password = mutableStateOf("")
     val canLogout = mutableStateOf(false)
+    val gotData = mutableStateOf(false)
 
     val unauthorised = mutableStateOf(false)
 
@@ -28,17 +29,22 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
                 canLogout.value = repository.logout()
             } catch (e: ConnectException) {
                 onErrorCallBack()
+
             } catch (e: NotAuthorisedException) {
                 unauthorised.value = true
+                canLogout.value = true
+            } catch (e:Exception) {
+                canLogout.value = true
             }
         }
     }
 
-    fun fetchProfileInfo(onCompletion: () -> Unit, onErrorCallBack: () -> Unit) {
+    fun fetchProfileInfo(onErrorCallBack: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             var result: ProfileInfo
             try {
                 result = repository.getProfile()
+                gotData.value = true
             } catch (e: ConnectException) {
                 onErrorCallBack()
                 result = ProfileInfo("", "")
@@ -46,9 +52,9 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
                 unauthorised.value = true
                 result = ProfileInfo("", "")
             }
-            email.value = result.email
+            email.value = result.username
             avatar.value = result.avatar
-        }.invokeOnCompletion { onCompletion() }
+        }
     }
 
     fun checkEmail(email: String): Boolean {

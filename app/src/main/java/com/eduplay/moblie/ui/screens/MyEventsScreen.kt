@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,10 +42,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.network.NetworkHeaders
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.MyEventsViewModel
@@ -241,5 +244,43 @@ private fun MyEventsTopBar() {
 @Composable
 @Preview
 fun MyEventsPreview() {
-
+    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+    val events = remember {
+        mutableStateListOf<QuestShortInfo>(
+            QuestShortInfo(
+                "1",
+                "test",
+                "",
+                "",
+                1.0,
+                false,
+                listOf(),
+                false
+            ),
+            QuestShortInfo(
+                "2",
+                "test",
+                "",
+                "",
+                1.0,
+                true,
+                listOf(EventTag("id", "tag 1"), EventTag("id", "tag 2")),
+                true
+            )
+        )
+    }
+val a = {str: String, b: Boolean -> str.forEach {  }}
+    EduPlayTheme {
+        MyEventsScreen(
+            PaddingValues(),
+            a,
+            events,
+            events,
+            events,
+            {},
+            { },
+            {},
+            headers
+        )
+    }
 }

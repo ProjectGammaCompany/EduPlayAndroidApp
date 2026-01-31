@@ -59,9 +59,10 @@ fun ProfileScreen(
     var noInternet by remember { mutableStateOf(false) }
     var gotProfile by remember { mutableStateOf(false) }
     val onNoInternet = { noInternet = true }
-    val onFetchedData = { gotProfile = true }
+    val onFetchedData = {  }
     if (!gotProfile) {
-        viewModel.fetchProfileInfo(onFetchedData, onNoInternet)
+        viewModel.fetchProfileInfo(onNoInternet)
+        gotProfile = true
     }
 
     if (noInternet) {
@@ -88,7 +89,7 @@ fun ProfileScreen(
     ProfileScreen(
         innerPaddingValues,
         updateEmail,
-        viewModel.email.value,
+        viewModel.email,
         hasEmailErrors,
         onLogout,
         viewModel.avatar.value,
@@ -101,14 +102,13 @@ fun ProfileScreen(
 private fun ProfileScreen(
     innerPaddingValues: PaddingValues,
     updateEmail: (String) -> Unit,
-    email: String,
+    email: State<String>,
     hasEmailErrors: (String) -> Boolean,
     onLogout: () -> Unit,
     avatar: String,
     headers: State<NetworkHeaders>
 ) {
     var editEmail by remember { mutableStateOf(false) }
-    var emailValue by remember { mutableStateOf(email) }
 
     Column(
         modifier = Modifier
@@ -129,7 +129,7 @@ private fun ProfileScreen(
                 .networkCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
-            contentDescription = email,
+            contentDescription = email.value,
             placeholder = painterResource(R.drawable.eduplaylogo),
             error = painterResource(id = R.drawable.ic_launcher_background),
             modifier = Modifier
@@ -156,7 +156,7 @@ private fun ProfileScreen(
             )
 //            if (!editEmail) {
                 Text(
-                    text = emailValue,
+                    text = email.value,
                     style = typography.bodyLarge.copy(color = colorScheme.onBackground),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
@@ -230,7 +230,7 @@ fun ProfilePreview() {
     ProfileScreen(
         PaddingValues(),
         {},
-        "email",
+        remember { mutableStateOf("email") },
         { false },
         {},
         "",

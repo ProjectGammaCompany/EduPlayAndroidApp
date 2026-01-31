@@ -7,6 +7,6 @@ data class QuestShortInfo(
     val imageUrl: String,
     val rate: Double,
     val isFavourite: Boolean,
-    val tags: List<String>,
+    val tags: List<EventTag>,
     val isDownloaded: Boolean
 )

@@ -39,6 +39,7 @@ import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 
 @Composable
@@ -128,7 +129,7 @@ fun QuestListElement(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 questShortInfo.tags.forEach { tag ->
-                    QuestTag(tag)
+                    QuestTag(tag.name)
                 }
 
             }
@@ -199,7 +200,11 @@ fun QuestListElementPreview() {
                 "some url",
                 4.3333333,
                 true,
-                listOf("tag 1", "funny", "long as hell tag"),
+                listOf(
+                    EventTag("", "tag 1"),
+                    EventTag("", "funny"),
+                    EventTag("", "long as hell tag")
+                ),
                 true
             ), {}, {}, headers
         )
@@ -212,7 +217,14 @@ fun QuestListElementPreview() {
                 "some url",
                 4.3333333,
                 false,
-                listOf("tag 1", "funny", "long as hell tag", "o", "long as hell tag"),
+                listOf(
+                    EventTag("", "tag 1"),
+                    EventTag("", "funny"),
+                    EventTag("", "long as hell tag"),
+                    EventTag("", "long as hell tag"),
+                    EventTag("", "long as hell tag"),
+                    EventTag("", "long as hell tag"),
+                ),
                 false
             ), {},
             {},

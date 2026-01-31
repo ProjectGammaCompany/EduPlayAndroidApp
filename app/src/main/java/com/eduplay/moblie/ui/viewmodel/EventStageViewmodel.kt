@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -10,6 +11,7 @@ import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.Task
+import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
@@ -17,7 +19,8 @@ import java.net.ConnectException
 import java.time.LocalDateTime
 
 @HiltViewModel
-class EventStageViewmodel @Inject constructor(private val repository: EduRepository) : ViewModel(), EventStageViewModelInterface {
+class EventStageViewmodel @Inject constructor(private val repository: EduRepository) : ViewModel(),
+    EventStageViewModelInterface {
     override val currentStageType = mutableStateOf(StageType.NONE)
 
     override var currentTask = mutableStateOf<Task?>(null)
@@ -32,10 +35,10 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
     override val correctAnswer = mutableListOf<String>()
     override var points: Int? = null
 
-    override var isAnswerCorrect: Boolean? = false
+    override var isAnswerCorrect: TaskAnswerStatus? = null
     val unauthorised = mutableStateOf(false)
 
-    override fun getNextStage(eventId: String, onNoInternet: ()->Unit) {
+    override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
         currentStageType.value = StageType.NONE
         viewModelScope.launch {
             try {
@@ -49,6 +52,8 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                 onNoInternet()
             } catch (e: NotAuthorisedException) {
                 unauthorised.value = true
+            } catch (e: Exception) {
+
             }
         }.invokeOnCompletion {
             if (currentStageType.value == StageType.TASK && currentTask.value?.timeStamp == null) {
@@ -63,15 +68,15 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
         showResults.value = false
         correctAnswer.clear()
         points = null
-        isAnswerCorrect = false
+        isAnswerCorrect = null
     }
 
-    override fun sendAnswer(eventId: String,  onNoInternet: ()->Unit) {
+    override fun sendAnswer(eventId: String, onNoInternet: () -> Unit) {
         disableTask.value = true
         if (currentStageType.value == StageType.TASK) {
             viewModelScope.launch {
                 val resultingAnswer =
-                    if (currentTask.value!!.type == TaskType.MULTIPLE_CHOICE) {
+                    if (TaskType.valueOf(currentTask.value!!.type) == TaskType.MULTIPLE_CHOICE) {
                         answers.toList()
                     } else {
                         listOf(answers.last())
@@ -91,16 +96,18 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                     } else {
                         showResults.value = true
                     }
-                } catch (e: ConnectException) {
+                } catch (_: ConnectException) {
                     onNoInternet()
-                } catch (e: NotAuthorisedException) {
+                } catch (_: NotAuthorisedException) {
                     unauthorised.value = true
+                } catch (e: Exception) {
+                    Log.e("send stage answer view model", e.message ?: e.toString())
                 }
             }
         }
     }
 
-    private fun sendStartTime(eventId: String,  onNoInternet: ()->Unit) {
+    private fun sendStartTime(eventId: String, onNoInternet: () -> Unit) {
         viewModelScope.launch {
             try {
                 repository.postTaskStartTime(
@@ -109,26 +116,26 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                     currentTask.value?.id ?: "",
                     taskStartTime
                 )
-            } catch (e: ConnectException) {
+            } catch (_: ConnectException) {
                 onNoInternet()
-            } catch (e: NotAuthorisedException) {
+            } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
             }
         }
     }
 
-    override fun chooseTask(eventId: String, taskId: String, onNoInternet: ()->Unit) {
+    override fun chooseTask(eventId: String, taskId: String, onNoInternet: () -> Unit) {
         viewModelScope.launch {
             try {
                 repository.postTaskChoice(eventId, currentBlock.value?.id ?: "", taskId)
-            } catch (e: IllegalAccessException) {
+            } catch (_: IllegalAccessException) {
 
-            } catch (e: ConnectException){
+            } catch (_: ConnectException) {
                 onNoInternet()
-            } catch (e: NotAuthorisedException) {
+            } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
+                Log.e("send stage answer view model", e.message ?: e.toString())
             }
         }.invokeOnCompletion { currentStageType.value = StageType.NONE }
     }

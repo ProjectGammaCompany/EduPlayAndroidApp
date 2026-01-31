@@ -5,5 +5,13 @@ enum class TaskType(val optionNumber: Int) {
     SINGLE_CHOICE(1),
     MULTIPLE_CHOICE(2),
     TEXT(3),
-    QR(4)
+    QR(4);
+    companion object {
+        fun valueOf(optionNumber: Int): TaskType {
+            for (e in TaskType.entries) {
+                if (e.optionNumber == optionNumber) return e
+            }
+            return TaskType.INFO
+        }
+    }
 }

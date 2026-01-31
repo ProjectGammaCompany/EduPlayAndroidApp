@@ -5,10 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.Format
 import com.eduplay.moblie.R
 import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventStatus
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.repository.EduRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -29,7 +31,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val rating = mutableStateOf("")
     val opens = mutableStateOf<String?>(null)
     val closes = mutableStateOf<String?>(null)
-    var tags = mutableStateListOf<String>()
+    var tags = mutableStateListOf<EventTag>()
     val info = mutableStateListOf<Pair<Int, String?>>(
         Pair(R.string.rating, rating.value),
         Pair(R.string.opens, opens.value),
@@ -54,6 +56,8 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
                 onNoInternet()
             } catch (e: NotAuthorisedException) {
                 unauthorised.value = true
+            } catch (e: IllegalStateException) {
+                onNoInternet()
             }
         }.invokeOnCompletion { callBack() }
     }
@@ -64,8 +68,8 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         isEventFavourite.value = data.favorite
 
         tags = data.tags.toMutableStateList()
-        opens.value = data.startDate
-        closes.value = data.endDate
+        opens.value = data.startDate?.substring(0..data.startDate.length-5)
+        closes.value = data.endDate?.substring(0..data.endDate.length-5)
         rating.value = data.rate.toString() + '⭐'
         description.value = data.description
 
@@ -78,19 +82,22 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
             )
         )
 
-        //TODO("check status")
+
         isOpen.value = !data.completed && data.status != EventStatus.ENDED
-                && (data.startDate == null || LocalDateTime.now() >= LocalDateTime.parse(data.startDate))
+//                && (data.startDate == null || LocalDateTime.now() >= LocalDateTime.parse(
+//            data.startDate, LocalDateTime.ofp { byUnicodePattern("yyyy-MM-dd HH:mm:ss.SSS")}
+//                )
+//                        )
         isContinuing.value = isOpen.value && data.status == EventStatus.STARTED
-                && (
-                data.endDate == null
-                        || (LocalDateTime.now() >= LocalDateTime.parse(data.startDate)
-                        && LocalDateTime.now() <= LocalDateTime.parse(data.endDate)
-                        )
-                )
+//                && (
+//                data.endDate == null
+//                        || (LocalDateTime.now() >= LocalDateTime.parse(data.startDate)
+//                        && LocalDateTime.now() <= LocalDateTime.parse(data.endDate)
+//                        )
+//                )
 
         eventName.value = data.title
-        author.value = data.authors.joinToString(", ")
+        author.value = data.authors.joinToString(", ") { it.email }
         isCompleted.value = data.completed
     }
 
@@ -110,7 +117,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
                 Pair(R.string.rating, rating.value),
                 Pair(R.string.opens, opens.value),
                 Pair(R.string.closes, closes.value),
-                Pair(R.string.groups, data.groups.joinToString { ", " }),
+                Pair(R.string.groups, data.groupNames.joinToString { ", " }),
                 Pair(R.string.last_edition, data.lastEditionDate),
             )
         )

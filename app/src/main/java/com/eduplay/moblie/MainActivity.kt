@@ -22,6 +22,7 @@ import com.eduplay.moblie.ui.screens.EventStageScreen
 import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.screens.MyEventsScreen
 import com.eduplay.moblie.ui.screens.ProfileScreen
+import com.eduplay.moblie.ui.screens.SplashScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -43,7 +44,11 @@ class MainActivity : ComponentActivity() {
                     bottomBar = { BottomNavBar(navController, hideBottomBarScreens) }
                 ) { innerPadding ->
 
-                    NavHost(navController = navController, startDestination = "auth_screen") {
+                    NavHost(navController = navController, startDestination = "splash") {
+
+                        composable("splash") {
+                            SplashScreen(navController)
+                        }
                         composable("auth_screen") {
                             AuthorizationScreen(
                                 navController = navController
@@ -58,7 +63,7 @@ class MainActivity : ComponentActivity() {
                         ) { pathArgs ->
                             EventScreen(
                                 innerPadding,
-                                pathArgs.arguments?.getString("userId") ?: "",
+                                pathArgs.arguments?.getString("eventId") ?: "",
                                 navController
                             )
                         }

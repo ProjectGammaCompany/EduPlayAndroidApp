@@ -13,6 +13,7 @@ import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.AuthResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
+import com.eduplay.moblie.repository.responseTypes.EventRoleResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
@@ -36,7 +37,7 @@ interface WebApi {
         @Query("active") active: Boolean = false
     ): Response<EventListResponse>
 
-    @GET("/events/personal/favourites")
+    @GET("/events/personal/favorites")
     @InjectAuth
     suspend fun favouriteEvents(
         @Query("page") page: Int = 1,
@@ -57,7 +58,7 @@ interface WebApi {
         @Query("maxOnPage") maxOnPage: Int = 10,
     ): Response<EventListResponse>
 
-    @POST("/events/personal/addToFavourites")
+    @PUT("events/personal/favorites")
     @InjectAuth
     suspend fun addToFavourite(
         @Body event: FavoriteEvent
@@ -67,7 +68,7 @@ interface WebApi {
     @InjectAuth
     suspend fun getUserEventRole(
         @Path("eventId") eventId: String
-    ): Response<EventRole>
+    ): Response<EventRoleResponse>
 
     @GET("/event/{eventId}/playerInfo")
     @InjectAuth
@@ -85,13 +86,13 @@ interface WebApi {
     @InjectAuth
     suspend fun getProfile(): Response<ProfileInfo>
 
-    @GET("/eventId/{eventId}/nextStage")
+    @GET("/event/{eventId}/nextStage")
     @InjectAuth
     suspend fun getNextStage(
         @Path("eventId") eventId: String
     ): Response<EventStage>
 
-    @POST("/eventId/{eventId}/nextStage")
+    @PUT("/event/{eventId}/nextStage")
     @InjectAuth
     suspend fun postTaskChoice(
         @Path("eventId") eventId: String,

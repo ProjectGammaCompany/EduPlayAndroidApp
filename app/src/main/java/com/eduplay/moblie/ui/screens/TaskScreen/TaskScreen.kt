@@ -64,6 +64,7 @@ import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.Task
+import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 import kotlinx.coroutines.delay
@@ -92,7 +93,7 @@ fun TaskScreen(
     val onSubmit = {
         viewModel.sendAnswer(eventId, onNoInternet)
     }
-    if (taskType == TaskType.QR && showQr) {
+    if (taskType == TaskType.QR.optionNumber && showQr) {
 
         QRCameraPreview(
             innerPaddingValues,
@@ -124,7 +125,7 @@ fun TaskScreen(
                 // header
                 TaskHeader(
                     height,
-                    taskType,
+                    TaskType.valueOf(taskType),
                     viewModel.currentTask.value!!.name,
                     viewModel.currentTask.value!!.description ?: "",
                     viewModel.currentTask.value!!.time,
@@ -136,7 +137,7 @@ fun TaskScreen(
                 //task
 
                 Box(modifier = Modifier.weight(2f)) {
-                    when (taskType) {
+                    when (TaskType.valueOf(taskType)) {
                         TaskType.INFO -> {}
                         TaskType.SINGLE_CHOICE -> SingleChoiceTask(viewModel)
                         TaskType.MULTIPLE_CHOICE -> MultipleChoiceTask(viewModel)
@@ -147,7 +148,7 @@ fun TaskScreen(
 
                 //next btn
                 if (isSubmitBtnShown) {
-                    SubmitBtn(taskType, { viewModel.sendAnswer(eventId, onNoInternet) })
+                    SubmitBtn(TaskType.valueOf(taskType), { viewModel.sendAnswer(eventId, onNoInternet) })
                 }
             }
         }
@@ -378,16 +379,16 @@ fun TaskPreview() {
                         Task(
                             "1",
                             "1",
-                            "Task",
-                            "task asjfnkjdsfnsskjndfkjn",
-                            TaskType.TEXT,
+                            "Задание 4 ",
+                            "Отсканировать код",
+                            TaskType.QR.optionNumber,
                             listOf(
-                                AnswerOption("1", "option1", false),
-                                AnswerOption("1", "option1", false),
-                                AnswerOption("1", "option1", false),
-                                AnswerOption("1", "option1", false),
-                                AnswerOption("1", "option1", false),
-                                AnswerOption("1", "option1", false)
+                                AnswerOption("1", "ответ 1", false),
+                                AnswerOption("0", "ответ 2", false),
+                                AnswerOption("2", "ответ 3", false),
+                                AnswerOption("3", "ответ 4", false),
+                                AnswerOption("4", "ответ 5", false),
+                                AnswerOption("5", "ответ 6", false)
                             ),
                             listOf("1", "option1"),
                             30,
@@ -412,7 +413,7 @@ fun TaskPreview() {
                 override var points: Int?
                     get() = TODO("Not yet implemented")
                     set(value) {}
-                override var isAnswerCorrect: Boolean?
+                override var isAnswerCorrect: TaskAnswerStatus?
                     get() = TODO("Not yet implemented")
                     set(value) {}
 

@@ -32,7 +32,9 @@ class WebRepository @Inject constructor(
     override suspend fun login(auth: Auth): AuthResult {
         val response = authApi.login(auth)
         val body = response.body()
+        Log.d("Requests AUTHORISATION", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
+            Log.d("Requests AUTHORISATION", body.accessToken)
             tokenManager.saveAccessToken(body.accessToken)
             tokenManager.saveRefreshToken(body.refreshToken)
             return AuthResult.SUCCESSES
@@ -53,8 +55,9 @@ class WebRepository @Inject constructor(
     override suspend fun register(auth: RegistrationData): AuthResult {
         val response = authApi.register(auth)
         val body = response.body()
-        Log.d("AUTHORISATION", response.code().toString() + response.message())
+        Log.d("Requests AUTHORISATION", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
+            Log.d("Requests AUTHORISATION", body.accessToken)
             tokenManager.saveAccessToken(body.accessToken)
             tokenManager.saveRefreshToken(body.refreshToken)
             return AuthResult.SUCCESSES
@@ -66,6 +69,7 @@ class WebRepository @Inject constructor(
     override suspend fun getEvents(page: Int): List<QuestShortInfo> {
         val response = api.allEvents(page = page)
         val body = response.body()
+        Log.d("Requests events", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
         } // TODO(оделать проверку на причины отказа)
@@ -73,10 +77,12 @@ class WebRepository @Inject constructor(
     }
 
     override suspend fun getRole(eventId: String): EventRole {
+
         val response = api.getUserEventRole(eventId)
         val body = response.body()
+        Log.d("Requests role", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
-            return body
+            return if (body.role == 1) EventRole.AUTHOR else EventRole.PARTICIPANT
         }
         throw IllegalAccessException("No role for this event")
     }
@@ -84,6 +90,7 @@ class WebRepository @Inject constructor(
     override suspend fun getPlayerEventInfo(eventId: String): EventPlayerInfo {
         val response = api.getEventInfoPlayer(eventId)
         val body = response.body()
+        Log.d("Requests player info", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         }
@@ -93,6 +100,7 @@ class WebRepository @Inject constructor(
     override suspend fun getOwnerEventInfo(eventId: String): EventOwnerInfo {
         val response = api.getEventInfoCreator(eventId)
         val body = response.body()
+        Log.d("Requests owner event", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         }
@@ -102,6 +110,7 @@ class WebRepository @Inject constructor(
     override suspend fun getFavouriteEvents(page: Int, maxOnPage: Int): List<QuestShortInfo> {
         val response = api.favouriteEvents(page, maxOnPage)
         val body = response.body()
+        Log.d("Requests get favourite", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
         } // TODO(оделать проверку на причины отказа)
@@ -111,6 +120,7 @@ class WebRepository @Inject constructor(
     override suspend fun getCreatedEvents(page: Int, maxOnPage: Int): List<QuestShortInfo> {
         val response = api.createdEvents(page, maxOnPage)
         val body = response.body()
+        Log.d("Requests created events", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
         } // TODO(оделать проверку на причины отказа)
@@ -120,6 +130,7 @@ class WebRepository @Inject constructor(
     override suspend fun getCompletedEvents(page: Int, maxOnPage: Int): List<QuestShortInfo> {
         val response = api.completedEvents(page, maxOnPage)
         val body = response.body()
+        Log.d("Requests completed events", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
         } // TODO(оделать проверку на причины отказа)
@@ -129,15 +140,17 @@ class WebRepository @Inject constructor(
     override suspend fun getProfile(): ProfileInfo {
         val response = api.getProfile()
         val body = response.body()
+        Log.d("Requests profile", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         } // TODO(оделать проверку на причины отказа)
-        return ProfileInfo("", "", "")
+        return ProfileInfo("", "")
     }
 
     override suspend fun getNextStage(eventId: String): EventStage {
         val response = api.getNextStage(eventId)
         val body = response.body()
+        Log.e("Requests next stage", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         } // TODO(оделать проверку на причины отказа)
@@ -167,6 +180,7 @@ class WebRepository @Inject constructor(
     ): AnswerResult {
         val response = api.postTaskAnswer(eventId, blockId, taskId, TaskAnswer(answers))
         val body = response.body()
+        Log.d("Requests answer", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         } // TODO(оделать проверку на причины отказа)
@@ -184,6 +198,7 @@ class WebRepository @Inject constructor(
     suspend fun getResults(eventId: String): PlayerStats {
         val response = api.getPlayerStats(eventId)
         val body = response.body()
+        Log.d("Requests results", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         } // TODO(оделать проверку на причины отказа)
@@ -192,6 +207,7 @@ class WebRepository @Inject constructor(
 
     suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean {
         val response = api.addToFavourite(FavoriteEvent(eventId, isFavorite))
+        Log.d("Requests add favorite events", response.code().toString() + response.raw())
         if (response.isSuccessful) {
             return true
         } // TODO(оделать проверку на причины отказа)
@@ -203,7 +219,7 @@ class WebRepository @Inject constructor(
         if (response.isSuccessful) {
             return
         } // TODO(оделать проверку на причины отказа)
-        throw IllegalAccessException("cant add to favourites $eventId")
+        throw IllegalAccessException("cant complain $eventId")
     }
 
 }
