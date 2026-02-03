@@ -77,7 +77,13 @@ fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel =
     }
     when (viewModel.authResult.value) {
         null -> {}
-        AuthResult.SUCCESSES -> navController.navigate("main_screen")
+        AuthResult.SUCCESSES -> navController.navigate("main_screen") {
+            navController.currentBackStackEntry?.destination?.route?.let {
+                popUpTo(
+                    it
+                ) { inclusive = true }
+            }
+        }
         AuthResult.INVALID_USER -> noAccount()
         AuthResult.INVALID_PASSWORD -> wrongEmailOrPassword()
     }
