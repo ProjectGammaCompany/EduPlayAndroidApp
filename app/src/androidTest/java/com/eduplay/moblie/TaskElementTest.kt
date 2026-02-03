@@ -1,11 +1,15 @@
 package com.eduplay.moblie
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import coil3.network.NetworkHeaders
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.QuestListElement
 import io.mockk.MockKAnnotations
@@ -22,13 +26,16 @@ class TaskElementTest {
     @SpyK
     lateinit var shortInfo: QuestShortInfo
 
-    val tags = listOf("tag 1", "tag 2", "tag 3")
+    val tags = listOf(
+        EventTag("id", "tag 1"), EventTag("id", "tag 2"), EventTag("id", "tag 3")
+    )
     val eventName = "Name"
     val eventRate = 3.00
 
     @Before
     fun setUp() {
         shortInfo = QuestShortInfo(
+            "",
             "",
             "",
             "",
@@ -46,7 +53,12 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(shortInfo, {}, {})
+                QuestListElement(
+                    shortInfo,
+                    {},
+                    { _: Boolean -> },
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                )
             }
 
             onNodeWithText(eventName, useUnmergedTree = true).assertIsDisplayed()
@@ -60,12 +72,16 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(shortInfo, {}, {})
+                QuestListElement(
+                    shortInfo,
+                    {},
+                    { _: Boolean -> },
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                )
             }
 
             onNodeWithTag(
-                "quest_element_rate",
-                useUnmergedTree = true
+                "quest_element_rate", useUnmergedTree = true
             ).assertTextContains(String.format("%.2f⭐", eventRate))
 
         }
@@ -77,10 +93,15 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(shortInfo, {}, {})
+                QuestListElement(
+                    shortInfo,
+                    {},
+                    { _: Boolean -> },
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                )
             }
             for (tag in tags) {
-                onNodeWithText(tag, useUnmergedTree = true).assertIsDisplayed()
+                onNodeWithText(tag.name, useUnmergedTree = true).assertIsDisplayed()
             }
         }
     }
@@ -93,7 +114,12 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(shortInfo, {}, {})
+                QuestListElement(
+                    shortInfo,
+                    {},
+                    { _: Boolean -> },
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                )
             }
             onNodeWithTag("quest_element_isDownloaded", useUnmergedTree = true).assertDoesNotExist()
         }
@@ -105,7 +131,12 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(shortInfo, {}, {})
+                QuestListElement(
+                    shortInfo,
+                    {},
+                    { _: Boolean -> },
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                )
             }
             onNodeWithTag("quest_element_isDownloaded", useUnmergedTree = true).assertIsDisplayed()
         }
@@ -119,16 +150,19 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(shortInfo, {}, {})
+                QuestListElement(
+                    shortInfo,
+                    {},
+                    { _: Boolean -> },
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                )
             }
 
             onNodeWithTag(
-                "quest_element_isNotFavourite",
-                useUnmergedTree = true
+                "quest_element_isNotFavourite", useUnmergedTree = true
             ).assertIsDisplayed()
             onNodeWithTag(
-                "quest_element_is_favourite",
-                useUnmergedTree = true
+                "quest_element_is_favourite", useUnmergedTree = true
             ).assertDoesNotExist()
         }
     }
@@ -140,16 +174,19 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(shortInfo, {}, {})
+                QuestListElement(
+                    shortInfo,
+                    {},
+                    { _: Boolean -> },
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                )
             }
 
             onNodeWithTag(
-                "quest_element_isNotFavourite",
-                useUnmergedTree = true
+                "quest_element_isNotFavourite", useUnmergedTree = true
             ).assertDoesNotExist()
             onNodeWithTag(
-                "quest_element_is_favourite",
-                useUnmergedTree = true
+                "quest_element_is_favourite", useUnmergedTree = true
             ).assertIsDisplayed()
 
         }
@@ -162,18 +199,21 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(shortInfo, {}, {})
+                QuestListElement(
+                    shortInfo,
+                    {},
+                    { _: Boolean -> },
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                )
             }
 
             onNodeWithTag("quest_element_favourite_btn", useUnmergedTree = true).performClick()
 
             onNodeWithTag(
-                "quest_element_isNotFavourite",
-                useUnmergedTree = true
+                "quest_element_isNotFavourite", useUnmergedTree = true
             ).assertDoesNotExist()
             onNodeWithTag(
-                "quest_element_is_favourite",
-                useUnmergedTree = true
+                "quest_element_is_favourite", useUnmergedTree = true
             ).assertIsDisplayed()
         }
     }
@@ -184,18 +224,21 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(shortInfo, {}, {})
+                QuestListElement(
+                    shortInfo,
+                    {},
+                    { _: Boolean -> },
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                )
             }
 
             onNodeWithTag("quest_element_favourite_btn", useUnmergedTree = true).performClick()
 
             onNodeWithTag(
-                "quest_element_isNotFavourite",
-                useUnmergedTree = true
+                "quest_element_isNotFavourite", useUnmergedTree = true
             ).assertIsDisplayed()
             onNodeWithTag(
-                "quest_element_is_favourite",
-                useUnmergedTree = true
+                "quest_element_is_favourite", useUnmergedTree = true
             ).assertDoesNotExist()
 
         }
