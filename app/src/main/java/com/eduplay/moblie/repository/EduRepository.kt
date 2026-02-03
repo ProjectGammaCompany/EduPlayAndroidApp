@@ -102,7 +102,7 @@ class EduRepository @Inject constructor(
         taskId: String,
         answers: List<String>
     ): AnswerResult {
-        return webRepository.postTaskAnswer(eventId, blockId, taskId, answers)
+        return webRepository.postTaskAnswer(eventId, blockId, taskId, answers.map { it.lowercase() }.toList())
     }
 
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
