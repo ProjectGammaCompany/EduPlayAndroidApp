@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +8,7 @@ import androidx.navigation.NavController
 import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -66,8 +68,10 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
         if (!emailHasErrors(email) && !passwordHasErrors(password)) {
             viewModelScope.launch(Dispatchers.IO) {
                 try {
-                    authResult.value = repository.register(Auth(email, password))
+                    authResult.value = repository
+                        .register(RegistrationData(email, password, password))
                 } catch (e: ConnectException) {
+                    Log.d("AUTHORISATION", e.message.toString())
                     noInternetConnection.value = true
                 }
 

@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -18,12 +20,16 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,24 +37,32 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil3.compose.AsyncImage
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import com.eduplay.moblie.R
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
+import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
     innerPaddingValues: PaddingValues,
     navController: NavController,
-    viewModel: ProfileViewModel = hiltViewModel()
+    viewModel: ProfileViewModel = hiltViewModel(),
+    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
 
     var noInternet by remember { mutableStateOf(false) }
     var gotProfile by remember { mutableStateOf(false) }
     val onNoInternet = { noInternet = true }
-    val onFetchedData = { gotProfile = true }
+    val onFetchedData = {  }
     if (!gotProfile) {
-        viewModel.fetchProfileInfo(onFetchedData, onNoInternet)
+        viewModel.fetchProfileInfo(onNoInternet)
+        gotProfile = true
     }
 
     if (noInternet) {
@@ -75,9 +89,11 @@ fun ProfileScreen(
     ProfileScreen(
         innerPaddingValues,
         updateEmail,
-        viewModel.email.value,
+        viewModel.email,
         hasEmailErrors,
-        onLogout
+        onLogout,
+        viewModel.avatar.value,
+        imageHeaderViewModel.headers
     )
 
 }
@@ -86,12 +102,13 @@ fun ProfileScreen(
 private fun ProfileScreen(
     innerPaddingValues: PaddingValues,
     updateEmail: (String) -> Unit,
-    email: String,
+    email: State<String>,
     hasEmailErrors: (String) -> Boolean,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    avatar: String,
+    headers: State<NetworkHeaders>
 ) {
     var editEmail by remember { mutableStateOf(false) }
-    var emailValue by remember { mutableStateOf(email) }
 
     Column(
         modifier = Modifier
@@ -104,6 +121,24 @@ private fun ProfileScreen(
             .fillMaxSize()
     ) {
         ProfileTopBar()
+
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(avatar)
+                .httpHeaders(headers = headers.value) //TODO("pass headers")
+                .networkCachePolicy(CachePolicy.ENABLED)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .build(),
+            contentDescription = email.value,
+            placeholder = painterResource(R.drawable.eduplaylogo),
+            error = painterResource(id = R.drawable.ic_launcher_background),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(10.dp)
+                .width(130.dp)
+                .clip(CircleShape)
+
+        )
 
         // email
         Text(
@@ -121,7 +156,7 @@ private fun ProfileScreen(
             )
 //            if (!editEmail) {
                 Text(
-                    text = emailValue,
+                    text = email.value,
                     style = typography.bodyLarge.copy(color = colorScheme.onBackground),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
@@ -195,8 +230,10 @@ fun ProfilePreview() {
     ProfileScreen(
         PaddingValues(),
         {},
-        "email",
+        remember { mutableStateOf("email") },
         { false },
-        {}
+        {},
+        "",
+        remember { mutableStateOf(NetworkHeaders.Builder().build()) }
     )
 }

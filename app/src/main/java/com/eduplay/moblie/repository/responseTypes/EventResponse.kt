@@ -1,5 +1,7 @@
 package com.eduplay.moblie.repository.responseTypes
 
+import com.eduplay.moblie.models.EventTag
+import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
 
 data class EventResponse(
@@ -8,7 +10,8 @@ data class EventResponse(
     val description: String,
     val rate: Double,
     val favorite: Boolean,
-    val lastEditionDate: LocalDateTime, // LocalDateTime
-    val tags: List<String>,
+    @SerializedName("last_edition_date")
+    val lastEditionDate: String, // LocalDateTime
+    val tags: List<EventTag>,
     val cover: String
 )

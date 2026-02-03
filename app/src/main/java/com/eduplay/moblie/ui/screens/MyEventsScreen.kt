@@ -24,8 +24,10 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,12 +40,16 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil3.network.NetworkHeaders
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
+import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.MyEventsViewModel
 
 @Composable
@@ -51,7 +57,8 @@ fun MyEventsScreen(
     innerPaddingValues: PaddingValues,
     navController: NavController,
     viewModel: MyEventsViewModel = hiltViewModel(),
-    eventListViewModel: EventListViewModel = hiltViewModel()
+    eventListViewModel: EventListViewModel = hiltViewModel(),
+    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
 
     var dataFetched by remember { mutableStateOf(false) }
@@ -88,9 +95,8 @@ fun MyEventsScreen(
         viewModel.created,
         onEventClick,
         getNextPage,
-        getPrevPage
-
-
+        getPrevPage,
+        imageHeaderViewModel.headers
     )
 
 }
@@ -104,7 +110,8 @@ private fun MyEventsScreen(
     created: SnapshotStateList<QuestShortInfo>,
     onEventClick: (String) -> Unit,
     getNextPage: (MyEventsViewModel.ListType) -> Unit,
-    getPrevPage: (MyEventsViewModel.ListType) -> Unit
+    getPrevPage: (MyEventsViewModel.ListType) -> Unit,
+    headers: State<NetworkHeaders>
 
 ) {
     val tabs = remember<List<Int>> {
@@ -152,7 +159,8 @@ private fun MyEventsScreen(
                 onFavouriteToggle,
                 onEventClick,
                 getNextPage,
-                getPrevPage
+                getPrevPage,
+                headers
             )
 
             1 -> ListOfEvents(
@@ -161,7 +169,8 @@ private fun MyEventsScreen(
                 onFavouriteToggle,
                 onEventClick,
                 getNextPage,
-                getPrevPage
+                getPrevPage,
+                headers
             )
 
             2 -> ListOfEvents(
@@ -170,7 +179,8 @@ private fun MyEventsScreen(
                 onFavouriteToggle,
                 onEventClick,
                 getNextPage,
-                getPrevPage
+                getPrevPage,
+                headers
             )
 
             else -> Box {}
@@ -186,7 +196,8 @@ private fun ListOfEvents(
     onFavouriteToggle: (String, Boolean) -> Unit,
     onEventClick: (String) -> Unit,
     getNextPage: (MyEventsViewModel.ListType) -> Unit,
-    getPrevPage: (MyEventsViewModel.ListType) -> Unit
+    getPrevPage: (MyEventsViewModel.ListType) -> Unit,
+    headers: State<NetworkHeaders>
 ) {
     Column {
         LazyColumn(
@@ -198,6 +209,7 @@ private fun ListOfEvents(
                     itemValue,
                     { onEventClick(itemValue.id) },
                     { onFavouriteToggle(itemValue.id, itemValue.isFavourite) },
+                    headers
                 )
             }
         }
@@ -232,5 +244,43 @@ private fun MyEventsTopBar() {
 @Composable
 @Preview
 fun MyEventsPreview() {
-
+    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+    val events = remember {
+        mutableStateListOf<QuestShortInfo>(
+            QuestShortInfo(
+                "1",
+                "test",
+                "",
+                "",
+                1.0,
+                false,
+                listOf(),
+                false
+            ),
+            QuestShortInfo(
+                "2",
+                "test",
+                "",
+                "",
+                1.0,
+                true,
+                listOf(EventTag("id", "tag 1"), EventTag("id", "tag 2")),
+                true
+            )
+        )
+    }
+val a = {str: String, b: Boolean -> str.forEach {  }}
+    EduPlayTheme {
+        MyEventsScreen(
+            PaddingValues(),
+            a,
+            events,
+            events,
+            events,
+            {},
+            { },
+            {},
+            headers
+        )
+    }
 }

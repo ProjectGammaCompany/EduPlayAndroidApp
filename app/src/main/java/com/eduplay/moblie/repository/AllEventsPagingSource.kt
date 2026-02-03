@@ -1,5 +1,6 @@
 package com.eduplay.moblie.repository
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.eduplay.moblie.models.QuestShortInfo
@@ -21,6 +22,7 @@ class AllEventsPagingWebSource(private val webRepository: WebRepository) :
                 nextKey = if (responseData.isEmpty()) null else pageIndex + 1
             )
         } catch (e: Exception) {
+            Log.e("LOAD_MAIN_EVENT_LIST", (e.message?:"") + ((e.cause?.message) ?:" "))
             LoadResult.Error(e)
         }
     }

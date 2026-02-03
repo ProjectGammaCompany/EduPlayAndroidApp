@@ -68,4 +68,6 @@
     <string name="complaint">Жалоба</string>
     <string name="no_internet">Нет подключения к интернету</string>
     <string name="no_registration">Такого аккаунта не существует</string>
+    <string name="partialy_correct">Частично правильно</string>
+    <string name="try_again_later">Произошла ошибка, попробуйте повторить дейстиве позже.</string>
 </resources>

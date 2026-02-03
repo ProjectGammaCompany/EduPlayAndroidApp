@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,15 +19,20 @@ import java.net.ConnectException
 class MainScreenViewModel @Inject constructor(val repository: EduRepository) : ViewModel() {
 
     val unauthorised = mutableStateOf(false)
+    var events: Flow<PagingData<QuestShortInfo>>
+    val noInternetConnection = mutableStateOf(false)
 
-    fun getEventList(onConnectionFailed: ()->Unit): Flow<PagingData<QuestShortInfo>> {
+    init {
         try {
-            return repository.getEvents().cachedIn(viewModelScope)
+            events = repository.getEvents().cachedIn(viewModelScope)
         } catch (e: ConnectException) {
-            onConnectionFailed()
+            noInternetConnection.value = true
+            events = flowOf()
         } catch (e: NotAuthorisedException) {
             unauthorised.value = true
+            events = flowOf()
+        }  catch (e: Exception) {
+            events = flowOf()
         }
-        return flowOf()
     }
 }

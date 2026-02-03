@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,14 +35,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 
 @Composable
 fun QuestListElement(
-    questShortInfo: QuestShortInfo, onClick: () -> Unit, onFavouriteToggle: (Boolean) -> Unit
+    questShortInfo: QuestShortInfo, onClick: () -> Unit, onFavouriteToggle: (Boolean) -> Unit,
+    headers: State<NetworkHeaders>
 ) {
 
     val isFavourite = remember { mutableStateOf(questShortInfo.isFavourite) }
@@ -58,7 +63,7 @@ fun QuestListElement(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(questShortInfo.imageUrl)
-                //.httpHeaders(headers = headers) //TODO("pass headers")
+                .httpHeaders(headers.value)
                 .networkCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
@@ -133,9 +138,21 @@ fun QuestListElement(
                 modifier = Modifier.testTag("tag_row").fillMaxWidth()
             ) {
                 questShortInfo.tags.forEach { tag ->
-                    QuestTag(tag)
+                    QuestTag(tag.name)
                 }
 
+            }
+            if (questShortInfo.description.isNotBlank()) {
+                Text(
+                    text = questShortInfo.description,
+                    textAlign = TextAlign.Start,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    style = typography.bodyMedium
+                        .copy(color = colorScheme.onBackground),
+                    modifier = Modifier
+                        .padding(start = 5.dp, end = 3.dp, top = 5.dp, bottom = 3.dp)
+                )
             }
         }
         IconButton(
@@ -186,38 +203,60 @@ private fun QuestTag(tagName: String) {
 @Composable
 @Preview
 fun QuestListElementPreview() {
+    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
     Column {
         QuestListElement(
             QuestShortInfo(
                 "id_funny",
                 "The very funny name",
+                "long enough description",
                 "some url",
                 4.3333333,
                 true,
-                listOf("tag 1", "funny", "long as hell tag"),
+                listOf(
+                    EventTag("", "tag 1"),
+                    EventTag("", "funny"),
+                    EventTag("", "long as hell tag")
+                ),
                 true
-            ), {}, {})
+            ), {}, {}, headers
+        )
 
         QuestListElement(
             QuestShortInfo(
                 "id_funny",
                 "Название квеста",
+                "",
                 "some url",
                 4.3333333,
                 false,
-                listOf("tag 1", "funny", "long as hell tag", "o", "long as hell tag"),
+                listOf(
+                    EventTag("", "tag 1"),
+                    EventTag("", "funny"),
+                    EventTag("", "long as hell tag"),
+                    EventTag("", "long as hell tag"),
+                    EventTag("", "long as hell tag"),
+                    EventTag("", "long as hell tag"),
+                ),
                 false
-            ), {}, {})
+            ), {},
+            {},
+            headers
+
+        )
 
         QuestListElement(
             QuestShortInfo(
                 "id_funny",
                 "The very fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuunny name",
+                "loooooooooooooong \n  enough  \n description \n long",
                 "some url",
                 5.00,
                 false,
                 listOf(),
                 false
-            ), {}, {})
+            ), {}, {},
+            headers
+        )
     }
 }

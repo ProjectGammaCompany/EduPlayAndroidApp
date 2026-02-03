@@ -7,8 +7,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.splashscreen.SplashScreen
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,19 +25,33 @@ import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.screens.EventResultScreen
 import com.eduplay.moblie.ui.screens.EventScreen
 import com.eduplay.moblie.ui.screens.EventStageScreen
+import com.eduplay.moblie.ui.screens.FakeSplashScreen
 import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.screens.MyEventsScreen
 import com.eduplay.moblie.ui.screens.ProfileScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
+import com.eduplay.moblie.ui.viewmodel.SplashViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val hideBottomBarScreens = listOf("auth_screen", "play_event")
+    private val hideBottomBarScreens = listOf("auth_screen", "play_event", "fake_splash")
+    private val viewModel: SplashViewModel by viewModels()
 
     @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+        val startDestination = mutableStateOf("main_screen")
         super.onCreate(savedInstanceState)
+
+        splashScreen.setKeepOnScreenCondition{viewModel.isLoading.value}
+//        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
+//
+//            splashScreenViewProvider.remove()
+//
+//        }
+
+
         enableEdgeToEdge()
         setContent {
             EduPlayTheme {
@@ -39,11 +59,19 @@ class MainActivity : ComponentActivity() {
                 (context as? Activity)?.requestedOrientation =
                     ActivityInfo.SCREEN_ORIENTATION_LOCKED
                 val navController = rememberNavController()
+
                 Scaffold(
                     bottomBar = { BottomNavBar(navController, hideBottomBarScreens) }
                 ) { innerPadding ->
 
-                    NavHost(navController = navController, startDestination = "main_screen") {
+                    NavHost(navController = navController, startDestination = "fake_splash") {
+                        composable("fake_splash") {
+                            FakeSplashScreen(
+                                viewModel.isLoading,
+                                viewModel.isAuthorised,
+                                navController
+                            )
+                        }
                         composable("auth_screen") {
                             AuthorizationScreen(
                                 navController = navController
@@ -58,7 +86,7 @@ class MainActivity : ComponentActivity() {
                         ) { pathArgs ->
                             EventScreen(
                                 innerPadding,
-                                pathArgs.arguments?.getString("userId") ?: "",
+                                pathArgs.arguments?.getString("eventId") ?: "",
                                 navController
                             )
                         }
@@ -92,7 +120,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-
                 }
             }
         }

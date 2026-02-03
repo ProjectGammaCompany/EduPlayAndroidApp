@@ -31,14 +31,14 @@ android {
                 "proguard-rules.pro"
             )
             //TODO("заменить на реальный адрес бекэнда")
-            buildConfigField("String", "BACKEND_URL", "\"http://localhost:80\"")
+            buildConfigField("String", "BACKEND_URL", "\"http://api.hse-eduplay.ru\"")
 
 
         }
         debug {
             applicationIdSuffix = ".debug"
             isDebuggable = true
-            buildConfigField("String", "BACKEND_URL", "\"http://192.168.1.227:8080/ \"")
+            buildConfigField("String", "BACKEND_URL", "\"http://api.hse-eduplay.ru\"")
         }
 
     }
@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.ui.test.junit4)
+    implementation(libs.androidx.media3.common.ktx)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     androidTestImplementation(libs.androidx.ui.test.junit4)
@@ -118,4 +119,6 @@ dependencies {
 
     // permissions
     implementation(libs.accompanist.permissions)
+
+    implementation(libs.androidx.core.splashscreen)
 }

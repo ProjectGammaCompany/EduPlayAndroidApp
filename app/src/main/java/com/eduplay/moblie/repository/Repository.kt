@@ -7,13 +7,13 @@ import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import java.time.LocalDateTime
 
 interface Repository {
     suspend fun login(auth: Auth): AuthResult
-    suspend fun register(auth: Auth): AuthResult
     suspend fun logout(): Boolean
     suspend fun getEvents(page: Int = 1): List<QuestShortInfo>
     suspend fun getRole(eventId: String): EventRole
@@ -37,4 +37,6 @@ interface Repository {
         taskId: String,
         answers: List<String>
     ): AnswerResult
+
+    suspend fun register(auth: RegistrationData): AuthResult
 }

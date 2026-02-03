@@ -36,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.repository.responseTypes.StageType
+import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.screens.TaskScreen.TaskScreen
@@ -149,7 +150,7 @@ private fun ExitEventDialog(hideDialog: () -> Unit, goBack: () -> Boolean) {
 
 @Composable
 private fun ResultDialog(
-    isCorrect: Boolean?,
+    isCorrect: TaskAnswerStatus?,
     answers: List<String>?,
     points: Int?,
     proceedToNextTask: () -> Unit
@@ -172,14 +173,15 @@ private fun ResultDialog(
             ) {
                 Text(
                     text = when (isCorrect) {
-                        true -> stringResource(R.string.correct)
-                        false -> stringResource(R.string.incorrect)
                         null -> stringResource(R.string.done)
+                        TaskAnswerStatus.CORRECT -> stringResource(R.string.correct)
+                        TaskAnswerStatus.INCORRECT -> stringResource(R.string.incorrect)
+                        TaskAnswerStatus.PARTIALLY -> stringResource(R.string.partialy_correct)
                     },
                     style = typography.headlineSmall.copy(color = colorScheme.onBackground)
                 )
                 if (isCorrect != null) {
-                    if (isCorrect) {
+                    if (isCorrect == TaskAnswerStatus.CORRECT) {
                         Image(
                             painter = painterResource(id = R.drawable.correct_answer),
                             contentDescription = stringResource(R.string.correct)
@@ -241,3 +243,4 @@ private fun ResultDialog(
         }
     }
 }
+

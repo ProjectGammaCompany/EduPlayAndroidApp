@@ -1,5 +1,7 @@
 package com.eduplay.moblie.models
 
+import com.eduplay.moblie.repository.responseTypes.Author
+
 data class EventPlayerInfo(
     val title: String,
     val description: String,
@@ -7,10 +9,10 @@ data class EventPlayerInfo(
     val favorite: Boolean,
     val startDate: String?,
     val endDate: String?,
-    val tags: List<String>,
+    val tags: List<EventTag>,
     val cover: String,
     val status: EventStatus,
     val lastEditionDate: String,
     val completed: Boolean,
-    val authors: List<String>
+    val authors: List<Author>
 )

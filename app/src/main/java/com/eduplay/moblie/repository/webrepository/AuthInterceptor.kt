@@ -1,5 +1,6 @@
 package com.eduplay.moblie.repository.webrepository
 
+import android.util.Log
 import com.eduplay.moblie.services.TokenManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.firstOrNull
@@ -18,6 +19,7 @@ class AuthInterceptor @Inject constructor(private val tokenManager: TokenManager
             val token = runBlocking {
                 tokenManager.getAccessToken().firstOrNull()
             }
+            Log.d("Authorisation Token", token ?: "")
             if (!token.isNullOrEmpty()) {
                 val newRequest = request.newBuilder()
                     .removeHeader("Authorization")

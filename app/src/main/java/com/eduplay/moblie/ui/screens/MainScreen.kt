@@ -1,8 +1,5 @@
 package com.eduplay.moblie.ui.screens
 
-import android.app.Activity
-import android.content.pm.ActivityInfo
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,13 +21,10 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
@@ -38,16 +32,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.PagingData
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import coil3.network.NetworkHeaders
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.elements.TryAgainLaterToast
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
+import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
@@ -55,11 +53,12 @@ fun MainScreen(
     innerPaddingValues: PaddingValues,
     navController: NavController,
     viewModel: MainScreenViewModel = hiltViewModel(),
-    eventListViewModel: EventListViewModel = hiltViewModel()
+    eventListViewModel: EventListViewModel = hiltViewModel(),
+    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
-    var noInternetConnection by remember { mutableStateOf(false) }
-
-    val onEventClick = { eventId: String -> navController.navigate("event_screen/$eventId") }
+    val onEventClick = { eventId: String ->
+        navController.navigate("event_screen/$eventId")
+    }
     val onFavourite = { eventId: String, isFavorite: Boolean ->
         eventListViewModel.changeFavourite(
             eventId,
@@ -67,18 +66,25 @@ fun MainScreen(
         )
     }
 
-    if (noInternetConnection) {
+    if (viewModel.noInternetConnection.value || eventListViewModel.noInternetConnection.value) {
         NoInternetConnectionToast()
     }
     if (viewModel.unauthorised.value || eventListViewModel.unauthorised.value) {
         AuthScreenNavigator(navController)
     }
+    if (eventListViewModel.unknownError.value) {
+        TryAgainLaterToast()
+        eventListViewModel.unknownError.value = false
+    }
+
+    val events = viewModel.events
 
     MainScreen(
         innerPaddingValues,
-        viewModel.getEventList { noInternetConnection = true }.collectAsLazyPagingItems(),
+        events,
         onEventClick,
-        onFavourite
+        onFavourite,
+        imageHeaderViewModel.headers
     )
 }
 
@@ -86,9 +92,10 @@ fun MainScreen(
 @Composable
 private fun MainScreen(
     innerPaddingValues: PaddingValues,
-    events: LazyPagingItems<QuestShortInfo>,
+    events: Flow<PagingData<QuestShortInfo>>,
     onEventClick: (String) -> Unit,
-    onFavourite: (String, Boolean) -> Unit
+    onFavourite: (String, Boolean) -> Unit,
+    headers: State<NetworkHeaders>
 ) {
     Column(
         modifier = Modifier
@@ -127,17 +134,19 @@ private fun MainScreen(
             }
         )
 
+        val eventsInfo = events.collectAsLazyPagingItems()
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(events.itemCount) { position ->
-                val itemValue = events[position]
+            items(eventsInfo.itemCount) { position ->
+                val itemValue = eventsInfo[position]
                 if (itemValue != null) {
                     val onEventClick = { onEventClick(itemValue.id) }
                     QuestListElement(
                         itemValue,
                         onEventClick,
-                        { isFavourite -> onFavourite(itemValue.id, isFavourite) }
+                        { isFavourite -> onFavourite(itemValue.id, isFavourite) },
+                        headers
                     )
                 }
             }
@@ -150,12 +159,14 @@ private fun MainScreen(
 @Preview
 @Composable
 fun MainScreenPreview() {
+    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
     val events = flowOf<PagingData<QuestShortInfo>>(
         PagingData.from(
             listOf<QuestShortInfo>(
                 QuestShortInfo(
                     "1",
                     "test",
+                    "",
                     "",
                     1.0,
                     false,
@@ -166,22 +177,26 @@ fun MainScreenPreview() {
                     "2",
                     "test",
                     "",
+                    "",
                     1.0,
                     true,
-                    listOf("tag 1", "tag 2"),
+                    listOf(EventTag("id", "tag 1"), EventTag("id", "tag 2")),
                     true
                 )
             )
         )
-    ).collectAsLazyPagingItems()
-    val nothing = {string:String -> string.forEach {  }}
-    val nothingB = {string:String, bool: Boolean -> string.forEach {  }}
+    )
+
+
+    val nothing = { string: String -> string.forEach { } }
+    val nothingB = { string: String, bool: Boolean -> string.forEach { } }
     EduPlayTheme {
         MainScreen(
             PaddingValues(0.dp),
             events,
             nothing,
-            nothingB
+            nothingB,
+            headers
         )
     }
 

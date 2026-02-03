@@ -10,6 +10,7 @@ import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
@@ -30,7 +31,7 @@ class EduRepository @Inject constructor(
         return webRepository.logout()
     }
 
-    suspend fun register(auth: Auth): AuthResult {
+    suspend fun register(auth: RegistrationData): AuthResult {
         return webRepository.register(auth)
     }
 
@@ -101,7 +102,7 @@ class EduRepository @Inject constructor(
         taskId: String,
         answers: List<String>
     ): AnswerResult {
-        return webRepository.postTaskAnswer(eventId, blockId, taskId, answers)
+        return webRepository.postTaskAnswer(eventId, blockId, taskId, answers.map { it.lowercase() }.toList())
     }
 
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {

@@ -16,8 +16,10 @@ import java.net.ConnectException
 class ProfileViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
 
     val email = mutableStateOf("")
+    val avatar = mutableStateOf("")
     val password = mutableStateOf("")
     val canLogout = mutableStateOf(false)
+    val gotData = mutableStateOf(false)
 
     val unauthorised = mutableStateOf(false)
 
@@ -27,27 +29,32 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
                 canLogout.value = repository.logout()
             } catch (e: ConnectException) {
                 onErrorCallBack()
+
             } catch (e: NotAuthorisedException) {
                 unauthorised.value = true
+                canLogout.value = true
+            } catch (e:Exception) {
+                canLogout.value = true
             }
         }
     }
 
-    fun fetchProfileInfo(onCompletion: () -> Unit, onErrorCallBack: () -> Unit) {
+    fun fetchProfileInfo(onErrorCallBack: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             var result: ProfileInfo
             try {
                 result = repository.getProfile()
+                gotData.value = true
             } catch (e: ConnectException) {
                 onErrorCallBack()
-                result = ProfileInfo("", "", "")
+                result = ProfileInfo("", "")
             } catch (e: NotAuthorisedException) {
                 unauthorised.value = true
-                result = ProfileInfo("", "", "")
+                result = ProfileInfo("", "")
             }
-            email.value = result.email
-            password.value = result.password
-        }.invokeOnCompletion { onCompletion() }
+            email.value = result.username
+            avatar.value = result.avatar
+        }
     }
 
     fun checkEmail(email: String): Boolean {
