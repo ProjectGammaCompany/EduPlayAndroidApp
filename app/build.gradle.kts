@@ -114,4 +114,6 @@ dependencies {
 
     // permissions
     implementation(libs.accompanist.permissions)
+
+    implementation(libs.androidx.core.splashscreen)
 }

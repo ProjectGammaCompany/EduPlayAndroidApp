@@ -47,6 +47,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.datastore.dataStore
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
@@ -130,7 +131,9 @@ private fun AuthorizationScreen(
                     .fillMaxHeight(0.8f)
             ) {
                 Image(
-                    painter = painterResource(R.drawable.eduplaylogo),
+                    painter = painterResource(
+                        R.drawable.eduplay_logo_primary
+                    ),
                     contentDescription = stringResource(R.string.app_name),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -274,7 +277,7 @@ private fun EmailPasswordForm(
 @Preview
 @Composable
 private fun auth() {
-    EduPlayTheme {
+    EduPlayTheme() {
         AuthorizationScreen(
             { false },
             { false },
