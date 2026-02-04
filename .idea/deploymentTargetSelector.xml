@@ -13,10 +13,19 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="TaskPreview">
+      <SelectionState runConfigName="TaskElementTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="TaskElementTest">
+      <SelectionState runConfigName="EventScreenUiTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="check_privacy_setting_is_private_for_creator()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="check_edit_button_onclick_displays_edit_dialog_creator_mode()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="Event">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

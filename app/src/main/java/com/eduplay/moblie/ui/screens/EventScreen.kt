@@ -55,6 +55,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -94,7 +96,7 @@ fun EventScreen(
         viewModel.fetchData(
             eventId,
             { dataFetched = true },
-            {noInternet = true})
+            { noInternet = true })
     }
 
     if (viewModel.unauthorised.value) {
@@ -107,20 +109,7 @@ fun EventScreen(
     val startEvent = {
         navController.navigate("play_event/${eventId}")
     }
-    var showEditDialog by remember { mutableStateOf(false) }
-    val onEditEvent = {
-        showEditDialog = true
-    }
-    val onCloseEditEvent = {
-        showEditDialog = false
-    }
-    var showComplaintDialog by remember { mutableStateOf(false) }
-    val onShowComplaintDialog = {
-        showComplaintDialog = true
-    }
-    val onHideComplaint = {
-        showComplaintDialog = false
-    }
+
     val onComplain = { reason: String ->
         viewModel.complain(eventId, reason)
     }
@@ -137,15 +126,10 @@ fun EventScreen(
     val onReturn = {
         navController.popBackStack()
     }
-    
 
-    if (showEditDialog) {
-        EditDialog(onCloseEditEvent)
-    }
-    if (showComplaintDialog) {
-        ComplaintDialog(onHideComplaint, onComplain)
-    }
-    
+
+
+
     EventScreen(
         innerPaddingValues,
         viewModel.eventCreatorMode.value,
@@ -160,9 +144,8 @@ fun EventScreen(
         viewModel.privateEvent.value,
         viewModel.isOpen.value,
         viewModel.isContinuing.value,
-        onEditEvent,
         onAddToFavourite,
-        onShowComplaintDialog,
+        onComplain,
         startEvent,
         showResults,
         onReturn,
@@ -171,7 +154,7 @@ fun EventScreen(
 }
 
 @Composable
-private fun EventScreen(
+fun EventScreen(
     innerPaddingValues: PaddingValues,
     eventCreatorMode: Boolean,
     isEventFavourite: Boolean,
@@ -185,14 +168,37 @@ private fun EventScreen(
     privateEvent: Boolean,
     isOpen: Boolean,
     isContinuing: Boolean,
-    onEditEvent: () -> Unit,
     onAddToFavourite: () -> Unit,
-    onShowComplaintDialog: () -> Unit,
+    onComplain: (String) -> Unit,
     startEvent: () -> Unit,
     showResults: () -> Unit,
     onReturn: () -> Boolean,
     headers: State<NetworkHeaders>
-){
+) {
+
+    var showEditDialog by remember { mutableStateOf(false) }
+    val onEditEvent = {
+        showEditDialog = true
+    }
+    val onCloseEditEvent = {
+        showEditDialog = false
+    }
+    var showComplaintDialog by remember { mutableStateOf(false) }
+    val onShowComplaintDialog = {
+        showComplaintDialog = true
+    }
+    val onHideComplaint = {
+        showComplaintDialog = false
+    }
+
+    if (showEditDialog) {
+        EditDialog(onCloseEditEvent)
+    }
+    if (showComplaintDialog) {
+        ComplaintDialog(onHideComplaint, onComplain)
+    }
+
+
     Column(
         modifier = Modifier
             .padding(
@@ -246,6 +252,7 @@ private fun EventScreen(
 
 @Composable
 private fun EditDialog(onClose: () -> Unit) {
+    val uriHandler = LocalUriHandler.current
     AlertDialog(
         title = {
             Text(text = stringResource(R.string.edit_event))
@@ -259,7 +266,7 @@ private fun EditDialog(onClose: () -> Unit) {
         confirmButton = {
             TextButton(
                 onClick = {
-                    onClose()
+                    uriHandler.openUri("http://localhost/")//TODO("попросить настоящий url фронта")
                 }
             ) {
                 Text(stringResource(R.string.proceed_to_website))
@@ -273,7 +280,8 @@ private fun EditDialog(onClose: () -> Unit) {
             ) {
                 Text(stringResource(R.string.close))
             }
-        }
+        },
+        modifier = Modifier.testTag("edit_dialog")
     )
 
 }
@@ -317,7 +325,8 @@ private fun ComplaintDialog(onClose: () -> Unit, onComplain: (String) -> Unit) {
             ) {
                 Text(stringResource(R.string.close))
             }
-        }
+        },
+        modifier = Modifier.testTag("report_dialog")
     )
 
 }
@@ -330,7 +339,7 @@ private fun TopAppBarEventScreen(
     onEditEvent: () -> Unit,
     onAddToFavourite: () -> Unit,
     onComplain: () -> Unit,
-    onReturn:()->Boolean
+    onReturn: () -> Boolean
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -347,28 +356,39 @@ private fun TopAppBarEventScreen(
         },
         actions = {
             if (!eventCreatorMode) {
-                IconButton(onClick = { onComplain() }) {
+                IconButton(
+                    onClick = { onComplain() },
+                    modifier = Modifier.testTag("report_btn")
+                ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.hand),
                         contentDescription = stringResource(R.string.report_event)
                     )
                 }
-                IconButton(onClick = { TODO("реализовать кнопку скачать событие") }) {
+                IconButton(
+                    onClick = { TODO("реализовать кнопку скачать событие") },
+                    modifier = Modifier.testTag("download_btn")
+                ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.download_24dp_1f1f1f_fill0_wght200_grad0_opsz24),
                         contentDescription = stringResource(R.string.download_event)
                     )
                 }
-                IconButton(onClick = { onAddToFavourite() }) {
+                IconButton(
+                    onClick = { onAddToFavourite() },
+                    modifier = Modifier.testTag("favourite_btn")
+                ) {
                     if (isFavourite) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.star_filled),
-                            contentDescription = stringResource(R.string.add_to_favourite)
+                            contentDescription = stringResource(R.string.add_to_favourite),
+                            modifier = Modifier.testTag("is_favourite_btn")
                         )
                     } else {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.star),
-                            contentDescription = stringResource(R.string.add_to_favourite)
+                            contentDescription = stringResource(R.string.add_to_favourite),
+                            modifier = Modifier.testTag("is_not_favourite_btn")
                         )
                     }
                 }
@@ -376,7 +396,8 @@ private fun TopAppBarEventScreen(
                 IconButton(onClick = { onEditEvent() }) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.edit),
-                        contentDescription = stringResource(R.string.edit_event)
+                        contentDescription = stringResource(R.string.edit_event),
+                        modifier = Modifier.testTag("edit_btn")
                     )
                 }
             }
@@ -409,6 +430,8 @@ private fun EventScreenHeader(
             modifier = Modifier
                 .width(130.dp)
                 .weight(0.35f)
+                .testTag("event_image")
+
         )
         Text(
             eventName,
@@ -419,6 +442,7 @@ private fun EventScreenHeader(
                 .weight(0.6f)
                 .align(Alignment.Bottom)
                 .padding(horizontal = 10.dp)
+                .testTag("event_title")
         )
     }
     Row(modifier = Modifier.padding(horizontal = 10.dp)) {
@@ -446,6 +470,7 @@ private fun EventScreenHeader(
                     },
                     modifier = Modifier
                         .align(Alignment.Center)
+                        .testTag("is_completed_chip")
 
 
                 )
@@ -462,6 +487,7 @@ private fun EventScreenHeader(
                     .weight(0.6f)
                     .padding(horizontal = 10.dp)
                     .align(Alignment.CenterVertically)
+                    .testTag("author")
             )
         }
     }
@@ -479,7 +505,9 @@ private fun GeneralInfo(
             .fillMaxHeight()
             .verticalScroll(rememberScrollState())
     ) {
-        FlowRow(modifier = Modifier.fillMaxWidth()) {
+        FlowRow(modifier = Modifier
+            .fillMaxWidth()
+            .testTag("tags")) {
             tags.forEach { tagName ->
                 EventTag(tagName.name)
             }
@@ -500,7 +528,10 @@ private fun GeneralInfo(
                     Row {
                         Text(
                             text = stringResource(pair.first),
-                            style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium, color = colorScheme.onBackground),
+                            style = typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium,
+                                color = colorScheme.onBackground
+                            ),
                             modifier = Modifier.padding(end = 5.dp)
                         )
                         Text(
@@ -536,11 +567,11 @@ private fun GeneralUserBody(
     showResults: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.Center) {
-        Box(modifier = Modifier.fillMaxHeight(if (isOpen) 0.85f else 1f)) {
+        Box(modifier = Modifier.fillMaxHeight(if (isOpen || isCompleted) 0.85f else 1f)) {
             GeneralInfo(tags, info, description)
         }
 
-        if (isOpen) {
+        if (isOpen && !isCompleted) {
             Button(
                 onClick = startEvent,
                 modifier = Modifier
@@ -549,6 +580,7 @@ private fun GeneralUserBody(
                     .height(50.dp)
                     .weight(0.15f)
                     .align(Alignment.CenterHorizontally)
+                    .testTag("start_event_btn")
             ) {
                 Text(
                     if (!isContinuing) {
@@ -571,6 +603,7 @@ private fun GeneralUserBody(
                     .height(50.dp)
                     .weight(0.15f)
                     .align(Alignment.CenterHorizontally)
+                    .testTag("results_btn")
             ) {
                 Text(
                     stringResource(R.string.show_result),
@@ -628,6 +661,7 @@ private fun EventCreatorBody(
                     },
                     selectedContentColor = colorScheme.primary,
                     unselectedContentColor = colorScheme.onSurface,
+                    modifier = Modifier.testTag(stringResource(title))
                 )
             }
         }
@@ -661,21 +695,20 @@ private fun Event() {
         isEventFavourite = true,
         eventCreatorMode = true,
         eventName = "Событие",
-        tags = remember {  mutableStateListOf<EventTag>(EventTag("", "tag1"))},
+        tags = remember { mutableStateListOf<EventTag>(EventTag("", "tag1")) },
         author = "Author",
         isCompleted = false,
         cover = "",
-        info = remember {  mutableStateListOf<Pair<Int, String>>()} as SnapshotStateList<Pair<Int, String?>>,
+        info = remember { mutableStateListOf<Pair<Int, String>>() } as SnapshotStateList<Pair<Int, String?>>,
         description = "Some information",
         privateEvent = false,
         isOpen = false,
         isContinuing = false,
-        onEditEvent = {},
-        onAddToFavourite = {  },
-        onShowComplaintDialog = {},
+        onAddToFavourite = { },
+        onComplain = { _: String -> },
         startEvent = {},
-        showResults = {  },
-        onReturn = {false},
-        headers = remember { mutableStateOf(NetworkHeaders.Builder().build())}
+        showResults = { },
+        onReturn = { false },
+        headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
     )
 }
