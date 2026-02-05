@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
@@ -52,12 +53,14 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
                     EventRole.AUTHOR -> fetchOwnerData(eventId)
                     EventRole.PARTICIPANT -> fetchPlayerData(eventId)
                 }
-            } catch (e: ConnectException) {
+            } catch (_: ConnectException) {
                 onNoInternet()
-            } catch (e: NotAuthorisedException) {
+            } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
-            } catch (e: IllegalStateException) {
+            } catch (_: IllegalStateException) {
                 onNoInternet()
+            } catch (e: Exception) {
+                Log.e("Fetch event screen", e.message ?: e.toString())
             }
         }.invokeOnCompletion { callBack() }
     }

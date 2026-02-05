@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -42,10 +43,12 @@ class MyEventsViewModel @Inject constructor(private val repository: EduRepositor
             try {
                 repository.getFavouriteEvents(0)
                     .forEach { favourite.add(it); totalFavourite.add(it) }
-            } catch (e: ConnectException) {
+            } catch (_: ConnectException) {
                 onErrorCallBack()
-            } catch (e: NotAuthorisedException) {
+            } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
+            } catch (e: Exception) {
+                Log.e("fetch my events", e.message ?: "", e)
             }
         }.invokeOnCompletion {
             onLoadedCallBack()
@@ -84,12 +87,14 @@ class MyEventsViewModel @Inject constructor(private val repository: EduRepositor
                 var res: List<QuestShortInfo>
                 try {
                     res = repository.getCreatedEvents(page)
-                } catch (e: ConnectException) {
+                } catch (_: ConnectException) {
                     onErrorCallBack()
                     res = listOf()
-                } catch (e: NotAuthorisedException) {
+                } catch (_: NotAuthorisedException) {
                     unauthorised.value = true
                     res = listOf()
+                } catch (e: Exception) {
+                    Log.e("fetch created events", e.message ?: "", e)
                 }
                 if (res.isEmpty()) {
                     // TODO("toast")
@@ -113,15 +118,15 @@ class MyEventsViewModel @Inject constructor(private val repository: EduRepositor
             completedPage = page
         } else {
             viewModelScope.launch(Dispatchers.IO) {
-                var res: List<QuestShortInfo>
+                var res: List<QuestShortInfo> = listOf()
                 try {
                     res = repository.getCompletedEvents(page)
-                } catch (e: ConnectException) {
+                } catch (_: ConnectException) {
                     onErrorCallBack()
-                    res = listOf()
-                } catch (e: NotAuthorisedException) {
+                } catch (_: NotAuthorisedException) {
                     unauthorised.value = true
-                    res = listOf()
+                } catch (e: Exception) {
+                    Log.e("fetch completed events", e.message ?: "", e)
                 }
                 if (res.isEmpty()) {
                     // TODO("toast")
@@ -145,15 +150,15 @@ class MyEventsViewModel @Inject constructor(private val repository: EduRepositor
             favouritePage = page
         } else {
             viewModelScope.launch(Dispatchers.IO) {
-                var res: List<QuestShortInfo>
+                var res: List<QuestShortInfo> = listOf()
                 try {
                     res = repository.getFavouriteEvents(page)
-                } catch (e: ConnectException) {
+                } catch (_: ConnectException) {
                     onErrorCallBack()
-                    res = listOf()
-                } catch (e: NotAuthorisedException) {
+                } catch (_: NotAuthorisedException) {
                     unauthorised.value = true
-                    res = listOf()
+                } catch (e: Exception) {
+                    Log.e("fetch favorite events", e.message ?: "", e)
                 }
                 if (res.isEmpty()) {
                     // TODO("toast")

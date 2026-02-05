@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,13 +28,12 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 canLogout.value = repository.logout()
-            } catch (e: ConnectException) {
+            } catch (_: ConnectException) {
                 onErrorCallBack()
-
-            } catch (e: NotAuthorisedException) {
+            } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
                 canLogout.value = true
-            } catch (e:Exception) {
+            } catch (_:Exception) {
                 canLogout.value = true
             }
         }
@@ -41,16 +41,16 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
 
     fun fetchProfileInfo(onErrorCallBack: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            var result: ProfileInfo
+            var result: ProfileInfo = ProfileInfo("", "")
             try {
                 result = repository.getProfile()
                 gotData.value = true
-            } catch (e: ConnectException) {
+            } catch (_: ConnectException) {
                 onErrorCallBack()
-                result = ProfileInfo("", "")
-            } catch (e: NotAuthorisedException) {
+            } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
-                result = ProfileInfo("", "")
+            } catch (e: Exception) {
+                Log.e("fetch profile", e.message ?: "", e)
             }
             email.value = result.username
             avatar.value = result.avatar

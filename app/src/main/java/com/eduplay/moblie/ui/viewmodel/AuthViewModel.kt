@@ -51,8 +51,11 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
             viewModelScope.launch(Dispatchers.IO) {
                 try {
                     authResult.value = repository.login(Auth(email, password))
-                } catch (e: ConnectException) {
+                } catch (_: ConnectException) {
                     noInternetConnection.value = true
+                } catch (e: Exception) {
+                    Log.e("login error", e.message ?: "", e)
+                    callBack()
                 }
             }
         } else {
@@ -73,6 +76,9 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
                 } catch (e: ConnectException) {
                     Log.d("AUTHORISATION", e.message.toString())
                     noInternetConnection.value = true
+                } catch (e: Exception) {
+                    Log.e("AUTHORISATION", e.message ?: "", e)
+                    callBack()
                 }
 
             }
