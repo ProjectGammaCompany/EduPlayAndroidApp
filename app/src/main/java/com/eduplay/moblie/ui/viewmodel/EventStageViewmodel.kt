@@ -48,12 +48,12 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                 currentTask.value = result.task
                 currentBlock.value = result.block
                 taskStartTime = LocalDateTime.parse(result.task?.timeStamp) ?: LocalDateTime.now()
-            } catch (e: ConnectException) {
+            } catch (_: ConnectException) {
                 onNoInternet()
-            } catch (e: NotAuthorisedException) {
+            } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
             } catch (e: Exception) {
-
+                Log.e("EventStage", e.message ?: "", e)
             }
         }.invokeOnCompletion {
             if (currentStageType.value == StageType.TASK && currentTask.value?.timeStamp == null) {
@@ -120,6 +120,8 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                 onNoInternet()
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
+            } catch (e: Exception) {
+                Log.e("EventStageTime", e.message ?: "", e)
             }
         }
     }

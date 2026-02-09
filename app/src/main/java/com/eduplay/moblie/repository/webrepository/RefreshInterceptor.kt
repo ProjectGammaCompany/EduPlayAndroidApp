@@ -19,7 +19,7 @@ class RefreshInterceptor @Inject constructor(
         val request: Request = chain.request()
         val response: Response = chain.proceed(request);
 
-        if (response.code >= 400 && response.code  < 500) {
+        if (response.code == 401) {
             response.close()
 
             val refreshToken: String?

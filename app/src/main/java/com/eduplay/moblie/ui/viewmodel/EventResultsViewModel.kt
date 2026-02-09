@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -22,10 +23,12 @@ class EventResultsViewModel @Inject constructor(private val repository: EduRepos
             try {
                 val result = repository.getEventResults(eventId)
                 points.intValue = result.points
-            } catch (e: ConnectException) {
+            } catch (_: ConnectException) {
                 onNoInternet()
-            } catch (e: NotAuthorisedException) {
+            } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
+            } catch (e: Exception) {
+                Log.e("results", e.message ?: "", e)
             }
         }
     }

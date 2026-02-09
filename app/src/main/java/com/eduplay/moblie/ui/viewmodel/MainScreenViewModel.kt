@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -25,13 +26,14 @@ class MainScreenViewModel @Inject constructor(val repository: EduRepository) : V
     init {
         try {
             events = repository.getEvents().cachedIn(viewModelScope)
-        } catch (e: ConnectException) {
+        } catch (_: ConnectException) {
             noInternetConnection.value = true
             events = flowOf()
-        } catch (e: NotAuthorisedException) {
+        } catch (_: NotAuthorisedException) {
             unauthorised.value = true
             events = flowOf()
         }  catch (e: Exception) {
+            Log.e("All events", e.message ?: "", e)
             events = flowOf()
         }
     }
