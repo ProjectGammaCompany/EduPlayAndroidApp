@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -70,6 +71,7 @@ fun MainScreen(
         NoInternetConnectionToast()
     }
     if (viewModel.unauthorised.value || eventListViewModel.unauthorised.value) {
+        Log.d("main_screen", "unauthorised")
         AuthScreenNavigator(navController)
     }
     if (eventListViewModel.unknownError.value) {

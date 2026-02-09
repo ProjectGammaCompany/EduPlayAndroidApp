@@ -84,15 +84,13 @@ class MyEventsViewModel @Inject constructor(private val repository: EduRepositor
             createdPage = page
         } else {
             viewModelScope.launch(Dispatchers.IO) {
-                var res: List<QuestShortInfo>
+                var res: List<QuestShortInfo> = listOf()
                 try {
                     res = repository.getCreatedEvents(page)
                 } catch (_: ConnectException) {
                     onErrorCallBack()
-                    res = listOf()
                 } catch (_: NotAuthorisedException) {
                     unauthorised.value = true
-                    res = listOf()
                 } catch (e: Exception) {
                     Log.e("fetch created events", e.message ?: "", e)
                 }

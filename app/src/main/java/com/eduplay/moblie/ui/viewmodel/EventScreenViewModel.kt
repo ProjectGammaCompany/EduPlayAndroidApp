@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.Format
 import com.eduplay.moblie.R
 import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.EventRole
@@ -18,7 +17,6 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.ConnectException
-import java.time.LocalDateTime
 
 @HiltViewModel
 class EventScreenViewModel @Inject constructor(val repository: EduRepository) : ViewModel() {
@@ -55,14 +53,18 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
                 }
             } catch (_: ConnectException) {
                 onNoInternet()
-            } catch (_: NotAuthorisedException) {
+            } catch (e: NotAuthorisedException) {
+                Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
                 unauthorised.value = true
             } catch (_: IllegalStateException) {
                 onNoInternet()
             } catch (e: Exception) {
-                Log.e("Fetch event screen", e.message ?: e.toString())
+                Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
             }
-        }.invokeOnCompletion { callBack() }
+        }
+            .invokeOnCompletion {
+                callBack()
+            }
     }
 
     private suspend fun fetchPlayerData(eventId: String) {
@@ -71,8 +73,8 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         isEventFavourite.value = data.favorite
 
         tags = data.tags.toMutableStateList()
-        opens.value = data.startDate?.substring(0..data.startDate.length-5)
-        closes.value = data.endDate?.substring(0..data.endDate.length-5)
+        opens.value = data.startDate?.substring(0..data.startDate.length - 5)
+        closes.value = data.endDate?.substring(0..data.endDate.length - 5)
         rating.value = data.rate.toString() + '⭐'
         description.value = data.description
 
