@@ -1,6 +1,7 @@
 package com.eduplay.moblie.repository.webrepository
 
 import android.util.Log
+import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.services.TokenManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.firstOrNull
@@ -26,6 +27,8 @@ class AuthInterceptor @Inject constructor(private val tokenManager: TokenManager
                     .addHeader("Authorization", "Bearer $token")
                     .build()
                 return chain.proceed(newRequest)
+            } else {
+                throw NotAuthorisedException("no access token")
             }
         }
 

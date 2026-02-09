@@ -9,6 +9,10 @@ import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
+import com.eduplay.moblie.repository.pagingSources.AllEventsPagingWebSource
+import com.eduplay.moblie.repository.pagingSources.CompletedEventsPagingSource
+import com.eduplay.moblie.repository.pagingSources.CreatedEventsPagingSource
+import com.eduplay.moblie.repository.pagingSources.FavoriteEventsPagingSource
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
@@ -67,16 +71,64 @@ class EduRepository @Inject constructor(
         return webRepository.getOwnerEventInfo(eventId)
     }
 
-    suspend fun getFavouriteEvents(page: Int): List<QuestShortInfo> {
-        return webRepository.getFavouriteEvents(page, 20)
+    fun getFavouriteEvents(
+        pageSize: Int = 20,
+        enablePlaceHolders: Boolean = false,
+        prefetchDistance: Int = 10,
+        initialLoadSize: Int = 20,
+        maxCacheSize: Int = 2000
+    ): Flow<PagingData<QuestShortInfo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = pageSize,
+                enablePlaceholders = enablePlaceHolders,
+                prefetchDistance = prefetchDistance,
+                initialLoadSize = initialLoadSize,
+                maxSize = maxCacheSize
+            ), pagingSourceFactory = {
+                FavoriteEventsPagingSource(webRepository)
+            }
+        ).flow
     }
 
-    suspend fun getCreatedEvents(page: Int): List<QuestShortInfo> {
-        return webRepository.getCreatedEvents(page, 20)
+    fun getCreatedEvents(
+        pageSize: Int = 20,
+        enablePlaceHolders: Boolean = false,
+        prefetchDistance: Int = 10,
+        initialLoadSize: Int = 20,
+        maxCacheSize: Int = 2000
+    ): Flow<PagingData<QuestShortInfo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = pageSize,
+                enablePlaceholders = enablePlaceHolders,
+                prefetchDistance = prefetchDistance,
+                initialLoadSize = initialLoadSize,
+                maxSize = maxCacheSize
+            ), pagingSourceFactory = {
+                CreatedEventsPagingSource(webRepository)
+            }
+        ).flow
     }
 
-    suspend fun getCompletedEvents(page: Int): List<QuestShortInfo> {
-        return webRepository.getCompletedEvents(page, 20)
+    fun getCompletedEvents(
+        pageSize: Int = 20,
+        enablePlaceHolders: Boolean = false,
+        prefetchDistance: Int = 10,
+        initialLoadSize: Int = 20,
+        maxCacheSize: Int = 2000
+    ): Flow<PagingData<QuestShortInfo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = pageSize,
+                enablePlaceholders = enablePlaceHolders,
+                prefetchDistance = prefetchDistance,
+                initialLoadSize = initialLoadSize,
+                maxSize = maxCacheSize
+            ), pagingSourceFactory = {
+                CompletedEventsPagingSource(webRepository)
+            }
+        ).flow
     }
 
     suspend fun getProfile(): ProfileInfo {
@@ -102,7 +154,12 @@ class EduRepository @Inject constructor(
         taskId: String,
         answers: List<String>
     ): AnswerResult {
-        return webRepository.postTaskAnswer(eventId, blockId, taskId, answers.map { it.lowercase() }.toList())
+        return webRepository.postTaskAnswer(
+            eventId,
+            blockId,
+            taskId,
+            answers.map { it.lowercase() }.toList()
+        )
     }
 
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {

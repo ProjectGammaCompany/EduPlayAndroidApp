@@ -1,12 +1,12 @@
-package com.eduplay.moblie.repository
+package com.eduplay.moblie.repository.pagingSources
 
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.eduplay.moblie.models.QuestShortInfo
-import com.eduplay.moblie.repository.webrepository.WebRepository
+import com.eduplay.moblie.repository.Repository
 
-class AllEventsPagingWebSource(private val webRepository: WebRepository) :
+class AllEventsPagingWebSource(private val webRepository: Repository) :
     PagingSource<Int, QuestShortInfo>() {
     private val numOfOffScreenPage: Int = 4
 

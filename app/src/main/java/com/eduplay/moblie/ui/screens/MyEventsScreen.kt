@@ -1,23 +1,16 @@
 package com.eduplay.moblie.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -40,6 +33,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.network.NetworkHeaders
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventTag
@@ -51,6 +46,7 @@ import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.MyEventsViewModel
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun MyEventsScreen(
@@ -60,16 +56,7 @@ fun MyEventsScreen(
     eventListViewModel: EventListViewModel = hiltViewModel(),
     imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
-
-    var dataFetched by remember { mutableStateOf(false) }
-    var noInternetConnection by remember { mutableStateOf(false) }
-    val onNoInternet = {noInternetConnection = true}
-    if (!dataFetched) {
-        noInternetConnection = false
-        viewModel.fetchData({dataFetched = true}, onNoInternet)
-    }
-
-    if (noInternetConnection) {
+    if (viewModel.noInternetConnection.value) {
         NoInternetConnectionToast()
     }
 
@@ -77,15 +64,10 @@ fun MyEventsScreen(
         AuthScreenNavigator(navController)
     }
 
-
     val onFavouriteToggle = { id: String, isFavourite: Boolean ->
         eventListViewModel.changeFavourite(id, isFavourite)
     }
     val onEventClick = { eventId: String -> navController.navigate("event_screen/$eventId") }
-    val getNextPage = { type: MyEventsViewModel.ListType -> viewModel.getNextPage(type, onNoInternet) }
-    val getPrevPage = { type: MyEventsViewModel.ListType -> viewModel.getPrevPage(type,  onNoInternet) }
-
-
 
     MyEventsScreen(
         innerPaddingValues,
@@ -94,8 +76,6 @@ fun MyEventsScreen(
         viewModel.completed,
         viewModel.created,
         onEventClick,
-        getNextPage,
-        getPrevPage,
         imageHeaderViewModel.headers
     )
 
@@ -105,14 +85,11 @@ fun MyEventsScreen(
 private fun MyEventsScreen(
     innerPaddingValues: PaddingValues,
     onFavouriteToggle: (String, Boolean) -> Unit,
-    favorite: SnapshotStateList<QuestShortInfo>,
-    completed: SnapshotStateList<QuestShortInfo>,
-    created: SnapshotStateList<QuestShortInfo>,
+    favorite:Flow<PagingData<QuestShortInfo>>,
+    completed: Flow<PagingData<QuestShortInfo>>,
+    created: Flow<PagingData<QuestShortInfo>>,
     onEventClick: (String) -> Unit,
-    getNextPage: (MyEventsViewModel.ListType) -> Unit,
-    getPrevPage: (MyEventsViewModel.ListType) -> Unit,
     headers: State<NetworkHeaders>
-
 ) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
@@ -155,33 +132,24 @@ private fun MyEventsScreen(
         when (selectedTabIdx) {
             0 -> ListOfEvents(
                 favorite,
-                MyEventsViewModel.ListType.FAVOURITE,
                 onFavouriteToggle,
                 onEventClick,
-                getNextPage,
-                getPrevPage,
                 headers
-            )
+            );
 
             1 -> ListOfEvents(
                 completed,
-                MyEventsViewModel.ListType.COMPLETED,
                 onFavouriteToggle,
                 onEventClick,
-                getNextPage,
-                getPrevPage,
                 headers
-            )
+            );
 
             2 -> ListOfEvents(
                 created,
-                MyEventsViewModel.ListType.CREATED,
                 onFavouriteToggle,
                 onEventClick,
-                getNextPage,
-                getPrevPage,
                 headers
-            )
+            );
 
             else -> Box {}
         }
@@ -191,37 +159,26 @@ private fun MyEventsScreen(
 
 @Composable
 private fun ListOfEvents(
-    events: List<QuestShortInfo>,
-    type: MyEventsViewModel.ListType,
+    events: Flow<PagingData<QuestShortInfo>>,
     onFavouriteToggle: (String, Boolean) -> Unit,
     onEventClick: (String) -> Unit,
-    getNextPage: (MyEventsViewModel.ListType) -> Unit,
-    getPrevPage: (MyEventsViewModel.ListType) -> Unit,
     headers: State<NetworkHeaders>
 ) {
+    val eventsInfo = events.collectAsLazyPagingItems()
     Column {
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(events.size) { position ->
-                val itemValue = events[position]
-                QuestListElement(
-                    itemValue,
-                    { onEventClick(itemValue.id) },
-                    { onFavouriteToggle(itemValue.id, itemValue.isFavourite) },
-                    headers
-                )
-            }
-        }
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.padding(top = 5.dp)
-        ) {
-            IconButton(onClick = { getPrevPage(type) }) {
-                Icon(Icons.Default.ChevronLeft, stringResource(R.string.previous_page))
-            }
-            IconButton(onClick = { getNextPage(type) }) {
-                Icon(Icons.Default.ChevronRight, stringResource(R.string.next_page))
+            items(eventsInfo.itemCount) { position ->
+                val itemValue = eventsInfo[position]
+                if (itemValue != null) {
+                    QuestListElement(
+                        itemValue,
+                        { onEventClick(itemValue.id) },
+                        { onFavouriteToggle(itemValue.id, itemValue.isFavourite) },
+                        headers
+                    )
+                }
             }
         }
     }
@@ -241,46 +198,44 @@ private fun MyEventsTopBar() {
     )
 }
 
-@Composable
-@Preview
-fun MyEventsPreview() {
-    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
-    val events = remember {
-        mutableStateListOf<QuestShortInfo>(
-            QuestShortInfo(
-                "1",
-                "test",
-                "",
-                "",
-                1.0,
-                false,
-                listOf(),
-                false
-            ),
-            QuestShortInfo(
-                "2",
-                "test",
-                "",
-                "",
-                1.0,
-                true,
-                listOf(EventTag("id", "tag 1"), EventTag("id", "tag 2")),
-                true
-            )
-        )
-    }
-val a = {str: String, b: Boolean -> str.forEach {  }}
-    EduPlayTheme {
-        MyEventsScreen(
-            PaddingValues(),
-            a,
-            events,
-            events,
-            events,
-            {},
-            { },
-            {},
-            headers
-        )
-    }
-}
+//@Composable
+//@Preview
+//fun MyEventsPreview() {
+//    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+//    val events = remember {
+//        mutableStateListOf<QuestShortInfo>(
+//            QuestShortInfo(
+//                "1",
+//                "test",
+//                "",
+//                "",
+//                1.0,
+//                false,
+//                listOf(),
+//                false
+//            ),
+//            QuestShortInfo(
+//                "2",
+//                "test",
+//                "",
+//                "",
+//                1.0,
+//                true,
+//                listOf(EventTag("id", "tag 1"), EventTag("id", "tag 2")),
+//                true
+//            )
+//        )
+//    }
+//    val a = { str: String, b: Boolean -> str.forEach { _ -> } }
+//    EduPlayTheme {
+//        MyEventsScreen(
+//            PaddingValues(),
+//            a,
+//            events,
+//            events,
+//            events,
+//            {},
+//            headers
+//        )
+//    }
+//}
