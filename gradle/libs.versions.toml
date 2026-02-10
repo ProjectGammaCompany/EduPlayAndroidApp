@@ -5,6 +5,7 @@ barcodeScanning = "17.3.0"
 cameraCore = "1.5.2"
 coreSplashscreen = "1.2.0"
 hiltAndroid = "2.57.2"
+jwtdecode = "2.0.2"
 kotlin = "2.2.21"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -67,6 +68,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
+jwtdecode = { module = "com.auth0.android:jwtdecode", version.ref = "jwtdecode" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlinReflect" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockk-agent = { module = "io.mockk:mockk-agent", version.ref = "mockk" }

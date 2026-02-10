@@ -1,18 +1,30 @@
 package com.eduplay.moblie.repository.localrepository
 
+import android.util.Log
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
+import com.eduplay.moblie.repository.localrepository.entity.UserEntity
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
+import com.eduplay.moblie.services.JwtDecoder
+import com.eduplay.moblie.services.OfflineModeManager
+import com.eduplay.moblie.services.TokenManager
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
 
-class LocalRepository @Inject constructor(eventDatabase: EventDatabase): Repository {
+class LocalRepository @Inject constructor(
+    private val eventDatabase: Database,
+    private val tokenManager: TokenManager,
+    private val offlineModeManager: OfflineModeManager
+
+) : Repository {
     override suspend fun getEvents(page: Int): List<QuestShortInfo> {
         TODO("Not yet implemented")
     }
@@ -96,10 +108,34 @@ class LocalRepository @Inject constructor(eventDatabase: EventDatabase): Reposit
     }
 
     suspend fun saveUser() {
+        val token = tokenManager.getAccessToken().first()
+        val userId = JwtDecoder.getUserId(token)
+        if (userId == null) {
+            Log.i("PARSE_ACCESS_TOKEN", "failed to get user id from access token")
+            return
+        }
 
+        val user = eventDatabase.userDao().getUserById(userId)
+        if (user == null) {
+            val email = JwtDecoder.getUserEmail(token)
+            if (email == null) {
+                Log.i("PARSE_ACCESS_TOKEN", "failed to get user email from access token")
+                return
+            }
+            eventDatabase.userDao().insertUser(UserEntity(email, "", userId))
+        }
+
+        if (getCurrentUser().first() != userId) {
+            offlineModeManager.saveCurrentUserId(userId)
+            Log.d("SAVE_USER", "saved $userId")
+        }
     }
 
-    suspend fun getCurrentUser() {
+    fun getCurrentUser(): Flow<String> {
+        return offlineModeManager.getCurrentUserId()
+    }
 
+    suspend fun removeCurrentUser() {
+        offlineModeManager.removeCurrentUserId()
     }
 }

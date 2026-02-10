@@ -9,6 +9,7 @@ import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
+import com.eduplay.moblie.repository.localrepository.LocalRepository
 import com.eduplay.moblie.repository.pagingSources.AllEventsPagingWebSource
 import com.eduplay.moblie.repository.pagingSources.CompletedEventsPagingSource
 import com.eduplay.moblie.repository.pagingSources.CreatedEventsPagingSource
@@ -24,19 +25,43 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
 class EduRepository @Inject constructor(
-    private val webRepository: WebRepository
+    private val webRepository: WebRepository,
+    private val localRepository: LocalRepository,
 ) {
 
+
+
     suspend fun login(auth: Auth): AuthResult {
-        return webRepository.login(auth)
+        var authResult: AuthResult
+        try {
+            authResult = webRepository.login(auth)
+        } catch (e: Exception) {
+            throw e
+        }
+        localRepository.saveUser()
+        return authResult
     }
 
     suspend fun logout(): Boolean {
-        return webRepository.logout()
+        var result: Boolean
+        try {
+            result = webRepository.logout()
+        } catch (e: Exception) {
+            throw e
+        }
+        localRepository.removeCurrentUser()
+        return result
     }
 
     suspend fun register(auth: RegistrationData): AuthResult {
-        return webRepository.register(auth)
+        var authResult: AuthResult
+        try {
+            authResult = webRepository.register(auth)
+        } catch (e: Exception) {
+            throw e
+        }
+        localRepository.saveUser()
+        return authResult
     }
 
     fun getEvents(

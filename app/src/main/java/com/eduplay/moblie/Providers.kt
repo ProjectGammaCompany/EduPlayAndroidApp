@@ -1,10 +1,13 @@
 package com.eduplay.moblie
 
 import android.content.Context
+import androidx.room.Room
+import com.eduplay.moblie.repository.localrepository.Database
 import com.eduplay.moblie.repository.webrepository.AuthApi
 import com.eduplay.moblie.repository.webrepository.AuthInterceptor
 import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
+import com.eduplay.moblie.services.OfflineModeManager
 import com.eduplay.moblie.services.TokenManager
 import dagger.Module
 import dagger.Provides
@@ -22,6 +25,7 @@ import javax.inject.Singleton
 class Providers {
 
     private var tokenManager: TokenManager? = null
+    private var offlineModeManager: OfflineModeManager? = null
 
     @Provides
     @Singleton
@@ -30,6 +34,15 @@ class Providers {
             tokenManager = TokenManager(context)
         }
         return tokenManager!!
+    }
+
+    @Provides
+    @Singleton
+    fun provideOfflineManager(@ApplicationContext context: Context): OfflineModeManager {
+        if (offlineModeManager == null) {
+            offlineModeManager = OfflineModeManager(context)
+        }
+        return offlineModeManager!!
     }
 
     @Provides
@@ -67,5 +80,16 @@ class Providers {
             )
             .build()
             .create(AuthApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context) : Database {
+        return Room.databaseBuilder(
+            context,
+            Database::class.java, "eduplayDb"
+        )
+            .allowMainThreadQueries()
+            .build()
     }
 }

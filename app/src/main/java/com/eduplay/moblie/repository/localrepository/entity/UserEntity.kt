@@ -14,5 +14,5 @@ data class UserEntity (
 
     @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name="userId")
-    val userId:Int
+    val userId:String
 )
