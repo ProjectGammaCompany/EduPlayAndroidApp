@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.screens
 
+import android.content.ComponentName
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -87,6 +88,7 @@ fun EventScreen(
     innerPaddingValues: PaddingValues,
     eventId: String,
     navController: NavController,
+    onDownloadEvent: ()-> ComponentName?,
     viewModel: EventScreenViewModel = hiltViewModel(),
     imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
@@ -128,6 +130,9 @@ fun EventScreen(
     val onReturn = {
         navController.popBackStack()
     }
+    val onDownload = {
+        viewModel.downloadEvent(eventId, onDownloadEvent)
+    }
 
 
 
@@ -151,7 +156,8 @@ fun EventScreen(
         startEvent,
         showResults,
         onReturn,
-        imageHeaderViewModel.headers
+        imageHeaderViewModel.headers,
+        onDownload
     )
 }
 
@@ -175,7 +181,8 @@ fun EventScreen(
     startEvent: () -> Unit,
     showResults: () -> Unit,
     onReturn: () -> Boolean,
-    headers: State<NetworkHeaders>
+    headers: State<NetworkHeaders>,
+    onDownload: () -> Unit
 ) {
 
     var showEditDialog by remember { mutableStateOf(false) }
@@ -217,7 +224,8 @@ fun EventScreen(
             onEditEvent,
             onAddToFavourite,
             onShowComplaintDialog,
-            onReturn
+            onReturn,
+            onDownload
         )
 
         EventScreenHeader(
@@ -341,7 +349,8 @@ private fun TopAppBarEventScreen(
     onEditEvent: () -> Unit,
     onAddToFavourite: () -> Unit,
     onComplain: () -> Unit,
-    onReturn: () -> Boolean
+    onReturn: () -> Boolean,
+    onDownload: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -368,7 +377,7 @@ private fun TopAppBarEventScreen(
                     )
                 }
                 IconButton(
-                    onClick = { TODO("реализовать кнопку скачать событие") },
+                    onClick = { onDownload() },
                     modifier = Modifier.testTag("download_btn")
                 ) {
                     Icon(
@@ -422,7 +431,7 @@ private fun EventScreenHeader(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(cover)
-                .httpHeaders(headers = headers.value) //TODO("pass headers")
+                .httpHeaders(headers = headers.value)
                 .networkCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
@@ -711,6 +720,7 @@ private fun Event() {
         startEvent = {},
         showResults = { },
         onReturn = { false },
-        headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+        headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+        onDownload = {}
     )
 }

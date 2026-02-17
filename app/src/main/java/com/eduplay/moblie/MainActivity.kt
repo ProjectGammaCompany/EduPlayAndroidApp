@@ -2,6 +2,7 @@ package com.eduplay.moblie
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,17 +10,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.eduplay.moblie.services.EventDownloadService
 import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.screens.EventResultScreen
@@ -38,19 +36,17 @@ class MainActivity : ComponentActivity() {
     private val hideBottomBarScreens = listOf("auth_screen", "play_event", "fake_splash")
     private val viewModel: SplashViewModel by viewModels()
 
+    private val startDownloadService = {
+        startService(Intent(this, EventDownloadService::class.java))
+    }
+
     @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
-        val startDestination = mutableStateOf("main_screen")
+
         super.onCreate(savedInstanceState)
 
-        splashScreen.setKeepOnScreenCondition{viewModel.isLoading.value}
-//        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
-//
-//            splashScreenViewProvider.remove()
-//
-//        }
-
+        splashScreen.setKeepOnScreenCondition { viewModel.isLoading.value }
 
         enableEdgeToEdge()
         setContent {
@@ -87,7 +83,8 @@ class MainActivity : ComponentActivity() {
                             EventScreen(
                                 innerPadding,
                                 pathArgs.arguments?.getString("eventId") ?: "",
-                                navController
+                                navController,
+                                startDownloadService
                             )
                         }
 

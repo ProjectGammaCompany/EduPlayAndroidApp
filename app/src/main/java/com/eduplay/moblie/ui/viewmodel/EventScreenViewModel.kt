@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.content.ComponentName
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +18,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.ConnectException
+
 
 @HiltViewModel
 class EventScreenViewModel @Inject constructor(val repository: EduRepository) : ViewModel() {
@@ -146,5 +148,9 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         viewModelScope.launch(Dispatchers.IO) {
             repository.complain(eventId, reason)
         }
+    }
+
+    fun downloadEvent(eventId: String, onDownloadEvent: () -> ComponentName?) {
+        onDownloadEvent()
     }
 }
