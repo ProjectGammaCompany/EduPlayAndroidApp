@@ -372,7 +372,7 @@ private fun TopAppBarEventScreen(
                     modifier = Modifier.testTag("download_btn")
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.download_24dp_1f1f1f_fill0_wght200_grad0_opsz24),
+                        imageVector = ImageVector.vectorResource(R.drawable.download),
                         contentDescription = stringResource(R.string.download_event)
                     )
                 }

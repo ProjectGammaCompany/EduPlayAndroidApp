@@ -3,6 +3,11 @@ package com.eduplay.moblie.ui.screens.TaskScreen
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -50,6 +55,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -137,8 +143,13 @@ fun TaskScreen(
                     viewModel.taskStartTime,
                     viewModel.currentTask.value!!.files,
                     onSubmit,
-                    onDownload = { fileName, fileUri -> viewModel.onDownloadFile(fileName, fileUri) },
-                    onOpen = { fileUri -> viewModel.onOpenFile(fileUri)},
+                    onDownload = { fileName, fileUri ->
+                        viewModel.onDownloadFile(
+                            fileName,
+                            fileUri
+                        )
+                    },
+                    onOpen = { fileUri -> viewModel.onOpenFile(fileUri) },
                     downloadStatus = viewModel.fileStatusFlows
                 )
 
@@ -351,22 +362,29 @@ fun FileView(
     onOpen: (String) -> Unit,
     downloadStatus: SnapshotStateMap<String, Flow<FileDownloadStatus>>
 ) {
+
     Column {
         files.forEach { file ->
-            val fileStatus = (downloadStatus["455d8c87-c253-42b7-970d-e3965ac95424.docx"] ?: flowOf()).collectAsState(
-                FileDownloadStatus.NOT_STARTED)
+            val fileStatus = (downloadStatus["455d8c87-c253-42b7-970d-e3965ac95424.docx"]
+                ?: flowOf()).collectAsState(
+                FileDownloadStatus.NOT_STARTED
+            )
             TextButton(
                 onClick = {
                     Log.d("FILE_STATUS", fileStatus.value.toString())
                     if (fileStatus.value == FileDownloadStatus.NOT_STARTED ||
-                        fileStatus.value == FileDownloadStatus.FAILED) {
-                        onDownload(file, "455d8c87-c253-42b7-970d-e3965ac95424.docx") //TODO("поменять на фактическое название файла")
+                        fileStatus.value == FileDownloadStatus.FAILED
+                    ) {
+                        onDownload(
+                            file,
+                            "455d8c87-c253-42b7-970d-e3965ac95424.docx"
+                        ) //TODO("поменять на фактическое название файла")
                     } else if (fileStatus.value == FileDownloadStatus.SUCCESS) {
                         onOpen("455d8c87-c253-42b7-970d-e3965ac95424.docx") //TODO("поменять на фактическое название файла")
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (fileStatus.value == FileDownloadStatus.SUCCESS)colorScheme.background else colorScheme.tertiary,
+                    containerColor = colorScheme.background,
                     contentColor = colorScheme.onBackground
                 ),
                 modifier = Modifier
@@ -378,17 +396,49 @@ fun FileView(
                         shape = RoundedCornerShape(8.dp)
                     )
             ) {
+                val infiniteTransition = rememberInfiniteTransition()
+                val angle by infiniteTransition.animateFloat(
+                    initialValue = 0F,
+                    targetValue = 360F,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(2000, easing = LinearEasing)
+                    )
+                )
+                // file icon
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.files),
                     contentDescription = file,
                     modifier = Modifier.padding(end = 10.dp)
                 )
+                //file name
                 Text(
                     text = file,
                     textAlign = TextAlign.Start,
                     style = typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().weight(1f)
                 )
+                // download status icon
+                when (fileStatus.value) {
+                    FileDownloadStatus.NOT_STARTED, FileDownloadStatus.FAILED -> {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.download),
+                            contentDescription = file,
+                            modifier = Modifier.padding(end = 10.dp)
+                        )
+                    }
+
+                    FileDownloadStatus.SUCCESS -> {}
+                    FileDownloadStatus.LOADING, FileDownloadStatus.PAUSED -> {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.progress),
+                            contentDescription = file,
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .rotate(angle)
+                        )
+                    }
+                }
+
             }
         }
     }
@@ -397,7 +447,7 @@ fun FileView(
 @Preview
 @Composable
 fun TaskPreview() {
-    val flowmap = remember {  mutableStateMapOf<String, Flow<FileDownloadStatus>>() }
+    val flowmap = remember { mutableStateMapOf<String, Flow<FileDownloadStatus>>() }
     EduPlayTheme(false) {
         TaskScreen(
             PaddingValues(),

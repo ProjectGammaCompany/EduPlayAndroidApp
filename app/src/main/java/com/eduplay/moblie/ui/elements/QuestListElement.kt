@@ -109,7 +109,7 @@ fun QuestListElement(
                     )
                     if (questShortInfo.isDownloaded) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.download_24dp_1f1f1f_fill0_wght200_grad0_opsz24),
+                            imageVector = ImageVector.vectorResource(R.drawable.download),
                             contentDescription = stringResource(id = R.string.downloaded),
                             tint = colorScheme.onBackground,
                             modifier = Modifier
