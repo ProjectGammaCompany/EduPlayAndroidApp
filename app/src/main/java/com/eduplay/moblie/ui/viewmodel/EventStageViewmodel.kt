@@ -2,6 +2,7 @@ package com.eduplay.moblie.ui.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,15 +13,20 @@ import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.Task
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
+import com.eduplay.moblie.useCases.FileDownloadStatus
+import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.net.ConnectException
 import java.time.LocalDateTime
 
 @HiltViewModel
-class EventStageViewmodel @Inject constructor(private val repository: EduRepository) : ViewModel(),
-    EventStageViewModelInterface {
+class EventStageViewmodel @Inject constructor(
+    private val repository: EduRepository,
+    private val taskDownloader: TaskDownloadUseCase
+) : ViewModel(), EventStageViewModelInterface {
     override val currentStageType = mutableStateOf(StageType.NONE)
 
     override var currentTask = mutableStateOf<Task?>(null)
@@ -37,6 +43,8 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
 
     override var isAnswerCorrect: TaskAnswerStatus? = null
     val unauthorised = mutableStateOf(false)
+
+    override val fileStatusFlows = mutableStateMapOf<String, Flow<FileDownloadStatus>>()
 
     override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
         currentStageType.value = StageType.NONE
@@ -140,5 +148,13 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                 Log.e("send stage answer view model", e.message ?: e.toString())
             }
         }.invokeOnCompletion { currentStageType.value = StageType.NONE }
+    }
+
+    override fun onDownloadFile(fileName: String, fileUri: String) {
+        fileStatusFlows.put(fileUri, taskDownloader.download(fileUri, fileName))
+    }
+
+    override fun onOpenFile(fileUri: String) {
+        taskDownloader.openFile(fileUri)
     }
 }

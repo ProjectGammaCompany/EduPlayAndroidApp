@@ -72,7 +72,7 @@ fun EventStageScreen(
                 eventId,
                 onGoBack = onGoBack,
                 viewModel = viewModel,
-                onNoInternet = {noInternet = true}
+                onNoInternet = { noInternet = true }
             )
         }
 

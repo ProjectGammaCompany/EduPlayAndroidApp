@@ -30,8 +30,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            //TODO("заменить на реальный адрес бекэнда")
             buildConfigField("String", "BACKEND_URL", "\"http://api.hse-eduplay.ru\"")
+            buildConfigField("String", "BACKEND_FILE_URL", "\"http://files.hse-eduplay.ru/eduplay-bucket/uploads/\"")
 
 
         }
@@ -39,6 +39,7 @@ android {
             applicationIdSuffix = ".debug"
             isDebuggable = true
             buildConfigField("String", "BACKEND_URL", "\"http://api.hse-eduplay.ru\"")
+            buildConfigField("String", "BACKEND_FILE_URL", "\"http://files.hse-eduplay.ru/eduplay-bucket/uploads/\"")
         }
 
     }
