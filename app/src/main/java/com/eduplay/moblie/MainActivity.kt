@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
                     bottomBar = { BottomNavBar(navController, hideBottomBarScreens) }
                 ) { innerPadding ->
 
-                    NavHost(navController = navController, startDestination = "fakeStage") {
+                    NavHost(navController = navController, startDestination = "fake_splash") {
                         composable("fake_splash") {
                             FakeSplashScreen(
                                 viewModel.isLoading,
@@ -136,97 +136,6 @@ class MainActivity : ComponentActivity() {
                                 innerPadding,
                                 navController
                             )
-                        }
-
-                        composable("fakeStage") {
-                            val flowmap = remember {  mutableStateOf(mapOf<String, Flow<FileDownloadStatus>>()) }
-                            EduPlayTheme(false) {
-                                TaskScreen(
-                                    PaddingValues(),
-                                    "1",
-                                    object : EventStageViewModelInterface {
-                                        override val fileStatusFlows: SnapshotStateMap<String, Flow<FileDownloadStatus>>
-                                            get() = fakeStage.fileStatusFlows
-                                        override val currentStageType: MutableState<StageType>
-                                            get() = TODO("Not yet implemented")
-
-                                        override var currentTask: MutableState<Task?> = remember {
-                                            mutableStateOf<Task?>(
-                                                Task(
-                                                    "1",
-                                                    "1",
-                                                    "Задание 4 ",
-                                                    "Отсканировать код",
-                                                    TaskType.QR.optionNumber,
-                                                    listOf(
-                                                        AnswerOption("1", "ответ 1", false),
-                                                        AnswerOption("0", "ответ 2", false),
-                                                        AnswerOption("2", "ответ 3", false),
-                                                        AnswerOption("3", "ответ 4", false),
-                                                        AnswerOption("4", "ответ 5", false),
-                                                        AnswerOption("5", "ответ 6", false)
-                                                    ),
-                                                    listOf(
-                                                        "455d8c87-c253-42b7-970d-e3965ac95424.docx",
-                                                        "455d8c87-c253-42b7-970d-e3965ac95424.docx"
-                                                    ),
-                                                    30,
-                                                    LocalDateTime.now().toString()
-                                                )
-                                            )
-                                        }
-                                            set(value) {}
-                                        override var currentBlock: MutableState<Block?>
-                                            get() = TODO("Not yet implemented")
-                                            set(value) {}
-                                        override var taskStartTime: LocalDateTime = LocalDateTime.now()
-
-                                        override val answers: SnapshotStateList<String> =
-                                            remember { mutableStateListOf<String>() }
-                                        override val disableTask: MutableState<Boolean> = remember { mutableStateOf(false) }
-
-                                        override val showResults: MutableState<Boolean> = remember { mutableStateOf(false) }
-
-                                        override val correctAnswer: MutableList<String>
-                                            get() = TODO("Not yet implemented")
-                                        override var points: Int?
-                                            get() = TODO("Not yet implemented")
-                                            set(value) {}
-                                        override var isAnswerCorrect: TaskAnswerStatus?
-                                            get() = TODO("Not yet implemented")
-                                            set(value) {}
-
-                                        override fun chooseTask(
-                                            eventId: String,
-                                            taskId: String,
-                                            onNoInternet: () -> Unit
-                                        ) {
-                                            TODO("Not yet implemented")
-                                        }
-
-                                        override fun sendAnswer(eventId: String, onNoInternet: () -> Unit) {
-                                            TODO("Not yet implemented")
-                                        }
-
-                                        override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
-                                            TODO("Not yet implemented")
-                                        }
-
-                                        override fun onDownloadFile(
-                                            fileName: String,
-                                            fileUri: String
-                                        ) {
-                                            fakeStage.onDownloadFile(fileName, fileUri)
-                                        }
-
-                                        override fun onOpenFile(fileUri: String) {
-                                            fakeStage.onOpenFile(fileUri)
-                                        }
-                                    },
-                                    {},
-                                    {}
-                                )
-                            }
                         }
                     }
                 }
