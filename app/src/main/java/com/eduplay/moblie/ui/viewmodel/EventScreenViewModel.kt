@@ -73,20 +73,21 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         isEventFavourite.value = data.favorite
 
         tags = data.tags.toMutableStateList()
-        opens.value = data.startDate?.substring(0..data.startDate.length - 5)
-        closes.value = data.endDate?.substring(0..data.endDate.length - 5)
+        opens.value = data.startDate//?.substring(0..data.startDate.length - 5)
+        closes.value = data.endDate//?.substring(0..data.endDate.length - 5)
         rating.value = data.rate.toString() + '⭐'
         description.value = data.description
 
         info.clear()
-        info.addAll(
-            listOf(
-                Pair(R.string.rating, rating.value),
-                Pair(R.string.opens, opens.value),
-                Pair(R.string.closes, closes.value)
-            )
+        info.add(
+            Pair(R.string.rating, rating.value)
         )
-
+        if (opens.value?.isNotBlank() ?: false) {
+            info.add(Pair(R.string.opens, opens.value))
+        }
+        if (closes.value?.isNotBlank() ?: false) {
+            Pair(R.string.closes, closes.value)
+        }
 
         isOpen.value = !data.completed && data.status != EventStatus.ENDED
 //                && (data.startDate == null || LocalDateTime.now() >= LocalDateTime.parse(

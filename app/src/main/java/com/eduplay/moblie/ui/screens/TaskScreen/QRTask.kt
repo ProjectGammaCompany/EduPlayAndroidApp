@@ -56,6 +56,7 @@ fun QRTask(
     var canScan by remember { mutableStateOf(true) }
     var answer by remember { mutableStateOf("") }
 
+    //TODO(check what is going on here)
     LaunchedEffect(cameraPermissionState.status) {
         // Check if the permission state has changed after the request
         if (hasRequestedPermission) {

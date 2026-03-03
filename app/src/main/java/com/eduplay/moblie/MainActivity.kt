@@ -1,36 +1,35 @@
 package com.eduplay.moblie
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.splashscreen.SplashScreen
+import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.eduplay.moblie.models.AnswerOption
-import com.eduplay.moblie.models.TaskType
-import com.eduplay.moblie.repository.responseTypes.Block
-import com.eduplay.moblie.repository.responseTypes.StageType
-import com.eduplay.moblie.repository.responseTypes.Task
-import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.screens.EventResultScreen
@@ -40,34 +39,30 @@ import com.eduplay.moblie.ui.screens.FakeSplashScreen
 import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.screens.MyEventsScreen
 import com.eduplay.moblie.ui.screens.ProfileScreen
-import com.eduplay.moblie.ui.screens.TaskScreen.TaskScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
-import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 import com.eduplay.moblie.ui.viewmodel.SplashViewModel
-import com.eduplay.moblie.useCases.FileDownloadStatus
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.Flow
-import java.time.LocalDateTime
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     private val hideBottomBarScreens = listOf("auth_screen", "play_event", "fake_splash")
     private val viewModel: SplashViewModel by viewModels()
-    private val fakeStage: EventStageViewmodel by viewModels()
+    private val bluetoothAdapter: BluetoothAdapter? = null
+
+    private val adapter = mutableStateOf<BluetoothAdapter?>(null)
+    private val manager = mutableStateOf<BluetoothManager?>(null)
 
     @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val updateAdapter = {adapter: BluetoothAdapter? -> this.adapter.value = adapter}
+        val updateManger = {manager: BluetoothManager? -> this.manager.value = manager}
         val splashScreen = installSplashScreen()
         val startDestination = mutableStateOf("main_screen")
         super.onCreate(savedInstanceState)
 
-        splashScreen.setKeepOnScreenCondition{viewModel.isLoading.value}
-//        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
-//
-//            splashScreenViewProvider.remove()
-//
-//        }
+        splashScreen.setKeepOnScreenCondition { viewModel.isLoading.value }
 
 
         enableEdgeToEdge()
@@ -105,7 +100,11 @@ class MainActivity : ComponentActivity() {
                             EventScreen(
                                 innerPadding,
                                 pathArgs.arguments?.getString("eventId") ?: "",
-                                navController
+                                navController,
+                                manager,
+                                adapter,
+                                updateManger = updateManger,
+                                updateAdapter = updateAdapter
                             )
                         }
 

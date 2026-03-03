@@ -1,5 +1,9 @@
 package com.eduplay.moblie.ui.screens
 
+import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -66,6 +71,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.fragment.compose.AndroidFragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -80,13 +86,21 @@ import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
+import com.eduplay.moblie.useCases.BluetoothConnectionFragment
+import com.eduplay.moblie.utils.hasPermission
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun EventScreen(
     innerPaddingValues: PaddingValues,
     eventId: String,
     navController: NavController,
+    manager: State<BluetoothManager?>,
+    adapter: State<BluetoothAdapter?>,
+    updateManger: (BluetoothManager?) -> Unit,
+    updateAdapter: (BluetoothAdapter?) -> Unit,
     viewModel: EventScreenViewModel = hiltViewModel(),
     imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
@@ -129,8 +143,84 @@ fun EventScreen(
         navController.popBackStack()
     }
 
+    val bluetoothScanPermission =
+        rememberPermissionState(permission = Manifest.permission.BLUETOOTH_SCAN)
+    var askScanPermission by remember { mutableStateOf(false) }
+
+    val bluetoothConnectPermission =
+        rememberPermissionState(permission = Manifest.permission.BLUETOOTH_CONNECT)
+    var askConnectPermission by remember { mutableStateOf(false) }
+
+    val fineLocationPermission =
+        rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
+    var askLocationPermission by remember { mutableStateOf(false) }
+
+    LaunchedEffect(askScanPermission) {
+        if (askScanPermission) {
+            bluetoothScanPermission.launchPermissionRequest()
+            askScanPermission = false
+        }
+    }
+    LaunchedEffect(askConnectPermission) {
+        if (askConnectPermission) {
+            bluetoothConnectPermission.launchPermissionRequest()
+            askConnectPermission = false
+        }
+    }
+    LaunchedEffect(askLocationPermission) {
+        if (askLocationPermission) {
+            fineLocationPermission.launchPermissionRequest()
+            askLocationPermission = false
+        }
+    }
+    val context = LocalContext.current
+    val runGetPermissions = {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            askScanPermission = !context.hasPermission(bluetoothScanPermission)
+            askConnectPermission = !context.hasPermission(bluetoothConnectPermission)
+
+            if (
+                context.hasPermission(bluetoothScanPermission) &&
+                context.hasPermission(bluetoothConnectPermission)
+            ) {
+                Log.d("BLUETOOTH_TEST", "permission granted")
+                // fragment?.connect()
+            }
+        } else {
+            askLocationPermission = !context.hasPermission(fineLocationPermission)
+            if (context.hasPermission(fineLocationPermission)) {
+                Log.d("BLUETOOTH_TEST", "permission granted")
+                // fragment?.connect()
+            }
+        }
+    }
+
+    runGetPermissions()
+
+    val showConnectionList = {
+        //TODO("показать список устройств")
+    }
+    val onDoesNotSupportBluetooth = {
+
+    }
+
+    var fragment by remember { mutableStateOf<BluetoothConnectionFragment?>(null) }
+    AndroidFragment<BluetoothConnectionFragment>() { connectionFragment ->
+        fragment = connectionFragment
+
+    }
 
 
+    LaunchedEffect(fragment) {
+        fragment?.connect(
+            manager,
+            adapter,
+            updateManger,
+            updateAdapter,
+            showConnectionList,
+            onDoesNotSupportBluetooth = onDoesNotSupportBluetooth,
+        )
+    }
 
     EventScreen(
         innerPaddingValues,
@@ -177,7 +267,6 @@ fun EventScreen(
     onReturn: () -> Boolean,
     headers: State<NetworkHeaders>
 ) {
-
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
         showEditDialog = true
@@ -507,9 +596,11 @@ private fun GeneralInfo(
             .fillMaxHeight()
             .verticalScroll(rememberScrollState())
     ) {
-        FlowRow(modifier = Modifier
-            .fillMaxWidth()
-            .testTag("tags")) {
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("tags")
+        ) {
             tags.forEach { tagName ->
                 EventTag(tagName.name)
             }

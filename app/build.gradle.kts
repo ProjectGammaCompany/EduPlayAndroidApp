@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.ui.test.junit4)
     implementation(libs.androidx.media3.common.ktx)
+    implementation(libs.androidx.fragment.compose)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     androidTestImplementation(libs.androidx.ui.test.junit4)
