@@ -86,7 +86,8 @@ fun MainScreen(
         events,
         onEventClick,
         onFavourite,
-        imageHeaderViewModel.headers
+        imageHeaderViewModel.headers,
+        {image: String -> imageHeaderViewModel.getFullUrl(image)}
     )
 }
 
@@ -97,7 +98,8 @@ private fun MainScreen(
     events: Flow<PagingData<QuestShortInfo>>,
     onEventClick: (String) -> Unit,
     onFavourite: (String, Boolean) -> Unit,
-    headers: State<NetworkHeaders>
+    headers: State<NetworkHeaders>,
+    imageUrl: (String) -> String
 ) {
     Column(
         modifier = Modifier
@@ -148,7 +150,8 @@ private fun MainScreen(
                         itemValue,
                         onEventClick,
                         { isFavourite -> onFavourite(itemValue.id, isFavourite) },
-                        headers
+                        headers,
+                        imageUrl
                     )
                 }
             }
@@ -198,7 +201,8 @@ fun MainScreenPreview() {
             events,
             nothing,
             nothingB,
-            headers
+            headers,
+            {it}
         )
     }
 

@@ -201,7 +201,7 @@ private fun TaskHeader(
     taskType: TaskType,
     title: String,
     description: String,
-    time: Int,
+    time: Int?,
     startTime: LocalDateTime,
     files: List<String>,
     invokeEndOnTime: () -> Unit,
@@ -210,44 +210,7 @@ private fun TaskHeader(
     downloadStatus: SnapshotStateMap<String, Flow<FileDownloadStatus>>
 ) {
     val scope = rememberCoroutineScope()
-    var showTimer by remember { mutableStateOf(true) }
-    var currentProgress by remember {
-        mutableFloatStateOf(
-            abs(Duration.between(LocalDateTime.now(), startTime).toSeconds()).toFloat() / time
-        )
-    }
-    LaunchedEffect(Any()) {
-        scope.launch {
-            while (currentProgress < 1f) {
-                currentProgress = abs(
-                    Duration.between(LocalDateTime.now(), startTime).toSeconds()
-                ).toFloat() / time
-                delay(500L)
-            }
-        }
-    }
-    var timeLeft by remember {
-        mutableLongStateOf(
-            time - abs(
-                Duration.between(
-                    LocalDateTime.now(),
-                    startTime
-                ).toSeconds()
-            )
-        )
-    }
-    LaunchedEffect(time) {
-        scope.launch {
-            while (timeLeft > 0) {
-                timeLeft -= 1
-                delay(1000L)
-            }
-            invokeEndOnTime()
-        }
-    }
-
-
-
+    var showTimer by remember { mutableStateOf(time != null && time != 0) }
 
     Column(
         modifier =
@@ -263,6 +226,41 @@ private fun TaskHeader(
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(0.9f)
             ) {
+                var currentProgress by remember {
+                    mutableFloatStateOf(
+                        abs(Duration.between(LocalDateTime.now(), startTime).toSeconds()).toFloat() / time!!
+                    )
+                }
+                LaunchedEffect(Any()) {
+                    scope.launch {
+                        while (currentProgress < 1f) {
+                            currentProgress = abs(
+                                Duration.between(LocalDateTime.now(), startTime).toSeconds()
+                            ).toFloat() / time!!
+                            delay(500L)
+                        }
+                    }
+                }
+                var timeLeft by remember {
+                    mutableLongStateOf(
+                        time!! - abs(
+                            Duration.between(
+                                LocalDateTime.now(),
+                                startTime
+                            ).toSeconds()
+                        )
+                    )
+                }
+                LaunchedEffect(time) {
+                    scope.launch {
+                        while (timeLeft > 0) {
+                            timeLeft -= 1
+                            delay(1000L)
+                        }
+                        invokeEndOnTime()
+                    }
+                }
+
                 LinearProgressIndicator(
                     progress = { currentProgress },
                     color = colorScheme.secondary,
@@ -365,7 +363,7 @@ fun FileView(
 
     Column {
         files.forEach { file ->
-            val fileStatus = (downloadStatus["455d8c87-c253-42b7-970d-e3965ac95424.docx"]
+            val fileStatus = (downloadStatus[file]
                 ?: flowOf()).collectAsState(
                 FileDownloadStatus.NOT_STARTED
             )
@@ -377,10 +375,10 @@ fun FileView(
                     ) {
                         onDownload(
                             file,
-                            "455d8c87-c253-42b7-970d-e3965ac95424.docx"
-                        ) //TODO("поменять на фактическое название файла")
+                            file
+                        )
                     } else if (fileStatus.value == FileDownloadStatus.SUCCESS) {
-                        onOpen("455d8c87-c253-42b7-970d-e3965ac95424.docx") //TODO("поменять на фактическое название файла")
+                        onOpen(file)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(

@@ -10,6 +10,7 @@ import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.responseTypes.Block
+import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.Task
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
@@ -52,10 +53,15 @@ class EventStageViewmodel @Inject constructor(
             try {
                 val result = repository.getNextStage(eventId)
                 clear()
-                currentStageType.value = result.type
+                currentStageType.value = StageType.stringValueOf(result.type)
                 currentTask.value = result.task
                 currentBlock.value = result.block
-                taskStartTime = LocalDateTime.parse(result.task?.timeStamp) ?: LocalDateTime.now()
+                taskStartTime = if (result.task?.timeStamp == null || result.task.timeStamp.isBlank()) {
+                                    LocalDateTime.now()
+                                } else {
+                                    LocalDateTime.parse(result.task.timeStamp)
+                                }
+
             } catch (_: ConnectException) {
                 onNoInternet()
             } catch (_: NotAuthorisedException) {
@@ -84,7 +90,10 @@ class EventStageViewmodel @Inject constructor(
         if (currentStageType.value == StageType.TASK) {
             viewModelScope.launch {
                 val resultingAnswer =
-                    if (TaskType.valueOf(currentTask.value!!.type) == TaskType.MULTIPLE_CHOICE) {
+                    if (answers.isEmpty()) {
+                        answers.add("")
+                        answers.toList()
+                    } else if (TaskType.valueOf(currentTask.value!!.type) == TaskType.MULTIPLE_CHOICE) {
                         answers.toList()
                     } else {
                         listOf(answers.last())
@@ -109,7 +118,7 @@ class EventStageViewmodel @Inject constructor(
                 } catch (_: NotAuthorisedException) {
                     unauthorised.value = true
                 } catch (e: Exception) {
-                    Log.e("send stage answer view model", e.message ?: e.toString())
+                    Log.e("send_stage_answer", e.message ?: e.toString())
                 }
             }
         }
@@ -138,6 +147,7 @@ class EventStageViewmodel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.postTaskChoice(eventId, currentBlock.value?.id ?: "", taskId)
+                currentStageType.value = StageType.NONE
             } catch (_: IllegalAccessException) {
 
             } catch (_: ConnectException) {
@@ -145,9 +155,9 @@ class EventStageViewmodel @Inject constructor(
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
             } catch (e: Exception) {
-                Log.e("send stage answer view model", e.message ?: e.toString())
+                Log.e("send_stage_answer", e.message ?: e.toString())
             }
-        }.invokeOnCompletion { currentStageType.value = StageType.NONE }
+        }
     }
 
     override fun onDownloadFile(fileName: String, fileUri: String) {

@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil3.network.NetworkHeaders
+import com.eduplay.moblie.BuildConfig
 import com.eduplay.moblie.services.TokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -26,5 +27,8 @@ class ImageHeaderViewModel @Inject constructor(private val tokenManager: TokenMa
                         .build()
             }
         }
+    }
+    fun getFullUrl(fileName: String): String {
+        return BuildConfig.BACKEND_FILE_URL + fileName
     }
 }

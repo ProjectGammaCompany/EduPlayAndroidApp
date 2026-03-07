@@ -59,7 +59,8 @@ class MainActivity : FragmentActivity() {
         val updateAdapter = {adapter: BluetoothAdapter? -> this.adapter.value = adapter}
         val updateManger = {manager: BluetoothManager? -> this.manager.value = manager}
         val splashScreen = installSplashScreen()
-        val startDestination = mutableStateOf("main_screen")
+        val isCompetitionMode = mutableStateOf(false)
+        val toggleCompetitionMode = {mode: Boolean -> isCompetitionMode.value = mode}
         super.onCreate(savedInstanceState)
 
         splashScreen.setKeepOnScreenCondition { viewModel.isLoading.value }
@@ -104,7 +105,9 @@ class MainActivity : FragmentActivity() {
                                 manager,
                                 adapter,
                                 updateManger = updateManger,
-                                updateAdapter = updateAdapter
+                                updateAdapter = updateAdapter,
+                                isCompetitionMode = isCompetitionMode,
+                                toggleCompetitionMode = toggleCompetitionMode
                             )
                         }
 

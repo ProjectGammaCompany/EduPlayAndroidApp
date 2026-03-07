@@ -108,7 +108,7 @@ interface WebApi {
         @Body timeStamp: TaskStartTime
     ): Response<Unit>
 
-    @POST("event/{eventId}/block/{blockId}/task/{taskId}/answer")
+    @POST("event/{eventId}/blocks/{blockId}/tasks/{taskId}/answer")
     @InjectAuth
     suspend fun postTaskAnswer(
         @Path("eventId") eventId: String,

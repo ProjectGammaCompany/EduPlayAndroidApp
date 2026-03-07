@@ -70,4 +70,6 @@
     <string name="no_registration">Такого аккаунта не существует</string>
     <string name="partialy_correct">Частично правильно</string>
     <string name="try_again_later">Произошла ошибка, попробуйте повторить дейстиве позже.</string>
+    <string name="start_bluetooth">Включить режим локального блютус соревнования</string>
+    <string name="turn_off_bluetooth">Отключить режим блютус соревнования</string>
 </resources>

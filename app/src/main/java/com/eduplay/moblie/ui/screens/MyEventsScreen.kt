@@ -76,7 +76,8 @@ fun MyEventsScreen(
         viewModel.completed,
         viewModel.created,
         onEventClick,
-        imageHeaderViewModel.headers
+        imageHeaderViewModel.headers,
+        {image: String -> imageHeaderViewModel.getFullUrl(image)}
     )
 
 }
@@ -89,7 +90,8 @@ private fun MyEventsScreen(
     completed: Flow<PagingData<QuestShortInfo>>,
     created: Flow<PagingData<QuestShortInfo>>,
     onEventClick: (String) -> Unit,
-    headers: State<NetworkHeaders>
+    headers: State<NetworkHeaders>,
+    imageUrl: (String) -> String
 ) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
@@ -134,21 +136,24 @@ private fun MyEventsScreen(
                 favorite,
                 onFavouriteToggle,
                 onEventClick,
-                headers
+                headers,
+                imageUrl
             );
 
             1 -> ListOfEvents(
                 completed,
                 onFavouriteToggle,
                 onEventClick,
-                headers
+                headers,
+                imageUrl
             );
 
             2 -> ListOfEvents(
                 created,
                 onFavouriteToggle,
                 onEventClick,
-                headers
+                headers,
+                imageUrl
             );
 
             else -> Box {}
@@ -162,7 +167,8 @@ private fun ListOfEvents(
     events: Flow<PagingData<QuestShortInfo>>,
     onFavouriteToggle: (String, Boolean) -> Unit,
     onEventClick: (String) -> Unit,
-    headers: State<NetworkHeaders>
+    headers: State<NetworkHeaders>,
+    imageUrl: (String) -> String
 ) {
     val eventsInfo = events.collectAsLazyPagingItems()
     Column {
@@ -176,7 +182,8 @@ private fun ListOfEvents(
                         itemValue,
                         { onEventClick(itemValue.id) },
                         { onFavouriteToggle(itemValue.id, itemValue.isFavourite) },
-                        headers
+                        headers,
+                        imageUrl
                     )
                 }
             }

@@ -105,6 +105,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         eventName.value = data.title
         author.value = data.authors.joinToString(", ") { it.email }
         isCompleted.value = data.completed
+        cover.value = data.cover
     }
 
     private suspend fun fetchOwnerData(eventId: String) {

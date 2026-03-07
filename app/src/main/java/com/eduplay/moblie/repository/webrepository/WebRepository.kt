@@ -180,11 +180,11 @@ class WebRepository @Inject constructor(
     ): AnswerResult {
         val response = api.postTaskAnswer(eventId, blockId, taskId, TaskAnswer(answers))
         val body = response.body()
-        Log.d("Requests answer", response.code().toString() + response.raw())
+        Log.d("Requests_answer", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         } // TODO(оделать проверку на причины отказа)
-        throw IllegalAccessException("cant enter next stage $eventId")
+        throw IllegalAccessException("cant send answer $eventId")
     }
 
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {

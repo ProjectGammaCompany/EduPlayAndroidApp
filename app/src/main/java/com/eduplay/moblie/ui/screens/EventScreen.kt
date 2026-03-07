@@ -41,6 +41,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -102,7 +103,9 @@ fun EventScreen(
     updateManger: (BluetoothManager?) -> Unit,
     updateAdapter: (BluetoothAdapter?) -> Unit,
     viewModel: EventScreenViewModel = hiltViewModel(),
-    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
+    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel(),
+    isCompetitionMode: State<Boolean>,
+    toggleCompetitionMode: (Boolean) -> Unit
 ) {
     var dataFetched by remember { mutableStateOf(false) }
     var noInternet by remember { mutableStateOf(false) }
@@ -173,6 +176,8 @@ fun EventScreen(
             askLocationPermission = false
         }
     }
+
+
     val context = LocalContext.current
     val runGetPermissions = {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -195,14 +200,31 @@ fun EventScreen(
         }
     }
 
-    runGetPermissions()
 
+
+
+    var requireAdapter by remember { mutableStateOf(false) }
+
+
+
+    var canShowConnectionList by remember { mutableStateOf(false) }
     val showConnectionList = {
-        //TODO("показать список устройств")
+        canShowConnectionList = true
+        requireAdapter = false
     }
-    val onDoesNotSupportBluetooth = {
 
+    var supportsBluetooth by remember { mutableStateOf(true) }
+    val onDoesNotSupportBluetooth = {
+        supportsBluetooth = false
+        requireAdapter = false
     }
+
+    var connectionTookTooLong by remember { mutableStateOf(false) }
+    val onConnectionTookTooLong = {
+        connectionTookTooLong = true
+        requireAdapter = false
+    }
+
 
     var fragment by remember { mutableStateOf<BluetoothConnectionFragment?>(null) }
     AndroidFragment<BluetoothConnectionFragment>() { connectionFragment ->
@@ -210,17 +232,77 @@ fun EventScreen(
 
     }
 
+    val turnOnBluetooth = {
+        if (!isCompetitionMode.value) {
+            runGetPermissions()
+            requireAdapter = true
+            toggleCompetitionMode(true)
+        } else {
+            if (adapter.value != null) {
+                try {
+                    fragment?.stopScan(adapter.value!!)
+                    toggleCompetitionMode(false)
+                } catch (e: SecurityException) {
+                    Log.d("cant_stop_scan",e.message ?: "")
+                }
+            }
+        }
+    }
 
-    LaunchedEffect(fragment) {
-        fragment?.connect(
-            manager,
-            adapter,
-            updateManger,
-            updateAdapter,
-            showConnectionList,
-            onDoesNotSupportBluetooth = onDoesNotSupportBluetooth,
+
+
+    LaunchedEffect(fragment, requireAdapter) {
+        if (requireAdapter && fragment != null) {
+            fragment?.startBluetooth(
+                manager,
+                adapter,
+                updateManger,
+                updateAdapter,
+                showConnectionList,
+                onDoesNotSupportBluetooth = onDoesNotSupportBluetooth,
+                onConnectionTookTooLong = onConnectionTookTooLong
+            )
+            requireAdapter = false
+        }
+    }
+
+    LaunchedEffect(canShowConnectionList) {
+        if (canShowConnectionList && adapter.value != null) {
+            try {
+                fragment?.getBondedDevices(
+                    adapter.value!!,
+                    runGetPermissions
+                )
+                fragment?.discoverDevices(
+                    adapter.value!!,
+                    onConnectionTookTooLong
+                )
+            } catch (_: SecurityException) {
+                runGetPermissions()
+                canShowConnectionList = false
+                requireAdapter = false
+                return@LaunchedEffect
+            }
+        } else if (canShowConnectionList && adapter.value == null) {
+            requireAdapter = true
+            canShowConnectionList = false
+        } else {
+            canShowConnectionList = false
+        }
+    }
+    LaunchedEffect(canShowConnectionList) {
+        Log.d("ADAPTER", fragment?.foundDevices?.size.toString())
+    }
+    if (canShowConnectionList && fragment?.foundDevices!= null) {
+        ConnectionList(
+            fragment?.foundDevices!!,
+            {
+                turnOnBluetooth()
+                canShowConnectionList = false
+            }
         )
     }
+
 
     EventScreen(
         innerPaddingValues,
@@ -230,7 +312,7 @@ fun EventScreen(
         viewModel.tags,
         viewModel.author.value,
         viewModel.isCompleted.value,
-        viewModel.cover.value,
+        imageHeaderViewModel.getFullUrl(viewModel.cover.value),
         viewModel.info,
         viewModel.description.value,
         viewModel.privateEvent.value,
@@ -241,8 +323,25 @@ fun EventScreen(
         startEvent,
         showResults,
         onReturn,
-        imageHeaderViewModel.headers
+        imageHeaderViewModel.headers,
+        turnOnBluetooth,
+        isCompetitionMode
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ConnectionList(
+    foundDevices: SnapshotStateList<Pair<String?, String?>>,
+    turnOnBluetooth: () -> Unit
+) {
+    ModalBottomSheet(turnOnBluetooth) {
+        Column {
+            foundDevices.toList().forEach {
+                Text(it.first ?: "unknown device")
+            }
+        }
+    }
 }
 
 @Composable
@@ -265,7 +364,9 @@ fun EventScreen(
     startEvent: () -> Unit,
     showResults: () -> Unit,
     onReturn: () -> Boolean,
-    headers: State<NetworkHeaders>
+    headers: State<NetworkHeaders>,
+    toggleBluetooth: () -> Unit,
+    isCompetitionMode: State<Boolean>
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -306,7 +407,9 @@ fun EventScreen(
             onEditEvent,
             onAddToFavourite,
             onShowComplaintDialog,
-            onReturn
+            onReturn,
+            toggleBluetooth,
+            isCompetitionMode
         )
 
         EventScreenHeader(
@@ -430,7 +533,9 @@ private fun TopAppBarEventScreen(
     onEditEvent: () -> Unit,
     onAddToFavourite: () -> Unit,
     onComplain: () -> Unit,
-    onReturn: () -> Boolean
+    onReturn: () -> Boolean,
+    toggleBluetooth: ()-> Unit,
+    isCompetitionMode: State<Boolean>
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -447,6 +552,21 @@ private fun TopAppBarEventScreen(
         },
         actions = {
             if (!eventCreatorMode) {
+                IconButton(
+                    onClick = toggleBluetooth,
+                ) {
+                    if (!isCompetitionMode.value) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.bluetooth),
+                            contentDescription = stringResource(R.string.start_bluetooth)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.bluetooth_disabled),
+                            contentDescription = stringResource(R.string.turn_off_bluetooth)
+                        )
+                    }
+                }
                 IconButton(
                     onClick = { onComplain() },
                     modifier = Modifier.testTag("report_btn")
@@ -505,7 +625,7 @@ private fun EventScreenHeader(
     eventCreatorMode: Boolean,
     isCompleted: Boolean,
     cover: String?,
-    headers: State<NetworkHeaders>
+    headers: State<NetworkHeaders>,
 ) {
     Row(Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
         AsyncImage(
@@ -786,13 +906,13 @@ private fun Event() {
     EventScreen(
         PaddingValues(),
         isEventFavourite = true,
-        eventCreatorMode = true,
+        eventCreatorMode = false,
         eventName = "Событие",
         tags = remember { mutableStateListOf<EventTag>(EventTag("", "tag1")) },
         author = "Author",
         isCompleted = false,
         cover = "",
-        info = remember { mutableStateListOf<Pair<Int, String>>() } as SnapshotStateList<Pair<Int, String?>>,
+        info = remember { mutableStateListOf() },
         description = "Some information",
         privateEvent = false,
         isOpen = false,
@@ -802,6 +922,8 @@ private fun Event() {
         startEvent = {},
         showResults = { },
         onReturn = { false },
-        headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+        headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+        toggleBluetooth = {},
+        isCompetitionMode = remember { mutableStateOf(false) }
     )
 }
