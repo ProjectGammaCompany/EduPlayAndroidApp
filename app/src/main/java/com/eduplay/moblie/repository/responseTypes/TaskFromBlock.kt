@@ -3,8 +3,8 @@ package com.eduplay.moblie.repository.responseTypes
 import com.google.gson.annotations.SerializedName
 
 data class TaskFromBlock(
-    @SerializedName("block_id")
+    @SerializedName("blockId")
     val blockId: String,
-    @SerializedName("task_id")
+    @SerializedName("taskId")
     val taskId: String
 )
