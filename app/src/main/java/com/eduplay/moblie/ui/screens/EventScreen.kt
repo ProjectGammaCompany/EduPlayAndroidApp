@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.clearText
@@ -160,6 +162,10 @@ fun EventScreen(
         rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
     var askLocationPermission by remember { mutableStateOf(false) }
 
+    val advertisePermission =
+        rememberPermissionState(permission = Manifest.permission.BLUETOOTH_ADVERTISE)
+    var askAdvertisePermission by remember { mutableStateOf(false) }
+
     LaunchedEffect(askScanPermission) {
         if (askScanPermission) {
             bluetoothScanPermission.launchPermissionRequest()
@@ -176,6 +182,12 @@ fun EventScreen(
         if (askLocationPermission) {
             fineLocationPermission.launchPermissionRequest()
             askLocationPermission = false
+        }
+    }
+    LaunchedEffect(askAdvertisePermission) {
+        if (askAdvertisePermission) {
+            advertisePermission.launchPermissionRequest()
+            askAdvertisePermission = false
         }
     }
 
@@ -195,6 +207,7 @@ fun EventScreen(
         }
         //}
         askLocationPermission = !context.hasPermission(fineLocationPermission)
+        askAdvertisePermission = !context.hasPermission(advertisePermission)
         if (context.hasPermission(fineLocationPermission)) {
             Log.d("BLUETOOTH_TEST", "permission granted")
             // fragment?.connect()
@@ -342,14 +355,15 @@ private fun ConnectionList(
     onConnectToDevice: (String) -> Unit
 ) {
     ModalBottomSheet(turnOnBluetooth) {
-        Column {
-            foundDevices.entries.forEach {
+        LazyColumn {
+            items(foundDevices.entries.toList()) {
                 TextButton(
                     onClick = { onConnectToDevice(it.key) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(it.value ?: it.key)
                 }
+
             }
         }
     }

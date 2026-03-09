@@ -5,10 +5,17 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
+import android.bluetooth.le.AdvertiseCallback
+import android.bluetooth.le.AdvertiseData
+import android.bluetooth.le.AdvertiseSettings
+import android.bluetooth.le.AdvertisingSet
+import android.bluetooth.le.AdvertisingSetCallback
+import android.bluetooth.le.AdvertisingSetParameters
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.os.ParcelUuid
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.State
@@ -22,10 +29,14 @@ import java.io.IOException
 import java.util.UUID
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.uuid.toKotlinUuid
 
 
 @OptIn(ExperimentalAtomicApi::class)
-class BluetoothViewModel(private val adapter: State<BluetoothAdapter?>): ViewModel() {
+class BluetoothViewModel(
+    private val adapter: State<BluetoothAdapter?>,
+
+): ViewModel() {
 
     private val uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
     private val connectedDevices =  mutableMapOf<BluetoothDevice, BluetoothSocket>()
@@ -36,7 +47,7 @@ class BluetoothViewModel(private val adapter: State<BluetoothAdapter?>): ViewMod
     val isScanning = mutableStateOf(false)
     val isReceivingConnections = AtomicBoolean(false)
 
-    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
+    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE])
     suspend fun discoverDevices(
         onScanFailed: () -> Unit
     ) {
@@ -81,18 +92,19 @@ class BluetoothViewModel(private val adapter: State<BluetoothAdapter?>): ViewMod
             override fun onScanResult(callbackType: Int, result: ScanResult) {
                 super.onScanResult(callbackType, result)
                 val device: BluetoothDevice? = result.device
-                Log.d("SCANNER", device?.name ?: device?.address ?: "unknown")
-                if (device != null && device.address != null)
-                    foundDevices.put(device.address!!, device.name)
+
+                Log.d("SCANNER", device?.name ?: result.scanRecord?.deviceName ?: device?.address ?: "unknown")
+                if (device != null && device.address != null && device.name != null)
+                    foundDevices.put(device.address!!, device.name ?: result.scanRecord?.deviceName)
             }
         }
         startServerSocket()
-        scanner.startScan(filters, scanSettings, scanCallback);
+        scanner.startScan(filters, scanSettings, scanCallback)
+        advertise()
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
+    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_ADVERTISE])
     fun stopScan() {
-
         val scanner = adapter.value?.bluetoothLeScanner
         if (scanner == null) {
             return
@@ -104,7 +116,42 @@ class BluetoothViewModel(private val adapter: State<BluetoothAdapter?>): ViewMod
         stopSocketConnection()
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
+    private fun advertise() {
+        val advertiser =
+           adapter.value?.bluetoothLeAdvertiser
+        val settings = AdvertiseSettings.Builder()
+            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+            .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
+            .setConnectable(true)
+            .build()
+
+//        val parameters = AdvertisingSetParameters.Builder()
+//            .setConnectable(true)
+//            .build()
+
+        val data = AdvertiseData.Builder()
+            .setIncludeDeviceName(true)
+            .addServiceUuid(ParcelUuid(uuid))
+            .build()
+
+        val callback: AdvertiseCallback = object : AdvertiseCallback() {
+            override fun onStartFailure(errorCode: Int) {
+                super.onStartFailure(errorCode)
+                Log.e("advert", "cant start")
+            }
+
+            override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
+                super.onStartSuccess(settingsInEffect)
+                Log.e("advert", "start")
+            }
+        }
+
+        advertiser?.startAdvertising(settings, data, callback)
+    }
+
     private var serverSocket: BluetoothServerSocket? = null
+
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun startServerSocket() {
         try {
