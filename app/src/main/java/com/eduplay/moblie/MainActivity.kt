@@ -20,11 +20,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -40,18 +42,23 @@ import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.screens.MyEventsScreen
 import com.eduplay.moblie.ui.screens.ProfileScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
+import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 import com.eduplay.moblie.ui.viewmodel.SplashViewModel
+import com.eduplay.moblie.ui.viewmodel.factories.BluetoothViewModelFactory
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
     private val hideBottomBarScreens = listOf("auth_screen", "play_event", "fake_splash")
     private val viewModel: SplashViewModel by viewModels()
-    private val bluetoothAdapter: BluetoothAdapter? = null
 
     private val adapter = mutableStateOf<BluetoothAdapter?>(null)
     private val manager = mutableStateOf<BluetoothManager?>(null)
+
+    private val bluetoothViewModel: BluetoothViewModel by viewModels{
+        BluetoothViewModelFactory(adapter as State<BluetoothAdapter?>)
+    }
 
     @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +68,9 @@ class MainActivity : FragmentActivity() {
         val splashScreen = installSplashScreen()
         val isCompetitionMode = mutableStateOf(false)
         val toggleCompetitionMode = {mode: Boolean -> isCompetitionMode.value = mode}
+
         super.onCreate(savedInstanceState)
+
 
         splashScreen.setKeepOnScreenCondition { viewModel.isLoading.value }
 
@@ -107,7 +116,8 @@ class MainActivity : FragmentActivity() {
                                 updateManger = updateManger,
                                 updateAdapter = updateAdapter,
                                 isCompetitionMode = isCompetitionMode,
-                                toggleCompetitionMode = toggleCompetitionMode
+                                toggleCompetitionMode = toggleCompetitionMode,
+                                bluetoothViewModel = bluetoothViewModel
                             )
                         }
 

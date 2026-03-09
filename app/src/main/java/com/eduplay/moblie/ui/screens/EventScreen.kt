@@ -3,7 +3,6 @@ package com.eduplay.moblie.ui.screens
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -58,6 +57,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -85,6 +85,7 @@ import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.theme.Typography
+import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.useCases.BluetoothConnectionFragment
@@ -105,7 +106,8 @@ fun EventScreen(
     viewModel: EventScreenViewModel = hiltViewModel(),
     imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel(),
     isCompetitionMode: State<Boolean>,
-    toggleCompetitionMode: (Boolean) -> Unit
+    toggleCompetitionMode: (Boolean) -> Unit,
+    bluetoothViewModel: BluetoothViewModel
 ) {
     var dataFetched by remember { mutableStateOf(false) }
     var noInternet by remember { mutableStateOf(false) }
@@ -180,31 +182,28 @@ fun EventScreen(
 
     val context = LocalContext.current
     val runGetPermissions = {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            askScanPermission = !context.hasPermission(bluetoothScanPermission)
-            askConnectPermission = !context.hasPermission(bluetoothConnectPermission)
+        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        askScanPermission = !context.hasPermission(bluetoothScanPermission)
+        askConnectPermission = !context.hasPermission(bluetoothConnectPermission)
 
-            if (
-                context.hasPermission(bluetoothScanPermission) &&
-                context.hasPermission(bluetoothConnectPermission)
-            ) {
-                Log.d("BLUETOOTH_TEST", "permission granted")
-                // fragment?.connect()
-            }
-        } else {
-            askLocationPermission = !context.hasPermission(fineLocationPermission)
-            if (context.hasPermission(fineLocationPermission)) {
-                Log.d("BLUETOOTH_TEST", "permission granted")
-                // fragment?.connect()
-            }
+        if (
+            context.hasPermission(bluetoothScanPermission) &&
+            context.hasPermission(bluetoothConnectPermission)
+        ) {
+            Log.d("BLUETOOTH_TEST", "permission granted")
+            // fragment?.connect()
         }
+        //}
+        askLocationPermission = !context.hasPermission(fineLocationPermission)
+        if (context.hasPermission(fineLocationPermission)) {
+            Log.d("BLUETOOTH_TEST", "permission granted")
+            // fragment?.connect()
+        }
+
     }
 
 
-
-
     var requireAdapter by remember { mutableStateOf(false) }
-
 
 
     var canShowConnectionList by remember { mutableStateOf(false) }
@@ -240,10 +239,10 @@ fun EventScreen(
         } else {
             if (adapter.value != null) {
                 try {
-                    fragment?.stopScan(adapter.value!!)
+                    bluetoothViewModel.stopScan()
                     toggleCompetitionMode(false)
                 } catch (e: SecurityException) {
-                    Log.d("cant_stop_scan",e.message ?: "")
+                    Log.d("cant_stop_scan", e.message ?: "")
                 }
             }
         }
@@ -269,12 +268,7 @@ fun EventScreen(
     LaunchedEffect(canShowConnectionList) {
         if (canShowConnectionList && adapter.value != null) {
             try {
-                fragment?.getBondedDevices(
-                    adapter.value!!,
-                    runGetPermissions
-                )
-                fragment?.discoverDevices(
-                    adapter.value!!,
+                bluetoothViewModel.discoverDevices(
                     onConnectionTookTooLong
                 )
             } catch (_: SecurityException) {
@@ -291,14 +285,25 @@ fun EventScreen(
         }
     }
     LaunchedEffect(canShowConnectionList) {
-        Log.d("ADAPTER", fragment?.foundDevices?.size.toString())
+        Log.d("ADAPTER", bluetoothViewModel.foundDevices.size.toString())
     }
-    if (canShowConnectionList && fragment?.foundDevices!= null) {
+    if (canShowConnectionList) {
         ConnectionList(
-            fragment?.foundDevices!!,
+            bluetoothViewModel.foundDevices,
             {
                 turnOnBluetooth()
                 canShowConnectionList = false
+            },
+
+            { address: String ->
+                try {
+                    bluetoothViewModel.connect(
+                        address,
+                        { Log.e("CONNECT", "couldnot connect") }
+                    )
+                } catch (e: SecurityException) {
+                    Log.e("CONNECT", e.message ?: "")
+                }
             }
         )
     }
@@ -332,13 +337,19 @@ fun EventScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ConnectionList(
-    foundDevices: SnapshotStateList<Pair<String?, String?>>,
-    turnOnBluetooth: () -> Unit
+    foundDevices: SnapshotStateMap<String, String?>,
+    turnOnBluetooth: () -> Unit,
+    onConnectToDevice: (String) -> Unit
 ) {
     ModalBottomSheet(turnOnBluetooth) {
         Column {
-            foundDevices.toList().forEach {
-                Text(it.first ?: "unknown device")
+            foundDevices.entries.forEach {
+                TextButton(
+                    onClick = { onConnectToDevice(it.key) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(it.value ?: it.key)
+                }
             }
         }
     }
@@ -534,7 +545,7 @@ private fun TopAppBarEventScreen(
     onAddToFavourite: () -> Unit,
     onComplain: () -> Unit,
     onReturn: () -> Boolean,
-    toggleBluetooth: ()-> Unit,
+    toggleBluetooth: () -> Unit,
     isCompetitionMode: State<Boolean>
 ) {
     CenterAlignedTopAppBar(
