@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,7 @@ import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.screens.TaskScreen.TaskScreen
+import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 
 @Composable
@@ -47,8 +49,13 @@ fun EventStageScreen(
     eventId: String,
     innerPadding: PaddingValues,
     navController: NavController,
-    viewModel: EventStageViewmodel = hiltViewModel()
+    viewModel: EventStageViewmodel = hiltViewModel(),
+    bluetoothViewModel: BluetoothViewModel,
+    isCompetitionMode: State<Boolean>
 ) {
+    if (isCompetitionMode.value) {
+        viewModel.bluetoothCallBack = {points -> bluetoothViewModel.sendResultsToSockets(points)}
+    }
     var showGoBackDialog by remember { mutableStateOf(false) }
     val onGoBack = {
         showGoBackDialog = true
@@ -72,7 +79,7 @@ fun EventStageScreen(
                 eventId,
                 onGoBack = onGoBack,
                 viewModel = viewModel,
-                onNoInternet = { noInternet = true }
+                onNoInternet = { noInternet = true },
             )
         }
 

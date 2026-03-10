@@ -47,6 +47,8 @@ class EventStageViewmodel @Inject constructor(
 
     override val fileStatusFlows = mutableStateMapOf<String, Flow<FileDownloadStatus>>()
 
+    var bluetoothCallBack: (Int) -> Unit = {}
+
     override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
         currentStageType.value = StageType.NONE
         viewModelScope.launch {
@@ -106,6 +108,9 @@ class EventStageViewmodel @Inject constructor(
                         resultingAnswer
                     )
                     points = stageResult.points
+                    if (stageResult.points != null) {
+                        bluetoothCallBack(stageResult.points)
+                    }
                     isAnswerCorrect = stageResult.isCorrect
                     correctAnswer.addAll(stageResult.rightAnswer ?: listOf())
                     if (stageResult.rightAnswer == null && stageResult.points == null) {

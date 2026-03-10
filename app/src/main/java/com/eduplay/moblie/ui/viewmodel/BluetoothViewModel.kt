@@ -38,11 +38,12 @@ class BluetoothViewModel(
 
 ) : ViewModel() {
 
-    private val uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+    private val uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb")
     private val connectedDevices = mutableMapOf<BluetoothDevice, BluetoothSocket>()
 
     // all devices bound and scanned; key - mac address; value - name
     val foundDevices = mutableStateMapOf<String, String?>()
+    val devicesConnectionStatus = mutableStateMapOf<String, Boolean>()
     val isScanning = mutableStateOf(false)
     val isReceivingConnections = AtomicBoolean(false)
     val devicesScore = mutableStateMapOf<String, Int>()
@@ -175,6 +176,7 @@ class BluetoothViewModel(
                     // If a connection was accepted, handle the connection in a separate thread
                     if (socket != null && !connectedDevices.keys.contains(socket.remoteDevice)) {
                         connectedDevices[socket.remoteDevice] = socket
+                        devicesConnectionStatus[socket.remoteDevice.name] = true
                         listenToSocket(socket)
                     }
                 }
@@ -201,6 +203,7 @@ class BluetoothViewModel(
             try {
                 bluetoothSocket.connect();
                 connectedDevices[device] = bluetoothSocket
+                devicesConnectionStatus[device.name] = true
                 listenToSocket(bluetoothSocket)
             } catch (e: Exception) {
                 Log.e("CONNECT", "can't connect to device as client", e)
@@ -240,7 +243,9 @@ class BluetoothViewModel(
     }
 
     fun stopAllSocketConnections() {
-        for (socket in connectedDevices.values)
+        devicesConnectionStatus.clear()
+        for (socket in connectedDevices.values) {
             exchangeUseCase.cancel(socket)
+        }
     }
 }

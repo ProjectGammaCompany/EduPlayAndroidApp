@@ -1,32 +1,20 @@
 package com.eduplay.moblie
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -43,9 +31,9 @@ import com.eduplay.moblie.ui.screens.MyEventsScreen
 import com.eduplay.moblie.ui.screens.ProfileScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
-import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 import com.eduplay.moblie.ui.viewmodel.SplashViewModel
 import com.eduplay.moblie.ui.viewmodel.factories.BluetoothViewModelFactory
+import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -57,7 +45,7 @@ class MainActivity : FragmentActivity() {
     private val manager = mutableStateOf<BluetoothManager?>(null)
 
     private val bluetoothViewModel: BluetoothViewModel by viewModels{
-        BluetoothViewModelFactory(adapter as State<BluetoothAdapter?>)
+        BluetoothViewModelFactory(adapter as State<BluetoothAdapter?>, BluetoothDataExchangeUseCase())
     }
 
     @SuppressLint("ViewModelConstructorInComposable")
@@ -146,7 +134,9 @@ class MainActivity : FragmentActivity() {
                             EventStageScreen(
                                 pathArgs.arguments?.getString("eventId") ?: "",
                                 innerPadding,
-                                navController
+                                navController,
+                                bluetoothViewModel = bluetoothViewModel,
+                                isCompetitionMode = isCompetitionMode
                             )
                         }
                     }

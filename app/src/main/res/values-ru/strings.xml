@@ -72,4 +72,8 @@
     <string name="try_again_later">Произошла ошибка, попробуйте повторить дейстиве позже.</string>
     <string name="start_bluetooth">Включить режим локального блютус соревнования</string>
     <string name="turn_off_bluetooth">Отключить режим блютус соревнования</string>
+    <string name="choose_bluetooth_device_header">Выберите устройства других игроков</string>
+    <string name="choose_bluetooth_device_comment">Выбоерете устройства других игроков чтобы подключиться к ним. Если устройство игрока не отбражается на экране, убедитесь что это игрок сейчас находится на этом же экране.</string>
+    <string name="failed_to_connect">"Не удалось подключиться у кстройству "</string>
+    <string name="connected">Подключено</string>
 </resources>

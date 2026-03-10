@@ -54,7 +54,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -71,7 +70,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.fragment.compose.AndroidFragment
@@ -315,7 +313,7 @@ fun EventScreen(
                         { Log.e("CONNECT", "couldnot connect") }
                     )
                 } catch (e: SecurityException) {
-                    Log.e("CONNECT", e.message ?: "")
+                    Log.e("CONNECT", e.message ?: "", e)
                 }
             }
         )
@@ -324,18 +322,18 @@ fun EventScreen(
 
     EventScreen(
         innerPaddingValues,
-        viewModel.eventCreatorMode.value,
-        viewModel.isEventFavourite.value,
-        viewModel.eventName.value,
+        viewModel.eventCreatorMode,
+        viewModel.isEventFavourite,
+        viewModel.eventName,
         viewModel.tags,
-        viewModel.author.value,
-        viewModel.isCompleted.value,
+        viewModel.author,
+        viewModel.isCompleted,
         imageHeaderViewModel.getFullUrl(viewModel.cover.value),
         viewModel.info,
-        viewModel.description.value,
-        viewModel.privateEvent.value,
-        viewModel.isOpen.value,
-        viewModel.isContinuing.value,
+        viewModel.description,
+        viewModel.privateEvent,
+        viewModel.isOpen,
+        viewModel.isContinuing,
         onAddToFavourite,
         onComplain,
         startEvent,
@@ -352,7 +350,8 @@ fun EventScreen(
 private fun ConnectionList(
     foundDevices: SnapshotStateMap<String, String?>,
     turnOnBluetooth: () -> Unit,
-    onConnectToDevice: (String) -> Unit
+    onConnectToDevice: (String) -> Unit,
+
 ) {
     ModalBottomSheet(turnOnBluetooth) {
         LazyColumn {
@@ -372,18 +371,18 @@ private fun ConnectionList(
 @Composable
 fun EventScreen(
     innerPaddingValues: PaddingValues,
-    eventCreatorMode: Boolean,
-    isEventFavourite: Boolean,
-    eventName: String,
+    eventCreatorMode: State<Boolean>,
+    isEventFavourite: State<Boolean>,
+    eventName: State<String>,
     tags: SnapshotStateList<EventTag>,
-    author: String,
-    isCompleted: Boolean,
+    author: State<String>,
+    isCompleted: State<Boolean>,
     cover: String,
     info: SnapshotStateList<Pair<Int, String?>>,
-    description: String,
-    privateEvent: Boolean,
-    isOpen: Boolean,
-    isContinuing: Boolean,
+    description: State<String>,
+    privateEvent: State<Boolean>,
+    isOpen: State<Boolean>,
+    isContinuing: State<Boolean>,
     onAddToFavourite: () -> Unit,
     onComplain: (String) -> Unit,
     startEvent: () -> Unit,
@@ -446,7 +445,7 @@ fun EventScreen(
             headers
         )
 
-        if (eventCreatorMode) {
+        if (eventCreatorMode.value) {
             EventCreatorBody(
                 tags,
                 info,
@@ -553,8 +552,8 @@ private fun ComplaintDialog(onClose: () -> Unit, onComplain: (String) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopAppBarEventScreen(
-    eventCreatorMode: Boolean,
-    isFavourite: Boolean,
+    eventCreatorMode: State<Boolean>,
+    isFavourite: State<Boolean>,
     onEditEvent: () -> Unit,
     onAddToFavourite: () -> Unit,
     onComplain: () -> Unit,
@@ -576,7 +575,7 @@ private fun TopAppBarEventScreen(
             }
         },
         actions = {
-            if (!eventCreatorMode) {
+            if (!eventCreatorMode.value) {
                 IconButton(
                     onClick = toggleBluetooth,
                 ) {
@@ -614,7 +613,7 @@ private fun TopAppBarEventScreen(
                     onClick = { onAddToFavourite() },
                     modifier = Modifier.testTag("favourite_btn")
                 ) {
-                    if (isFavourite) {
+                    if (isFavourite.value) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.star_filled),
                             contentDescription = stringResource(R.string.add_to_favourite),
@@ -645,10 +644,10 @@ private fun TopAppBarEventScreen(
 
 @Composable
 private fun EventScreenHeader(
-    eventName: String,
-    author: String,
-    eventCreatorMode: Boolean,
-    isCompleted: Boolean,
+    eventName: State<String>,
+    author: State<String>,
+    eventCreatorMode: State<Boolean>,
+    isCompleted: State<Boolean>,
     cover: String?,
     headers: State<NetworkHeaders>,
 ) {
@@ -656,11 +655,11 @@ private fun EventScreenHeader(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(cover)
-                .httpHeaders(headers = headers.value) //TODO("pass headers")
+                .httpHeaders(headers = headers.value)
                 .networkCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
-            contentDescription = eventName,
+            contentDescription = eventName.value,
             placeholder = painterResource(R.drawable.eduplaylogo),
             error = painterResource(id = R.drawable.ic_launcher_background),
             modifier = Modifier
@@ -670,7 +669,7 @@ private fun EventScreenHeader(
 
         )
         Text(
-            eventName,
+            eventName.value,
             style = typography.headlineMedium
                 .copy(color = colorScheme.onBackground),
             maxLines = 3,
@@ -687,7 +686,7 @@ private fun EventScreenHeader(
                 .width(120.dp)
                 .weight(0.35f)
         ) {
-            if (!eventCreatorMode && isCompleted) {
+            if (!eventCreatorMode.value && isCompleted.value) {
                 AssistChip(
                     onClick = {}, //так и должно быть при нажатии ничего не происходит
                     label = {
@@ -712,9 +711,9 @@ private fun EventScreenHeader(
                 )
             }
         }
-        if (!eventCreatorMode) {
+        if (!eventCreatorMode.value) {
             Text(
-                author,
+                author.value,
                 style = typography.labelLarge
                     .copy(color = colorScheme.onBackground),
                 maxLines = 1,
@@ -797,19 +796,19 @@ private fun GeneralInfo(
 private fun GeneralUserBody(
     tags: SnapshotStateList<EventTag>,
     info: List<Pair<Int, String?>>,
-    description: String,
-    isOpen: Boolean,
-    isContinuing: Boolean,
-    isCompleted: Boolean,
+    description: State<String>,
+    isOpen: State<Boolean>,
+    isContinuing: State<Boolean>,
+    isCompleted: State<Boolean>,
     startEvent: () -> Unit,
     showResults: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.Center) {
-        Box(modifier = Modifier.fillMaxHeight(if (isOpen || isCompleted) 0.85f else 1f)) {
-            GeneralInfo(tags, info, description)
+        Box(modifier = Modifier.fillMaxHeight(if (isOpen.value || isCompleted.value) 0.85f else 1f)) {
+            GeneralInfo(tags, info, description.value)
         }
 
-        if (isOpen && !isCompleted) {
+        if (isOpen.value && !isCompleted.value) {
             Button(
                 onClick = startEvent,
                 modifier = Modifier
@@ -821,7 +820,7 @@ private fun GeneralUserBody(
                     .testTag("start_event_btn")
             ) {
                 Text(
-                    if (!isContinuing) {
+                    if (!isContinuing.value) {
                         stringResource(R.string.start_event)
                     } else {
                         stringResource(R.string.continue_event)
@@ -832,7 +831,7 @@ private fun GeneralUserBody(
             }
         }
 
-        if (isCompleted) {
+        if (isCompleted.value) {
             Button(
                 onClick = { showResults() },
                 modifier = Modifier
@@ -874,8 +873,8 @@ private fun EventTag(tagName: String) {
 private fun EventCreatorBody(
     tags: SnapshotStateList<EventTag>,
     info: List<Pair<Int, String?>>,
-    description: String,
-    privateEvent: Boolean
+    description: State<String>,
+    privateEvent: State<Boolean>
 ) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
@@ -908,11 +907,11 @@ private fun EventCreatorBody(
     infoP.add(
         Pair(
             R.string.private_event_flag,
-            if (privateEvent) stringResource(R.string.private_event) else stringResource(R.string.public_event)
+            if (privateEvent.value) stringResource(R.string.private_event) else stringResource(R.string.public_event)
         ),
     )
     when (selectedTabIdx) {
-        0 -> GeneralInfo(tags, infoP, description)
+        0 -> GeneralInfo(tags, infoP, description.value)
         1 -> StatisticsInfo()
         else -> Box {}
     }
@@ -925,30 +924,30 @@ private fun StatisticsInfo() {
     //TODO("статистики на экране статистик")
 }
 
-@Composable
-@Preview
-private fun Event() {
-    EventScreen(
-        PaddingValues(),
-        isEventFavourite = true,
-        eventCreatorMode = false,
-        eventName = "Событие",
-        tags = remember { mutableStateListOf<EventTag>(EventTag("", "tag1")) },
-        author = "Author",
-        isCompleted = false,
-        cover = "",
-        info = remember { mutableStateListOf() },
-        description = "Some information",
-        privateEvent = false,
-        isOpen = false,
-        isContinuing = false,
-        onAddToFavourite = { },
-        onComplain = { _: String -> },
-        startEvent = {},
-        showResults = { },
-        onReturn = { false },
-        headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-        toggleBluetooth = {},
-        isCompetitionMode = remember { mutableStateOf(false) }
-    )
-}
+//@Composable
+//@Preview
+//private fun Event() {
+//    EventScreen(
+//        PaddingValues(),
+//        isEventFavourite = statetrue,
+//        eventCreatorMode = false,
+//        eventName = "Событие",
+//        tags = remember { mutableStateListOf<EventTag>(EventTag("", "tag1")) },
+//        author = "Author",
+//        isCompleted = false,
+//        cover = "",
+//        info = remember { mutableStateListOf() },
+//        description = "Some information",
+//        privateEvent = false,
+//        isOpen = false,
+//        isContinuing = false,
+//        onAddToFavourite = { },
+//        onComplain = { _: String -> },
+//        startEvent = {},
+//        showResults = { },
+//        onReturn = { false },
+//        headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+//        toggleBluetooth = {},
+//        isCompetitionMode = remember { mutableStateOf(false) }
+//    )
+//}
