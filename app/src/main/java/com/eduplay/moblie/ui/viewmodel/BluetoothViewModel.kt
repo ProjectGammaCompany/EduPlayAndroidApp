@@ -12,6 +12,8 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.os.ParcelUuid
@@ -20,9 +22,11 @@ import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -31,7 +35,7 @@ import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 
-@OptIn(ExperimentalAtomicApi::class)
+@OptIn(ExperimentalAtomicApi::class, ExperimentalPermissionsApi::class)
 class BluetoothViewModel(
     private val adapter: State<BluetoothAdapter?>,
     private val exchangeUseCase: BluetoothDataExchangeUseCase
@@ -47,9 +51,10 @@ class BluetoothViewModel(
     val isScanning = mutableStateOf(false)
     val isReceivingConnections = AtomicBoolean(false)
     val devicesScore = mutableStateMapOf<String, Int>()
+    var askForPermissions = mutableStateOf(false)
 
-    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE])
-    suspend fun discoverDevices(
+    fun discoverDevices(
+        context: Context,
         onScanFailed: () -> Unit
     ) {
         if (adapter.value == null) {
@@ -60,6 +65,18 @@ class BluetoothViewModel(
 
         foundDevices.clear()
 
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_ADVERTISE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            askForPermissions.value = true
+            return
+        }
         foundDevices.putAll(
             adapter.value?.bondedDevices
                 ?.filter { device -> device != null }
@@ -107,14 +124,20 @@ class BluetoothViewModel(
         advertise()
     }
 
-    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_ADVERTISE])
-    fun stopScan() {
+    fun stopScan(context: Context) {
         val scanner = adapter.value?.bluetoothLeScanner
         if (scanner == null) {
             return
         }
 
         val scanCallback: ScanCallback = object : ScanCallback() {
+        }
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
         }
         scanner.stopScan(scanCallback)
         stopSocketConnection()
@@ -153,7 +176,7 @@ class BluetoothViewModel(
     private var serverSocket: BluetoothServerSocket? = null
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    fun startServerSocket() {
+    private fun startServerSocket() {
         try {
             // Create a server socket
             serverSocket = adapter.value?.listenUsingRfcommWithServiceRecord("EduPlay", uuid)
@@ -188,20 +211,30 @@ class BluetoothViewModel(
         isReceivingConnections.store(false)
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun connect(
+        context: Context,
         address: String,
         onCouldNotConnect: () -> Unit
     ) {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            askForPermissions.value = true
+            onCouldNotConnect()
+            return
+        }
         val device = adapter.value?.getRemoteDevice(address)
         if (device == null) {
             onCouldNotConnect()
             return
         }
+
         if (!connectedDevices.keys.contains(device)) {
-            val bluetoothSocket = device.createInsecureRfcommSocketToServiceRecord(uuid);
+            val bluetoothSocket = device.createInsecureRfcommSocketToServiceRecord(uuid)
             try {
-                bluetoothSocket.connect();
+                bluetoothSocket.connect()
                 connectedDevices[device] = bluetoothSocket
                 devicesConnectionStatus[device.name] = true
                 listenToSocket(bluetoothSocket)
@@ -215,7 +248,6 @@ class BluetoothViewModel(
 
     private val RECIEVED_SCORE = 1001
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun listenToSocket(socket: BluetoothSocket) {
         val callback = Handler.Callback { message ->
             when (message.what) {
@@ -248,4 +280,6 @@ class BluetoothViewModel(
             exchangeUseCase.cancel(socket)
         }
     }
+
+
 }

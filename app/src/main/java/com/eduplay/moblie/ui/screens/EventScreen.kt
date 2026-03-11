@@ -1,6 +1,5 @@
 package com.eduplay.moblie.ui.screens
 
-import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.util.Log
@@ -89,9 +88,7 @@ import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.useCases.BluetoothConnectionFragment
-import com.eduplay.moblie.utils.hasPermission
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberPermissionState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -127,9 +124,7 @@ fun EventScreen(
         NoInternetConnectionToast()
     }
 
-    val startEvent = {
-        navController.navigate("play_event/${eventId}")
-    }
+
 
     val onComplain = { reason: String ->
         viewModel.complain(eventId, reason)
@@ -148,71 +143,7 @@ fun EventScreen(
         navController.popBackStack()
     }
 
-    val bluetoothScanPermission =
-        rememberPermissionState(permission = Manifest.permission.BLUETOOTH_SCAN)
-    var askScanPermission by remember { mutableStateOf(false) }
-
-    val bluetoothConnectPermission =
-        rememberPermissionState(permission = Manifest.permission.BLUETOOTH_CONNECT)
-    var askConnectPermission by remember { mutableStateOf(false) }
-
-    val fineLocationPermission =
-        rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
-    var askLocationPermission by remember { mutableStateOf(false) }
-
-    val advertisePermission =
-        rememberPermissionState(permission = Manifest.permission.BLUETOOTH_ADVERTISE)
-    var askAdvertisePermission by remember { mutableStateOf(false) }
-
-    LaunchedEffect(askScanPermission) {
-        if (askScanPermission) {
-            bluetoothScanPermission.launchPermissionRequest()
-            askScanPermission = false
-        }
-    }
-    LaunchedEffect(askConnectPermission) {
-        if (askConnectPermission) {
-            bluetoothConnectPermission.launchPermissionRequest()
-            askConnectPermission = false
-        }
-    }
-    LaunchedEffect(askLocationPermission) {
-        if (askLocationPermission) {
-            fineLocationPermission.launchPermissionRequest()
-            askLocationPermission = false
-        }
-    }
-    LaunchedEffect(askAdvertisePermission) {
-        if (askAdvertisePermission) {
-            advertisePermission.launchPermissionRequest()
-            askAdvertisePermission = false
-        }
-    }
-
-
     val context = LocalContext.current
-    val runGetPermissions = {
-        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        askScanPermission = !context.hasPermission(bluetoothScanPermission)
-        askConnectPermission = !context.hasPermission(bluetoothConnectPermission)
-
-        if (
-            context.hasPermission(bluetoothScanPermission) &&
-            context.hasPermission(bluetoothConnectPermission)
-        ) {
-            Log.d("BLUETOOTH_TEST", "permission granted")
-            // fragment?.connect()
-        }
-        //}
-        askLocationPermission = !context.hasPermission(fineLocationPermission)
-        askAdvertisePermission = !context.hasPermission(advertisePermission)
-        if (context.hasPermission(fineLocationPermission)) {
-            Log.d("BLUETOOTH_TEST", "permission granted")
-            // fragment?.connect()
-        }
-
-    }
-
 
     var requireAdapter by remember { mutableStateOf(false) }
 
@@ -242,15 +173,16 @@ fun EventScreen(
 
     }
 
+
+
     val turnOnBluetooth = {
         if (!isCompetitionMode.value) {
-            runGetPermissions()
             requireAdapter = true
             toggleCompetitionMode(true)
+            bluetoothViewModel.askForPermissions.value = true
         } else {
             if (adapter.value != null) {
                 try {
-                    bluetoothViewModel.stopScan()
                     toggleCompetitionMode(false)
                 } catch (e: SecurityException) {
                     Log.d("cant_stop_scan", e.message ?: "")
@@ -259,8 +191,6 @@ fun EventScreen(
         }
     }
 
-
-
     LaunchedEffect(fragment, requireAdapter) {
         if (requireAdapter && fragment != null) {
             fragment?.startBluetooth(
@@ -268,7 +198,7 @@ fun EventScreen(
                 adapter,
                 updateManger,
                 updateAdapter,
-                showConnectionList,
+                {},
                 onDoesNotSupportBluetooth = onDoesNotSupportBluetooth,
                 onConnectionTookTooLong = onConnectionTookTooLong
             )
@@ -278,47 +208,45 @@ fun EventScreen(
 
     LaunchedEffect(canShowConnectionList) {
         if (canShowConnectionList && adapter.value != null) {
-            try {
-                bluetoothViewModel.discoverDevices(
-                    onConnectionTookTooLong
-                )
-            } catch (_: SecurityException) {
-                runGetPermissions()
-                canShowConnectionList = false
-                requireAdapter = false
-                return@LaunchedEffect
-            }
+            bluetoothViewModel.discoverDevices(context, onConnectionTookTooLong)
         } else if (canShowConnectionList && adapter.value == null) {
             requireAdapter = true
             canShowConnectionList = false
         } else {
-            canShowConnectionList = false
+            bluetoothViewModel.stopScan(context);
         }
     }
-    LaunchedEffect(canShowConnectionList) {
-        Log.d("ADAPTER", bluetoothViewModel.foundDevices.size.toString())
-    }
-    if (canShowConnectionList) {
-        ConnectionList(
-            bluetoothViewModel.foundDevices,
-            {
-                turnOnBluetooth()
-                canShowConnectionList = false
-            },
 
-            { address: String ->
-                try {
-                    bluetoothViewModel.connect(
-                        address,
-                        { Log.e("CONNECT", "couldnot connect") }
-                    )
-                } catch (e: SecurityException) {
-                    Log.e("CONNECT", e.message ?: "", e)
-                }
-            }
+    val onStopShowingDeviceList = {
+        bluetoothViewModel.stopScan(context);
+        canShowConnectionList = false
+    }
+    val proceedWithBluetooth = {
+        onStopShowingDeviceList()
+        navController.navigate("play_event/${eventId}")
+    }
+
+    val startEvent = {
+        if (isCompetitionMode.value) {
+            showConnectionList()
+        } else {
+            navController.navigate("play_event/${eventId}")
+        }
+    }
+
+
+    if (canShowConnectionList) {
+        BluetoothDeviceListScreen(
+            foundDevices = bluetoothViewModel.foundDevices,
+            connect = { address, function ->
+                bluetoothViewModel.connect(context, address, function)
+            },
+            devicesConnectionStatus = bluetoothViewModel.devicesConnectionStatus,
+            onProceed = proceedWithBluetooth,
+            innerPaddingValues = innerPaddingValues,
+            onReturn = onStopShowingDeviceList
         )
     }
-
 
     EventScreen(
         innerPaddingValues,
@@ -341,32 +269,11 @@ fun EventScreen(
         onReturn,
         imageHeaderViewModel.headers,
         turnOnBluetooth,
-        isCompetitionMode
+        isCompetitionMode,
+        canShowConnectionList
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ConnectionList(
-    foundDevices: SnapshotStateMap<String, String?>,
-    turnOnBluetooth: () -> Unit,
-    onConnectToDevice: (String) -> Unit,
-
-) {
-    ModalBottomSheet(turnOnBluetooth) {
-        LazyColumn {
-            items(foundDevices.entries.toList()) {
-                TextButton(
-                    onClick = { onConnectToDevice(it.key) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(it.value ?: it.key)
-                }
-
-            }
-        }
-    }
-}
 
 @Composable
 fun EventScreen(
@@ -390,7 +297,8 @@ fun EventScreen(
     onReturn: () -> Boolean,
     headers: State<NetworkHeaders>,
     toggleBluetooth: () -> Unit,
-    isCompetitionMode: State<Boolean>
+    isCompetitionMode: State<Boolean>,
+    canShowConnectionList: Boolean
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -425,44 +333,46 @@ fun EventScreen(
             )
             .fillMaxSize()
     ) {
-        TopAppBarEventScreen(
-            eventCreatorMode,
-            isEventFavourite,
-            onEditEvent,
-            onAddToFavourite,
-            onShowComplaintDialog,
-            onReturn,
-            toggleBluetooth,
-            isCompetitionMode
-        )
-
-        EventScreenHeader(
-            eventName,
-            author,
-            eventCreatorMode,
-            isCompleted,
-            cover,
-            headers
-        )
-
-        if (eventCreatorMode.value) {
-            EventCreatorBody(
-                tags,
-                info,
-                description,
-                privateEvent
+        if (!canShowConnectionList) {
+            TopAppBarEventScreen(
+                eventCreatorMode,
+                isEventFavourite,
+                onEditEvent,
+                onAddToFavourite,
+                onShowComplaintDialog,
+                onReturn,
+                toggleBluetooth,
+                isCompetitionMode
             )
-        } else {
-            GeneralUserBody(
-                tags,
-                info,
-                description,
-                isOpen,
-                isContinuing,
+
+            EventScreenHeader(
+                eventName,
+                author,
+                eventCreatorMode,
                 isCompleted,
-                startEvent,
-                showResults
+                cover,
+                headers
             )
+
+            if (eventCreatorMode.value) {
+                EventCreatorBody(
+                    tags,
+                    info,
+                    description,
+                    privateEvent
+                )
+            } else {
+                GeneralUserBody(
+                    tags,
+                    info,
+                    description,
+                    isOpen,
+                    isContinuing,
+                    isCompleted,
+                    startEvent,
+                    showResults
+                )
+            }
         }
     }
 }

@@ -20,6 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.eduplay.moblie.ui.elements.BluetoothPermissionElement
 import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.screens.EventResultScreen
@@ -70,6 +71,8 @@ class MainActivity : FragmentActivity() {
                 (context as? Activity)?.requestedOrientation =
                     ActivityInfo.SCREEN_ORIENTATION_LOCKED
                 val navController = rememberNavController()
+
+                BluetoothPermissionElement(bluetoothViewModel.askForPermissions)
 
                 Scaffold(
                     bottomBar = { BottomNavBar(navController, hideBottomBarScreens) }

@@ -75,4 +75,5 @@
     <string name="choose_bluetooth_device_comment">Choose other players devices to connect to them. If a device is not visible, make shure that all players, have this screen open, in order to connect to them. Press proceed once you have connected to all other players.</string>
     <string name="failed_to_connect">Failed to connect to device</string>
     <string name="connected">Connected</string>
+    <string name="scanning_devices">Scanning devices</string>
 </resources>

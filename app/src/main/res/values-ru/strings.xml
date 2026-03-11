@@ -76,4 +76,5 @@
     <string name="choose_bluetooth_device_comment">Выбоерете устройства других игроков чтобы подключиться к ним. Если устройство игрока не отбражается на экране, убедитесь что это игрок сейчас находится на этом же экране.</string>
     <string name="failed_to_connect">"Не удалось подключиться у кстройству "</string>
     <string name="connected">Подключено</string>
+    <string name="scanning_devices">Сканирование устройств</string>
 </resources>
