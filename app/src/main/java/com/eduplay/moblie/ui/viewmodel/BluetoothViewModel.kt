@@ -12,7 +12,12 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.companion.AssociationInfo
+import android.companion.AssociationRequest
+import android.companion.BluetoothDeviceFilter
+import android.companion.CompanionDeviceManager
 import android.content.Context
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
@@ -23,14 +28,18 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.startIntentSenderForResult
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.eduplay.moblie.R
 import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.UUID
+import java.util.concurrent.Executor
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
@@ -42,7 +51,7 @@ class BluetoothViewModel(
 
 ) : ViewModel() {
 
-    private val uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb")
+    private val uuid = UUID.fromString("00004ba8-0000-1000-8000-00805f9b34fb")
     private val connectedDevices = mutableMapOf<BluetoothDevice, BluetoothSocket>()
 
     // all devices bound and scanned; key - mac address; value - name
@@ -95,7 +104,11 @@ class BluetoothViewModel(
 
         isScanning.value = true
 
-        val filters: List<ScanFilter?> = listOf()
+        val filters: MutableList<ScanFilter?> = mutableListOf()
+        val filter = ScanFilter.Builder()
+            .setServiceUuid(ParcelUuid(uuid))
+            .build()
+        filters.add(filter)
 
         val scanSettings = ScanSettings.Builder()
             .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
@@ -111,10 +124,6 @@ class BluetoothViewModel(
                 super.onScanResult(callbackType, result)
                 val device: BluetoothDevice? = result.device
 
-                Log.d(
-                    "SCANNER",
-                    device?.name ?: result.scanRecord?.deviceName ?: device?.address ?: "unknown"
-                )
                 if (device != null && device.address != null && device.name != null)
                     foundDevices.put(device.address!!, device.name ?: result.scanRecord?.deviceName)
             }
@@ -178,8 +187,8 @@ class BluetoothViewModel(
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun startServerSocket() {
         try {
-            // Create a server socket
-            serverSocket = adapter.value?.listenUsingRfcommWithServiceRecord("EduPlay", uuid)
+            serverSocket =
+                adapter.value?.listenUsingRfcommWithServiceRecord("EduPlay", uuid)
         } catch (e: IOException) {
             Log.e("SOCKET_CREATE", e.message ?: e.toString())
         }
@@ -188,15 +197,20 @@ class BluetoothViewModel(
             isReceivingConnections.store(true)
             var socket: BluetoothSocket?
             viewModelScope.launch(Dispatchers.IO) {
-                while (isReceivingConnections.load()) {
-                    try {
-                        // Accept incoming connection
-                        socket = serverSocket!!.accept()
-                    } catch (e: IOException) {
-                        Log.e("SOCKET_CREATE", e.message ?: e.toString())
+                while (true) {
+                    if (!isReceivingConnections.load()) {
                         break
                     }
-                    // If a connection was accepted, handle the connection in a separate thread
+                    try {
+                        socket = serverSocket!!.accept()
+                        Log.i("SOCKET_CREATE", "accepted ${socket.remoteDevice.name}")
+                    } catch (e: IOException) {
+                        Log.e("SOCKET_CREATE", e.message ?: e.toString(), e)
+                        continue
+                    } catch (e: Exception) {
+                        Log.e("SOCKET_CREATE", e.message ?: "", e)
+                        break
+                    }
                     if (socket != null && !connectedDevices.keys.contains(socket.remoteDevice)) {
                         connectedDevices[socket.remoteDevice] = socket
                         devicesConnectionStatus[socket.remoteDevice.name] = true
@@ -209,6 +223,8 @@ class BluetoothViewModel(
 
     fun stopSocketConnection() {
         isReceivingConnections.store(false)
+        serverSocket?.close()
+        serverSocket = null
     }
 
     fun connect(
@@ -216,35 +232,55 @@ class BluetoothViewModel(
         address: String,
         onCouldNotConnect: () -> Unit
     ) {
+
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_ADMIN
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             askForPermissions.value = true
             onCouldNotConnect()
             return
         }
-        val device = adapter.value?.getRemoteDevice(address)
-        if (device == null) {
-            onCouldNotConnect()
-            return
-        }
 
-        if (!connectedDevices.keys.contains(device)) {
-            val bluetoothSocket = device.createInsecureRfcommSocketToServiceRecord(uuid)
-            try {
-                bluetoothSocket.connect()
-                connectedDevices[device] = bluetoothSocket
-                devicesConnectionStatus[device.name] = true
-                listenToSocket(bluetoothSocket)
-            } catch (e: Exception) {
-                Log.e("CONNECT", "can't connect to device as client", e)
+        //TODO("pair devices")
+        connectSockets(address, onCouldNotConnect)
+    }
+
+    @RequiresPermission(allOf=[Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
+    private fun connectSockets(address: String, onCouldNotConnect: () -> Unit) {
+        adapter.value?.cancelDiscovery()
+        viewModelScope.launch(Dispatchers.IO) {
+            val device = adapter.value?.getRemoteDevice(address)
+            if (device == null) {
+                onCouldNotConnect()
+                return@launch
+            }
+
+            if (!connectedDevices.keys.contains(device)) {
+                val bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid)
+                try {
+                    bluetoothSocket.connect()
+                    connectedDevices[device] =  bluetoothSocket
+                    devicesConnectionStatus[device.name] = true
+                    listenToSocket(bluetoothSocket)
+                } catch (e: Exception) {
+                    onCouldNotConnect()
+                    Log.e("CONNECT", "can't connect to device as client", e)
+                }
+
             }
         }
-
-
     }
+
 
     private val RECIEVED_SCORE = 1001
 
@@ -269,7 +305,8 @@ class BluetoothViewModel(
     }
 
 
-    fun sendResultsToSockets(points: Int) {
+    fun sendResultsToSockets(points: Int, context: Context) {
+        devicesScore[context.getString(R.string.you)] = points
         for (socket in connectedDevices.values)
             exchangeUseCase.writePointsToSocket(points, socket)
     }

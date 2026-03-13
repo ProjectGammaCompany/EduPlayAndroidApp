@@ -147,4 +147,10 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        bluetoothViewModel.stopScan(this)
+        bluetoothViewModel.stopAllSocketConnections()
+    }
 }

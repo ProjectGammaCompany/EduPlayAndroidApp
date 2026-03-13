@@ -77,4 +77,5 @@
     <string name="failed_to_connect">"Не удалось подключиться у кстройству "</string>
     <string name="connected">Подключено</string>
     <string name="scanning_devices">Сканирование устройств</string>
+    <string name="you">Вы</string>
 </resources>

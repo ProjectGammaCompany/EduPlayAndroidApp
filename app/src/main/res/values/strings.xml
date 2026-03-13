@@ -76,4 +76,5 @@
     <string name="failed_to_connect">Failed to connect to device</string>
     <string name="connected">Connected</string>
     <string name="scanning_devices">Scanning devices</string>
+    <string name="you">You</string>
 </resources>

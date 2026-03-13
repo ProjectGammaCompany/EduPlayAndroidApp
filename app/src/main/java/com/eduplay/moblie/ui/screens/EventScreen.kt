@@ -212,8 +212,6 @@ fun EventScreen(
         } else if (canShowConnectionList && adapter.value == null) {
             requireAdapter = true
             canShowConnectionList = false
-        } else {
-            bluetoothViewModel.stopScan(context);
         }
     }
 

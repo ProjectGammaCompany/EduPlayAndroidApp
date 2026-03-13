@@ -1,9 +1,6 @@
 package com.eduplay.moblie.ui.elements
 
 import android.Manifest
-import android.os.Build
-import android.util.Log
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -38,25 +35,19 @@ fun BluetoothPermissionElement(
         rememberPermissionState(permission = Manifest.permission.BLUETOOTH_ADVERTISE)
     var askAdvertisePermission by remember { mutableStateOf(false) }
 
-    LaunchedEffect(askScanPermission) {
+    LaunchedEffect(askScanPermission, askConnectPermission, askLocationPermission, askAdvertisePermission) {
         if (askScanPermission) {
             bluetoothScanPermission.launchPermissionRequest()
             askScanPermission = false
         }
-    }
-    LaunchedEffect(askConnectPermission) {
         if (askConnectPermission) {
             bluetoothConnectPermission.launchPermissionRequest()
             askConnectPermission = false
         }
-    }
-    LaunchedEffect(askLocationPermission) {
         if (askLocationPermission) {
             fineLocationPermission.launchPermissionRequest()
             askLocationPermission = false
         }
-    }
-    LaunchedEffect(askAdvertisePermission) {
         if (askAdvertisePermission) {
             advertisePermission.launchPermissionRequest()
             askAdvertisePermission = false
@@ -65,22 +56,9 @@ fun BluetoothPermissionElement(
 
     val context = LocalContext.current
     if (askForPermissions.value) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            askScanPermission = !context.hasPermission(bluetoothScanPermission)
-            askConnectPermission = !context.hasPermission(bluetoothConnectPermission)
-
-            if (
-                context.hasPermission(bluetoothScanPermission) &&
-                context.hasPermission(bluetoothConnectPermission)
-            ) {
-                Log.d("BLUETOOTH_TEST", "permission granted")
-            }
-        } else {
-            askLocationPermission = !context.hasPermission(fineLocationPermission)
-        }
+        askScanPermission = !context.hasPermission(bluetoothScanPermission)
+        askConnectPermission = !context.hasPermission(bluetoothConnectPermission)
+        askLocationPermission = !context.hasPermission(fineLocationPermission)
         askAdvertisePermission = !context.hasPermission(advertisePermission)
-        if (context.hasPermission(fineLocationPermission)) {
-            Log.d("BLUETOOTH_TEST", "permission granted")
-        }
     }
 }
