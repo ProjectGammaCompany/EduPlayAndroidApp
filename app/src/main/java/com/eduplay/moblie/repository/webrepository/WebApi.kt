@@ -8,16 +8,19 @@ import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventComplaint
+import com.eduplay.moblie.repository.requestTypes.EventPasswords
 import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
 import com.eduplay.moblie.repository.requestTypes.Refresh
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.AuthResponse
+import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
 import com.eduplay.moblie.repository.responseTypes.EventRoleResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
+import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import retrofit2.Response
 import retrofit2.http.Body
@@ -134,5 +137,16 @@ interface WebApi {
     @GET("/tags")
     @InjectAuth
     suspend fun getTags(): Response<EventTagList>
+
+    @GET("/events/joinRequiredFields/{joinCode}")
+    @InjectAuth
+    suspend fun getFieldsToJoinEvent(@Path("joinCode") joinCode: String): Response<RequiredJoinFields>
+
+    @POST("/events/join/{joinCode}")
+    @InjectAuth
+    suspend fun postPasswords(
+        @Path("joinCode") joinCode: String,
+        @Body eventPasswords: EventPasswords
+    ): Response<EventIdResponse>
 
 }

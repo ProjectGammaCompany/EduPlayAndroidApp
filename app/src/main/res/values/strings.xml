@@ -82,4 +82,11 @@
     <string name="active">Active</string>
     <string name="declining_rate">Declining rate</string>
     <string name="no_events_found">Couldn\'t find any events.</string>
+    <string name="join_by_code">Join by code</string>
+    <string name="join_code">Join code</string>
+    <string name="wrong_code">Incorrect code</string>
+    <string name="event_password">Event password</string>
+    <string name="group">Group</string>
+    <string name="group_password">Group password</string>
+    <string name="incorrect_password">Incorrect password</string>
 </resources>

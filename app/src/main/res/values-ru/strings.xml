@@ -83,4 +83,11 @@
     <string name="active">Активные</string>
     <string name="declining_rate">По убыванию рейтинга</string>
     <string name="no_events_found">Не нашлось ни одного события.</string>
+    <string name="join_by_code">Присоединиться по коду</string>
+    <string name="join_code">Код события</string>
+    <string name="wrong_code">Неверный код события</string>
+    <string name="event_password">Пароль события</string>
+    <string name="group">Группа</string>
+    <string name="group_password">Пароль группы</string>
+    <string name="incorrect_password">Неверный пароль</string>
 </resources>

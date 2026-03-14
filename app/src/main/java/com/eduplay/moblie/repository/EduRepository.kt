@@ -15,10 +15,13 @@ import com.eduplay.moblie.repository.pagingSources.CompletedEventsPagingSource
 import com.eduplay.moblie.repository.pagingSources.CreatedEventsPagingSource
 import com.eduplay.moblie.repository.pagingSources.FavoriteEventsPagingSource
 import com.eduplay.moblie.repository.requestTypes.Auth
+import com.eduplay.moblie.repository.requestTypes.EventPasswords
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
+import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
+import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.webrepository.WebRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -193,5 +196,13 @@ class EduRepository @Inject constructor(
 
     suspend fun getTags(): EventTagList {
         return webRepository.getTags()
+    }
+
+    suspend fun getRequiredJoinFields(joinCode: String): RequiredJoinFields {
+        return webRepository.getRequiredJoinFields(joinCode)
+    }
+
+    suspend fun enterPrivateEvent(joinCode: String, eventPasswords: EventPasswords): EventIdResponse {
+        return webRepository.enterPrivateEvent(joinCode, eventPasswords)
     }
 }

@@ -12,18 +12,22 @@ import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventComplaint
+import com.eduplay.moblie.repository.requestTypes.EventPasswords
 import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
+import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
+import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.services.TokenManager
 import jakarta.inject.Inject
 import retrofit2.http.Query
 import java.time.LocalDateTime
+import java.util.NoSuchElementException
 
 
 class WebRepository @Inject constructor(
@@ -246,6 +250,31 @@ class WebRepository @Inject constructor(
             return body
         } // TODO(оделать проверку на причины отказа)
         throw IllegalAccessException("cant get tags")
+    }
+
+    suspend fun getRequiredJoinFields(joinCode: String): RequiredJoinFields {
+        val response = api.getFieldsToJoinEvent(joinCode)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        }
+        if (response.code() == 404) {
+            throw NoSuchElementException("no event with code $joinCode")
+        }
+        throw IllegalAccessException("cant get tags")
+    }
+
+    suspend fun enterPrivateEvent(joinCode: String, eventPasswords: EventPasswords): EventIdResponse {
+        val response = api.postPasswords(joinCode, eventPasswords)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        }
+        if (response.code() == 403) {
+            throw IllegalAccessException("wrong password")
+        }
+        throw IllegalAccessException("cant access event")
+
     }
 
 }
