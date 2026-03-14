@@ -30,6 +30,7 @@ import com.eduplay.moblie.ui.screens.FakeSplashScreen
 import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.screens.MyEventsScreen
 import com.eduplay.moblie.ui.screens.ProfileScreen
+import com.eduplay.moblie.ui.screens.SearchScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.SplashViewModel
@@ -122,6 +123,9 @@ class MainActivity : FragmentActivity() {
 
                         composable("profile") {
                             ProfileScreen(innerPadding, navController)
+                        }
+                        composable("search") {
+                            SearchScreen(navController, innerPadding)
                         }
                         composable(
                             "event_result/{eventId}",

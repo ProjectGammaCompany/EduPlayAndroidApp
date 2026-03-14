@@ -77,4 +77,9 @@
     <string name="connected">Connected</string>
     <string name="scanning_devices">Scanning devices</string>
     <string name="you">You</string>
+    <string name="show_filters">Filters</string>
+    <string name="hide_filters">Hide filters</string>
+    <string name="active">Active</string>
+    <string name="declining_rate">Declining rate</string>
+    <string name="no_events_found">Couldn\'t find any events.</string>
 </resources>

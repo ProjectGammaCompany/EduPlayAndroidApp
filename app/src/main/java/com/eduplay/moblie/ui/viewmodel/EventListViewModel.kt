@@ -24,13 +24,13 @@ class EventListViewModel @Inject constructor(private val repository: EduReposito
                 repository.addToFavourites(eventId, isFavorite)
             } catch (_: ConnectException) {
                 noInternetConnection.value = true
-                Log.i("main screen fetch events", "no internet")
+                Log.i("add to favorite", "no internet")
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
-                Log.i("main screen fetch events", "not authorised")
+                Log.i("add to favorite", "not authorised")
             } catch (e: Exception) {
                 unknownError.value = true
-                Log.e("main screen fetch events", e.message ?: "unknown error")
+                Log.e("add to favorite", e.message ?: "unknown error")
             }
         }
     }

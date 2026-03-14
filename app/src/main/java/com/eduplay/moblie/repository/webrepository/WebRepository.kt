@@ -5,6 +5,8 @@ import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.EventTag
+import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
@@ -20,6 +22,7 @@ import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.services.TokenManager
 import jakarta.inject.Inject
+import retrofit2.http.Query
 import java.time.LocalDateTime
 
 
@@ -66,8 +69,22 @@ class WebRepository @Inject constructor(
         return AuthResult.INVALID_USER
     }
 
-    override suspend fun getEvents(page: Int): List<QuestShortInfo> {
-        val response = api.allEvents(page = page)
+    override suspend fun getEvents(
+        page: Int,
+        tags: List<String>?,
+        decliningRating: Boolean,
+        active: Boolean,
+        favorites: Boolean,
+        title: String
+    ): List<QuestShortInfo> {
+        val response = api.allEvents(
+            page = page,
+            tags = tags,
+            decliningRating = decliningRating,
+            active = active,
+            favorites = favorites,
+            title = title
+        )
         val body = response.body()
         Log.d("Requests events", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
@@ -220,6 +237,15 @@ class WebRepository @Inject constructor(
             return
         } // TODO(оделать проверку на причины отказа)
         throw IllegalAccessException("cant complain $eventId")
+    }
+
+    suspend fun getTags(): EventTagList {
+        val response = api.getTags()
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        } // TODO(оделать проверку на причины отказа)
+        throw IllegalAccessException("cant get tags")
     }
 
 }

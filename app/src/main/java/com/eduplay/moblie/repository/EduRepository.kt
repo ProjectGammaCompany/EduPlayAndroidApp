@@ -7,6 +7,7 @@ import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.pagingSources.AllEventsPagingWebSource
@@ -44,7 +45,12 @@ class EduRepository @Inject constructor(
         enablePlaceHolders: Boolean = false,
         prefetchDistance: Int = 10,
         initialLoadSize: Int = 20,
-        maxCacheSize: Int = 2000
+        maxCacheSize: Int = 2000,
+        tags: List<String>? = null,
+        decliningRating: Boolean = false,
+        active: Boolean = false,
+        favorites: Boolean = false,
+        title: String = ""
     ): Flow<PagingData<QuestShortInfo>> {
         return Pager(
             config = PagingConfig(
@@ -54,7 +60,14 @@ class EduRepository @Inject constructor(
                 initialLoadSize = initialLoadSize,
                 maxSize = maxCacheSize
             ), pagingSourceFactory = {
-                AllEventsPagingWebSource(webRepository)
+                AllEventsPagingWebSource(
+                    webRepository,
+                    tags,
+                    decliningRating,
+                    active,
+                    favorites,
+                    title
+                )
             }
         ).flow
     }
@@ -176,5 +189,9 @@ class EduRepository @Inject constructor(
 
     suspend fun getEventResults(eventId: String): PlayerStats {
         return webRepository.getResults(eventId)
+    }
+
+    suspend fun getTags(): EventTagList {
+        return webRepository.getTags()
     }
 }

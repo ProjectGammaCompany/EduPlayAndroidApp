@@ -15,7 +15,6 @@ import java.time.LocalDateTime
 interface Repository {
     suspend fun login(auth: Auth): AuthResult
     suspend fun logout(): Boolean
-    suspend fun getEvents(page: Int = 1): List<QuestShortInfo>
     suspend fun getRole(eventId: String): EventRole
     suspend fun getPlayerEventInfo(eventId: String): EventPlayerInfo
     suspend fun getOwnerEventInfo(eventId: String): EventOwnerInfo
@@ -39,4 +38,12 @@ interface Repository {
     ): AnswerResult
 
     suspend fun register(auth: RegistrationData): AuthResult
+    suspend fun getEvents(
+        page: Int,
+        tags: List<String>? = null,
+        decliningRating: Boolean = false,
+        active: Boolean = false,
+        favorites: Boolean = false,
+        title: String = ""
+    ): List<QuestShortInfo>
 }

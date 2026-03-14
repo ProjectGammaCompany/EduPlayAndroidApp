@@ -57,7 +57,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+                    {it}
                 )
             }
 
@@ -76,7 +77,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+                    {it}
                 )
             }
 
@@ -97,7 +99,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+                    {it}
                 )
             }
             for (tag in tags) {
@@ -118,7 +121,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+                    {it}
                 )
             }
             onNodeWithTag("quest_element_isDownloaded", useUnmergedTree = true).assertDoesNotExist()
@@ -135,7 +139,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+                    {it}
                 )
             }
             onNodeWithTag("quest_element_isDownloaded", useUnmergedTree = true).assertIsDisplayed()
@@ -154,7 +159,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+                    {it}
                 )
             }
 
@@ -178,7 +184,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+                    {it}
                 )
             }
 
@@ -203,7 +210,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+                    {it}
                 )
             }
 
@@ -228,7 +236,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+                    {it}
                 )
             }
 

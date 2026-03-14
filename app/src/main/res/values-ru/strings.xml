@@ -78,4 +78,9 @@
     <string name="connected">Подключено</string>
     <string name="scanning_devices">Сканирование устройств</string>
     <string name="you">Вы</string>
+    <string name="show_filters">Фильтры</string>
+    <string name="hide_filters">Скрыть фильтры</string>
+    <string name="active">Активные</string>
+    <string name="declining_rate">По убыванию рейтинга</string>
+    <string name="no_events_found">Не нашлось ни одного события.</string>
 </resources>

@@ -3,6 +3,8 @@ package com.eduplay.moblie.repository.webrepository
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.EventTag
+import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventComplaint
@@ -33,8 +35,9 @@ interface WebApi {
         @Query("maxOnPage") maxOnPage: Int = 10,
         @Query("tags") tags: List<String>? = null,
         @Query("decliningRating") decliningRating: Boolean = false,
-        @Query("territorialized") territorialized: Boolean = false,
-        @Query("active") active: Boolean = false
+        @Query("active") active: Boolean = false,
+        @Query("favorites") favorites: Boolean = false,
+        @Query("title") title: String = ""
     ): Response<EventListResponse>
 
     @GET("/events/personal/favorites")
@@ -127,5 +130,9 @@ interface WebApi {
     @GET("/event/{eventId}/playerStats")
     @InjectAuth
     suspend fun getPlayerStats(@Path("eventId") eventId: String) : Response<PlayerStats>
+
+    @GET("/tags")
+    @InjectAuth
+    suspend fun getTags(): Response<EventTagList>
 
 }

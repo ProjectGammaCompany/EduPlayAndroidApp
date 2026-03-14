@@ -85,6 +85,10 @@ fun MainScreen(
 
     val events = viewModel.events
 
+    val onSearch = {
+        navController.navigate("search")
+    }
+
     MainScreen(
         innerPaddingValues,
         events,
@@ -93,7 +97,8 @@ fun MainScreen(
         imageHeaderViewModel.headers,
         {image: String -> imageHeaderViewModel.getFullUrl(image)},
         isCompetitionMode,
-        onStopCompetition
+        onStopCompetition,
+        onSearch
     )
 }
 
@@ -108,6 +113,7 @@ private fun MainScreen(
     imageUrl: (String) -> String,
     isCompetitionMode:State<Boolean>,
     onStopCompetition: ()->Unit,
+    onSearch: ()->Unit
 ) {
     Column(
         modifier = Modifier
@@ -125,14 +131,6 @@ private fun MainScreen(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.primary,
             ),
-            navigationIcon = {
-                IconButton(onClick = { }) { //TODO("меню на главном экане")
-                    Icon(
-                        imageVector = Icons.Filled.Menu,
-                        contentDescription = stringResource(R.string.app_menu)
-                    )
-                }
-            },
             actions = {
                 if (isCompetitionMode.value) {
                     IconButton(onClick = { onStopCompetition() }) {
@@ -142,7 +140,7 @@ private fun MainScreen(
                         )
                     }
                 }
-                IconButton(onClick = { }) { //TODO("поиск")
+                IconButton(onClick = { onSearch() }) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = stringResource(R.string.search_events)
@@ -209,8 +207,8 @@ fun MainScreenPreview() {
     )
 
 
-    val nothing = { string: String -> string.forEach { } }
-    val nothingB = { string: String, bool: Boolean -> string.forEach { } }
+    val nothing = { string: String ->  }
+    val nothingB = { string: String, bool: Boolean -> }
     EduPlayTheme {
         MainScreen(
             PaddingValues(0.dp),
@@ -220,6 +218,7 @@ fun MainScreenPreview() {
             headers,
             {it},
             remember { mutableStateOf(false) },
+            {},
             {}
         )
     }
