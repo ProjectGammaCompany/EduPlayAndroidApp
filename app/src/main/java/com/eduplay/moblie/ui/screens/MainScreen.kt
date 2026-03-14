@@ -26,7 +26,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -53,6 +55,8 @@ import kotlinx.coroutines.flow.flowOf
 fun MainScreen(
     innerPaddingValues: PaddingValues,
     navController: NavController,
+    isCompetitionMode:State<Boolean>,
+    onStopCompetition: ()->Unit,
     viewModel: MainScreenViewModel = hiltViewModel(),
     eventListViewModel: EventListViewModel = hiltViewModel(),
     imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
@@ -87,7 +91,9 @@ fun MainScreen(
         onEventClick,
         onFavourite,
         imageHeaderViewModel.headers,
-        {image: String -> imageHeaderViewModel.getFullUrl(image)}
+        {image: String -> imageHeaderViewModel.getFullUrl(image)},
+        isCompetitionMode,
+        onStopCompetition
     )
 }
 
@@ -99,7 +105,9 @@ private fun MainScreen(
     onEventClick: (String) -> Unit,
     onFavourite: (String, Boolean) -> Unit,
     headers: State<NetworkHeaders>,
-    imageUrl: (String) -> String
+    imageUrl: (String) -> String,
+    isCompetitionMode:State<Boolean>,
+    onStopCompetition: ()->Unit,
 ) {
     Column(
         modifier = Modifier
@@ -126,6 +134,14 @@ private fun MainScreen(
                 }
             },
             actions = {
+                if (isCompetitionMode.value) {
+                    IconButton(onClick = { onStopCompetition() }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.bluetooth_disabled),
+                            contentDescription = stringResource(R.string.turn_off_bluetooth)
+                        )
+                    }
+                }
                 IconButton(onClick = { }) { //TODO("поиск")
                     Icon(
                         imageVector = Icons.Default.Search,
@@ -202,7 +218,9 @@ fun MainScreenPreview() {
             nothing,
             nothingB,
             headers,
-            {it}
+            {it},
+            remember { mutableStateOf(false) },
+            {}
         )
     }
 

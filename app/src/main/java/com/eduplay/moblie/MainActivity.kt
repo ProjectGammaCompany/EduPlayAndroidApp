@@ -57,7 +57,11 @@ class MainActivity : FragmentActivity() {
         val splashScreen = installSplashScreen()
         val isCompetitionMode = mutableStateOf(false)
         val toggleCompetitionMode = {mode: Boolean -> isCompetitionMode.value = mode}
-
+        val onStopCompetition = {
+            isCompetitionMode.value = false
+            bluetoothViewModel.stopScan(this)
+            bluetoothViewModel.stopAllSocketConnections()
+        }
         super.onCreate(savedInstanceState)
 
 
@@ -92,7 +96,7 @@ class MainActivity : FragmentActivity() {
                             )
                         }
                         composable("main_screen") {
-                            MainScreen(innerPadding, navController)
+                            MainScreen(innerPadding, navController, isCompetitionMode=isCompetitionMode, onStopCompetition = onStopCompetition)
                         }
                         composable(
                             "event_screen/{eventId}",
