@@ -17,6 +17,8 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.ConnectException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @HiltViewModel
 class EventScreenViewModel @Inject constructor(val repository: EduRepository) : ViewModel() {
@@ -27,15 +29,8 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val isContinuing = mutableStateOf(false)
     val eventName = mutableStateOf("")
     val author = mutableStateOf("")
-    val rating = mutableStateOf("")
-    val opens = mutableStateOf<String?>(null)
-    val closes = mutableStateOf<String?>(null)
     var tags = mutableStateListOf<EventTag>()
-    val info = mutableStateListOf<Pair<Int, String?>>(
-        Pair(R.string.rating, rating.value),
-        Pair(R.string.opens, opens.value),
-        Pair(R.string.closes, closes.value)
-    )
+    val info = mutableStateListOf<Pair<Int, String?>>()
     val description = mutableStateOf("")
     val privateEvent = mutableStateOf(true)
     val cover = mutableStateOf("")
@@ -73,57 +68,58 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         isEventFavourite.value = data.favorite
 
         tags = data.tags.toMutableStateList()
-        opens.value = data.startDate//?.substring(0..data.startDate.length - 5)
-        closes.value = data.endDate//?.substring(0..data.endDate.length - 5)
-        rating.value = data.rate.toString() + '⭐'
         description.value = data.description
+        eventName.value = data.title
+        author.value = data.authors.joinToString(", ") { it.email }
+        cover.value = data.cover
 
         info.clear()
         info.add(
-            Pair(R.string.rating, rating.value)
+            Pair(R.string.rating, data.rate.toString() + '⭐')
         )
-        if (opens.value?.isNotBlank() ?: false) {
-            info.add(Pair(R.string.opens, opens.value))
+        val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
+        val presentingFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+
+        if (data.startDate?.isNotBlank() ?: false) {
+            val startTime = LocalDateTime.parse(data.startDate, dateFormatter)
+            info.add(Pair(R.string.opens, startTime.format(presentingFormatter)))
         }
-        if (closes.value?.isNotBlank() ?: false) {
-            Pair(R.string.closes, closes.value)
+        if (data.endDate?.isNotBlank() ?: false) {
+            val endTime = LocalDateTime.parse(data.endDate, dateFormatter)
+            Pair(R.string.closes, endTime.format(presentingFormatter))
         }
 
-        isOpen.value = !data.completed && data.status != EventStatus.ENDED
-//                && (data.startDate == null || LocalDateTime.now() >= LocalDateTime.parse(
-//            data.startDate, LocalDateTime.ofp { byUnicodePattern("yyyy-MM-dd HH:mm:ss.SSS")}
-//                )
-//                        )
-        isContinuing.value = isOpen.value && data.status == EventStatus.STARTED
-//                && (
-//                data.endDate == null
-//                        || (LocalDateTime.now() >= LocalDateTime.parse(data.startDate)
-//                        && LocalDateTime.now() <= LocalDateTime.parse(data.endDate)
-//                        )
-//                )
-
-        eventName.value = data.title
-        author.value = data.authors.joinToString(", ") { it.email }
-        isCompleted.value = data.completed
-        cover.value = data.cover
+        isOpen.value =  EventStatus.statusOf(data.status) != EventStatus.ENDED
+                && (data.startDate == null || LocalDateTime.now() >= LocalDateTime.parse(data.startDate,  dateFormatter))
+                && (data.endDate == null || LocalDateTime.now() <= LocalDateTime.parse(data.endDate,  dateFormatter))
+        isContinuing.value = isOpen.value && EventStatus.statusOf(data.status) == EventStatus.STARTED
+        isCompleted.value = EventStatus.statusOf(data.status) == EventStatus.ENDED
     }
 
     private suspend fun fetchOwnerData(eventId: String) {
         val data = repository.getEventInfoOwner(eventId)
 
         tags = data.tags.toMutableStateList()
-        opens.value = data.startDate
-        closes.value = data.endDate
-        rating.value = data.rating.toString() + '⭐'
         description.value = data.description
         privateEvent.value = data.private
 
         info.clear()
+
+        val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
+        val presentingFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+
+        if (data.startDate?.isNotBlank() ?: false) {
+            val startTime = LocalDateTime.parse(data.startDate, dateFormatter)
+            info.add(Pair(R.string.opens, startTime.format(presentingFormatter)))
+        }
+        if (data.endDate?.isNotBlank() ?: false) {
+            val endTime = LocalDateTime.parse(data.endDate, dateFormatter)
+            Pair(R.string.closes, endTime.format(presentingFormatter))
+        }
+
         info.addAll(
             listOf(
-                Pair(R.string.rating, rating.value),
-                Pair(R.string.opens, opens.value),
-                Pair(R.string.closes, closes.value),
+                Pair(R.string.rating, data.rating.toString() + '⭐'),
                 Pair(R.string.groups, data.groupNames.joinToString { ", " }),
                 Pair(R.string.last_edition, data.lastEditionDate),
             )

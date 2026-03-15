@@ -11,8 +11,7 @@ data class EventPlayerInfo(
     val endDate: String?,
     val tags: List<EventTag>,
     val cover: String,
-    val status: EventStatus,
+    val status: String,
     val lastEditionDate: String,
-    val completed: Boolean,
     val authors: List<Author>
 )

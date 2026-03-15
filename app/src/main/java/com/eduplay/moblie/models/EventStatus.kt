@@ -1,7 +1,18 @@
 package com.eduplay.moblie.models
 
-enum class EventStatus(status: String) {
+enum class EventStatus(val status: String) {
     NOT_STARTED("notStarted"),
-    STARTED("Started"),
-    ENDED("Ended")
+    STARTED("in progress"),
+    ENDED("finished");
+    companion object {
+        fun statusOf(value: String): EventStatus {
+            for (status in entries) {
+                if (status.status == value) {
+                    return status
+                }
+            }
+            return ENDED
+        }
+    }
+
 }
