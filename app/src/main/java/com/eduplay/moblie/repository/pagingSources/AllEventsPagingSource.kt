@@ -48,5 +48,4 @@ class AllEventsPagingWebSource(
                 ?: state.closestPageToPosition(anchor)?.nextKey?.minus(numOfOffScreenPage)
         }
     }
-
 }

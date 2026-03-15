@@ -95,11 +95,11 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         }
 
         isOpen.value = EventStatus.statusOf(data.status) != EventStatus.ENDED
-                && (data.startDate == null || LocalDateTime.now() >= LocalDateTime.parse(
+                && (data.startDate == null || data.startDate.isBlank() || LocalDateTime.now() >= LocalDateTime.parse(
             data.startDate,
             dateFormatter
         ))
-                && (data.endDate == null || LocalDateTime.now() <= LocalDateTime.parse(
+                && (data.endDate == null || data.endDate.isBlank() || LocalDateTime.now() <= LocalDateTime.parse(
             data.endDate,
             dateFormatter
         ))

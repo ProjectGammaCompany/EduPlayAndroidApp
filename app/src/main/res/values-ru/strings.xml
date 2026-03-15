@@ -3,8 +3,8 @@
     <string name="app_name">EduPlay</string>
     <string name="email">Электронная почта</string>
     <string name="password">Пароль</string>
-    <string name="login">Войти</string>
-    <string name="register">Зарегистрироваться</string>
+    <string name="login">Вход</string>
+    <string name="register">Регистрация</string>
     <string name="downloaded">Скачан</string>
     <string name="add_to_favourite">Добавить в избранное</string>
     <string name="remove_from_favourite">Удалить из избранного</string>
