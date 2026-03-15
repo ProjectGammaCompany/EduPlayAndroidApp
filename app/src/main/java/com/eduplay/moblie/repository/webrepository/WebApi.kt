@@ -19,6 +19,7 @@ import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
 import com.eduplay.moblie.repository.responseTypes.EventRoleResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
@@ -82,7 +83,7 @@ interface WebApi {
         @Path("eventId") eventId: String
     ): Response<EventPlayerInfo>
 
-    @GET("/event/{eventId}/ownerInfo")
+    @GET("/event/{eventId}/settings")
     @InjectAuth
     suspend fun getEventInfoCreator(
         @Path("eventId") eventId: String
@@ -148,5 +149,11 @@ interface WebApi {
         @Path("joinCode") joinCode: String,
         @Body eventPasswords: EventPasswords
     ): Response<EventIdResponse>
+
+    @GET("events/{eventId}/joinCode")
+    @InjectAuth
+    suspend fun getJoinCode(
+        @Path("eventId") eventId: String,
+    ): Response<JoinCodeInfo>
 
 }

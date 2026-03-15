@@ -32,6 +32,7 @@ android {
             )
             buildConfigField("String", "BACKEND_URL", "\"http://api.hse-eduplay.ru\"")
             buildConfigField("String", "BACKEND_FILE_URL", "\"http://files.hse-eduplay.ru/eduplay-bucket/uploads/\"")
+            buildConfigField("String", "FRONTEND_URL", "\"http://hse-eduplay.ru/\"")
 
 
         }
@@ -40,6 +41,7 @@ android {
             isDebuggable = true
             buildConfigField("String", "BACKEND_URL", "\"http://api.hse-eduplay.ru\"")
             buildConfigField("String", "BACKEND_FILE_URL", "\"http://files.hse-eduplay.ru/eduplay-bucket/uploads/\"")
+            buildConfigField("String", "FRONTEND_URL", "\"http://hse-eduplay.ru/\"")
         }
 
     }

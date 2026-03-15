@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -8,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.R
 import com.eduplay.moblie.exceptions.NotAuthorisedException
+import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventStatus
 import com.eduplay.moblie.models.EventTag
@@ -35,15 +37,18 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val privateEvent = mutableStateOf(true)
     val cover = mutableStateOf("")
     val unauthorised = mutableStateOf(false)
+    val password = mutableStateOf("")
+    val groups = mutableStateListOf<EventGroup>()
+    val joinCode = mutableStateOf("")
 
-    fun fetchData(eventId: String, callBack: () -> Unit, onNoInternet: () -> Unit) {
+    fun fetchData(eventId: String, callBack: () -> Unit, onNoInternet: () -> Unit, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             val role = repository.getRole(eventId)
 
             eventCreatorMode.value = role == EventRole.AUTHOR
             try {
                 when (role) {
-                    EventRole.AUTHOR -> fetchOwnerData(eventId)
+                    EventRole.AUTHOR -> fetchOwnerData(eventId, context)
                     EventRole.PARTICIPANT -> fetchPlayerData(eventId)
                 }
             } catch (_: ConnectException) {
@@ -89,19 +94,28 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
             Pair(R.string.closes, endTime.format(presentingFormatter))
         }
 
-        isOpen.value =  EventStatus.statusOf(data.status) != EventStatus.ENDED
-                && (data.startDate == null || LocalDateTime.now() >= LocalDateTime.parse(data.startDate,  dateFormatter))
-                && (data.endDate == null || LocalDateTime.now() <= LocalDateTime.parse(data.endDate,  dateFormatter))
-        isContinuing.value = isOpen.value && EventStatus.statusOf(data.status) == EventStatus.STARTED
+        isOpen.value = EventStatus.statusOf(data.status) != EventStatus.ENDED
+                && (data.startDate == null || LocalDateTime.now() >= LocalDateTime.parse(
+            data.startDate,
+            dateFormatter
+        ))
+                && (data.endDate == null || LocalDateTime.now() <= LocalDateTime.parse(
+            data.endDate,
+            dateFormatter
+        ))
+        isContinuing.value =
+            isOpen.value && EventStatus.statusOf(data.status) == EventStatus.STARTED
         isCompleted.value = EventStatus.statusOf(data.status) == EventStatus.ENDED
     }
 
-    private suspend fun fetchOwnerData(eventId: String) {
+    private suspend fun fetchOwnerData(eventId: String, context: Context) {
         val data = repository.getEventInfoOwner(eventId)
 
-        tags = data.tags.toMutableStateList()
+        eventName.value = data?.title ?: ""
+        tags = data.tags?.toMutableStateList() ?: mutableStateListOf()
         description.value = data.description
         privateEvent.value = data.private
+        author.value = data.collaboratos?.joinToString(", ") ?: ""
 
         info.clear()
 
@@ -116,14 +130,40 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
             val endTime = LocalDateTime.parse(data.endDate, dateFormatter)
             Pair(R.string.closes, endTime.format(presentingFormatter))
         }
+        password.value = data.password ?: ""
+        groups.addAll(data.groups ?: listOf())
 
         info.addAll(
             listOf(
-                Pair(R.string.rating, data.rating.toString() + '⭐'),
+                Pair(R.string.rating, (data.eventRating?.toString() ?: "0") + '⭐'),
                 Pair(R.string.groups, data.groupNames.joinToString { ", " }),
                 Pair(R.string.last_edition, data.lastEditionDate),
+                Pair(
+                    R.string.private_event_flag,
+                    if (privateEvent.value) context.getString(R.string.private_event) else context.getString(
+                        R.string.public_event
+                    )
+                ),
+                Pair(
+                    R.string.group_event,
+                    if (data.groupEvent) context.getString(R.string.yes) else context.getString(R.string.no)
+                ),
+                Pair(
+                    R.string.allow_download,
+                    if (data.allowDownloading) context.getString(R.string.yes) else context.getString(
+                        R.string.no
+                    )
+                )
             )
         )
+
+        if (privateEvent.value) {
+            try {
+                joinCode.value = repository.getJoinCode(eventId).joinCode
+            } catch (e: Exception) {
+                Log.e("JOIN_CODE", e.message ?:"", e)
+            }
+        }
     }
 
     fun addToFavourite(eventId: String) {

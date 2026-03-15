@@ -90,4 +90,9 @@
     <string name="group">Группа</string>
     <string name="group_password">Пароль группы</string>
     <string name="incorrect_password">Неверный пароль</string>
+    <string name="privacy_settings">Настройки приватности</string>
+    <string name="group_event">Групповое событие</string>
+    <string name="allow_download">"Разрешить скачивание события "</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
 </resources>

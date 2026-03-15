@@ -1,6 +1,7 @@
 package com.eduplay.moblie.models
 
 import com.eduplay.moblie.repository.responseTypes.Author
+import com.google.gson.annotations.SerializedName
 
 data class EventPlayerInfo(
     val title: String,
@@ -12,6 +13,7 @@ data class EventPlayerInfo(
     val tags: List<EventTag>,
     val cover: String,
     val status: String,
+    @SerializedName("lastEditionDate")
     val lastEditionDate: String,
     val authors: List<Author>
 )

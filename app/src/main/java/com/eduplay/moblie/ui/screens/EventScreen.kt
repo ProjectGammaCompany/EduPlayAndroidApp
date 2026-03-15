@@ -21,8 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.clearText
@@ -41,7 +39,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -57,7 +54,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -79,7 +75,9 @@ import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import com.eduplay.moblie.BuildConfig
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
@@ -109,11 +107,15 @@ fun EventScreen(
     var dataFetched by remember { mutableStateOf(false) }
     var noInternet by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
     if (!dataFetched) {
         viewModel.fetchData(
             eventId,
             { dataFetched = true },
-            { noInternet = true })
+            { noInternet = true },
+            context
+        )
     }
 
     if (viewModel.unauthorised.value) {
@@ -123,7 +125,6 @@ fun EventScreen(
     if (noInternet) {
         NoInternetConnectionToast()
     }
-
 
 
     val onComplain = { reason: String ->
@@ -142,8 +143,6 @@ fun EventScreen(
     val onReturn = {
         navController.popBackStack()
     }
-
-    val context = LocalContext.current
 
     var requireAdapter by remember { mutableStateOf(false) }
 
@@ -172,7 +171,6 @@ fun EventScreen(
         fragment = connectionFragment
 
     }
-
 
 
     val turnOnBluetooth = {
@@ -268,7 +266,11 @@ fun EventScreen(
         imageHeaderViewModel.headers,
         turnOnBluetooth,
         isCompetitionMode,
-        canShowConnectionList
+        canShowConnectionList,
+        viewModel.password,
+        viewModel.groups,
+        eventId,
+        viewModel.joinCode
     )
 }
 
@@ -296,7 +298,11 @@ fun EventScreen(
     headers: State<NetworkHeaders>,
     toggleBluetooth: () -> Unit,
     isCompetitionMode: State<Boolean>,
-    canShowConnectionList: Boolean
+    canShowConnectionList: Boolean,
+    password: State<String>,
+    groups: SnapshotStateList<EventGroup>,
+    eventId: String,
+    joinCode: State<String>
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -314,7 +320,7 @@ fun EventScreen(
     }
 
     if (showEditDialog) {
-        EditDialog(onCloseEditEvent)
+        EditDialog(onCloseEditEvent, eventId)
     }
     if (showComplaintDialog) {
         ComplaintDialog(onHideComplaint, onComplain)
@@ -357,7 +363,10 @@ fun EventScreen(
                     tags,
                     info,
                     description,
-                    privateEvent
+                    privateEvent,
+                    password,
+                    groups,
+                    joinCode
                 )
             } else {
                 GeneralUserBody(
@@ -377,7 +386,7 @@ fun EventScreen(
 
 
 @Composable
-private fun EditDialog(onClose: () -> Unit) {
+private fun EditDialog(onClose: () -> Unit, eventId: String) {
     val uriHandler = LocalUriHandler.current
     AlertDialog(
         title = {
@@ -392,7 +401,7 @@ private fun EditDialog(onClose: () -> Unit) {
         confirmButton = {
             TextButton(
                 onClick = {
-                    uriHandler.openUri("http://localhost/")//TODO("попросить настоящий url фронта")
+                    uriHandler.openUri(BuildConfig.FRONTEND_URL)
                 }
             ) {
                 Text(stringResource(R.string.proceed_to_website))
@@ -782,18 +791,23 @@ private fun EventCreatorBody(
     tags: SnapshotStateList<EventTag>,
     info: List<Pair<Int, String?>>,
     description: State<String>,
-    privateEvent: State<Boolean>
+    privateEvent: State<Boolean>,
+    password: State<String>,
+    groups: SnapshotStateList<EventGroup>,
+    joinCode: State<String>
 ) {
     val tabs = remember<List<Int>> {
-        listOf<Int>(
-            R.string.general_info,
-            R.string.statistics,
-        )
+            listOf<Int>(
+                R.string.general_info,
+                R.string.statistics,
+                R.string.privacy_settings
+            )
     }
     var selectedTabIdx by remember { mutableIntStateOf(0) }
     Column {
         SecondaryTabRow(selectedTabIndex = selectedTabIdx) {
             tabs.forEachIndexed { index, title ->
+                if (index == 2 && !privateEvent.value) return@forEachIndexed
                 Tab(
                     selected = selectedTabIdx == index,
                     onClick = { selectedTabIdx = index },
@@ -821,9 +835,82 @@ private fun EventCreatorBody(
     when (selectedTabIdx) {
         0 -> GeneralInfo(tags, infoP, description.value)
         1 -> StatisticsInfo()
+        2 -> PrivacySettings(password, groups, joinCode)
         else -> Box {}
     }
 
+}
+
+@Composable
+fun PrivacySettings(
+    password: State<String>,
+    groups: SnapshotStateList<EventGroup>,
+    joinCode: State<String>
+) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 10.dp, vertical = 10.dp)
+            .fillMaxHeight()
+            .verticalScroll(rememberScrollState())
+    ) {
+        Row {
+            Text(
+                text = stringResource(R.string.join_code),
+                style = typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+            Text(
+                text = joinCode.value,
+                style = typography.bodyLarge.copy(
+                    color = colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+        }
+        Row {
+            Text(
+                text = stringResource(R.string.event_password),
+                style = typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+            Text(
+                text = password.value,
+                style = typography.bodyMedium.copy(color = colorScheme.onBackground)
+            )
+        }
+
+        if (groups.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.groups),
+                style = typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+        }
+
+        groups.forEach { group ->
+            Text(
+                text = group.login,
+                style = typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+            Text(
+                text = group.password,
+                style = typography.bodyMedium.copy(color = colorScheme.onBackground)
+            )
+        }
+    }
 }
 
 @Composable

@@ -20,6 +20,7 @@ import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
@@ -275,6 +276,15 @@ class WebRepository @Inject constructor(
         }
         throw IllegalAccessException("cant access event")
 
+    }
+
+    suspend fun getJoinCode(eventId: String): JoinCodeInfo {
+        val response = api.getJoinCode(eventId)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        }
+        throw IllegalAccessException("cant get join code for $eventId")
     }
 
 }

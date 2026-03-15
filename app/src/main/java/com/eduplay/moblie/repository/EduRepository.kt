@@ -20,6 +20,7 @@ import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.webrepository.WebRepository
@@ -204,5 +205,9 @@ class EduRepository @Inject constructor(
 
     suspend fun enterPrivateEvent(joinCode: String, eventPasswords: EventPasswords): EventIdResponse {
         return webRepository.enterPrivateEvent(joinCode, eventPasswords)
+    }
+
+    suspend fun getJoinCode(eventId: String): JoinCodeInfo {
+        return webRepository.getJoinCode(eventId)
     }
 }
