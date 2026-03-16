@@ -2,10 +2,9 @@ package com.eduplay.moblie.repository.webrepository
 
 import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.repository.requestTypes.Refresh
-import com.eduplay.moblie.services.TokenManager
+import com.eduplay.moblie.useCases.TokenManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Request

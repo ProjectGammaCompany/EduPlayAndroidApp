@@ -5,7 +5,7 @@ import com.eduplay.moblie.repository.webrepository.AuthApi
 import com.eduplay.moblie.repository.webrepository.AuthInterceptor
 import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
-import com.eduplay.moblie.services.TokenManager
+import com.eduplay.moblie.useCases.TokenManager
 import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import dagger.Module
 import dagger.Provides
