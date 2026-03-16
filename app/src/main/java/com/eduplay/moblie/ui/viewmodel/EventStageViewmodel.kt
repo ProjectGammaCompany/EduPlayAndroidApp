@@ -50,7 +50,7 @@ class EventStageViewmodel @Inject constructor(
     var bluetoothCallBack: (Int) -> Unit = {}
 
     override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
-        currentStageType.value = StageType.NONE
+        //currentStageType.value = StageType.NONE
         viewModelScope.launch {
             try {
                 val result = repository.getNextStage(eventId)
@@ -151,10 +151,10 @@ class EventStageViewmodel @Inject constructor(
     override fun chooseTask(eventId: String, taskId: String, onNoInternet: () -> Unit) {
         viewModelScope.launch {
             try {
-                repository.postTaskChoice(eventId, currentBlock.value?.id ?: "", taskId)
+                repository.postTaskChoice(eventId, blockId = currentBlock.value?.id ?: "", taskId = taskId)
                 currentStageType.value = StageType.NONE
-            } catch (_: IllegalAccessException) {
-
+            } catch (e: IllegalAccessException) {
+                Log.e("send_stage_answer", e.message ?: e.toString(), e)
             } catch (_: ConnectException) {
                 onNoInternet()
             } catch (_: NotAuthorisedException) {

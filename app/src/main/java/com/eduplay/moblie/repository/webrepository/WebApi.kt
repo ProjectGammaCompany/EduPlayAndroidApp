@@ -104,7 +104,7 @@ interface WebApi {
     suspend fun postTaskChoice(
         @Path("eventId") eventId: String,
         @Body task: TaskFromBlock
-    ): Response<EventStage>
+    ): Response<Unit>
 
     @POST("event/{eventId}/block/{blockId}/task/{taskId}/timestamp")
     @InjectAuth

@@ -210,7 +210,7 @@ class WebRepository @Inject constructor(
     }
 
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
-        val response = api.postTaskChoice(eventId, TaskFromBlock(blockId, taskId))
+        val response = api.postTaskChoice(eventId, TaskFromBlock(blockId = blockId, taskId = taskId))
         if (response.isSuccessful) {
             return true
         } // TODO(оделать проверку на причины отказа)

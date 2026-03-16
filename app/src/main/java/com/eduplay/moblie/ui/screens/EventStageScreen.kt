@@ -102,6 +102,7 @@ fun EventStageScreen(
         }
 
         StageType.END -> {
+            navController.popBackStack()
             navController.navigate("event_result/$eventId")
         }
     }
