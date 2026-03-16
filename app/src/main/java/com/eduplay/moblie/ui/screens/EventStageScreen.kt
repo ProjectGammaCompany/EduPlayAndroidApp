@@ -108,7 +108,7 @@ fun EventStageScreen(
     if (viewModel.showResults.value) {
         ResultDialog(
             isCorrect = viewModel.isAnswerCorrect,
-            answers = viewModel.answers,
+            answers = viewModel.correctAnswer,
             points = viewModel.points,
             proceedToNextTask = {
                 viewModel.currentStageType.value = StageType.NONE

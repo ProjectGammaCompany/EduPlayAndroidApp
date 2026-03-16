@@ -3,10 +3,10 @@ package com.eduplay.moblie.repository.responseTypes
 import com.google.gson.annotations.SerializedName
 
 data class AnswerResult(
-    @SerializedName("right_answer")
+    @SerializedName("rightAnswer")
     val rightAnswer: List<String>?,
     val points: Int?,
-    @SerializedName("is_correct")
+    @SerializedName("isCorrect")
     val isCorrect: TaskAnswerStatus?
 )
 

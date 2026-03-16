@@ -113,7 +113,7 @@ class EventStageViewmodel @Inject constructor(
                     }
                     isAnswerCorrect = stageResult.isCorrect
                     correctAnswer.addAll(stageResult.rightAnswer ?: listOf())
-                    if (stageResult.rightAnswer == null && stageResult.points == null) {
+                    if (stageResult.rightAnswer == null || stageResult.points == null || correctAnswer.isEmpty()) {
                         currentStageType.value = StageType.NONE
                     } else {
                         showResults.value = true
