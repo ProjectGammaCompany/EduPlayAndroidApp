@@ -18,27 +18,32 @@ class BluetoothDataExchangeUseCase() {
         private val mmBuffer: ByteArray = ByteArray(1024)
 
         override fun run() {
+            Log.e("SEND_TO_BLUETOOTH_SOCKET", "listening")
             var numBytes: Int
 
             while (true) {
                 numBytes = try {
                     mmInStream.read(mmBuffer)
+                    Log.e("SEND_TO_BLUETOOTH_SOCKET", "read smth")
                 } catch (e: IOException) {
-                    Log.d("SOCKET", "Input stream was disconnected", e)
+                    Log.i("SOCKET", "Input stream was disconnected", e)
                     break
                 }
 
                 if (numBytes > 0) {
-                    val callBack = listeningSockets[this]
+                    val callBack = handlers[this]
                     if (callBack == null) {
+                        Log.e("SEND_TO_BLUETOOTH_SOCKET", "no callback")
                         return
                     }
-                    listeningSockets[this]?.obtainMessage(
-                        RECIEVED_SCORE,
-                        byteArrayToInt(mmBuffer),
-                        0,
-                        listeningSockets[this]
-                    )
+                    Log.e("SEND_TO_BLUETOOTH_SOCKET", "${byteArrayToInt(mmBuffer)}")
+                    val message = callBack.obtainMessage()
+                    message.what = RECIEVED_SCORE
+                    message.arg1 = byteArrayToInt(mmBuffer)
+                    message.arg2 = 0
+                    message.obj = sockets[this]
+                    callBack.sendMessage(message)
+
                 }
             }
         }
@@ -51,12 +56,14 @@ class BluetoothDataExchangeUseCase() {
                 (buffer[0].toInt() and 0xff)
     }
 
-    private val listeningSockets: ConcurrentMap<ConnectedThread, Handler> = ConcurrentHashMap()
+    private val handlers: ConcurrentMap<ConnectedThread, Handler> = ConcurrentHashMap()
+    private val sockets: ConcurrentMap<ConnectedThread, BluetoothSocket> = ConcurrentHashMap()
 
 
     fun listenToSocket(socket: BluetoothSocket, handler: Handler) {
         val connectedThread = ConnectedThread(socket)
-        listeningSockets[connectedThread] = handler
+        handlers[connectedThread] = handler
+        sockets[connectedThread] = socket
         connectedThread.start()
     }
 
@@ -69,8 +76,9 @@ class BluetoothDataExchangeUseCase() {
         bytes.add((points shr 24).toByte())
         try {
             outStream.write(bytes.toByteArray())
+            Log.e("SEND_TO_BLUETOOTH_SOCKET", "${bytes.first()} $points")
         } catch (e: IOException) {
-            Log.e("SEND_TO_SOCKET", "error sending points", e)
+            Log.e("SEND_TO_BLUETOOTH_SOCKET", "error sending points", e)
             return
         }
     }

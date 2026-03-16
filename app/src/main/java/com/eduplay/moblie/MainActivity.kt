@@ -61,7 +61,7 @@ class MainActivity : FragmentActivity() {
         val onStopCompetition = {
             isCompetitionMode.value = false
             bluetoothViewModel.stopScan(this)
-            bluetoothViewModel.stopAllSocketConnections()
+           // bluetoothViewModel.stopAllSocketConnections()
         }
         super.onCreate(savedInstanceState)
 

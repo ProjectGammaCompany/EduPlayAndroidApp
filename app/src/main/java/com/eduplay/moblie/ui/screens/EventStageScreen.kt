@@ -220,7 +220,6 @@ private fun ResultDialog(
                             Row(Modifier.padding(1.dp)) {
                                 Text(
                                     it.first,
-                                    modifier = Modifier.weight(1f),
                                     overflow = TextOverflow.Ellipsis,
                                     maxLines = 1
                                 )

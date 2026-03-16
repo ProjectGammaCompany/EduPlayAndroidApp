@@ -21,6 +21,7 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
+import android.os.Message
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.annotation.RequiresPermission
@@ -223,8 +224,8 @@ class BluetoothViewModel(
 
     fun stopSocketConnection() {
         isReceivingConnections.store(false)
-        serverSocket?.close()
-        serverSocket = null
+//        serverSocket?.close()
+//        serverSocket = null
     }
 
     fun connect(
@@ -285,22 +286,25 @@ class BluetoothViewModel(
     private val RECIEVED_SCORE = 1001
 
     private fun listenToSocket(socket: BluetoothSocket) {
-        val callback = Handler.Callback { message ->
-            when (message.what) {
-                RECIEVED_SCORE -> {
-                    try {
-                        devicesScore[(message.obj as BluetoothSocket).remoteDevice.name] =
-                            message.arg1
-                    } catch (e: SecurityException) {
-                        Log.e("SCORES", "cant display scores without permissions", e)
+        val handler = object : Handler(Looper.getMainLooper()) {
+            override fun handleMessage(msg: Message): Unit {
+                super.handleMessage(msg);
+                Log.d("Bluetooth_handler", "{${msg.what}}")
+                when (msg.what) {
+                    RECIEVED_SCORE -> {
+                        try {
+                            devicesScore[(msg.obj as BluetoothSocket).remoteDevice.name] =
+                                msg.arg1
+                        } catch (e: SecurityException) {
+                            Log.e("SCORES", "cant display scores without permissions", e)
+                        }
                     }
                 }
             }
-            true
         }
         exchangeUseCase.listenToSocket(
             socket,
-            Handler(Looper.getMainLooper(), callback)
+            handler
         )
     }
 
