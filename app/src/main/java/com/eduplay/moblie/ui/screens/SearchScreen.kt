@@ -140,7 +140,7 @@ private fun SearchScreen(
     tags: SnapshotStateList<String>,
     noEventsFound: State<Boolean>
 ) {
-    var advancedSearch by rememberSaveable { mutableStateOf(false) }
+    var advancedSearch by rememberSaveable { mutableStateOf(true) }
     val chosenTags = remember { mutableStateSetOf<String>() }
     val isDecliningOrder = remember { mutableStateOf(false) }
     val isActive = remember { mutableStateOf(false) }

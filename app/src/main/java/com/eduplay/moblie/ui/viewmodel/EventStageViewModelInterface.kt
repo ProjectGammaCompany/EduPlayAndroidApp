@@ -30,7 +30,8 @@ interface EventStageViewModelInterface {
     var isAnswerCorrect: TaskAnswerStatus?
     fun chooseTask(eventId: String, taskId: String, onNoInternet: () -> Unit)
     fun sendAnswer(eventId: String, onNoInternet: () -> Unit)
-    fun getNextStage(eventId: String, onNoInternet: () -> Unit)
+    //fun getNextStage(eventId: String, onNoInternet: () -> Unit)
     fun onDownloadFile(fileName: String, fileUri: String)
     fun onOpenFile(fileUri: String)
+    fun getNextStage(eventId: String, onNoInternet: () -> Unit, retry: Boolean = false)
 }

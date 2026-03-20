@@ -26,6 +26,7 @@ class SearchViewModel @Inject constructor(private val repository: EduRepository)
     val events: MutableState<Flow<PagingData<QuestShortInfo>>> = mutableStateOf(flowOf())
     val noInternetConnection = mutableStateOf(false)
     val tags = mutableStateListOf<String>()
+    private val tagIds = mutableMapOf<String, String>()
 
     init {
         viewModelScope.launch {
@@ -34,6 +35,7 @@ class SearchViewModel @Inject constructor(private val repository: EduRepository)
                     .getTags()
                     .tags
                     .map {
+                        tagIds[it.name] = it.id
                         it.name
                     }
                 )
@@ -55,10 +57,11 @@ class SearchViewModel @Inject constructor(private val repository: EduRepository)
         favorites: Boolean = false,
         title: String = ""
     ) {
+        val searchTags: List<String> = tags?.map { tagIds[it] ?: "" }?.toList() ?: listOf()
         try {
             events.value = repository
                 .getEvents(
-                    tags =  if (tags?.isEmpty() ?: true) null else tags,
+                    tags = searchTags.ifEmpty { null },
                     decliningRating = decliningRating,
                     active = active,
                     favorites = favorites,

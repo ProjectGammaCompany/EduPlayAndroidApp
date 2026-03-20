@@ -72,7 +72,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
 
         isEventFavourite.value = data.favorite
 
-        tags = data.tags.toMutableStateList()
+        tags.addAll(data.tags ?: listOf())
         description.value = data.description
         eventName.value = data.title
         author.value = data.authors.joinToString(", ") { it.email }

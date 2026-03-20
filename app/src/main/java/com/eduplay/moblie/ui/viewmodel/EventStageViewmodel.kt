@@ -49,7 +49,8 @@ class EventStageViewmodel @Inject constructor(
 
     var bluetoothCallBack: (Int) -> Unit = {}
 
-    override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
+
+    override fun getNextStage(eventId: String, onNoInternet: () -> Unit, retry: Boolean) {
         //currentStageType.value = StageType.NONE
         viewModelScope.launch {
             try {
@@ -69,6 +70,9 @@ class EventStageViewmodel @Inject constructor(
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
             } catch (e: Exception) {
+                if (!retry) {
+                    getNextStage(eventId, onNoInternet, true)
+                }
                 Log.e("EventStage", e.message ?: "", e)
             }
         }.invokeOnCompletion {
@@ -93,7 +97,7 @@ class EventStageViewmodel @Inject constructor(
             viewModelScope.launch {
                 val resultingAnswer =
                     if (answers.isEmpty()) {
-                        answers.add("")
+                        //answers.add("")
                         answers.toList()
                     } else if (TaskType.valueOf(currentTask.value!!.type) == TaskType.MULTIPLE_CHOICE) {
                         answers.toList()

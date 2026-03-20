@@ -196,11 +196,11 @@ private fun UserList(
                     style = typography.titleLarge
                         .copy(color = colorScheme.onBackground)
                 )
-                Text(
-                    text = stringResource(R.string.points),
-                    style = typography.titleLarge
-                        .copy(color = colorScheme.onBackground),
-                )
+//                Text(
+//                    text = stringResource(R.string.points),
+//                    style = typography.titleLarge
+//                        .copy(color = colorScheme.onBackground),
+//                )
             }
         }
     }
