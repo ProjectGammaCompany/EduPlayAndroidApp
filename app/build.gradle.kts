@@ -30,9 +30,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BACKEND_URL", "\"http://api.hse-eduplay.ru\"")
-            buildConfigField("String", "BACKEND_FILE_URL", "\"http://files.hse-eduplay.ru/eduplay-bucket/uploads/\"")
-            buildConfigField("String", "FRONTEND_URL", "\"http://hse-eduplay.ru/\"")
+            buildConfigField("String", "BACKEND_URL", "\"https://api.hse-eduplay.ru\"")
+            buildConfigField("String", "BACKEND_FILE_URL", "\"https://files.hse-eduplay.ru/eduplay-bucket/uploads/\"")
+            buildConfigField("String", "FRONTEND_URL", "\"https://hse-eduplay.ru/\"")
 
 
         }

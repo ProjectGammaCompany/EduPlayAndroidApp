@@ -136,7 +136,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         info.addAll(
             listOf(
                 Pair(R.string.rating, (data.eventRating?.toString() ?: "0") + '⭐'),
-                Pair(R.string.groups, data.groupNames.joinToString { ", " }),
+                Pair(R.string.groups, data.groupNames?.joinToString { ", " } ?: ""),
                 Pair(R.string.last_edition, data.lastEditionDate),
                 Pair(
                     R.string.private_event_flag,
