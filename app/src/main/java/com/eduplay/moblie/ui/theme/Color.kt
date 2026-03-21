@@ -21,3 +21,5 @@ val Blue200 = Color(0xFF2F1C8E)
 val LightBlue200 = Color(0xFF7163C2)
 val Purpule10 = Color(0xFF731C94)
 val Purpul20 = Color(0xFFA38DBB)
+
+val transparent = Color(0x00FFFFFF)

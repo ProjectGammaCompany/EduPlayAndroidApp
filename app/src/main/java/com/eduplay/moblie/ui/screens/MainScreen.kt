@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,10 +23,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -39,6 +44,7 @@ import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
+import com.eduplay.moblie.ui.elements.JoinByCodeDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
 import com.eduplay.moblie.ui.elements.TryAgainLaterToast
@@ -53,6 +59,8 @@ import kotlinx.coroutines.flow.flowOf
 fun MainScreen(
     innerPaddingValues: PaddingValues,
     navController: NavController,
+    isCompetitionMode: State<Boolean>,
+    onStopCompetition: () -> Unit,
     viewModel: MainScreenViewModel = hiltViewModel(),
     eventListViewModel: EventListViewModel = hiltViewModel(),
     imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
@@ -81,12 +89,29 @@ fun MainScreen(
 
     val events = viewModel.events
 
+    val onSearch = {
+        navController.navigate("search")
+    }
+
+    var joinByCode by remember { mutableStateOf(false) }
+    val onJoinByCode = {
+        joinByCode = true
+    }
+    if (joinByCode) {
+        JoinByCodeDialog({joinByCode=false}, navController)
+    }
+
     MainScreen(
         innerPaddingValues,
         events,
         onEventClick,
         onFavourite,
-        imageHeaderViewModel.headers
+        imageHeaderViewModel.headers,
+        { image: String -> imageHeaderViewModel.getFullUrl(image) },
+        isCompetitionMode,
+        onStopCompetition,
+        onSearch,
+        onJoinByCode
     )
 }
 
@@ -97,7 +122,12 @@ private fun MainScreen(
     events: Flow<PagingData<QuestShortInfo>>,
     onEventClick: (String) -> Unit,
     onFavourite: (String, Boolean) -> Unit,
-    headers: State<NetworkHeaders>
+    headers: State<NetworkHeaders>,
+    imageUrl: (String) -> String,
+    isCompetitionMode: State<Boolean>,
+    onStopCompetition: () -> Unit,
+    onSearch: () -> Unit,
+    onJoinByCode: ()->Unit
 ) {
     Column(
         modifier = Modifier
@@ -115,16 +145,16 @@ private fun MainScreen(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.primary,
             ),
-            navigationIcon = {
-                IconButton(onClick = { }) { //TODO("меню на главном экане")
-                    Icon(
-                        imageVector = Icons.Filled.Menu,
-                        contentDescription = stringResource(R.string.app_menu)
-                    )
-                }
-            },
             actions = {
-                IconButton(onClick = { }) { //TODO("поиск")
+                if (isCompetitionMode.value) {
+                    IconButton(onClick = { onStopCompetition() }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.bluetooth_disabled),
+                            contentDescription = stringResource(R.string.turn_off_bluetooth)
+                        )
+                    }
+                }
+                IconButton(onClick = { onSearch() }) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = stringResource(R.string.search_events)
@@ -135,6 +165,16 @@ private fun MainScreen(
                 Text(stringResource(R.string.app_name))
             }
         )
+
+
+
+        Button(
+            onClick = { onJoinByCode()},
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text(stringResource(R.string.join_by_code))
+        }
+
 
         val eventsInfo = events.collectAsLazyPagingItems()
         LazyColumn(
@@ -148,7 +188,8 @@ private fun MainScreen(
                         itemValue,
                         onEventClick,
                         { isFavourite -> onFavourite(itemValue.id, isFavourite) },
-                        headers
+                        headers,
+                        imageUrl
                     )
                 }
             }
@@ -190,15 +231,20 @@ fun MainScreenPreview() {
     )
 
 
-    val nothing = { string: String -> string.forEach { } }
-    val nothingB = { string: String, bool: Boolean -> string.forEach { } }
+    val nothing = { string: String -> }
+    val nothingB = { string: String, bool: Boolean -> }
     EduPlayTheme {
         MainScreen(
             PaddingValues(0.dp),
             events,
             nothing,
             nothingB,
-            headers
+            headers,
+            { it },
+            remember { mutableStateOf(false) },
+            {},
+            {},
+            {}
         )
     }
 

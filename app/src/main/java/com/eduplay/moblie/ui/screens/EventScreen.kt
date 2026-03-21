@@ -1,6 +1,8 @@
 package com.eduplay.moblie.ui.screens
 
 import android.content.ComponentName
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,10 +47,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -64,9 +66,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.fragment.compose.AndroidFragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -74,32 +76,48 @@ import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import com.eduplay.moblie.BuildConfig
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.theme.Typography
+import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
+import com.eduplay.moblie.useCases.BluetoothConnectionFragment
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun EventScreen(
     innerPaddingValues: PaddingValues,
     eventId: String,
     navController: NavController,
-    onDownloadEvent: ()-> ComponentName?,
+    manager: State<BluetoothManager?>,
+    adapter: State<BluetoothAdapter?>,
+    updateManger: (BluetoothManager?) -> Unit,
+    updateAdapter: (BluetoothAdapter?) -> Unit,
     viewModel: EventScreenViewModel = hiltViewModel(),
-    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
+    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel(),
+    isCompetitionMode: State<Boolean>,
+    toggleCompetitionMode: (Boolean) -> Unit,
+    bluetoothViewModel: BluetoothViewModel,
+    onDownloadEvent: ()-> ComponentName?
 ) {
     var dataFetched by remember { mutableStateOf(false) }
     var noInternet by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
 
     if (!dataFetched) {
         viewModel.fetchData(
             eventId,
             { dataFetched = true },
-            { noInternet = true })
+            { noInternet = true },
+            context
+        )
     }
 
     if (viewModel.unauthorised.value) {
@@ -110,9 +128,6 @@ fun EventScreen(
         NoInternetConnectionToast()
     }
 
-    val startEvent = {
-        navController.navigate("play_event/${eventId}")
-    }
 
     val onComplain = { reason: String ->
         viewModel.complain(eventId, reason)
@@ -134,29 +149,133 @@ fun EventScreen(
         viewModel.downloadEvent(eventId, onDownloadEvent)
     }
 
+    var requireAdapter by remember { mutableStateOf(false) }
 
 
+    var canShowConnectionList by remember { mutableStateOf(false) }
+    val showConnectionList = {
+        canShowConnectionList = true
+        requireAdapter = false
+    }
+
+    var supportsBluetooth by remember { mutableStateOf(true) }
+    val onDoesNotSupportBluetooth = {
+        supportsBluetooth = false
+        requireAdapter = false
+    }
+
+    var connectionTookTooLong by remember { mutableStateOf(false) }
+    val onConnectionTookTooLong = {
+        connectionTookTooLong = true
+        requireAdapter = false
+    }
+
+
+    var fragment by remember { mutableStateOf<BluetoothConnectionFragment?>(null) }
+    AndroidFragment<BluetoothConnectionFragment>() { connectionFragment ->
+        fragment = connectionFragment
+
+    }
+
+
+    val turnOnBluetooth = {
+        if (!isCompetitionMode.value) {
+            requireAdapter = true
+            toggleCompetitionMode(true)
+            bluetoothViewModel.askForPermissions.value = true
+        } else {
+            if (adapter.value != null) {
+                try {
+                    toggleCompetitionMode(false)
+                } catch (e: SecurityException) {
+                    Log.d("cant_stop_scan", e.message ?: "")
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(fragment, requireAdapter) {
+        if (requireAdapter && fragment != null) {
+            fragment?.startBluetooth(
+                manager,
+                adapter,
+                updateManger,
+                updateAdapter,
+                {},
+                onDoesNotSupportBluetooth = onDoesNotSupportBluetooth,
+                onConnectionTookTooLong = onConnectionTookTooLong
+            )
+            requireAdapter = false
+        }
+    }
+
+    LaunchedEffect(canShowConnectionList) {
+        if (canShowConnectionList && adapter.value != null) {
+            bluetoothViewModel.discoverDevices(context, onConnectionTookTooLong)
+        } else if (canShowConnectionList && adapter.value == null) {
+            requireAdapter = true
+            canShowConnectionList = false
+        }
+    }
+
+    val onStopShowingDeviceList = {
+        bluetoothViewModel.stopScan(context);
+        canShowConnectionList = false
+    }
+    val proceedWithBluetooth = {
+        onStopShowingDeviceList()
+        navController.navigate("play_event/${eventId}")
+    }
+
+    val startEvent = {
+        if (isCompetitionMode.value) {
+            showConnectionList()
+        } else {
+            navController.navigate("play_event/${eventId}")
+        }
+    }
+
+
+    if (canShowConnectionList) {
+        BluetoothDeviceListScreen(
+            foundDevices = bluetoothViewModel.foundDevices,
+            connect = { address, function ->
+                bluetoothViewModel.connect(context, address, function)
+            },
+            devicesConnectionStatus = bluetoothViewModel.devicesConnectionStatus,
+            onProceed = proceedWithBluetooth,
+            innerPaddingValues = innerPaddingValues,
+            onReturn = onStopShowingDeviceList
+        )
+    }
 
     EventScreen(
         innerPaddingValues,
-        viewModel.eventCreatorMode.value,
-        viewModel.isEventFavourite.value,
-        viewModel.eventName.value,
+        viewModel.eventCreatorMode,
+        viewModel.isEventFavourite,
+        viewModel.eventName,
         viewModel.tags,
-        viewModel.author.value,
-        viewModel.isCompleted.value,
-        viewModel.cover.value,
+        viewModel.author,
+        viewModel.isCompleted,
+        imageHeaderViewModel.getFullUrl(viewModel.cover.value),
         viewModel.info,
-        viewModel.description.value,
-        viewModel.privateEvent.value,
-        viewModel.isOpen.value,
-        viewModel.isContinuing.value,
+        viewModel.description,
+        viewModel.privateEvent,
+        viewModel.isOpen,
+        viewModel.isContinuing,
         onAddToFavourite,
         onComplain,
         startEvent,
         showResults,
         onReturn,
         imageHeaderViewModel.headers,
+        turnOnBluetooth,
+        isCompetitionMode,
+        canShowConnectionList,
+        viewModel.password,
+        viewModel.groups,
+        eventId,
+        viewModel.joinCode,
         onDownload
     )
 }
@@ -164,27 +283,33 @@ fun EventScreen(
 @Composable
 fun EventScreen(
     innerPaddingValues: PaddingValues,
-    eventCreatorMode: Boolean,
-    isEventFavourite: Boolean,
-    eventName: String,
+    eventCreatorMode: State<Boolean>,
+    isEventFavourite: State<Boolean>,
+    eventName: State<String>,
     tags: SnapshotStateList<EventTag>,
-    author: String,
-    isCompleted: Boolean,
+    author: State<String>,
+    isCompleted: State<Boolean>,
     cover: String,
     info: SnapshotStateList<Pair<Int, String?>>,
-    description: String,
-    privateEvent: Boolean,
-    isOpen: Boolean,
-    isContinuing: Boolean,
+    description: State<String>,
+    privateEvent: State<Boolean>,
+    isOpen: State<Boolean>,
+    isContinuing: State<Boolean>,
     onAddToFavourite: () -> Unit,
     onComplain: (String) -> Unit,
     startEvent: () -> Unit,
     showResults: () -> Unit,
     onReturn: () -> Boolean,
     headers: State<NetworkHeaders>,
+    toggleBluetooth: () -> Unit,
+    isCompetitionMode: State<Boolean>,
+    canShowConnectionList: Boolean,
+    password: State<String>,
+    groups: SnapshotStateList<EventGroup>,
+    eventId: String,
+    joinCode: State<String>,
     onDownload: () -> Unit
 ) {
-
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
         showEditDialog = true
@@ -201,7 +326,7 @@ fun EventScreen(
     }
 
     if (showEditDialog) {
-        EditDialog(onCloseEditEvent)
+        EditDialog(onCloseEditEvent, eventId)
     }
     if (showComplaintDialog) {
         ComplaintDialog(onHideComplaint, onComplain)
@@ -218,50 +343,57 @@ fun EventScreen(
             )
             .fillMaxSize()
     ) {
-        TopAppBarEventScreen(
-            eventCreatorMode,
-            isEventFavourite,
-            onEditEvent,
-            onAddToFavourite,
-            onShowComplaintDialog,
-            onReturn,
-            onDownload
-        )
-
-        EventScreenHeader(
-            eventName,
-            author,
-            eventCreatorMode,
-            isCompleted,
-            cover,
-            headers
-        )
-
-        if (eventCreatorMode) {
-            EventCreatorBody(
-                tags,
-                info,
-                description,
-                privateEvent
+        if (!canShowConnectionList) {
+            TopAppBarEventScreen(
+                eventCreatorMode,
+                isEventFavourite,
+                onEditEvent,
+                onAddToFavourite,
+                onShowComplaintDialog,
+                onReturn,
+                toggleBluetooth,
+                isCompetitionMode,
+                onDownload
             )
-        } else {
-            GeneralUserBody(
-                tags,
-                info,
-                description,
-                isOpen,
-                isContinuing,
+
+            EventScreenHeader(
+                eventName,
+                author,
+                eventCreatorMode,
                 isCompleted,
-                startEvent,
-                showResults
+                cover,
+                headers
             )
+
+            if (eventCreatorMode.value) {
+                EventCreatorBody(
+                    tags,
+                    info,
+                    description,
+                    privateEvent,
+                    password,
+                    groups,
+                    joinCode
+                )
+            } else {
+                GeneralUserBody(
+                    tags,
+                    info,
+                    description,
+                    isOpen,
+                    isContinuing,
+                    isCompleted,
+                    startEvent,
+                    showResults
+                )
+            }
         }
     }
 }
 
 
 @Composable
-private fun EditDialog(onClose: () -> Unit) {
+private fun EditDialog(onClose: () -> Unit, eventId: String) {
     val uriHandler = LocalUriHandler.current
     AlertDialog(
         title = {
@@ -276,7 +408,7 @@ private fun EditDialog(onClose: () -> Unit) {
         confirmButton = {
             TextButton(
                 onClick = {
-                    uriHandler.openUri("http://localhost/")//TODO("попросить настоящий url фронта")
+                    uriHandler.openUri(BuildConfig.FRONTEND_URL)
                 }
             ) {
                 Text(stringResource(R.string.proceed_to_website))
@@ -344,12 +476,14 @@ private fun ComplaintDialog(onClose: () -> Unit, onComplain: (String) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopAppBarEventScreen(
-    eventCreatorMode: Boolean,
-    isFavourite: Boolean,
+    eventCreatorMode: State<Boolean>,
+    isFavourite: State<Boolean>,
     onEditEvent: () -> Unit,
     onAddToFavourite: () -> Unit,
     onComplain: () -> Unit,
     onReturn: () -> Boolean,
+    toggleBluetooth: () -> Unit,
+    isCompetitionMode: State<Boolean>,
     onDownload: () -> Unit
 ) {
     CenterAlignedTopAppBar(
@@ -366,7 +500,22 @@ private fun TopAppBarEventScreen(
             }
         },
         actions = {
-            if (!eventCreatorMode) {
+            if (!eventCreatorMode.value) {
+                IconButton(
+                    onClick = toggleBluetooth,
+                ) {
+                    if (!isCompetitionMode.value) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.bluetooth),
+                            contentDescription = stringResource(R.string.start_bluetooth)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.bluetooth_disabled),
+                            contentDescription = stringResource(R.string.turn_off_bluetooth)
+                        )
+                    }
+                }
                 IconButton(
                     onClick = { onComplain() },
                     modifier = Modifier.testTag("report_btn")
@@ -381,7 +530,7 @@ private fun TopAppBarEventScreen(
                     modifier = Modifier.testTag("download_btn")
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.download_24dp_1f1f1f_fill0_wght200_grad0_opsz24),
+                        imageVector = ImageVector.vectorResource(R.drawable.download),
                         contentDescription = stringResource(R.string.download_event)
                     )
                 }
@@ -389,7 +538,7 @@ private fun TopAppBarEventScreen(
                     onClick = { onAddToFavourite() },
                     modifier = Modifier.testTag("favourite_btn")
                 ) {
-                    if (isFavourite) {
+                    if (isFavourite.value) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.star_filled),
                             contentDescription = stringResource(R.string.add_to_favourite),
@@ -420,12 +569,12 @@ private fun TopAppBarEventScreen(
 
 @Composable
 private fun EventScreenHeader(
-    eventName: String,
-    author: String,
-    eventCreatorMode: Boolean,
-    isCompleted: Boolean,
+    eventName: State<String>,
+    author: State<String>,
+    eventCreatorMode: State<Boolean>,
+    isCompleted: State<Boolean>,
     cover: String?,
-    headers: State<NetworkHeaders>
+    headers: State<NetworkHeaders>,
 ) {
     Row(Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
         AsyncImage(
@@ -435,7 +584,7 @@ private fun EventScreenHeader(
                 .networkCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
-            contentDescription = eventName,
+            contentDescription = eventName.value,
             placeholder = painterResource(R.drawable.eduplaylogo),
             error = painterResource(id = R.drawable.ic_launcher_background),
             modifier = Modifier
@@ -445,7 +594,7 @@ private fun EventScreenHeader(
 
         )
         Text(
-            eventName,
+            eventName.value,
             style = typography.headlineMedium
                 .copy(color = colorScheme.onBackground),
             maxLines = 3,
@@ -462,7 +611,7 @@ private fun EventScreenHeader(
                 .width(120.dp)
                 .weight(0.35f)
         ) {
-            if (!eventCreatorMode && isCompleted) {
+            if (!eventCreatorMode.value && isCompleted.value) {
                 AssistChip(
                     onClick = {}, //так и должно быть при нажатии ничего не происходит
                     label = {
@@ -487,9 +636,9 @@ private fun EventScreenHeader(
                 )
             }
         }
-        if (!eventCreatorMode) {
+        if (!eventCreatorMode.value) {
             Text(
-                author,
+                author.value,
                 style = typography.labelLarge
                     .copy(color = colorScheme.onBackground),
                 maxLines = 1,
@@ -516,9 +665,11 @@ private fun GeneralInfo(
             .fillMaxHeight()
             .verticalScroll(rememberScrollState())
     ) {
-        FlowRow(modifier = Modifier
-            .fillMaxWidth()
-            .testTag("tags")) {
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("tags")
+        ) {
             tags.forEach { tagName ->
                 EventTag(tagName.name)
             }
@@ -570,19 +721,19 @@ private fun GeneralInfo(
 private fun GeneralUserBody(
     tags: SnapshotStateList<EventTag>,
     info: List<Pair<Int, String?>>,
-    description: String,
-    isOpen: Boolean,
-    isContinuing: Boolean,
-    isCompleted: Boolean,
+    description: State<String>,
+    isOpen: State<Boolean>,
+    isContinuing: State<Boolean>,
+    isCompleted: State<Boolean>,
     startEvent: () -> Unit,
     showResults: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.Center) {
-        Box(modifier = Modifier.fillMaxHeight(if (isOpen || isCompleted) 0.85f else 1f)) {
-            GeneralInfo(tags, info, description)
+        Box(modifier = Modifier.fillMaxHeight(if (isOpen.value || isCompleted.value) 0.85f else 1f)) {
+            GeneralInfo(tags, info, description.value)
         }
 
-        if (isOpen && !isCompleted) {
+        if (isOpen.value && !isCompleted.value) {
             Button(
                 onClick = startEvent,
                 modifier = Modifier
@@ -594,7 +745,7 @@ private fun GeneralUserBody(
                     .testTag("start_event_btn")
             ) {
                 Text(
-                    if (!isContinuing) {
+                    if (!isContinuing.value) {
                         stringResource(R.string.start_event)
                     } else {
                         stringResource(R.string.continue_event)
@@ -605,7 +756,7 @@ private fun GeneralUserBody(
             }
         }
 
-        if (isCompleted) {
+        if (isCompleted.value) {
             Button(
                 onClick = { showResults() },
                 modifier = Modifier
@@ -647,19 +798,24 @@ private fun EventTag(tagName: String) {
 private fun EventCreatorBody(
     tags: SnapshotStateList<EventTag>,
     info: List<Pair<Int, String?>>,
-    description: String,
-    privateEvent: Boolean
+    description: State<String>,
+    privateEvent: State<Boolean>,
+    password: State<String>,
+    groups: SnapshotStateList<EventGroup>,
+    joinCode: State<String>
 ) {
     val tabs = remember<List<Int>> {
-        listOf<Int>(
-            R.string.general_info,
-            R.string.statistics,
-        )
+            listOf<Int>(
+                R.string.general_info,
+                R.string.statistics,
+                R.string.privacy_settings
+            )
     }
     var selectedTabIdx by remember { mutableIntStateOf(0) }
     Column {
         SecondaryTabRow(selectedTabIndex = selectedTabIdx) {
             tabs.forEachIndexed { index, title ->
+                if (index == 2 && !privateEvent.value) return@forEachIndexed
                 Tab(
                     selected = selectedTabIdx == index,
                     onClick = { selectedTabIdx = index },
@@ -681,15 +837,88 @@ private fun EventCreatorBody(
     infoP.add(
         Pair(
             R.string.private_event_flag,
-            if (privateEvent) stringResource(R.string.private_event) else stringResource(R.string.public_event)
+            if (privateEvent.value) stringResource(R.string.private_event) else stringResource(R.string.public_event)
         ),
     )
     when (selectedTabIdx) {
-        0 -> GeneralInfo(tags, infoP, description)
+        0 -> GeneralInfo(tags, infoP, description.value)
         1 -> StatisticsInfo()
+        2 -> PrivacySettings(password, groups, joinCode)
         else -> Box {}
     }
 
+}
+
+@Composable
+fun PrivacySettings(
+    password: State<String>,
+    groups: SnapshotStateList<EventGroup>,
+    joinCode: State<String>
+) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 10.dp, vertical = 10.dp)
+            .fillMaxHeight()
+            .verticalScroll(rememberScrollState())
+    ) {
+        Row {
+            Text(
+                text = stringResource(R.string.join_code),
+                style = typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+            Text(
+                text = joinCode.value,
+                style = typography.bodyLarge.copy(
+                    color = colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+        }
+        Row {
+            Text(
+                text = stringResource(R.string.event_password),
+                style = typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+            Text(
+                text = password.value,
+                style = typography.bodyMedium.copy(color = colorScheme.onBackground)
+            )
+        }
+
+        if (groups.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.groups),
+                style = typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+        }
+
+        groups.forEach { group ->
+            Text(
+                text = group.login,
+                style = typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+            Text(
+                text = group.password,
+                style = typography.bodyMedium.copy(color = colorScheme.onBackground)
+            )
+        }
+    }
 }
 
 @Composable
@@ -698,29 +927,30 @@ private fun StatisticsInfo() {
     //TODO("статистики на экране статистик")
 }
 
-@Composable
-@Preview
-private fun Event() {
-    EventScreen(
-        PaddingValues(),
-        isEventFavourite = true,
-        eventCreatorMode = true,
-        eventName = "Событие",
-        tags = remember { mutableStateListOf<EventTag>(EventTag("", "tag1")) },
-        author = "Author",
-        isCompleted = false,
-        cover = "",
-        info = remember { mutableStateListOf<Pair<Int, String>>() } as SnapshotStateList<Pair<Int, String?>>,
-        description = "Some information",
-        privateEvent = false,
-        isOpen = false,
-        isContinuing = false,
-        onAddToFavourite = { },
-        onComplain = { _: String -> },
-        startEvent = {},
-        showResults = { },
-        onReturn = { false },
-        headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-        onDownload = {}
-    )
-}
+//@Composable
+//@Preview
+//private fun Event() {
+//    EventScreen(
+//        PaddingValues(),
+//        isEventFavourite = statetrue,
+//        eventCreatorMode = false,
+//        eventName = "Событие",
+//        tags = remember { mutableStateListOf<EventTag>(EventTag("", "tag1")) },
+//        author = "Author",
+//        isCompleted = false,
+//        cover = "",
+//        info = remember { mutableStateListOf() },
+//        description = "Some information",
+//        privateEvent = false,
+//        isOpen = false,
+//        isContinuing = false,
+//        onAddToFavourite = { },
+//        onComplain = { _: String -> },
+//        startEvent = {},
+//        showResults = { },
+//        onReturn = { false },
+//        headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+//        toggleBluetooth = {},
+//        isCompetitionMode = remember { mutableStateOf(false) }
+//    )
+//}

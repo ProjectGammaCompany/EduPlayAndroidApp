@@ -1,11 +1,10 @@
 package com.eduplay.moblie.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.repository.EduRepository
-import com.eduplay.moblie.services.TokenManager
+import com.eduplay.moblie.useCases.TokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

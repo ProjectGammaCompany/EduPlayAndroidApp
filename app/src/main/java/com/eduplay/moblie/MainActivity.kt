@@ -3,21 +3,26 @@ package com.eduplay.moblie
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.eduplay.moblie.services.EventDownloadService
+import com.eduplay.moblie.ui.elements.BluetoothPermissionElement
 import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
 import com.eduplay.moblie.ui.screens.EventResultScreen
@@ -27,12 +32,16 @@ import com.eduplay.moblie.ui.screens.FakeSplashScreen
 import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.screens.MyEventsScreen
 import com.eduplay.moblie.ui.screens.ProfileScreen
+import com.eduplay.moblie.ui.screens.SearchScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
+import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.SplashViewModel
+import com.eduplay.moblie.ui.viewmodel.factories.BluetoothViewModelFactory
+import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     private val hideBottomBarScreens = listOf("auth_screen", "play_event", "fake_splash")
     private val viewModel: SplashViewModel by viewModels()
 
@@ -40,13 +49,31 @@ class MainActivity : ComponentActivity() {
         startService(Intent(this, EventDownloadService::class.java))
     }
 
+    private val adapter = mutableStateOf<BluetoothAdapter?>(null)
+    private val manager = mutableStateOf<BluetoothManager?>(null)
+
+    private val bluetoothViewModel: BluetoothViewModel by viewModels{
+        BluetoothViewModelFactory(adapter as State<BluetoothAdapter?>, BluetoothDataExchangeUseCase())
+    }
+
     @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
 
+        val updateAdapter = {adapter: BluetoothAdapter? -> this.adapter.value = adapter}
+        val updateManger = {manager: BluetoothManager? -> this.manager.value = manager}
+        val splashScreen = installSplashScreen()
+        val isCompetitionMode = mutableStateOf(false)
+        val toggleCompetitionMode = {mode: Boolean -> isCompetitionMode.value = mode}
+        val onStopCompetition = {
+            isCompetitionMode.value = false
+            bluetoothViewModel.stopScan(this)
+           // bluetoothViewModel.stopAllSocketConnections()
+        }
         super.onCreate(savedInstanceState)
 
+
         splashScreen.setKeepOnScreenCondition { viewModel.isLoading.value }
+
 
         enableEdgeToEdge()
         setContent {
@@ -55,6 +82,8 @@ class MainActivity : ComponentActivity() {
                 (context as? Activity)?.requestedOrientation =
                     ActivityInfo.SCREEN_ORIENTATION_LOCKED
                 val navController = rememberNavController()
+
+                BluetoothPermissionElement(bluetoothViewModel.askForPermissions)
 
                 Scaffold(
                     bottomBar = { BottomNavBar(navController, hideBottomBarScreens) }
@@ -74,7 +103,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("main_screen") {
-                            MainScreen(innerPadding, navController)
+                            MainScreen(innerPadding, navController, isCompetitionMode=isCompetitionMode, onStopCompetition = onStopCompetition)
                         }
                         composable(
                             "event_screen/{eventId}",
@@ -84,7 +113,14 @@ class MainActivity : ComponentActivity() {
                                 innerPadding,
                                 pathArgs.arguments?.getString("eventId") ?: "",
                                 navController,
-                                startDownloadService
+                                manager,
+                                adapter,
+                                updateManger = updateManger,
+                                updateAdapter = updateAdapter,
+                                isCompetitionMode = isCompetitionMode,
+                                toggleCompetitionMode = toggleCompetitionMode,
+                                bluetoothViewModel = bluetoothViewModel,
+                                onDownload = startDownloadService
                             )
                         }
 
@@ -94,6 +130,9 @@ class MainActivity : ComponentActivity() {
 
                         composable("profile") {
                             ProfileScreen(innerPadding, navController)
+                        }
+                        composable("search") {
+                            SearchScreen(navController, innerPadding)
                         }
                         composable(
                             "event_result/{eventId}",
@@ -113,12 +152,20 @@ class MainActivity : ComponentActivity() {
                             EventStageScreen(
                                 pathArgs.arguments?.getString("eventId") ?: "",
                                 innerPadding,
-                                navController
+                                navController,
+                                bluetoothViewModel = bluetoothViewModel,
+                                isCompetitionMode = isCompetitionMode
                             )
                         }
                     }
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        bluetoothViewModel.stopScan(this)
+        bluetoothViewModel.stopAllSocketConnections()
     }
 }

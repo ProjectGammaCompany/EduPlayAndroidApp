@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -21,15 +23,19 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,15 +46,23 @@ import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.screens.TaskScreen.TaskScreen
+import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
+import kotlin.collections.toList
 
 @Composable
 fun EventStageScreen(
     eventId: String,
     innerPadding: PaddingValues,
     navController: NavController,
-    viewModel: EventStageViewmodel = hiltViewModel()
+    viewModel: EventStageViewmodel = hiltViewModel(),
+    bluetoothViewModel: BluetoothViewModel,
+    isCompetitionMode: State<Boolean>
 ) {
+    val context = LocalContext.current
+    if (isCompetitionMode.value) {
+        viewModel.bluetoothCallBack = {points -> bluetoothViewModel.sendResultsToSockets(points, context)}
+    }
     var showGoBackDialog by remember { mutableStateOf(false) }
     val onGoBack = {
         showGoBackDialog = true
@@ -72,7 +86,7 @@ fun EventStageScreen(
                 eventId,
                 onGoBack = onGoBack,
                 viewModel = viewModel,
-                onNoInternet = {noInternet = true}
+                onNoInternet = { noInternet = true },
             )
         }
 
@@ -88,17 +102,19 @@ fun EventStageScreen(
         }
 
         StageType.END -> {
+            navController.popBackStack()
             navController.navigate("event_result/$eventId")
         }
     }
     if (viewModel.showResults.value) {
         ResultDialog(
             isCorrect = viewModel.isAnswerCorrect,
-            answers = viewModel.answers,
+            answers = viewModel.correctAnswer,
             points = viewModel.points,
             proceedToNextTask = {
                 viewModel.currentStageType.value = StageType.NONE
-            }
+            },
+            playersResults = bluetoothViewModel.devicesScore
 
         )
     }
@@ -153,7 +169,8 @@ private fun ResultDialog(
     isCorrect: TaskAnswerStatus?,
     answers: List<String>?,
     points: Int?,
-    proceedToNextTask: () -> Unit
+    proceedToNextTask: () -> Unit,
+    playersResults: SnapshotStateMap<String, Int>
 ) {
     Dialog(
         onDismissRequest = proceedToNextTask
@@ -180,19 +197,35 @@ private fun ResultDialog(
                     },
                     style = typography.headlineSmall.copy(color = colorScheme.onBackground)
                 )
-                if (isCorrect != null) {
-                    if (isCorrect == TaskAnswerStatus.CORRECT) {
-                        Image(
-                            painter = painterResource(id = R.drawable.correct_answer),
-                            contentDescription = stringResource(R.string.correct)
-                        )
-                    } else {
-                        Image(
-                            painter = painterResource(id = R.drawable.incorrect_answer),
-                            contentDescription = stringResource(R.string.incorrect),
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                        )
+                if (playersResults.isEmpty()) {
+                    if (isCorrect != null) {
+                        if (isCorrect == TaskAnswerStatus.CORRECT) {
+                            Image(
+                                painter = painterResource(id = R.drawable.correct_answer),
+                                contentDescription = stringResource(R.string.correct)
+                            )
+                        } else {
+                            Image(
+                                painter = painterResource(id = R.drawable.incorrect_answer),
+                                contentDescription = stringResource(R.string.incorrect),
+                                modifier = Modifier
+                                    .align(Alignment.CenterHorizontally)
+                            )
+                        }
+                    }
+                } else {
+                    val points = playersResults.toList().sortedByDescending { it.second }
+                    LazyColumn(Modifier.height(100.dp)) {
+                        items(points) {
+                            Row(Modifier.padding(1.dp)) {
+                                Text(
+                                    it.first,
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1
+                                )
+                                Text(": "+it.second)
+                            }
+                        }
                     }
                 }
                 if (points != null) {

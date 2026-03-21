@@ -6,7 +6,14 @@ import androidx.paging.PagingState
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
 
-class AllEventsPagingWebSource(private val webRepository: Repository) :
+class AllEventsPagingWebSource(
+    private val webRepository: Repository,
+    private val tags: List<String>? = null,
+    private val decliningRating: Boolean = false,
+    private val active: Boolean = false,
+    private val favorites: Boolean = false,
+    private val title: String = ""
+) :
     PagingSource<Int, QuestShortInfo>() {
     private val numOfOffScreenPage: Int = 4
 
@@ -14,7 +21,15 @@ class AllEventsPagingWebSource(private val webRepository: Repository) :
         val pageIndex = params.key ?: 1
         params.loadSize
         return try {
-            val responseData = webRepository.getEvents(pageIndex)
+            val responseData = webRepository
+                .getEvents(
+                    page = pageIndex,
+                    tags = tags,
+                    decliningRating = decliningRating,
+                    active = active,
+                    favorites = favorites,
+                    title = title,
+                )
 
             LoadResult.Page(
                 data = responseData,
@@ -33,5 +48,4 @@ class AllEventsPagingWebSource(private val webRepository: Repository) :
                 ?: state.closestPageToPosition(anchor)?.nextKey?.minus(numOfOffScreenPage)
         }
     }
-
 }

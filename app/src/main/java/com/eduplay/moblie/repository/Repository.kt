@@ -14,7 +14,8 @@ import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import java.time.LocalDateTime
 
 interface Repository {
-    suspend fun getEvents(page: Int = 1): List<QuestShortInfo>
+    suspend fun login(auth: Auth): AuthResult
+    suspend fun logout(): Boolean
     suspend fun getRole(eventId: String): EventRole
     suspend fun getPlayerEventInfo(eventId: String): EventPlayerInfo
     suspend fun getOwnerEventInfo(eventId: String): EventOwnerInfo
@@ -37,7 +38,13 @@ interface Repository {
         answers: List<String>
     ): AnswerResult
 
-    suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean
-    suspend fun getResults(eventId: String): PlayerStats
-    suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean
+    suspend fun register(auth: RegistrationData): AuthResult
+    suspend fun getEvents(
+        page: Int,
+        tags: List<String>? = null,
+        decliningRating: Boolean = false,
+        active: Boolean = false,
+        favorites: Boolean = false,
+        title: String = ""
+    ): List<QuestShortInfo>
 }

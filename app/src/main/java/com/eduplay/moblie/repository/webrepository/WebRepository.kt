@@ -5,22 +5,28 @@ import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventComplaint
+import com.eduplay.moblie.repository.requestTypes.EventPasswords
 import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
+import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
+import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
-import com.eduplay.moblie.services.TokenManager
+import com.eduplay.moblie.useCases.TokenManager
 import jakarta.inject.Inject
 import java.time.LocalDateTime
+import java.util.NoSuchElementException
 
 
 class WebRepository @Inject constructor(
@@ -29,7 +35,7 @@ class WebRepository @Inject constructor(
     private val tokenManager: TokenManager,
 
     ) : Repository {
-    suspend fun login(auth: Auth): AuthResult {
+    override suspend fun login(auth: Auth): AuthResult {
         val response = authApi.login(auth)
         val body = response.body()
         Log.d("Requests AUTHORISATION", response.code().toString() + response.raw())
@@ -42,7 +48,7 @@ class WebRepository @Inject constructor(
         return AuthResult.INVALID_USER
     }
 
-    suspend fun logout(): Boolean {
+    override suspend fun logout(): Boolean {
         val response = authApi.logout()
         if (response.isSuccessful) {
             tokenManager.saveAccessToken("")
@@ -52,7 +58,7 @@ class WebRepository @Inject constructor(
         return false
     }
 
-    suspend fun register(auth: RegistrationData): AuthResult {
+    override suspend fun register(auth: RegistrationData): AuthResult {
         val response = authApi.register(auth)
         val body = response.body()
         Log.d("Requests AUTHORISATION", response.code().toString() + response.raw())
@@ -66,13 +72,27 @@ class WebRepository @Inject constructor(
         return AuthResult.INVALID_USER
     }
 
-    override suspend fun getEvents(page: Int): List<QuestShortInfo> {
-        val response = api.allEvents(page = page)
+    override suspend fun getEvents(
+        page: Int,
+        tags: List<String>?,
+        decliningRating: Boolean,
+        active: Boolean,
+        favorites: Boolean,
+        title: String
+    ): List<QuestShortInfo> {
+        val response = api.allEvents(
+            page = page,
+            tags = tags,
+            decliningRating = decliningRating,
+            active = active,
+            favorites = favorites,
+            title = title
+        )
         val body = response.body()
         Log.d("Requests events", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
-        }
+        } // TODO(оделать проверку на причины отказа)
         return listOf()
     }
 
@@ -180,22 +200,22 @@ class WebRepository @Inject constructor(
     ): AnswerResult {
         val response = api.postTaskAnswer(eventId, blockId, taskId, TaskAnswer(answers))
         val body = response.body()
-        Log.d("Requests answer", response.code().toString() + response.raw())
+        Log.d("Requests_answer", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
-        }
-        throw IllegalAccessException("cant enter next stage $eventId")
+        } // TODO(оделать проверку на причины отказа)
+        throw IllegalAccessException("cant send answer $eventId")
     }
 
-    override suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
-        val response = api.postTaskChoice(eventId, TaskFromBlock(blockId, taskId))
+    suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
+        val response = api.postTaskChoice(eventId, TaskFromBlock(blockId = blockId, taskId = taskId))
         if (response.isSuccessful) {
             return true
         }
         throw IllegalAccessException("cant enter next stage $eventId")
     }
 
-    override suspend fun getResults(eventId: String): PlayerStats {
+    suspend fun getResults(eventId: String): PlayerStats {
         val response = api.getPlayerStats(eventId)
         val body = response.body()
         Log.d("Requests results", response.code().toString() + response.raw())
@@ -205,7 +225,7 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("cant enter next stage $eventId")
     }
 
-    override suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean {
+    suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean {
         val response = api.addToFavourite(FavoriteEvent(eventId, isFavorite))
         Log.d("Requests add favorite events", response.code().toString() + response.raw())
         if (response.isSuccessful) {
@@ -220,6 +240,49 @@ class WebRepository @Inject constructor(
             return
         }
         throw IllegalAccessException("cant complain $eventId")
+    }
+
+    suspend fun getTags(): EventTagList {
+        val response = api.getTags()
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        } // TODO(оделать проверку на причины отказа)
+        throw IllegalAccessException("cant get tags")
+    }
+
+    suspend fun getRequiredJoinFields(joinCode: String): RequiredJoinFields {
+        val response = api.getFieldsToJoinEvent(joinCode)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        }
+        if (response.code() == 404) {
+            throw NoSuchElementException("no event with code $joinCode")
+        }
+        throw IllegalAccessException("cant get tags")
+    }
+
+    suspend fun enterPrivateEvent(joinCode: String, eventPasswords: EventPasswords): EventIdResponse {
+        val response = api.postPasswords(joinCode, eventPasswords)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        }
+        if (response.code() == 403) {
+            throw IllegalAccessException("wrong password")
+        }
+        throw IllegalAccessException("cant access event")
+
+    }
+
+    suspend fun getJoinCode(eventId: String): JoinCodeInfo {
+        val response = api.getJoinCode(eventId)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        }
+        throw IllegalAccessException("cant get join code for $eventId")
     }
 
 }

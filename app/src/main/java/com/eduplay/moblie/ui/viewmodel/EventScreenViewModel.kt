@@ -1,6 +1,7 @@
 package com.eduplay.moblie.ui.viewmodel
 
 import android.content.ComponentName
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.R
 import com.eduplay.moblie.exceptions.NotAuthorisedException
+import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventStatus
 import com.eduplay.moblie.models.EventTag
@@ -18,6 +20,8 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.ConnectException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 @HiltViewModel
@@ -29,28 +33,24 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val isContinuing = mutableStateOf(false)
     val eventName = mutableStateOf("")
     val author = mutableStateOf("")
-    val rating = mutableStateOf("")
-    val opens = mutableStateOf<String?>(null)
-    val closes = mutableStateOf<String?>(null)
     var tags = mutableStateListOf<EventTag>()
-    val info = mutableStateListOf<Pair<Int, String?>>(
-        Pair(R.string.rating, rating.value),
-        Pair(R.string.opens, opens.value),
-        Pair(R.string.closes, closes.value)
-    )
+    val info = mutableStateListOf<Pair<Int, String?>>()
     val description = mutableStateOf("")
     val privateEvent = mutableStateOf(true)
     val cover = mutableStateOf("")
     val unauthorised = mutableStateOf(false)
+    val password = mutableStateOf("")
+    val groups = mutableStateListOf<EventGroup>()
+    val joinCode = mutableStateOf("")
 
-    fun fetchData(eventId: String, callBack: () -> Unit, onNoInternet: () -> Unit) {
+    fun fetchData(eventId: String, callBack: () -> Unit, onNoInternet: () -> Unit, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             val role = repository.getRole(eventId)
 
             eventCreatorMode.value = role == EventRole.AUTHOR
             try {
                 when (role) {
-                    EventRole.AUTHOR -> fetchOwnerData(eventId)
+                    EventRole.AUTHOR -> fetchOwnerData(eventId, context)
                     EventRole.PARTICIPANT -> fetchPlayerData(eventId)
                 }
             } catch (_: ConnectException) {
@@ -74,60 +74,98 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
 
         isEventFavourite.value = data.favorite
 
-        tags = data.tags.toMutableStateList()
-        opens.value = data.startDate?.substring(0..data.startDate.length - 5)
-        closes.value = data.endDate?.substring(0..data.endDate.length - 5)
-        rating.value = data.rate.toString() + '⭐'
+        tags.addAll(data.tags ?: listOf())
         description.value = data.description
-
-        info.clear()
-        info.addAll(
-            listOf(
-                Pair(R.string.rating, rating.value),
-                Pair(R.string.opens, opens.value),
-                Pair(R.string.closes, closes.value)
-            )
-        )
-
-
-        isOpen.value = !data.completed && data.status != EventStatus.ENDED
-//                && (data.startDate == null || LocalDateTime.now() >= LocalDateTime.parse(
-//            data.startDate, LocalDateTime.ofp { byUnicodePattern("yyyy-MM-dd HH:mm:ss.SSS")}
-//                )
-//                        )
-        isContinuing.value = isOpen.value && data.status == EventStatus.STARTED
-//                && (
-//                data.endDate == null
-//                        || (LocalDateTime.now() >= LocalDateTime.parse(data.startDate)
-//                        && LocalDateTime.now() <= LocalDateTime.parse(data.endDate)
-//                        )
-//                )
-
         eventName.value = data.title
         author.value = data.authors.joinToString(", ") { it.email }
-        isCompleted.value = data.completed
-    }
-
-    private suspend fun fetchOwnerData(eventId: String) {
-        val data = repository.getEventInfoOwner(eventId)
-
-        tags = data.tags.toMutableStateList()
-        opens.value = data.startDate
-        closes.value = data.endDate
-        rating.value = data.rating.toString() + '⭐'
-        description.value = data.description
-        privateEvent.value = data.private
+        cover.value = data.cover
 
         info.clear()
+        info.add(
+            Pair(R.string.rating, data.rate.toString() + '⭐')
+        )
+        val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
+        val presentingFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+
+        if (data.startDate?.isNotBlank() ?: false) {
+            val startTime = LocalDateTime.parse(data.startDate, dateFormatter)
+            info.add(Pair(R.string.opens, startTime.format(presentingFormatter)))
+        }
+        if (data.endDate?.isNotBlank() ?: false) {
+            val endTime = LocalDateTime.parse(data.endDate, dateFormatter)
+            Pair(R.string.closes, endTime.format(presentingFormatter))
+        }
+
+        isOpen.value = EventStatus.statusOf(data.status) != EventStatus.ENDED
+                && (data.startDate == null || data.startDate.isBlank() || LocalDateTime.now() >= LocalDateTime.parse(
+            data.startDate,
+            dateFormatter
+        ))
+                && (data.endDate == null || data.endDate.isBlank() || LocalDateTime.now() <= LocalDateTime.parse(
+            data.endDate,
+            dateFormatter
+        ))
+        isContinuing.value =
+            isOpen.value && EventStatus.statusOf(data.status) == EventStatus.STARTED
+        isCompleted.value = EventStatus.statusOf(data.status) == EventStatus.ENDED
+    }
+
+    private suspend fun fetchOwnerData(eventId: String, context: Context) {
+        val data = repository.getEventInfoOwner(eventId)
+
+        eventName.value = data?.title ?: ""
+        tags = data.tags?.toMutableStateList() ?: mutableStateListOf()
+        description.value = data.description
+        privateEvent.value = data.private
+        author.value = data.collaboratos?.joinToString(", ") ?: ""
+
+        info.clear()
+
+        val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
+        val presentingFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+
+        if (data.startDate?.isNotBlank() ?: false) {
+            val startTime = LocalDateTime.parse(data.startDate, dateFormatter)
+            info.add(Pair(R.string.opens, startTime.format(presentingFormatter)))
+        }
+        if (data.endDate?.isNotBlank() ?: false) {
+            val endTime = LocalDateTime.parse(data.endDate, dateFormatter)
+            Pair(R.string.closes, endTime.format(presentingFormatter))
+        }
+        password.value = data.password ?: ""
+        groups.addAll(data.groups ?: listOf())
+
         info.addAll(
             listOf(
-                Pair(R.string.rating, rating.value),
-                Pair(R.string.opens, opens.value),
-                Pair(R.string.closes, closes.value),
-                Pair(R.string.groups, data.groupNames.joinToString { ", " }),
+                Pair(R.string.rating, (data.eventRating?.toString() ?: "0") + '⭐'),
+                Pair(R.string.groups, data.groupNames?.joinToString { ", " } ?: ""),
                 Pair(R.string.last_edition, data.lastEditionDate),
+                Pair(
+                    R.string.private_event_flag,
+                    if (privateEvent.value) context.getString(R.string.private_event) else context.getString(
+                        R.string.public_event
+                    )
+                ),
+                Pair(
+                    R.string.group_event,
+                    if (data.groupEvent) context.getString(R.string.yes) else context.getString(R.string.no)
+                ),
+                Pair(
+                    R.string.allow_download,
+                    if (data.allowDownloading) context.getString(R.string.yes) else context.getString(
+                        R.string.no
+                    )
+                )
             )
         )
+
+        if (privateEvent.value) {
+            try {
+                joinCode.value = repository.getJoinCode(eventId).joinCode
+            } catch (e: Exception) {
+                Log.e("JOIN_CODE", e.message ?:"", e)
+            }
+        }
     }
 
     fun addToFavourite(eventId: String) {

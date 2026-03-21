@@ -2,6 +2,7 @@ package com.eduplay.moblie.ui.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,18 +10,24 @@ import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.responseTypes.Block
+import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.Task
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
+import com.eduplay.moblie.useCases.FileDownloadStatus
+import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.net.ConnectException
 import java.time.LocalDateTime
 
 @HiltViewModel
-class EventStageViewmodel @Inject constructor(private val repository: EduRepository) : ViewModel(),
-    EventStageViewModelInterface {
+class EventStageViewmodel @Inject constructor(
+    private val repository: EduRepository,
+    private val taskDownloader: TaskDownloadUseCase
+) : ViewModel(), EventStageViewModelInterface {
     override val currentStageType = mutableStateOf(StageType.NONE)
 
     override var currentTask = mutableStateOf<Task?>(null)
@@ -38,21 +45,34 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
     override var isAnswerCorrect: TaskAnswerStatus? = null
     val unauthorised = mutableStateOf(false)
 
-    override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
-        currentStageType.value = StageType.NONE
+    override val fileStatusFlows = mutableStateMapOf<String, Flow<FileDownloadStatus>>()
+
+    var bluetoothCallBack: (Int) -> Unit = {}
+
+
+    override fun getNextStage(eventId: String, onNoInternet: () -> Unit, retry: Boolean) {
+        //currentStageType.value = StageType.NONE
         viewModelScope.launch {
             try {
                 val result = repository.getNextStage(eventId)
                 clear()
-                currentStageType.value = result.type
+                currentStageType.value = StageType.stringValueOf(result.type)
                 currentTask.value = result.task
                 currentBlock.value = result.block
-                taskStartTime = LocalDateTime.parse(result.task?.timeStamp) ?: LocalDateTime.now()
+                taskStartTime = if (result.task?.timeStamp == null || result.task.timeStamp.isBlank()) {
+                                    LocalDateTime.now()
+                                } else {
+                                    LocalDateTime.parse(result.task.timeStamp)
+                                }
+
             } catch (_: ConnectException) {
                 onNoInternet()
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
             } catch (e: Exception) {
+                if (!retry) {
+                    getNextStage(eventId, onNoInternet, true)
+                }
                 Log.e("EventStage", e.message ?: "", e)
             }
         }.invokeOnCompletion {
@@ -76,7 +96,10 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
         if (currentStageType.value == StageType.TASK) {
             viewModelScope.launch {
                 val resultingAnswer =
-                    if (TaskType.valueOf(currentTask.value!!.type) == TaskType.MULTIPLE_CHOICE) {
+                    if (answers.isEmpty()) {
+                        //answers.add("")
+                        answers.toList()
+                    } else if (TaskType.valueOf(currentTask.value!!.type) == TaskType.MULTIPLE_CHOICE) {
                         answers.toList()
                     } else {
                         listOf(answers.last())
@@ -89,9 +112,12 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                         resultingAnswer
                     )
                     points = stageResult.points
+                    if (stageResult.points != null) {
+                        bluetoothCallBack(stageResult.points)
+                    }
                     isAnswerCorrect = stageResult.isCorrect
                     correctAnswer.addAll(stageResult.rightAnswer ?: listOf())
-                    if (stageResult.rightAnswer == null && stageResult.points == null) {
+                    if (stageResult.rightAnswer == null || stageResult.points == null || correctAnswer.isEmpty()) {
                         currentStageType.value = StageType.NONE
                     } else {
                         showResults.value = true
@@ -101,7 +127,7 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
                 } catch (_: NotAuthorisedException) {
                     unauthorised.value = true
                 } catch (e: Exception) {
-                    Log.e("send stage answer view model", e.message ?: e.toString())
+                    Log.e("send_stage_answer", e.message ?: e.toString())
                 }
             }
         }
@@ -129,16 +155,25 @@ class EventStageViewmodel @Inject constructor(private val repository: EduReposit
     override fun chooseTask(eventId: String, taskId: String, onNoInternet: () -> Unit) {
         viewModelScope.launch {
             try {
-                repository.postTaskChoice(eventId, currentBlock.value?.id ?: "", taskId)
-            } catch (_: IllegalAccessException) {
-
+                repository.postTaskChoice(eventId, blockId = currentBlock.value?.id ?: "", taskId = taskId)
+                currentStageType.value = StageType.NONE
+            } catch (e: IllegalAccessException) {
+                Log.e("send_stage_answer", e.message ?: e.toString(), e)
             } catch (_: ConnectException) {
                 onNoInternet()
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
             } catch (e: Exception) {
-                Log.e("send stage answer view model", e.message ?: e.toString())
+                Log.e("send_stage_answer", e.message ?: e.toString())
             }
-        }.invokeOnCompletion { currentStageType.value = StageType.NONE }
+        }
+    }
+
+    override fun onDownloadFile(fileName: String, fileUri: String) {
+        fileStatusFlows.put(fileUri, taskDownloader.download(fileUri, fileName))
+    }
+
+    override fun onOpenFile(fileUri: String) {
+        taskDownloader.openFile(fileUri)
     }
 }

@@ -7,13 +7,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.semantics.SemanticsNode
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.SemanticsSelector
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -24,8 +20,6 @@ import com.eduplay.moblie.ui.screens.EventScreen
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.SpyK
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -35,24 +29,25 @@ class EventScreenUiTest {
 
     private class EventData {
         val innerPaddingValues: PaddingValues = PaddingValues()
-        val eventCreatorMode: Boolean = false
-        val isEventFavourite: Boolean = false
-        val eventName: String = ""
+        val eventCreatorMode = mutableStateOf(false)
+        val isEventFavourite = mutableStateOf(false)
+        val eventName = mutableStateOf("")
         val tags: SnapshotStateList<EventTag> = mutableStateListOf()
-        val author: String = ""
-        val isCompleted: Boolean = false
+        val author=mutableStateOf("")
+        val isCompleted = mutableStateOf(false)
         val cover: String = ""
         val info: SnapshotStateList<Pair<Int, String?>> = mutableStateListOf<Pair<Int, String?>>()
-        val description: String = ""
-        val privateEvent: Boolean = false
-        val isOpen: Boolean = false
-        val isContinuing: Boolean = false
+        val description = mutableStateOf("")
+        val privateEvent = mutableStateOf(false)
+        val isOpen = mutableStateOf(false)
+        val isContinuing=mutableStateOf(false)
         val onAddToFavourite: () -> Unit = {}
         val onComplain: (String) -> Unit = {}
         val startEvent: () -> Unit = {}
         val showResults: () -> Unit = {}
         val onReturn: () -> Boolean = { false }
         val networkHeaders: State<NetworkHeaders> = mutableStateOf(NetworkHeaders.Builder().build())
+        val isCompletionMode: State<Boolean> = mutableStateOf(false)
     }
 
     @get:Rule
@@ -106,14 +101,17 @@ class EventScreenUiTest {
             startEvent = eventData.startEvent,
             showResults = eventData.showResults,
             onReturn = eventData.onReturn,
-            headers = eventData.networkHeaders
+            headers = eventData.networkHeaders,
+            toggleBluetooth= {},
+        isCompetitionMode= eventData.isCompletionMode,
+        canShowConnectionList= false
         )
     }
 
     @Test
     fun check_top_bar_event_creator_mode_only_edit_button_is_displayed() {
         composeTestRule.apply {
-            every { eventData.eventCreatorMode } returns true
+            every { eventData.eventCreatorMode } returns mutableStateOf(true)
 
             setContent {
                 FillScreen()
@@ -131,7 +129,7 @@ class EventScreenUiTest {
     @Test
     fun check_edit_button_onclick_displays_edit_dialog_creator_mode() {
         composeTestRule.apply {
-            every { eventData.eventCreatorMode } returns true
+            every { eventData.eventCreatorMode } returns mutableStateOf(true)
 
             setContent {
                 FillScreen()
@@ -149,7 +147,7 @@ class EventScreenUiTest {
     @Test
     fun check_top_bar_player_mode_only_edit_button_is_not_displayed() {
         composeTestRule.apply {
-            every { eventData.eventCreatorMode } returns false
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
 
             setContent {
                 FillScreen()
@@ -167,7 +165,7 @@ class EventScreenUiTest {
     @Test
     fun check_complain_button_onclick_displays_complain_dialog_player_mode() {
         composeTestRule.apply {
-            every { eventData.eventCreatorMode } returns false
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
 
             setContent {
                 FillScreen()
@@ -183,7 +181,7 @@ class EventScreenUiTest {
     fun check_header_contains_info_for_all_users() {
         val eventTitle = "Event 1"
         composeTestRule.apply {
-            every { eventData.eventName } returns eventTitle
+            every { eventData.eventName } returns mutableStateOf(eventTitle)
 
 
             setContent {
@@ -200,8 +198,8 @@ class EventScreenUiTest {
     fun check_header_not_contains_author_in_event_creator_mode() {
         val author = "Author"
         composeTestRule.apply {
-            every { eventData.eventCreatorMode } returns true
-            every { eventData.author } returns author
+            every { eventData.eventCreatorMode } returns mutableStateOf(true)
+            every { eventData.author } returns mutableStateOf(author)
 
             setContent {
                 FillScreen()
@@ -215,8 +213,8 @@ class EventScreenUiTest {
     fun check_header_contains_author_in_event_player_mode() {
         val author = "Author"
         composeTestRule.apply {
-            every { eventData.eventCreatorMode } returns false
-            every { eventData.author } returns author
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
+            every { eventData.author } returns mutableStateOf(author)
 
             setContent {
                 FillScreen()
@@ -229,8 +227,8 @@ class EventScreenUiTest {
     @Test
     fun check_header_not_contains_completed_chip_in_event_creator_mode() {
         composeTestRule.apply {
-            every { eventData.eventCreatorMode } returns true
-            every { eventData.isCompleted } returns true
+            every { eventData.eventCreatorMode } returns mutableStateOf(true)
+            every { eventData.isCompleted } returns mutableStateOf(true)
 
             setContent {
                 FillScreen()
@@ -243,8 +241,8 @@ class EventScreenUiTest {
     @Test
     fun check_header_contains_completed_chip_in_event_player_mode_event_is_completed() {
         composeTestRule.apply {
-            every { eventData.eventCreatorMode } returns false
-            every { eventData.isCompleted } returns true
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
+            every { eventData.isCompleted } returns mutableStateOf(true)
 
             setContent {
                 FillScreen()
@@ -257,8 +255,8 @@ class EventScreenUiTest {
     @Test
     fun check_header_not_contains_completed_chip_in_event_player_mode_event_is_not_completed() {
         composeTestRule.apply {
-            every { eventData.eventCreatorMode } returns false
-            every { eventData.isCompleted } returns false
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
+            every { eventData.isCompleted } returns mutableStateOf(false)
 
             setContent {
                 FillScreen()
@@ -273,9 +271,9 @@ class EventScreenUiTest {
     fun check_contains_general_info_for_player() {
         composeTestRule.apply {
             every { eventData.tags } returns tags
-            every { eventData.eventCreatorMode } returns false
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
             every { eventData.info } returns info
-            every { eventData.description } returns description
+            every { eventData.description } returns mutableStateOf(description)
 
             setContent {
                 FillScreen()
@@ -296,9 +294,9 @@ class EventScreenUiTest {
     fun check_contains_general_info_for_creator() {
         composeTestRule.apply {
             every { eventData.tags } returns tags
-            every { eventData.eventCreatorMode } returns true
+            every { eventData.eventCreatorMode } returns mutableStateOf(true)
             every { eventData.info } returns info
-            every { eventData.description } returns description
+            every { eventData.description } returns mutableStateOf(description)
 
             setContent {
                 FillScreen()
@@ -320,10 +318,10 @@ class EventScreenUiTest {
     fun check_privacy_setting_is_private_for_creator() {
         composeTestRule.apply {
             every { eventData.tags } returns tags
-            every { eventData.eventCreatorMode } returns true
+            every { eventData.eventCreatorMode } returns mutableStateOf(true)
             every { eventData.info } returns info
-            every { eventData.description } returns description
-            every { eventData.privateEvent } returns true
+            every { eventData.description } returns mutableStateOf(description)
+            every { eventData.privateEvent } returns mutableStateOf(true)
 
             setContent {
                 FillScreen()
@@ -338,10 +336,10 @@ class EventScreenUiTest {
     fun check_privacy_setting_is_not_private_for_creator() {
         composeTestRule.apply {
             every { eventData.tags } returns tags
-            every { eventData.eventCreatorMode } returns true
+            every { eventData.eventCreatorMode } returns mutableStateOf(true)
             every { eventData.info } returns info
-            every { eventData.description } returns description
-            every { eventData.privateEvent } returns false
+            every { eventData.description } returns mutableStateOf(description)
+            every { eventData.privateEvent } returns mutableStateOf(false)
 
             setContent {
                 FillScreen()
@@ -356,8 +354,8 @@ class EventScreenUiTest {
     @Test
     fun check_start_event_btn_is_not_displayed_when_event_is_not_open_player_mode() {
         composeTestRule.apply {
-            every { eventData.isOpen } returns false
-            every { eventData.eventCreatorMode } returns false
+            every { eventData.isOpen } returns mutableStateOf(false)
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
 
             setContent {
                 FillScreen()
@@ -370,8 +368,8 @@ class EventScreenUiTest {
     @Test
     fun check_results_btn_is_not_displayed_when_event_is_not_completed_player_mode() {
         composeTestRule.apply {
-            every { eventData.isCompleted } returns false
-            every { eventData.eventCreatorMode } returns false
+            every { eventData.isCompleted } returns mutableStateOf(false)
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
 
             setContent {
                 FillScreen()
@@ -384,10 +382,10 @@ class EventScreenUiTest {
     @Test
     fun check_start_event_btn_is_displayed_with_start_event_text_when_event_is_open_and_not_started_player_mode() {
         composeTestRule.apply {
-            every { eventData.isOpen } returns true
-            every { eventData.isContinuing } returns false
-            every { eventData.isCompleted } returns false
-            every { eventData.eventCreatorMode } returns false
+            every { eventData.isOpen } returns mutableStateOf(true)
+            every { eventData.isContinuing } returns mutableStateOf(false)
+            every { eventData.isCompleted } returns mutableStateOf(false)
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
 
             setContent {
                 FillScreen()
@@ -400,10 +398,10 @@ class EventScreenUiTest {
     @Test
     fun check_start_event_btn_is_displayed_with_continue_event_text_when_event_is_open_and_started_player_mode() {
         composeTestRule.apply {
-            every { eventData.isOpen } returns true
-            every { eventData.isContinuing } returns true
-            every { eventData.isCompleted } returns false
-            every { eventData.eventCreatorMode } returns false
+            every { eventData.isOpen } returns mutableStateOf(true)
+            every { eventData.isContinuing } returns mutableStateOf(true)
+            every { eventData.isCompleted } returns mutableStateOf(false)
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
 
             setContent {
                 FillScreen()
@@ -417,9 +415,9 @@ class EventScreenUiTest {
     @Test
     fun check_start_event_btn_is_not_displayed_when_event_completed_player_mode() {
         composeTestRule.apply {
-            every { eventData.isOpen } returns true
-            every { eventData.isCompleted } returns true
-            every { eventData.eventCreatorMode } returns false
+            every { eventData.isOpen } returns mutableStateOf(true)
+            every { eventData.isCompleted } returns mutableStateOf(true)
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
 
             setContent {
                 FillScreen()
@@ -432,8 +430,8 @@ class EventScreenUiTest {
     @Test
     fun check_results_btn_is_displayed_when_event_event_is_completed_player_mode() {
         composeTestRule.apply {
-            every { eventData.isCompleted } returns true
-            every { eventData.eventCreatorMode } returns false
+            every { eventData.isCompleted } returns mutableStateOf(true)
+            every { eventData.eventCreatorMode } returns mutableStateOf(false)
 
             setContent {
                 FillScreen()
@@ -446,8 +444,8 @@ class EventScreenUiTest {
     @Test
     fun check_event_stats_are_displayed_creator_mode() {
         composeTestRule.apply {
-            every { eventData.isCompleted } returns true
-            every { eventData.eventCreatorMode } returns true
+            every { eventData.isCompleted } returns mutableStateOf(true)
+            every { eventData.eventCreatorMode } returns mutableStateOf(true)
 
             setContent {
                 FillScreen()

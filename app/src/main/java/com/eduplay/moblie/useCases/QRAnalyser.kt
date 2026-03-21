@@ -1,4 +1,4 @@
-package com.eduplay.moblie.services
+package com.eduplay.moblie.useCases
 
 import android.util.Log
 import androidx.annotation.OptIn

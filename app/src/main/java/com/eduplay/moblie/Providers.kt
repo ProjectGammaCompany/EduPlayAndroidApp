@@ -9,6 +9,8 @@ import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
 import com.eduplay.moblie.services.OfflineModeManager
 import com.eduplay.moblie.services.TokenManager
+import com.eduplay.moblie.useCases.TokenManager
+import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,6 +36,11 @@ class Providers {
             tokenManager = TokenManager(context)
         }
         return tokenManager!!
+    }
+
+    @Provides
+    fun provideFileDownloader(@ApplicationContext context: Context): TaskDownloadUseCase {
+       return TaskDownloadUseCase(context)
     }
 
     @Provides

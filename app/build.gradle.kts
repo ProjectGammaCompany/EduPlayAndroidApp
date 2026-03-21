@@ -30,8 +30,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            //TODO("заменить на реальный адрес бекэнда")
-            buildConfigField("String", "BACKEND_URL", "\"http://api.hse-eduplay.ru\"")
+            buildConfigField("String", "BACKEND_URL", "\"https://api.hse-eduplay.ru\"")
+            buildConfigField("String", "BACKEND_FILE_URL", "\"https://files.hse-eduplay.ru/eduplay-bucket/uploads/\"")
+            buildConfigField("String", "FRONTEND_URL", "\"https://hse-eduplay.ru/\"")
 
 
         }
@@ -39,6 +40,8 @@ android {
             applicationIdSuffix = ".debug"
             isDebuggable = true
             buildConfigField("String", "BACKEND_URL", "\"http://api.hse-eduplay.ru\"")
+            buildConfigField("String", "BACKEND_FILE_URL", "\"http://files.hse-eduplay.ru/eduplay-bucket/uploads/\"")
+            buildConfigField("String", "FRONTEND_URL", "\"http://hse-eduplay.ru/\"")
         }
 
     }
@@ -72,6 +75,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.ui.test.junit4)
     implementation(libs.androidx.media3.common.ktx)
+    implementation(libs.androidx.fragment.compose)
     implementation(libs.androidx.room.common.jvm)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

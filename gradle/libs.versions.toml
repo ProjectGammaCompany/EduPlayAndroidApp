@@ -32,6 +32,7 @@ uiTestJunit4 = "1.10.1"
 media3CommonKtx = "1.9.0"
 roomRuntime = "2.8.4"
 roomCommonJvm = "2.8.4"
+fragmentCompose = "1.8.9"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -83,6 +84,7 @@ androidx-datastore-preferences = { module = "androidx.datastore:datastore-prefer
 androidx-media3-common-ktx = { group = "androidx.media3", name = "media3-common-ktx", version.ref = "media3CommonKtx" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "uiTestJunit4" }
 androidx-room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
+androidx-fragment-compose = { group = "androidx.fragment", name = "fragment-compose", version.ref = "fragmentCompose" }
 
 
 [plugins]

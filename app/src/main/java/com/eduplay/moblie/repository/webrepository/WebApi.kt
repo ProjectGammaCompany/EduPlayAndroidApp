@@ -3,19 +3,25 @@ package com.eduplay.moblie.repository.webrepository
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.EventTag
+import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventComplaint
+import com.eduplay.moblie.repository.requestTypes.EventPasswords
 import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
 import com.eduplay.moblie.repository.requestTypes.Refresh
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.AuthResponse
+import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
 import com.eduplay.moblie.repository.responseTypes.EventRoleResponse
 import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
+import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import retrofit2.Response
 import retrofit2.http.Body
@@ -33,8 +39,9 @@ interface WebApi {
         @Query("maxOnPage") maxOnPage: Int = 10,
         @Query("tags") tags: List<String>? = null,
         @Query("decliningRating") decliningRating: Boolean = false,
-        @Query("territorialized") territorialized: Boolean = false,
-        @Query("active") active: Boolean = false
+        @Query("active") active: Boolean = false,
+        @Query("favorites") favorites: Boolean = false,
+        @Query("title") title: String = ""
     ): Response<EventListResponse>
 
     @GET("/events/personal/favorites")
@@ -76,7 +83,7 @@ interface WebApi {
         @Path("eventId") eventId: String
     ): Response<EventPlayerInfo>
 
-    @GET("/event/{eventId}/ownerInfo")
+    @GET("/event/{eventId}/settings")
     @InjectAuth
     suspend fun getEventInfoCreator(
         @Path("eventId") eventId: String
@@ -97,7 +104,7 @@ interface WebApi {
     suspend fun postTaskChoice(
         @Path("eventId") eventId: String,
         @Body task: TaskFromBlock
-    ): Response<EventStage>
+    ): Response<Unit>
 
     @POST("event/{eventId}/block/{blockId}/task/{taskId}/timestamp")
     @InjectAuth
@@ -108,7 +115,7 @@ interface WebApi {
         @Body timeStamp: TaskStartTime
     ): Response<Unit>
 
-    @POST("event/{eventId}/block/{blockId}/task/{taskId}/answer")
+    @POST("event/{eventId}/blocks/{blockId}/tasks/{taskId}/answer")
     @InjectAuth
     suspend fun postTaskAnswer(
         @Path("eventId") eventId: String,
@@ -127,5 +134,26 @@ interface WebApi {
     @GET("/event/{eventId}/playerStats")
     @InjectAuth
     suspend fun getPlayerStats(@Path("eventId") eventId: String) : Response<PlayerStats>
+
+    @GET("/tags")
+    @InjectAuth
+    suspend fun getTags(): Response<EventTagList>
+
+    @GET("/events/joinRequiredFields/{joinCode}")
+    @InjectAuth
+    suspend fun getFieldsToJoinEvent(@Path("joinCode") joinCode: String): Response<RequiredJoinFields>
+
+    @POST("/events/join/{joinCode}")
+    @InjectAuth
+    suspend fun postPasswords(
+        @Path("joinCode") joinCode: String,
+        @Body eventPasswords: EventPasswords
+    ): Response<EventIdResponse>
+
+    @GET("events/{eventId}/joinCode")
+    @InjectAuth
+    suspend fun getJoinCode(
+        @Path("eventId") eventId: String,
+    ): Response<JoinCodeInfo>
 
 }

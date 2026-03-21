@@ -80,7 +80,7 @@ fun ParallelBlockScreen(
                 TaskItem(
                     name = task.name,
                     time = task.time,
-                    isEnabled = task.isCompleted,
+                    isEnabled = !task.isCompleted,
                     onChooseTask = { onChooseTask(task.id) }
                 )
             }

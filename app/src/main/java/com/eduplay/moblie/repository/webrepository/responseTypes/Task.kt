@@ -5,6 +5,7 @@ import com.eduplay.moblie.models.TaskType
 import com.google.gson.annotations.SerializedName
 
 data class Task(
+    @SerializedName("taskId")
     val id: String,
     val blockId: String,
     val name: String,
@@ -12,7 +13,7 @@ data class Task(
     val type: Int,
     val options: List<AnswerOption>?,
     val files: List<String>,
-    val time: Int,
-    @SerializedName("time_stamp")
+    val time: Int?,
+    @SerializedName("timestamp")
     val timeStamp: String?
 )

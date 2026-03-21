@@ -45,8 +45,11 @@ import com.eduplay.moblie.models.QuestShortInfo
 
 @Composable
 fun QuestListElement(
-    questShortInfo: QuestShortInfo, onClick: () -> Unit, onFavouriteToggle: (Boolean) -> Unit,
-    headers: State<NetworkHeaders>
+    questShortInfo: QuestShortInfo,
+    onClick: () -> Unit,
+    onFavouriteToggle: (Boolean) -> Unit,
+    headers: State<NetworkHeaders>,
+    imageUrl: (String) -> String
 ) {
 
     val isFavourite = remember { mutableStateOf(questShortInfo.isFavourite) }
@@ -62,7 +65,7 @@ fun QuestListElement(
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(questShortInfo.imageUrl)
+                .data(imageUrl(questShortInfo.imageUrl))
                 .httpHeaders(headers.value)
                 .networkCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
@@ -75,8 +78,7 @@ fun QuestListElement(
                 .height(60.dp)
                 .width(60.dp)
                 .clip(RoundedCornerShape(10.dp))
-
-
+                .align(Alignment.CenterVertically)
         )
 
         Column(
@@ -109,7 +111,7 @@ fun QuestListElement(
                     )
                     if (questShortInfo.isDownloaded) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.download_24dp_1f1f1f_fill0_wght200_grad0_opsz24),
+                            imageVector = ImageVector.vectorResource(R.drawable.download),
                             contentDescription = stringResource(id = R.string.downloaded),
                             tint = colorScheme.onBackground,
                             modifier = Modifier
@@ -219,7 +221,7 @@ fun QuestListElementPreview() {
                     EventTag("", "long as hell tag")
                 ),
                 true
-            ), {}, {}, headers
+            ), {}, {}, headers, {it}
         )
 
         QuestListElement(
@@ -241,7 +243,8 @@ fun QuestListElementPreview() {
                 false
             ), {},
             {},
-            headers
+            headers,
+            {it}
 
         )
 
@@ -256,7 +259,8 @@ fun QuestListElementPreview() {
                 listOf(),
                 false
             ), {}, {},
-            headers
+            headers,
+            {it}
         )
     }
 }

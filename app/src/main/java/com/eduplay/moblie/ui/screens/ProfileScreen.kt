@@ -93,7 +93,8 @@ fun ProfileScreen(
         hasEmailErrors,
         onLogout,
         viewModel.avatar.value,
-        imageHeaderViewModel.headers
+        imageHeaderViewModel.headers,
+        {image: String -> imageHeaderViewModel.getFullUrl(image)}
     )
 
 }
@@ -106,7 +107,8 @@ private fun ProfileScreen(
     hasEmailErrors: (String) -> Boolean,
     onLogout: () -> Unit,
     avatar: String,
-    headers: State<NetworkHeaders>
+    headers: State<NetworkHeaders>,
+    imageUrl: (String) -> String
 ) {
     var editEmail by remember { mutableStateOf(false) }
 
@@ -124,8 +126,8 @@ private fun ProfileScreen(
 
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(avatar)
-                .httpHeaders(headers = headers.value) //TODO("pass headers")
+                .data(imageUrl(avatar))
+                .httpHeaders(headers = headers.value)
                 .networkCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
@@ -234,6 +236,7 @@ fun ProfilePreview() {
         { false },
         {},
         "",
-        remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+        remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+        {it}
     )
 }

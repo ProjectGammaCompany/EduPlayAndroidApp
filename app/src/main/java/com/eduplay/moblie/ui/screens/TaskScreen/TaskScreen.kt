@@ -1,7 +1,13 @@
 package com.eduplay.moblie.ui.screens.TaskScreen
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -29,26 +35,28 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -67,7 +75,10 @@ import com.eduplay.moblie.repository.responseTypes.Task
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
+import com.eduplay.moblie.useCases.FileDownloadStatus
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
@@ -82,7 +93,7 @@ fun TaskScreen(
     eventId: String,
     viewModel: EventStageViewModelInterface,
     onGoBack: () -> Unit,
-    onNoInternet: ()->Unit
+    onNoInternet: () -> Unit
 ) {
     val taskType = viewModel.currentTask.value!!.type
     var isSubmitBtnShown by remember { mutableStateOf(true) }
@@ -131,7 +142,15 @@ fun TaskScreen(
                     viewModel.currentTask.value!!.time,
                     viewModel.taskStartTime,
                     viewModel.currentTask.value!!.files,
-                    onSubmit
+                    onSubmit,
+                    onDownload = { fileName, fileUri ->
+                        viewModel.onDownloadFile(
+                            fileName,
+                            fileUri
+                        )
+                    },
+                    onOpen = { fileUri -> viewModel.onOpenFile(fileUri) },
+                    downloadStatus = viewModel.fileStatusFlows
                 )
 
                 //task
@@ -148,7 +167,9 @@ fun TaskScreen(
 
                 //next btn
                 if (isSubmitBtnShown) {
-                    SubmitBtn(TaskType.valueOf(taskType), { viewModel.sendAnswer(eventId, onNoInternet) })
+                    SubmitBtn(
+                        TaskType.valueOf(taskType),
+                        { viewModel.sendAnswer(eventId, onNoInternet) })
                 }
             }
         }
@@ -180,50 +201,16 @@ private fun TaskHeader(
     taskType: TaskType,
     title: String,
     description: String,
-    time: Int,
+    time: Int?,
     startTime: LocalDateTime,
     files: List<String>,
-    invokeEndOnTime: () -> Unit
+    invokeEndOnTime: () -> Unit,
+    onDownload: (String, String) -> Unit,
+    onOpen: (String) -> Unit,
+    downloadStatus: SnapshotStateMap<String, Flow<FileDownloadStatus>>
 ) {
     val scope = rememberCoroutineScope()
-    var showTimer by remember { mutableStateOf(true) }
-    var currentProgress by remember {
-        mutableFloatStateOf(
-            abs(Duration.between(LocalDateTime.now(), startTime).toSeconds()).toFloat() / time
-        )
-    }
-    LaunchedEffect(Any()) {
-        scope.launch {
-            while (currentProgress < 1f) {
-                currentProgress = abs(
-                    Duration.between(LocalDateTime.now(), startTime).toSeconds()
-                ).toFloat() / time
-                delay(500L)
-            }
-        }
-    }
-    var timeLeft by remember {
-        mutableLongStateOf(
-            time - abs(
-                Duration.between(
-                    LocalDateTime.now(),
-                    startTime
-                ).toSeconds()
-            )
-        )
-    }
-    LaunchedEffect(time) {
-        scope.launch {
-            while (timeLeft > 0) {
-                timeLeft -= 1
-                delay(1000L)
-            }
-            invokeEndOnTime()
-        }
-    }
-
-
-
+    var showTimer by remember { mutableStateOf(time != null && time != 0) }
 
     Column(
         modifier =
@@ -239,6 +226,41 @@ private fun TaskHeader(
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(0.9f)
             ) {
+                var currentProgress by remember {
+                    mutableFloatStateOf(
+                        abs(Duration.between(LocalDateTime.now(), startTime).toSeconds()).toFloat() / time!!
+                    )
+                }
+                LaunchedEffect(Any()) {
+                    scope.launch {
+                        while (currentProgress < 1f) {
+                            currentProgress = abs(
+                                Duration.between(LocalDateTime.now(), startTime).toSeconds()
+                            ).toFloat() / time!!
+                            delay(500L)
+                        }
+                    }
+                }
+                var timeLeft by remember {
+                    mutableLongStateOf(
+                        time!! - abs(
+                            Duration.between(
+                                LocalDateTime.now(),
+                                startTime
+                            ).toSeconds()
+                        )
+                    )
+                }
+                LaunchedEffect(time) {
+                    scope.launch {
+                        while (timeLeft > 0) {
+                            timeLeft -= 1
+                            delay(1000L)
+                        }
+                        invokeEndOnTime()
+                    }
+                }
+
                 LinearProgressIndicator(
                     progress = { currentProgress },
                     color = colorScheme.secondary,
@@ -296,7 +318,12 @@ private fun TaskHeader(
                         .align(Alignment.Start)
                         .padding(top = 15.dp)
                 )
-                FileView(files)
+                FileView(
+                    files,
+                    onDownload,
+                    onOpen,
+                    downloadStatus
+                )
             }
         }
     }
@@ -327,13 +354,32 @@ private fun SubmitBtn(taskType: TaskType, onSubmit: () -> Unit) {
 }
 
 @Composable
-fun FileView(files: List<String>) {
-    val uriHandler = LocalUriHandler.current
+fun FileView(
+    files: List<String>,
+    onDownload: (String, String) -> Unit,
+    onOpen: (String) -> Unit,
+    downloadStatus: SnapshotStateMap<String, Flow<FileDownloadStatus>>
+) {
+
     Column {
-        files.forEach {
+        files.forEach { file ->
+            val fileStatus = (downloadStatus[file]
+                ?: flowOf()).collectAsState(
+                FileDownloadStatus.NOT_STARTED
+            )
             TextButton(
                 onClick = {
-                    uriHandler.openUri(uri = it)
+                    Log.d("FILE_STATUS", fileStatus.value.toString())
+                    if (fileStatus.value == FileDownloadStatus.NOT_STARTED ||
+                        fileStatus.value == FileDownloadStatus.FAILED
+                    ) {
+                        onDownload(
+                            file,
+                            file
+                        )
+                    } else if (fileStatus.value == FileDownloadStatus.SUCCESS) {
+                        onOpen(file)
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorScheme.background,
@@ -348,17 +394,49 @@ fun FileView(files: List<String>) {
                         shape = RoundedCornerShape(8.dp)
                     )
             ) {
+                val infiniteTransition = rememberInfiniteTransition()
+                val angle by infiniteTransition.animateFloat(
+                    initialValue = 0F,
+                    targetValue = 360F,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(2000, easing = LinearEasing)
+                    )
+                )
+                // file icon
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.files),
-                    contentDescription = it,
+                    contentDescription = file,
                     modifier = Modifier.padding(end = 10.dp)
                 )
+                //file name
                 Text(
-                    text = it,
+                    text = file,
                     textAlign = TextAlign.Start,
                     style = typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().weight(1f)
                 )
+                // download status icon
+                when (fileStatus.value) {
+                    FileDownloadStatus.NOT_STARTED, FileDownloadStatus.FAILED -> {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.download),
+                            contentDescription = file,
+                            modifier = Modifier.padding(end = 10.dp)
+                        )
+                    }
+
+                    FileDownloadStatus.SUCCESS -> {}
+                    FileDownloadStatus.LOADING, FileDownloadStatus.PAUSED -> {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.progress),
+                            contentDescription = file,
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .rotate(angle)
+                        )
+                    }
+                }
+
             }
         }
     }
@@ -367,11 +445,14 @@ fun FileView(files: List<String>) {
 @Preview
 @Composable
 fun TaskPreview() {
+    val flowmap = remember { mutableStateMapOf<String, Flow<FileDownloadStatus>>() }
     EduPlayTheme(false) {
         TaskScreen(
             PaddingValues(),
             "1",
             object : EventStageViewModelInterface {
+                override val fileStatusFlows: SnapshotStateMap<String, Flow<FileDownloadStatus>>
+                    get() = flowmap
                 override val currentStageType: MutableState<StageType> =
                     remember { mutableStateOf(StageType.TASK) }
                 override var currentTask: MutableState<Task?> = remember {
@@ -390,7 +471,10 @@ fun TaskPreview() {
                                 AnswerOption("4", "ответ 5", false),
                                 AnswerOption("5", "ответ 6", false)
                             ),
-                            listOf("1", "option1"),
+                            listOf(
+                                "455d8c87-c253-42b7-970d-e3965ac95424.docx",
+                                "455d8c87-c253-42b7-970d-e3965ac95424.docx"
+                            ),
                             30,
                             LocalDateTime.now().toString()
                         )
@@ -430,6 +514,14 @@ fun TaskPreview() {
                 }
 
                 override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onDownloadFile(fileName: String, fileUri: String) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onOpenFile(fileUri: String) {
                     TODO("Not yet implemented")
                 }
             },

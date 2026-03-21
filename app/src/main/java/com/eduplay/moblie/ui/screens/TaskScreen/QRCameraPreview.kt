@@ -28,7 +28,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.eduplay.moblie.R
-import com.eduplay.moblie.services.QRAnalyser
+import com.eduplay.moblie.useCases.QRAnalyser
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.common.util.concurrent.ListenableFuture
 import java.util.concurrent.ExecutorService
