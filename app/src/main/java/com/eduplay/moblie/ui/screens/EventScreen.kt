@@ -1,8 +1,8 @@
 package com.eduplay.moblie.ui.screens
 
-import android.content.ComponentName
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.content.ComponentName
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -104,7 +104,7 @@ fun EventScreen(
     isCompetitionMode: State<Boolean>,
     toggleCompetitionMode: (Boolean) -> Unit,
     bluetoothViewModel: BluetoothViewModel,
-    onDownloadEvent: ()-> ComponentName?
+    onDownloadEvent: () -> ComponentName?
 ) {
     var dataFetched by remember { mutableStateOf(false) }
     var noInternet by remember { mutableStateOf(false) }
@@ -172,7 +172,7 @@ fun EventScreen(
 
 
     var fragment by remember { mutableStateOf<BluetoothConnectionFragment?>(null) }
-    AndroidFragment<BluetoothConnectionFragment>() { connectionFragment ->
+    AndroidFragment<BluetoothConnectionFragment> { connectionFragment ->
         fragment = connectionFragment
 
     }
@@ -219,7 +219,7 @@ fun EventScreen(
     }
 
     val onStopShowingDeviceList = {
-        bluetoothViewModel.stopScan(context);
+        bluetoothViewModel.stopScan(context)
         canShowConnectionList = false
     }
     val proceedWithBluetooth = {
@@ -805,11 +805,11 @@ private fun EventCreatorBody(
     joinCode: State<String>
 ) {
     val tabs = remember<List<Int>> {
-            listOf<Int>(
-                R.string.general_info,
-                R.string.statistics,
-                R.string.privacy_settings
-            )
+        listOf<Int>(
+            R.string.general_info,
+            R.string.statistics,
+            R.string.privacy_settings
+        )
     }
     var selectedTabIdx by remember { mutableIntStateOf(0) }
     Column {

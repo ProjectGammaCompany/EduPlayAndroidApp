@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.flow
 import java.io.File
 
 
-class TaskDownloadUseCase (private val context: Context) {
+class TaskDownloadUseCase(private val context: Context) {
     private val downloadingFiles: MutableMap<String, Long> = mutableMapOf()
     private val fileUriBase: String = BuildConfig.BACKEND_FILE_URL
     private val downloadManager = context.getSystemService(DownloadManager::class.java)
@@ -37,14 +37,16 @@ class TaskDownloadUseCase (private val context: Context) {
                         emit(FileDownloadStatus.SUCCESS)
                         return@flow
                     }
-                    DownloadManager.STATUS_FAILED ->  {
+
+                    DownloadManager.STATUS_FAILED -> {
                         emit(FileDownloadStatus.FAILED)
                         return@flow
                     }
+
                     DownloadManager.STATUS_PAUSED -> emit(FileDownloadStatus.PAUSED)
                     DownloadManager.STATUS_PENDING -> emit(FileDownloadStatus.LOADING)
                     DownloadManager.STATUS_RUNNING -> emit(FileDownloadStatus.LOADING)
-                    else ->  {
+                    else -> {
                         FileDownloadStatus.FAILED
                         return@flow
                     }
@@ -62,10 +64,10 @@ class TaskDownloadUseCase (private val context: Context) {
             val intent = Intent()
             intent.action = Intent.ACTION_VIEW
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
             val file: Uri = getFileUrl(fileId)
-            intent.setDataAndType(file, context.contentResolver.getType(file));
+            intent.setDataAndType(file, context.contentResolver.getType(file))
             context.startActivity(intent)
         }
     }
@@ -87,7 +89,8 @@ class TaskDownloadUseCase (private val context: Context) {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                 fileName
             )
-            val contentUri: Uri = getUriForFile(context, "com.eduplay.fileprovider", file) ?: throw IllegalAccessException("no such file $fileId")
+            val contentUri: Uri = getUriForFile(context, "com.eduplay.fileprovider", file)
+                ?: throw IllegalAccessException("no such file $fileId")
 
             return contentUri
         }

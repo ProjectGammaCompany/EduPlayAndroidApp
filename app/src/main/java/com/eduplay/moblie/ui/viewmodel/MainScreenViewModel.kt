@@ -1,7 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,7 +31,7 @@ class MainScreenViewModel @Inject constructor(val repository: EduRepository) : V
         } catch (_: NotAuthorisedException) {
             unauthorised.value = true
             events = flowOf()
-        }  catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e("All events", e.message ?: "", e)
             events = flowOf()
         }

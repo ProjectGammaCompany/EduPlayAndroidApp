@@ -8,9 +8,8 @@ import com.eduplay.moblie.repository.webrepository.AuthInterceptor
 import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
 import com.eduplay.moblie.services.OfflineModeManager
-import com.eduplay.moblie.services.TokenManager
-import com.eduplay.moblie.useCases.TokenManager
 import com.eduplay.moblie.useCases.TaskDownloadUseCase
+import com.eduplay.moblie.useCases.TokenManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,7 +39,7 @@ class Providers {
 
     @Provides
     fun provideFileDownloader(@ApplicationContext context: Context): TaskDownloadUseCase {
-       return TaskDownloadUseCase(context)
+        return TaskDownloadUseCase(context)
     }
 
     @Provides
@@ -91,7 +90,7 @@ class Providers {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context) : Database {
+    fun provideDatabase(@ApplicationContext context: Context): Database {
         return Room.databaseBuilder(
             context,
             Database::class.java, "eduplayDb"

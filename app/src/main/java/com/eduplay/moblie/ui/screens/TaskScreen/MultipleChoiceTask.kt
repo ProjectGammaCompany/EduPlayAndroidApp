@@ -17,25 +17,14 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.eduplay.moblie.models.AnswerOption
-import com.eduplay.moblie.models.TaskType
-import com.eduplay.moblie.repository.responseTypes.Block
-import com.eduplay.moblie.repository.responseTypes.StageType
-import com.eduplay.moblie.repository.responseTypes.Task
 import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
-import java.time.LocalDateTime
 
 @Composable
 fun MultipleChoiceTask(viewModel: EventStageViewModelInterface) {

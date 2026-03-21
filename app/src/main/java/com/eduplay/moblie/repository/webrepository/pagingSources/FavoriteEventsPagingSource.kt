@@ -22,7 +22,7 @@ class FavoriteEventsPagingSource(private val repository: Repository) :
                 nextKey = if (responseData.isEmpty()) null else pageIndex + 1
             )
         } catch (e: Exception) {
-            Log.e("LOAD_FAVORITE_EVENT_LIST", (e.message?:"") + ((e.cause?.message) ?:" "))
+            Log.e("LOAD_FAVORITE_EVENT_LIST", (e.message ?: "") + ((e.cause?.message) ?: " "))
             LoadResult.Error(e)
         }
     }

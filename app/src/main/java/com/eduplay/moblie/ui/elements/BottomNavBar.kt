@@ -16,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.toRoute
 import com.eduplay.moblie.R
 
 private enum class Destination(
@@ -47,7 +46,9 @@ fun BottomNavBar(
 //    Log.d("SCREEN_BOTTOM", navController.currentBackStackEntryAsState().value?.destination?.route ?: "")
     if (
         screensToHide.none { screenName ->
-            navController.currentBackStackEntryAsState().value?.destination?.route?.startsWith(screenName) ?: false
+            navController.currentBackStackEntryAsState().value?.destination?.route?.startsWith(
+                screenName
+            ) ?: false
         }
     ) {
         Log.d("SCREEN_BOTTOM", navController.currentDestination?.route ?: "")

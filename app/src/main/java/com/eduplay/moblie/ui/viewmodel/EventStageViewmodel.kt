@@ -10,7 +10,6 @@ import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.responseTypes.Block
-import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.Task
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
@@ -59,11 +58,12 @@ class EventStageViewmodel @Inject constructor(
                 currentStageType.value = StageType.stringValueOf(result.type)
                 currentTask.value = result.task
                 currentBlock.value = result.block
-                taskStartTime = if (result.task?.timeStamp == null || result.task.timeStamp.isBlank()) {
-                                    LocalDateTime.now()
-                                } else {
-                                    LocalDateTime.parse(result.task.timeStamp)
-                                }
+                taskStartTime =
+                    if (result.task?.timeStamp == null || result.task.timeStamp.isBlank()) {
+                        LocalDateTime.now()
+                    } else {
+                        LocalDateTime.parse(result.task.timeStamp)
+                    }
 
             } catch (_: ConnectException) {
                 onNoInternet()
@@ -155,7 +155,11 @@ class EventStageViewmodel @Inject constructor(
     override fun chooseTask(eventId: String, taskId: String, onNoInternet: () -> Unit) {
         viewModelScope.launch {
             try {
-                repository.postTaskChoice(eventId, blockId = currentBlock.value?.id ?: "", taskId = taskId)
+                repository.postTaskChoice(
+                    eventId,
+                    blockId = currentBlock.value?.id ?: "",
+                    taskId = taskId
+                )
                 currentStageType.value = StageType.NONE
             } catch (e: IllegalAccessException) {
                 Log.e("send_stage_answer", e.message ?: e.toString(), e)

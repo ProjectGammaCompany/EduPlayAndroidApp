@@ -74,7 +74,7 @@ fun CodeDialog(
                         Text(stringResource(R.string.wrong_code))
                     else
                         Text(stringResource(R.string.join_code))
-                        },
+                },
                 isError = badCode.value
             )
         },
@@ -146,7 +146,7 @@ fun PasswordDialog(
                             Text(stringResource(R.string.incorrect_password))
                         else
                             Text(stringResource(R.string.group_password))
-                            },
+                    },
                     isError = badPasswords.value
                 )
             }

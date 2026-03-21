@@ -1,7 +1,6 @@
 package com.eduplay.moblie.repository.responseTypes
 
 import com.eduplay.moblie.models.AnswerOption
-import com.eduplay.moblie.models.TaskType
 import com.google.gson.annotations.SerializedName
 
 data class Task(

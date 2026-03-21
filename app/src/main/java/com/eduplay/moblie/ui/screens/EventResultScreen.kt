@@ -1,6 +1,5 @@
 package com.eduplay.moblie.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,11 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -41,7 +38,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -72,8 +68,8 @@ fun EventResultScreen(
         navController.popBackStack()
     }
     var gotResults by remember { mutableStateOf(false) }
-    var noInternet by remember{mutableStateOf(false)}
-    val onNoInternet = {noInternet = true}
+    var noInternet by remember { mutableStateOf(false) }
+    val onNoInternet = { noInternet = true }
     if (!gotResults) {
         viewModel.fetchResults(eventId, onNoInternet)
         gotResults = true
@@ -81,7 +77,7 @@ fun EventResultScreen(
     if (noInternet) {
         NoInternetConnectionToast()
     }
-    if (viewModel.unauthorised.value){
+    if (viewModel.unauthorised.value) {
         AuthScreenNavigator(navController)
     }
 
@@ -144,7 +140,7 @@ private fun EventResultScreen(
         }
 
         Button(
-            onClick = {onExitScreen()},
+            onClick = { onExitScreen() },
             modifier = Modifier
                 .background(color = colorScheme.surface)
                 .align(Alignment.CenterHorizontally)
@@ -213,7 +209,7 @@ private fun ResultTopBar(onExitScreen: () -> Boolean) {
         title = {},
         navigationIcon = {
             IconButton(
-                onClick = {onExitScreen()}
+                onClick = { onExitScreen() }
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -230,9 +226,9 @@ private fun EventResultScreenPreview() {
     EduPlayTheme {
         EventResultScreen(
             PaddingValues(),
-            {true},
+            { true },
             remember { mutableStateListOf(PlayerStats.StatUser("1", "user", null, 10)) },
             remember { mutableStateListOf() }
-            )
+        )
     }
 }

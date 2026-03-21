@@ -29,8 +29,6 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +46,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.datastore.dataStore
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
@@ -85,12 +82,13 @@ fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel =
                 ) { inclusive = true }
             }
         }
+
         AuthResult.INVALID_USER -> noAccount()
         AuthResult.INVALID_PASSWORD -> wrongEmailOrPassword()
     }
     AuthorizationScreen(
-        { it:String -> viewModel.emailHasErrors(it) },
-        { it:String -> viewModel.passwordHasErrors(it) },
+        { it: String -> viewModel.emailHasErrors(it) },
+        { it: String -> viewModel.passwordHasErrors(it) },
         { email: String, password: String ->
             viewModel.submitLoginForm(
                 email,
@@ -194,7 +192,7 @@ private fun EmailPasswordForm(
     onSubmitForm: (String, String) -> Unit,
     mainButtonLabel: Int,
     switchButtonLabel: Int,
-    ) {
+) {
     var passwordVisible by remember { mutableStateOf(false) }
     val email = rememberTextFieldState()
     var password by remember { mutableStateOf("") }
@@ -251,7 +249,9 @@ private fun EmailPasswordForm(
     //submit btn
     Button(
         onClick = { onSubmitForm(email.text.toString(), password) },
-        modifier = Modifier.fillMaxWidth(0.9f).testTag("main_btn")
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .testTag("main_btn")
     ) {
         Text(
             text = stringResource(mainButtonLabel),
@@ -288,7 +288,7 @@ private fun EmailPasswordForm(
 @Preview
 @Composable
 private fun auth() {
-    EduPlayTheme() {
+    EduPlayTheme {
         AuthorizationScreen(
             { false },
             { false },

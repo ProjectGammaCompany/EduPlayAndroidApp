@@ -182,7 +182,7 @@ private fun SearchScreen(
                             )
                         },
                         expanded = true,
-                        onExpandedChange = {  },
+                        onExpandedChange = { },
                         placeholder = { Text(stringResource(R.string.search_events)) },
                         trailingIcon = {
                             Icon(
@@ -237,7 +237,7 @@ private fun SearchScreen(
                 dividerColor = if (advancedSearch) colorScheme.primary else colorResource(android.R.color.transparent)
             ),
             expanded = true,
-            onExpandedChange = {  },
+            onExpandedChange = { },
             modifier = Modifier
                 .fillMaxWidth(0.9f)
         ) {
@@ -342,7 +342,7 @@ private fun TagList(
 @Composable
 private fun SearchPrev() {
     val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
-    val nothing = { string: String -> }
+    { string: String -> }
     val nothingB = { string: String, bool: Boolean -> }
     EduPlayTheme {
         SearchScreen(

@@ -18,8 +18,9 @@ class OfflineModeManager(private val context: Context) {
     enum class AppModes(val modeNumber: Int) {
         ONLINE(0),
         OFFLINE(1);
+
         companion object {
-            fun valueOf(value: Int):AppModes {
+            fun valueOf(value: Int): AppModes {
                 for (mode in AppModes.values()) {
                     if (mode.modeNumber == value) return mode
                 }

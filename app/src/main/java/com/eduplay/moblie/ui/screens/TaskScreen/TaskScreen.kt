@@ -40,18 +40,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,18 +58,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
-import com.eduplay.moblie.models.AnswerOption
 import com.eduplay.moblie.models.TaskType
-import com.eduplay.moblie.repository.responseTypes.Block
-import com.eduplay.moblie.repository.responseTypes.StageType
-import com.eduplay.moblie.repository.responseTypes.Task
-import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
-import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 import com.eduplay.moblie.useCases.FileDownloadStatus
 import kotlinx.coroutines.delay
@@ -228,7 +217,9 @@ private fun TaskHeader(
             ) {
                 var currentProgress by remember {
                     mutableFloatStateOf(
-                        abs(Duration.between(LocalDateTime.now(), startTime).toSeconds()).toFloat() / time!!
+                        abs(
+                            Duration.between(LocalDateTime.now(), startTime).toSeconds()
+                        ).toFloat() / time!!
                     )
                 }
                 LaunchedEffect(Any()) {
@@ -413,7 +404,9 @@ fun FileView(
                     text = file,
                     textAlign = TextAlign.Start,
                     style = typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth().weight(1f)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
                 )
                 // download status icon
                 when (fileStatus.value) {
@@ -442,91 +435,91 @@ fun FileView(
     }
 }
 
-@Preview
-@Composable
-fun TaskPreview() {
-    val flowmap = remember { mutableStateMapOf<String, Flow<FileDownloadStatus>>() }
-    EduPlayTheme(false) {
-        TaskScreen(
-            PaddingValues(),
-            "1",
-            object : EventStageViewModelInterface {
-                override val fileStatusFlows: SnapshotStateMap<String, Flow<FileDownloadStatus>>
-                    get() = flowmap
-                override val currentStageType: MutableState<StageType> =
-                    remember { mutableStateOf(StageType.TASK) }
-                override var currentTask: MutableState<Task?> = remember {
-                    mutableStateOf<Task?>(
-                        Task(
-                            "1",
-                            "1",
-                            "Задание 4 ",
-                            "Отсканировать код",
-                            TaskType.QR.optionNumber,
-                            listOf(
-                                AnswerOption("1", "ответ 1", false),
-                                AnswerOption("0", "ответ 2", false),
-                                AnswerOption("2", "ответ 3", false),
-                                AnswerOption("3", "ответ 4", false),
-                                AnswerOption("4", "ответ 5", false),
-                                AnswerOption("5", "ответ 6", false)
-                            ),
-                            listOf(
-                                "455d8c87-c253-42b7-970d-e3965ac95424.docx",
-                                "455d8c87-c253-42b7-970d-e3965ac95424.docx"
-                            ),
-                            30,
-                            LocalDateTime.now().toString()
-                        )
-                    )
-                }
-                    set(value) {}
-                override var currentBlock: MutableState<Block?>
-                    get() = TODO("Not yet implemented")
-                    set(value) {}
-                override var taskStartTime: LocalDateTime = LocalDateTime.now()
-
-                override val answers: SnapshotStateList<String> =
-                    remember { mutableStateListOf<String>() }
-                override val disableTask: MutableState<Boolean> = remember { mutableStateOf(false) }
-
-                override val showResults: MutableState<Boolean> = remember { mutableStateOf(false) }
-
-                override val correctAnswer: MutableList<String>
-                    get() = TODO("Not yet implemented")
-                override var points: Int?
-                    get() = TODO("Not yet implemented")
-                    set(value) {}
-                override var isAnswerCorrect: TaskAnswerStatus?
-                    get() = TODO("Not yet implemented")
-                    set(value) {}
-
-                override fun chooseTask(
-                    eventId: String,
-                    taskId: String,
-                    onNoInternet: () -> Unit
-                ) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun sendAnswer(eventId: String, onNoInternet: () -> Unit) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onDownloadFile(fileName: String, fileUri: String) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onOpenFile(fileUri: String) {
-                    TODO("Not yet implemented")
-                }
-            },
-            {},
-            {}
-        )
-    }
-}
+//@Preview
+//@Composable
+//fun TaskPreview() {
+//    val flowmap = remember { mutableStateMapOf<String, Flow<FileDownloadStatus>>() }
+//    EduPlayTheme(false) {
+//        TaskScreen(
+//            PaddingValues(),
+//            "1",
+//            object : EventStageViewModelInterface {
+//                override val fileStatusFlows: SnapshotStateMap<String, Flow<FileDownloadStatus>>
+//                    get() = flowmap
+//                override val currentStageType: MutableState<StageType> =
+//                    remember { mutableStateOf(StageType.TASK) }
+//                override var currentTask: MutableState<Task?> = remember {
+//                    mutableStateOf<Task?>(
+//                        Task(
+//                            "1",
+//                            "1",
+//                            "Задание 4 ",
+//                            "Отсканировать код",
+//                            TaskType.QR.optionNumber,
+//                            listOf(
+//                                AnswerOption("1", "ответ 1", false),
+//                                AnswerOption("0", "ответ 2", false),
+//                                AnswerOption("2", "ответ 3", false),
+//                                AnswerOption("3", "ответ 4", false),
+//                                AnswerOption("4", "ответ 5", false),
+//                                AnswerOption("5", "ответ 6", false)
+//                            ),
+//                            listOf(
+//                                "455d8c87-c253-42b7-970d-e3965ac95424.docx",
+//                                "455d8c87-c253-42b7-970d-e3965ac95424.docx"
+//                            ),
+//                            30,
+//                            LocalDateTime.now().toString()
+//                        )
+//                    )
+//                }
+//                    set(value) {}
+//                override var currentBlock: MutableState<Block?>
+//                    get() = TODO("Not yet implemented")
+//                    set(value) {}
+//                override var taskStartTime: LocalDateTime = LocalDateTime.now()
+//
+//                override val answers: SnapshotStateList<String> =
+//                    remember { mutableStateListOf<String>() }
+//                override val disableTask: MutableState<Boolean> = remember { mutableStateOf(false) }
+//
+//                override val showResults: MutableState<Boolean> = remember { mutableStateOf(false) }
+//
+//                override val correctAnswer: MutableList<String>
+//                    get() = TODO("Not yet implemented")
+//                override var points: Int?
+//                    get() = TODO("Not yet implemented")
+//                    set(value) {}
+//                override var isAnswerCorrect: TaskAnswerStatus?
+//                    get() = TODO("Not yet implemented")
+//                    set(value) {}
+//
+//                override fun chooseTask(
+//                    eventId: String,
+//                    taskId: String,
+//                    onNoInternet: () -> Unit
+//                ) {
+//                    TODO("Not yet implemented")
+//                }
+//
+//                override fun sendAnswer(eventId: String, onNoInternet: () -> Unit) {
+//                    TODO("Not yet implemented")
+//                }
+//
+//                override fun getNextStage(eventId: String, onNoInternet: () -> Unit) {
+//                    TODO("Not yet implemented")
+//                }
+//
+//                override fun onDownloadFile(fileName: String, fileUri: String) {
+//                    TODO("Not yet implemented")
+//                }
+//
+//                override fun onOpenFile(fileUri: String) {
+//                    TODO("Not yet implemented")
+//                }
+//            },
+//            {},
+//            {}
+//        )
+//    }
+//}

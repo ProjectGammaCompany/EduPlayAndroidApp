@@ -98,7 +98,7 @@ fun MainScreen(
         joinByCode = true
     }
     if (joinByCode) {
-        JoinByCodeDialog({joinByCode=false}, navController)
+        JoinByCodeDialog({ joinByCode = false }, navController)
     }
 
     MainScreen(
@@ -127,7 +127,7 @@ private fun MainScreen(
     isCompetitionMode: State<Boolean>,
     onStopCompetition: () -> Unit,
     onSearch: () -> Unit,
-    onJoinByCode: ()->Unit
+    onJoinByCode: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -142,8 +142,8 @@ private fun MainScreen(
     ) {
         CenterAlignedTopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
+                containerColor = colorScheme.primaryContainer,
+                titleContentColor = colorScheme.primary,
             ),
             actions = {
                 if (isCompetitionMode.value) {
@@ -169,7 +169,7 @@ private fun MainScreen(
 
 
         Button(
-            onClick = { onJoinByCode()},
+            onClick = { onJoinByCode() },
             modifier = Modifier.align(Alignment.End)
         ) {
             Text(stringResource(R.string.join_by_code))

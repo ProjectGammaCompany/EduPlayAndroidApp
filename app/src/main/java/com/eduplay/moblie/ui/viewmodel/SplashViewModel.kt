@@ -13,7 +13,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class SplashViewModel @Inject constructor(eduRepository: EduRepository, tokenManager: TokenManager): ViewModel() {
+class SplashViewModel @Inject constructor(
+    eduRepository: EduRepository,
+    tokenManager: TokenManager
+) : ViewModel() {
     private val mutableStateFlow = MutableStateFlow(true)
     val isLoading = mutableStateFlow.asStateFlow()
 
@@ -28,11 +31,7 @@ class SplashViewModel @Inject constructor(eduRepository: EduRepository, tokenMan
             } catch (_: NotAuthorisedException) {
                 isAuthorisedFlow.value = false
             } catch (_: Exception) {
-                if (tokenManager.getAccessToken().first().isNotEmpty()) {
-                    isAuthorisedFlow.value = true
-                } else {
-                    isAuthorisedFlow.value = false
-                }
+                isAuthorisedFlow.value = tokenManager.getAccessToken().first().isNotEmpty()
             }
 
             mutableStateFlow.value = false

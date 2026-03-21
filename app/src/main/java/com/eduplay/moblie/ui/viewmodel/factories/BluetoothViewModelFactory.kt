@@ -7,7 +7,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
 
-class BluetoothViewModelFactory(val adapter: State<BluetoothAdapter?>, val exchangeUseCase: BluetoothDataExchangeUseCase) :
+class BluetoothViewModelFactory(
+    val adapter: State<BluetoothAdapter?>,
+    val exchangeUseCase: BluetoothDataExchangeUseCase
+) :
     ViewModelProvider.NewInstanceFactory() {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

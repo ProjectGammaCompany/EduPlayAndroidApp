@@ -5,6 +5,7 @@ enum class StageType(val stageName: String) {
     BLOCK("block"),
     END("end"),
     NONE("none");
+
     companion object {
         fun stringValueOf(value: String): StageType {
             for (element in StageType.entries) {

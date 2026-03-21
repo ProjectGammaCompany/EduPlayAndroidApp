@@ -43,7 +43,12 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val groups = mutableStateListOf<EventGroup>()
     val joinCode = mutableStateOf("")
 
-    fun fetchData(eventId: String, callBack: () -> Unit, onNoInternet: () -> Unit, context: Context) {
+    fun fetchData(
+        eventId: String,
+        callBack: () -> Unit,
+        onNoInternet: () -> Unit,
+        context: Context
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             val role = repository.getRole(eventId)
 
@@ -163,7 +168,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
             try {
                 joinCode.value = repository.getJoinCode(eventId).joinCode
             } catch (e: Exception) {
-                Log.e("JOIN_CODE", e.message ?:"", e)
+                Log.e("JOIN_CODE", e.message ?: "", e)
             }
         }
     }

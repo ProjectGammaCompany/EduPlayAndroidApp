@@ -20,15 +20,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,12 +33,10 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.network.NetworkHeaders
 import com.eduplay.moblie.R
-import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
-import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.MyEventsViewModel
@@ -77,7 +71,7 @@ fun MyEventsScreen(
         viewModel.created,
         onEventClick,
         imageHeaderViewModel.headers,
-        {image: String -> imageHeaderViewModel.getFullUrl(image)}
+        { image: String -> imageHeaderViewModel.getFullUrl(image) }
     )
 
 }
@@ -86,7 +80,7 @@ fun MyEventsScreen(
 private fun MyEventsScreen(
     innerPaddingValues: PaddingValues,
     onFavouriteToggle: (String, Boolean) -> Unit,
-    favorite:Flow<PagingData<QuestShortInfo>>,
+    favorite: Flow<PagingData<QuestShortInfo>>,
     completed: Flow<PagingData<QuestShortInfo>>,
     created: Flow<PagingData<QuestShortInfo>>,
     onEventClick: (String) -> Unit,
@@ -138,7 +132,7 @@ private fun MyEventsScreen(
                 onEventClick,
                 headers,
                 imageUrl
-            );
+            )
 
             1 -> ListOfEvents(
                 completed,
@@ -146,7 +140,7 @@ private fun MyEventsScreen(
                 onEventClick,
                 headers,
                 imageUrl
-            );
+            )
 
             2 -> ListOfEvents(
                 created,
@@ -154,7 +148,7 @@ private fun MyEventsScreen(
                 onEventClick,
                 headers,
                 imageUrl
-            );
+            )
 
             else -> Box {}
         }

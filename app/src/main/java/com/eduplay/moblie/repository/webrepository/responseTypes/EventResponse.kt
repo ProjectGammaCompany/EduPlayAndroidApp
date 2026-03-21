@@ -2,7 +2,6 @@ package com.eduplay.moblie.repository.responseTypes
 
 import com.eduplay.moblie.models.EventTag
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDateTime
 
 data class EventResponse(
     val id: String,

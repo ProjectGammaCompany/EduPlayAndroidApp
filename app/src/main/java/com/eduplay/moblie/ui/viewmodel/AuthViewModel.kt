@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.requestTypes.Auth

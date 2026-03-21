@@ -11,10 +11,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 import java.net.ConnectException
-import java.util.NoSuchElementException
 
 @HiltViewModel
-class JoinByCodeViewModel @Inject constructor(private val repository: EduRepository): ViewModel() {
+class JoinByCodeViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
     val showGroupFields = mutableStateOf(false)
     val noInternet = mutableStateOf(false)
     val badCode = mutableStateOf(false)
@@ -54,7 +53,7 @@ class JoinByCodeViewModel @Inject constructor(private val repository: EduReposit
             val groupPass = if (showGroupFields.value) groupPassword else null
             try {
                 eventId.value = repository.enterPrivateEvent(
-                    code?: "",
+                    code ?: "",
                     EventPasswords(
                         eventPassword,
                         group,

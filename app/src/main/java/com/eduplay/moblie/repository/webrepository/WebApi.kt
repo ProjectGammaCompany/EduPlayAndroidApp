@@ -2,19 +2,14 @@ package com.eduplay.moblie.repository.webrepository
 
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
-import com.eduplay.moblie.models.EventRole
-import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
-import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventComplaint
 import com.eduplay.moblie.repository.requestTypes.EventPasswords
 import com.eduplay.moblie.repository.requestTypes.FavoriteEvent
-import com.eduplay.moblie.repository.requestTypes.Refresh
 import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
-import com.eduplay.moblie.repository.responseTypes.AuthResponse
 import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
 import com.eduplay.moblie.repository.responseTypes.EventRoleResponse
@@ -133,7 +128,7 @@ interface WebApi {
 
     @GET("/event/{eventId}/playerStats")
     @InjectAuth
-    suspend fun getPlayerStats(@Path("eventId") eventId: String) : Response<PlayerStats>
+    suspend fun getPlayerStats(@Path("eventId") eventId: String): Response<PlayerStats>
 
     @GET("/tags")
     @InjectAuth

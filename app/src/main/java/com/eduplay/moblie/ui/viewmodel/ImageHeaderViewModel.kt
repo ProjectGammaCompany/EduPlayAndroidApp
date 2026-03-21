@@ -28,6 +28,7 @@ class ImageHeaderViewModel @Inject constructor(private val tokenManager: TokenMa
             }
         }
     }
+
     fun getFullUrl(fileName: String): String {
         return BuildConfig.BACKEND_FILE_URL + fileName
     }

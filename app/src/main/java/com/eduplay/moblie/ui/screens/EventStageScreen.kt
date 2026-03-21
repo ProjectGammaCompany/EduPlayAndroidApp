@@ -48,7 +48,6 @@ import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.screens.TaskScreen.TaskScreen
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
-import kotlin.collections.toList
 
 @Composable
 fun EventStageScreen(
@@ -61,7 +60,8 @@ fun EventStageScreen(
 ) {
     val context = LocalContext.current
     if (isCompetitionMode.value) {
-        viewModel.bluetoothCallBack = {points -> bluetoothViewModel.sendResultsToSockets(points, context)}
+        viewModel.bluetoothCallBack =
+            { points -> bluetoothViewModel.sendResultsToSockets(points, context) }
     }
     var showGoBackDialog by remember { mutableStateOf(false) }
     val onGoBack = {
@@ -77,7 +77,7 @@ fun EventStageScreen(
     }
     when (viewModel.currentStageType.value) {
         StageType.NONE -> {
-            viewModel.getNextStage(eventId, {noInternet = true; cantShowData = true})
+            viewModel.getNextStage(eventId, { noInternet = true; cantShowData = true })
         }
 
         StageType.TASK -> {
@@ -94,7 +94,7 @@ fun EventStageScreen(
             ParallelBlockScreen(
                 block = viewModel.currentBlock.value!!,
                 onChooseTask = { taskId: String ->
-                    viewModel.chooseTask(eventId, taskId, {noInternet=true})
+                    viewModel.chooseTask(eventId, taskId, { noInternet = true })
                 },
                 onGoBack = onGoBack,
                 innerPaddingValues = innerPadding
@@ -223,7 +223,7 @@ private fun ResultDialog(
                                     overflow = TextOverflow.Ellipsis,
                                     maxLines = 1
                                 )
-                                Text(": "+it.second)
+                                Text(": " + it.second)
                             }
                         }
                     }
@@ -232,7 +232,8 @@ private fun ResultDialog(
                     Row {
                         Text(
                             text = stringResource(R.string.points) + ":",
-                            style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium).copy(color = colorScheme.onBackground)
+                            style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                                .copy(color = colorScheme.onBackground)
                         )
                         Text(
                             text = points.toString(),
@@ -243,7 +244,8 @@ private fun ResultDialog(
                 if (answers != null) {
                     Text(
                         text = stringResource(R.string.сorrect_answers) + ":",
-                        style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium).copy(color = colorScheme.onBackground)
+                        style = typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            .copy(color = colorScheme.onBackground)
                     )
                     Column(
                         modifier = Modifier

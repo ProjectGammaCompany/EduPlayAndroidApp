@@ -137,7 +137,9 @@ fun QuestListElement(
             }
             // список тегов
             Row(
-                modifier = Modifier.testTag("tag_row").fillMaxWidth()
+                modifier = Modifier
+                    .testTag("tag_row")
+                    .fillMaxWidth()
             ) {
                 questShortInfo.tags.forEach { tag ->
                     QuestTag(tag.name)
@@ -221,7 +223,7 @@ fun QuestListElementPreview() {
                     EventTag("", "long as hell tag")
                 ),
                 true
-            ), {}, {}, headers, {it}
+            ), {}, {}, headers, { it }
         )
 
         QuestListElement(
@@ -244,7 +246,7 @@ fun QuestListElementPreview() {
             ), {},
             {},
             headers,
-            {it}
+            { it }
 
         )
 
@@ -260,7 +262,7 @@ fun QuestListElementPreview() {
                 false
             ), {}, {},
             headers,
-            {it}
+            { it }
         )
     }
 }

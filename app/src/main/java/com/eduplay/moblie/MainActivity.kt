@@ -2,9 +2,9 @@ package com.eduplay.moblie
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Intent
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -52,22 +52,25 @@ class MainActivity : FragmentActivity() {
     private val adapter = mutableStateOf<BluetoothAdapter?>(null)
     private val manager = mutableStateOf<BluetoothManager?>(null)
 
-    private val bluetoothViewModel: BluetoothViewModel by viewModels{
-        BluetoothViewModelFactory(adapter as State<BluetoothAdapter?>, BluetoothDataExchangeUseCase())
+    private val bluetoothViewModel: BluetoothViewModel by viewModels {
+        BluetoothViewModelFactory(
+            adapter as State<BluetoothAdapter?>,
+            BluetoothDataExchangeUseCase()
+        )
     }
 
     @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        val updateAdapter = {adapter: BluetoothAdapter? -> this.adapter.value = adapter}
-        val updateManger = {manager: BluetoothManager? -> this.manager.value = manager}
+        val updateAdapter = { adapter: BluetoothAdapter? -> this.adapter.value = adapter }
+        val updateManger = { manager: BluetoothManager? -> this.manager.value = manager }
         val splashScreen = installSplashScreen()
         val isCompetitionMode = mutableStateOf(false)
-        val toggleCompetitionMode = {mode: Boolean -> isCompetitionMode.value = mode}
+        val toggleCompetitionMode = { mode: Boolean -> isCompetitionMode.value = mode }
         val onStopCompetition = {
             isCompetitionMode.value = false
             bluetoothViewModel.stopScan(this)
-           // bluetoothViewModel.stopAllSocketConnections()
+            // bluetoothViewModel.stopAllSocketConnections()
         }
         super.onCreate(savedInstanceState)
 
@@ -103,7 +106,12 @@ class MainActivity : FragmentActivity() {
                             )
                         }
                         composable("main_screen") {
-                            MainScreen(innerPadding, navController, isCompetitionMode=isCompetitionMode, onStopCompetition = onStopCompetition)
+                            MainScreen(
+                                innerPadding,
+                                navController,
+                                isCompetitionMode = isCompetitionMode,
+                                onStopCompetition = onStopCompetition
+                            )
                         }
                         composable(
                             "event_screen/{eventId}",
@@ -120,7 +128,7 @@ class MainActivity : FragmentActivity() {
                                 isCompetitionMode = isCompetitionMode,
                                 toggleCompetitionMode = toggleCompetitionMode,
                                 bluetoothViewModel = bluetoothViewModel,
-                                onDownload = startDownloadService
+                                onDownloadEvent = startDownloadService
                             )
                         }
 

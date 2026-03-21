@@ -59,7 +59,7 @@ fun ProfileScreen(
     var noInternet by remember { mutableStateOf(false) }
     var gotProfile by remember { mutableStateOf(false) }
     val onNoInternet = { noInternet = true }
-    val onFetchedData = {  }
+    { }
     if (!gotProfile) {
         viewModel.fetchProfileInfo(onNoInternet)
         gotProfile = true
@@ -94,7 +94,7 @@ fun ProfileScreen(
         onLogout,
         viewModel.avatar.value,
         imageHeaderViewModel.headers,
-        {image: String -> imageHeaderViewModel.getFullUrl(image)}
+        { image: String -> imageHeaderViewModel.getFullUrl(image) }
     )
 
 }
@@ -110,7 +110,6 @@ private fun ProfileScreen(
     headers: State<NetworkHeaders>,
     imageUrl: (String) -> String
 ) {
-    var editEmail by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -151,19 +150,20 @@ private fun ProfileScreen(
         Row {
             Text(
                 text = stringResource(R.string.email),
-                style = typography.bodyLarge.copy(fontWeight = FontWeight.Medium).copy(color = colorScheme.onBackground),
+                style = typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                    .copy(color = colorScheme.onBackground),
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(end = 5.dp)
             )
 //            if (!editEmail) {
-                Text(
-                    text = email.value,
-                    style = typography.bodyLarge.copy(color = colorScheme.onBackground),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(end = 5.dp)
-                )
+            Text(
+                text = email.value,
+                style = typography.bodyLarge.copy(color = colorScheme.onBackground),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(end = 5.dp)
+            )
 //                IconButton(onClick = { editEmail = true }) {
 //                    Icon(
 //                        ImageVector.vectorResource(R.drawable.edit),
@@ -237,6 +237,6 @@ fun ProfilePreview() {
         {},
         "",
         remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-        {it}
+        { it }
     )
 }

@@ -24,7 +24,7 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
 
     val unauthorised = mutableStateOf(false)
 
-    fun logout(onErrorCallBack: ()->Unit) {
+    fun logout(onErrorCallBack: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 canLogout.value = repository.logout()
@@ -33,7 +33,7 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
                 canLogout.value = true
-            } catch (_:Exception) {
+            } catch (_: Exception) {
                 canLogout.value = true
             }
         }

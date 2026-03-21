@@ -1,7 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -16,11 +15,12 @@ import kotlinx.coroutines.launch
 import java.net.ConnectException
 
 @HiltViewModel
-class EventResultsViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
+class EventResultsViewModel @Inject constructor(private val repository: EduRepository) :
+    ViewModel() {
     val users = mutableStateListOf<PlayerStats.StatUser>()
     val groups = mutableStateListOf<PlayerStats.StatGroup>()
     val unauthorised = mutableStateOf(false)
-    fun fetchResults(eventId: String, onNoInternet: ()->Unit) {
+    fun fetchResults(eventId: String, onNoInternet: () -> Unit) {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {

@@ -12,12 +12,7 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
-import android.companion.AssociationInfo
-import android.companion.AssociationRequest
-import android.companion.BluetoothDeviceFilter
-import android.companion.CompanionDeviceManager
 import android.content.Context
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
@@ -29,8 +24,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.startIntentSenderForResult
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.R
@@ -40,7 +33,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.UUID
-import java.util.concurrent.Executor
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
@@ -256,7 +248,7 @@ class BluetoothViewModel(
         connectSockets(address, onCouldNotConnect)
     }
 
-    @RequiresPermission(allOf=[Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
+    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     private fun connectSockets(address: String, onCouldNotConnect: () -> Unit) {
         adapter.value?.cancelDiscovery()
         viewModelScope.launch(Dispatchers.IO) {
@@ -270,7 +262,7 @@ class BluetoothViewModel(
                 val bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid)
                 try {
                     bluetoothSocket.connect()
-                    connectedDevices[device] =  bluetoothSocket
+                    connectedDevices[device] = bluetoothSocket
                     devicesConnectionStatus[device.name] = true
                     listenToSocket(bluetoothSocket)
                 } catch (e: Exception) {
@@ -287,8 +279,8 @@ class BluetoothViewModel(
 
     private fun listenToSocket(socket: BluetoothSocket) {
         val handler = object : Handler(Looper.getMainLooper()) {
-            override fun handleMessage(msg: Message): Unit {
-                super.handleMessage(msg);
+            override fun handleMessage(msg: Message) {
+                super.handleMessage(msg)
                 Log.d("Bluetooth_handler", "{${msg.what}}")
                 when (msg.what) {
                     RECIEVED_SCORE -> {

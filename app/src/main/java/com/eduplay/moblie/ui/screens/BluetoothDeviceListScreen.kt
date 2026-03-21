@@ -74,7 +74,9 @@ fun BluetoothDeviceListScreen(
             .padding(horizontal = 5.dp)
             .fillMaxSize()
     ) {
-        Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()) {
             IconButton(
                 onClick = onReturn,
                 modifier = Modifier
@@ -114,9 +116,11 @@ fun BluetoothDeviceListScreen(
             color = colorScheme.tertiary
         )
 
-        Row(Modifier
-            .align(Alignment.CenterHorizontally)
-            .padding(top = 2.dp)) {
+        Row(
+            Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 2.dp)
+        ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.progress),
                 contentDescription = "",
@@ -142,7 +146,7 @@ fun BluetoothDeviceListScreen(
                         .padding(vertical = 2.dp)
                         .border(1.dp, colorScheme.primary, shape = RoundedCornerShape(5.dp))
                 ) {
-                    Row() {
+                    Row {
                         Text(
                             text = it.value ?: it.key,
                             modifier = Modifier

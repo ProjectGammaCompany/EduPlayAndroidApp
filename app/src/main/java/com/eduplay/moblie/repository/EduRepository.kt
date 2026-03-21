@@ -35,7 +35,6 @@ class EduRepository @Inject constructor(
 ) {
 
 
-
     suspend fun login(auth: Auth): AuthResult {
         var authResult: AuthResult
         try {
@@ -228,7 +227,10 @@ class EduRepository @Inject constructor(
         return webRepository.getRequiredJoinFields(joinCode)
     }
 
-    suspend fun enterPrivateEvent(joinCode: String, eventPasswords: EventPasswords): EventIdResponse {
+    suspend fun enterPrivateEvent(
+        joinCode: String,
+        eventPasswords: EventPasswords
+    ): EventIdResponse {
         return webRepository.enterPrivateEvent(joinCode, eventPasswords)
     }
 

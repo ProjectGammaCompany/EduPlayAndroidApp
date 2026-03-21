@@ -26,7 +26,6 @@ import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.useCases.TokenManager
 import jakarta.inject.Inject
 import java.time.LocalDateTime
-import java.util.NoSuchElementException
 
 
 class WebRepository @Inject constructor(
@@ -35,7 +34,7 @@ class WebRepository @Inject constructor(
     private val tokenManager: TokenManager,
 
     ) : Repository {
-    override suspend fun login(auth: Auth): AuthResult {
+    suspend fun login(auth: Auth): AuthResult {
         val response = authApi.login(auth)
         val body = response.body()
         Log.d("Requests AUTHORISATION", response.code().toString() + response.raw())
@@ -48,7 +47,7 @@ class WebRepository @Inject constructor(
         return AuthResult.INVALID_USER
     }
 
-    override suspend fun logout(): Boolean {
+    suspend fun logout(): Boolean {
         val response = authApi.logout()
         if (response.isSuccessful) {
             tokenManager.saveAccessToken("")
@@ -207,15 +206,16 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("cant send answer $eventId")
     }
 
-    suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
-        val response = api.postTaskChoice(eventId, TaskFromBlock(blockId = blockId, taskId = taskId))
+    override suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
+        val response =
+            api.postTaskChoice(eventId, TaskFromBlock(blockId = blockId, taskId = taskId))
         if (response.isSuccessful) {
             return true
         }
         throw IllegalAccessException("cant enter next stage $eventId")
     }
 
-    suspend fun getResults(eventId: String): PlayerStats {
+    override suspend fun getResults(eventId: String): PlayerStats {
         val response = api.getPlayerStats(eventId)
         val body = response.body()
         Log.d("Requests results", response.code().toString() + response.raw())
@@ -225,7 +225,7 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("cant enter next stage $eventId")
     }
 
-    suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean {
+    override suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean {
         val response = api.addToFavourite(FavoriteEvent(eventId, isFavorite))
         Log.d("Requests add favorite events", response.code().toString() + response.raw())
         if (response.isSuccessful) {
@@ -263,7 +263,10 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("cant get tags")
     }
 
-    suspend fun enterPrivateEvent(joinCode: String, eventPasswords: EventPasswords): EventIdResponse {
+    suspend fun enterPrivateEvent(
+        joinCode: String,
+        eventPasswords: EventPasswords
+    ): EventIdResponse {
         val response = api.postPasswords(joinCode, eventPasswords)
         val body = response.body()
         if (response.isSuccessful && body != null) {

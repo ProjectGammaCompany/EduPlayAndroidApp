@@ -37,7 +37,7 @@ class AllEventsPagingWebSource(
                 nextKey = if (responseData.isEmpty()) null else pageIndex + 1
             )
         } catch (e: Exception) {
-            Log.e("LOAD_MAIN_EVENT_LIST", (e.message?:"") + ((e.cause?.message) ?:" "))
+            Log.e("LOAD_MAIN_EVENT_LIST", (e.message ?: "") + ((e.cause?.message) ?: " "))
             LoadResult.Error(e)
         }
     }

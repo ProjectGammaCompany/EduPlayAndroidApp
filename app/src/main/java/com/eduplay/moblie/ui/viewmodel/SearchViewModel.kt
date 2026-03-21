@@ -14,13 +14,12 @@ import com.eduplay.moblie.repository.EduRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.net.ConnectException
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(private val repository: EduRepository): ViewModel() {
+class SearchViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
     val unauthorised = mutableStateOf(false)
     val didntFindEvents = mutableStateOf(false)
     val events: MutableState<Flow<PagingData<QuestShortInfo>>> = mutableStateOf(flowOf())
@@ -31,13 +30,14 @@ class SearchViewModel @Inject constructor(private val repository: EduRepository)
     init {
         viewModelScope.launch {
             try {
-                tags.addAll(repository
-                    .getTags()
-                    .tags
-                    .map {
-                        tagIds[it.name] = it.id
-                        it.name
-                    }
+                tags.addAll(
+                    repository
+                        .getTags()
+                        .tags
+                        .map {
+                            tagIds[it.name] = it.id
+                            it.name
+                        }
                 )
             } catch (_: ConnectException) {
                 noInternetConnection.value = true
@@ -76,7 +76,7 @@ class SearchViewModel @Inject constructor(private val repository: EduRepository)
         } catch (_: NotAuthorisedException) {
             unauthorised.value = true
             events.value = flowOf()
-        }  catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e("All events", e.message ?: "", e)
             events.value = flowOf()
             didntFindEvents.value = true

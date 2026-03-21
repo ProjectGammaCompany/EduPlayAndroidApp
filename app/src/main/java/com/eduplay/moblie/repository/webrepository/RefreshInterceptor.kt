@@ -16,7 +16,7 @@ class RefreshInterceptor @Inject constructor(
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request: Request = chain.request()
-        val response: Response = chain.proceed(request);
+        val response: Response = chain.proceed(request)
 
         if (response.code == 401) {
             response.close()
@@ -47,11 +47,11 @@ class RefreshInterceptor @Inject constructor(
                 .newBuilder()
                 .removeHeader("Authorization")
                 .addHeader("Authorization", "Bearer ${newTokens.accessToken}")
-                .build();
-            return chain.proceed(newRequest);
+                .build()
+            return chain.proceed(newRequest)
         }
 
-        return response;
+        return response
     }
 
 }

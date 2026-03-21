@@ -9,8 +9,6 @@ import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.delay
@@ -19,10 +17,8 @@ import kotlinx.coroutines.delay
 class BluetoothConnectionFragment : Fragment() {
 
     private lateinit var bluetoothEnableLauncher: ActivityResultLauncher<Intent>
-    private final val defaultValue = -2
+    private val defaultValue = -2
     private var activityResult = defaultValue
-
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -11,7 +11,7 @@ import android.os.Process
 import android.util.Log
 import android.widget.Toast
 
-class EventDownloadService: Service() {
+class EventDownloadService : Service() {
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -26,14 +26,14 @@ class EventDownloadService: Service() {
         override fun handleMessage(msg: Message) {
             // Normally we would do some work here, like download a file.
             // For our sample, we just sleep for 5 seconds.
-            Log.d("SERVICE_TEST", "starting "+msg.arg1)
+            Log.d("SERVICE_TEST", "starting " + msg.arg1)
             try {
                 Thread.sleep(5000)
             } catch (e: InterruptedException) {
                 // Restore interrupt status.
                 Thread.currentThread().interrupt()
             }
-            Log.d("SERVICE_TEST", "stopping "+msg.arg1)
+            Log.d("SERVICE_TEST", "stopping " + msg.arg1)
 
             // Stop the service using the startId, so that we don't stop
             // the service in the middle of handling another job

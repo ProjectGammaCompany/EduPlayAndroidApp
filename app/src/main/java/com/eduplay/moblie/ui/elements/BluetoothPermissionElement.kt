@@ -35,7 +35,12 @@ fun BluetoothPermissionElement(
         rememberPermissionState(permission = Manifest.permission.BLUETOOTH_ADVERTISE)
     var askAdvertisePermission by remember { mutableStateOf(false) }
 
-    LaunchedEffect(askScanPermission, askConnectPermission, askLocationPermission, askAdvertisePermission) {
+    LaunchedEffect(
+        askScanPermission,
+        askConnectPermission,
+        askLocationPermission,
+        askAdvertisePermission
+    ) {
         if (askScanPermission) {
             bluetoothScanPermission.launchPermissionRequest()
             askScanPermission = false

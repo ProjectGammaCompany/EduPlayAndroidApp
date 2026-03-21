@@ -1,6 +1,7 @@
 package com.eduplay.moblie.repository.localrepository
 
 import android.util.Log
+import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
@@ -8,12 +9,13 @@ import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
+import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.services.JwtDecoder
 import com.eduplay.moblie.services.OfflineModeManager
-import com.eduplay.moblie.services.TokenManager
+import com.eduplay.moblie.useCases.TokenManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -25,7 +27,14 @@ class LocalRepository @Inject constructor(
     private val offlineModeManager: OfflineModeManager
 
 ) : Repository {
-    override suspend fun getEvents(page: Int): List<QuestShortInfo> {
+    override suspend fun getEvents(
+        page: Int,
+        tags: List<String>?,
+        decliningRating: Boolean,
+        active: Boolean,
+        favorites: Boolean,
+        title: String
+    ): List<QuestShortInfo> {
         TODO("Not yet implemented")
     }
 
@@ -85,6 +94,10 @@ class LocalRepository @Inject constructor(
         taskId: String,
         answers: List<String>
     ): AnswerResult {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun register(auth: RegistrationData): AuthResult {
         TODO("Not yet implemented")
     }
 

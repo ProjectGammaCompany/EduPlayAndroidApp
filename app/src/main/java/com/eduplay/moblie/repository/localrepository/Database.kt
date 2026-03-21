@@ -11,6 +11,6 @@ import com.eduplay.moblie.repository.localrepository.entity.UserEntity
     ],
     version = 1
 )
-abstract class Database:  RoomDatabase(), EventDatabase {
+abstract class Database : RoomDatabase(), EventDatabase {
     abstract override fun userDao(): UserDao
 }
