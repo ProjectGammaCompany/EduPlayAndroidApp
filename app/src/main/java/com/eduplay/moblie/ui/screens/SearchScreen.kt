@@ -342,7 +342,6 @@ private fun TagList(
 @Composable
 private fun SearchPrev() {
     val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
-    { string: String -> }
     val nothingB = { string: String, bool: Boolean -> }
     EduPlayTheme {
         SearchScreen(
