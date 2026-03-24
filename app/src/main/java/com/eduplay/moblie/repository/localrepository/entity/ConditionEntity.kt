@@ -3,6 +3,7 @@ package com.eduplay.moblie.repository.localrepository.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -20,6 +21,10 @@ import androidx.room.PrimaryKey
             childColumns = arrayOf("nextBlockId"),
             onDelete = ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        Index("prevBlockId"),
+        Index("nextBlockId"),
     ]
 )
 data class ConditionEntity(

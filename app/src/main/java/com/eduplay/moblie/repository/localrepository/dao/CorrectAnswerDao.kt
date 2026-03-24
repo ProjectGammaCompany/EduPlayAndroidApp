@@ -19,5 +19,5 @@ interface CorrectAnswerDao {
 
     @Transaction
     @Query("SELECT * FROM correct_answers WHERE taskId = :taskId")
-    suspend fun getAnswersByTask(taskId: String,): List<BlockEntity>?
+    suspend fun getAnswersByTask(taskId: String,): List<CorrectAnswerEntity>
 }
