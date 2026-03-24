@@ -13,6 +13,6 @@ interface AnswerDao {
     suspend fun insertAnswer(answerEntity: AnswerEntity)
 
     @Transaction
-    @Query("SELECT * FROM answers WHERE answerId = :id AND userId = :userId")
-    suspend fun getAnswerByIdAndUserId(id: String, userId: String): AnswerEntity?
+    @Query("SELECT * FROM answers WHERE taskId = :taskId AND userId = :userId")
+    suspend fun getAnswerByTaskAndUserId(taskId: String, userId: String): AnswerEntity?
 }

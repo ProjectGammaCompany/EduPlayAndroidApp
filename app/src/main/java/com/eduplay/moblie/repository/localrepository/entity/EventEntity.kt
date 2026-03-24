@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.google.gson.Gson
 
 @Entity(
     tableName = "events",
@@ -40,4 +41,28 @@ data class EventEntity(
     val groupEvent: Boolean,
     @ColumnInfo(name = "authorId")
     val authorId: String
-)
+) {
+    constructor(
+        id: String,
+         title: String,
+         description: String,
+         tags: List<String>,
+         cover: String,
+         startDate: String,
+         endDate: String,
+         lastEditionDate: String,
+         groupEvent: Boolean,
+         authorId: List<String>
+    ) : this(
+        id,
+        title,
+        description,
+        Gson().toJson(tags),
+        cover,
+        startDate,
+        endDate,
+        lastEditionDate,
+        groupEvent,
+        Gson().toJson(authorId)
+    )
+}

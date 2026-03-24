@@ -7,23 +7,24 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "options",
-    foreignKeys = [ForeignKey(
-        entity = TaskEntity::class,
-        parentColumns = arrayOf("taskId"),
-        childColumns = arrayOf("taskId"),
-        onDelete = ForeignKey.CASCADE
-    )],
+    tableName = "correct_answers",
+    foreignKeys = [
+        ForeignKey(
+            entity = TaskEntity::class,
+            parentColumns = arrayOf("taskId"),
+            childColumns = arrayOf("taskId"),
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
     indices = [
         Index("taskId")
     ]
 )
-data class OptionEntity(
-    @ColumnInfo(name = "optionId")
-    @PrimaryKey
-    val id: String,
+data class CorrectAnswerEntity(
     @ColumnInfo(name = "taskId")
     val taskId: String,
     @ColumnInfo(name = "value")
     val value: String,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int
 )

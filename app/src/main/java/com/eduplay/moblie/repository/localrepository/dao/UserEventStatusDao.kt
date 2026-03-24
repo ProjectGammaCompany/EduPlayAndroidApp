@@ -24,7 +24,7 @@ interface UserEventStatusDao {
 
     @Transaction
     @Query(
-        "SELECT * FROM user_status " + "WHERE userId = :userId AND eventId = :eventId"
+        "SELECT * FROM user_status WHERE userId = :userId AND eventId = :eventId"
     )
     suspend fun getStatusByUserAndEvent(
         userId: String, eventId: String
