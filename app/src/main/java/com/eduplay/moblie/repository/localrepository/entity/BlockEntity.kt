@@ -3,6 +3,7 @@ package com.eduplay.moblie.repository.localrepository.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -11,7 +12,10 @@ import androidx.room.PrimaryKey
         parentColumns = arrayOf("eventId"),
         childColumns = arrayOf("eventId"),
         onDelete = ForeignKey.CASCADE
-    )]
+    )],
+    indices = [
+        Index("eventId")
+    ]
 )
 data class BlockEntity(
     @PrimaryKey

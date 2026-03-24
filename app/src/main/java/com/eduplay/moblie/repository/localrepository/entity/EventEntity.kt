@@ -2,9 +2,22 @@ package com.eduplay.moblie.repository.localrepository.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "events")
+@Entity(
+    tableName = "events",
+    foreignKeys = [ForeignKey(
+        entity = UserEntity::class,
+        parentColumns = arrayOf("userId"),
+        childColumns = arrayOf("authorId"),
+        onDelete = ForeignKey.NO_ACTION
+    )],
+    indices = [
+        Index("authorId")
+    ]
+)
 data class EventEntity(
     @ColumnInfo(name = "eventId")
     @PrimaryKey
@@ -15,8 +28,8 @@ data class EventEntity(
     val description: String,
     @ColumnInfo(name = "tags")
     val tags: String,
-//    @ColumnInfo(name = "cover")
-//    val cover: String,
+    @ColumnInfo(name = "cover")
+    val cover: String,
     @ColumnInfo(name = "startDate")
     val startDate: String,
     @ColumnInfo(name = "endDate")
@@ -24,5 +37,7 @@ data class EventEntity(
     @ColumnInfo(name = "lastEditionDate")
     val lastEditionDate: String,
     @ColumnInfo(name = "groupEvent")
-    val groupEvent: Boolean
+    val groupEvent: Boolean,
+    @ColumnInfo(name = "authorId")
+    val authorId: String
 )

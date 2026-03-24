@@ -3,8 +3,10 @@ package com.eduplay.moblie.repository.localrepository.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.eduplay.moblie.models.TaskType
+import com.google.gson.Gson
 
 @Entity(
     tableName = "tasks",
@@ -13,7 +15,10 @@ import com.eduplay.moblie.models.TaskType
         parentColumns = arrayOf("blockId"),
         childColumns = arrayOf("blockId"),
         onDelete = ForeignKey.CASCADE
-    )]
+    )],
+    indices = [
+        Index("blockId")
+    ]
 )
 data class TaskEntity(
     @PrimaryKey
@@ -26,9 +31,9 @@ data class TaskEntity(
     @ColumnInfo(name = "description")
     val description: String,
     @ColumnInfo(name = "type")
-    val type: TaskType,
+    val type: Int,
     @ColumnInfo(name = "files")
-    val files: List<String>,
+    val files: String,
     @ColumnInfo(name = "time")
     val time: Int,
     @ColumnInfo(name = "points")
@@ -37,4 +42,28 @@ data class TaskEntity(
     val partialPoints: Boolean,
     @ColumnInfo(name = "taskOrder")
     val taskOrder: Int
-)
+) {
+    constructor(
+        id: String,
+        blockId: String,
+        name: String,
+        description: String,
+        type: TaskType,
+        files: List<String>,
+        time: Int,
+        points: Int,
+        partialPoints: Boolean,
+        taskOrder: Int
+    ) : this(
+        id,
+        blockId,
+        name,
+        description,
+        type.optionNumber,
+        Gson().toJson(files),
+        time,
+        points,
+        partialPoints,
+        taskOrder
+    )
+}
