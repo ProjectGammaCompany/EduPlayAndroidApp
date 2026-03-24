@@ -2,6 +2,7 @@ package com.eduplay.moblie.repository.localrepository
 
 import com.eduplay.moblie.repository.localrepository.dao.AnswerDao
 import com.eduplay.moblie.repository.localrepository.dao.BlockDao
+import com.eduplay.moblie.repository.localrepository.dao.ConditionDao
 import com.eduplay.moblie.repository.localrepository.dao.EventDao
 import com.eduplay.moblie.repository.localrepository.dao.GroupDao
 import com.eduplay.moblie.repository.localrepository.dao.OptionDao
@@ -18,4 +19,5 @@ interface EventDatabase {
     fun optionDao(): OptionDao
     fun taskDao(): TaskDao
     fun userEventStatus(): UserEventStatusDao
+    fun conditionDao(): ConditionDao
 }

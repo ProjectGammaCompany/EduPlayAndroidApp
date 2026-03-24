@@ -5,13 +5,17 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.eduplay.moblie.repository.localrepository.entity.EventEntity
-import com.eduplay.moblie.repository.localrepository.entity.UserEntity
 
 @Dao
 interface EventDao {
     @Insert
     suspend fun insertEvent(event: EventEntity)
+
+    @Transaction
+    @Update
+    suspend fun updateEvent(event: EventEntity)
 
     @Delete
     suspend fun deleteEvent(event: EventEntity)

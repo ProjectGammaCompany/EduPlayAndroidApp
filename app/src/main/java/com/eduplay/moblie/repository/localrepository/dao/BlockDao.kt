@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.eduplay.moblie.repository.localrepository.entity.BlockEntity
 
 @Dao
@@ -11,6 +12,9 @@ interface BlockDao {
     @Transaction
     @Insert
     suspend fun insertBlock(block: BlockEntity)
+
+    @Update
+    suspend fun updateBlock(block: BlockEntity)
 
     @Transaction
     @Query("SELECT * FROM blocks WHERE blockId = :id")
