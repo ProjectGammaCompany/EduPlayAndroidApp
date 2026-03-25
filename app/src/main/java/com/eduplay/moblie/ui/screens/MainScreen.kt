@@ -17,7 +17,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -119,7 +118,7 @@ fun MainScreen(
 @Composable
 private fun MainScreen(
     innerPaddingValues: PaddingValues,
-    events: Flow<PagingData<QuestShortInfo>>,
+    events: State<Flow<PagingData<QuestShortInfo>>>,
     onEventClick: (String) -> Unit,
     onFavourite: (String, Boolean) -> Unit,
     headers: State<NetworkHeaders>,
@@ -176,7 +175,7 @@ private fun MainScreen(
         }
 
 
-        val eventsInfo = events.collectAsLazyPagingItems()
+        val eventsInfo = events.value.collectAsLazyPagingItems()
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -236,7 +235,7 @@ fun MainScreenPreview() {
     EduPlayTheme {
         MainScreen(
             PaddingValues(0.dp),
-            events,
+            remember { mutableStateOf(events) },
             nothing,
             nothingB,
             headers,

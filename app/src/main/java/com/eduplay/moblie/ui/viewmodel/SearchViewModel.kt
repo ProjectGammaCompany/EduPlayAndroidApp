@@ -58,28 +58,30 @@ class SearchViewModel @Inject constructor(private val repository: EduRepository)
         title: String = ""
     ) {
         val searchTags: List<String> = tags?.map { tagIds[it] ?: "" }?.toList() ?: listOf()
-        try {
-            events.value = repository
-                .getEvents(
-                    tags = searchTags.ifEmpty { null },
-                    decliningRating = decliningRating,
-                    active = active,
-                    favorites = favorites,
-                    title = title,
-                )
-                .cachedIn(viewModelScope)
-            didntFindEvents.value = false
-        } catch (_: ConnectException) {
-            noInternetConnection.value = true
-            didntFindEvents.value = true
-            events.value = flowOf()
-        } catch (_: NotAuthorisedException) {
-            unauthorised.value = true
-            events.value = flowOf()
-        } catch (e: Exception) {
-            Log.e("All events", e.message ?: "", e)
-            events.value = flowOf()
-            didntFindEvents.value = true
+        viewModelScope.launch {
+            try {
+                events.value = repository
+                    .getEvents(
+                        tags = searchTags.ifEmpty { null },
+                        decliningRating = decliningRating,
+                        active = active,
+                        favorites = favorites,
+                        title = title,
+                    )
+                    .cachedIn(viewModelScope)
+                didntFindEvents.value = false
+            } catch (_: ConnectException) {
+                noInternetConnection.value = true
+                didntFindEvents.value = true
+                events.value = flowOf()
+            } catch (_: NotAuthorisedException) {
+                unauthorised.value = true
+                events.value = flowOf()
+            } catch (e: Exception) {
+                Log.e("All events", e.message ?: "", e)
+                events.value = flowOf()
+                didntFindEvents.value = true
+            }
         }
     }
 }

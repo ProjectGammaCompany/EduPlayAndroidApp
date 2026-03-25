@@ -71,7 +71,7 @@ class WebRepository @Inject constructor(
         return AuthResult.INVALID_USER
     }
 
-    override suspend fun getEvents(
+    suspend fun getEvents(
         page: Int,
         tags: List<String>?,
         decliningRating: Boolean,

@@ -13,27 +13,30 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import java.net.ConnectException
 
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(val repository: EduRepository) : ViewModel() {
 
     val unauthorised = mutableStateOf(false)
-    var events: Flow<PagingData<QuestShortInfo>>
+    val events = mutableStateOf(flowOf<PagingData<QuestShortInfo>>())
     val noInternetConnection = mutableStateOf(false)
 
     init {
-        try {
-            events = repository.getEvents().cachedIn(viewModelScope)
-        } catch (_: ConnectException) {
-            noInternetConnection.value = true
-            events = flowOf()
-        } catch (_: NotAuthorisedException) {
-            unauthorised.value = true
-            events = flowOf()
-        } catch (e: Exception) {
-            Log.e("All events", e.message ?: "", e)
-            events = flowOf()
+        viewModelScope.launch {
+            try {
+                events.value = repository.getEvents().cachedIn(viewModelScope)
+            } catch (_: ConnectException) {
+                noInternetConnection.value = true
+                events.value = flowOf()
+            } catch (_: NotAuthorisedException) {
+                unauthorised.value = true
+                events.value = flowOf()
+            } catch (e: Exception) {
+                Log.e("All events", e.message ?: "", e)
+                events.value = flowOf()
+            }
         }
     }
 }

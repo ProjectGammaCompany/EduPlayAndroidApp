@@ -1,6 +1,9 @@
 package com.eduplay.moblie.repository.localrepository
 
+//import android.database.sqlite.SQLiteStatement
+import androidx.sqlite.SQLiteStatement
 import android.util.Log
+import androidx.room.RoomRawQuery
 import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
@@ -8,6 +11,7 @@ import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
+import com.eduplay.moblie.repository.localrepository.entity.EventEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
@@ -27,15 +31,39 @@ class LocalRepository @Inject constructor(
     private val offlineModeManager: OfflineModeManager
 
 ) : Repository {
-    override suspend fun getEvents(
-        page: Int,
+    suspend fun getEvents(
         tags: List<String>?,
-        decliningRating: Boolean,
         active: Boolean,
-        favorites: Boolean,
-        title: String
-    ): List<QuestShortInfo> {
-        TODO("Not yet implemented")
+        title: String,
+        limit: Int = 20,
+        offset: Int = 0
+    ): List<EventEntity> {
+        val stringBuilder = StringBuilder("SELECT * FROM events ")
+        val binders = mutableListOf<(SQLiteStatement, Int)->Unit>()
+        if (!tags.isNullOrEmpty() || active || title.isNotBlank()) {
+            stringBuilder.append("WHERE 1=1 ") // вот это условие тут только для более красивого добавление условий через AND
+        }
+        val addStringBinder = { str:String -> binders.add { it: SQLiteStatement, idx: Int -> it.bindText(binders.size + 1, str.trim()) } }
+        val addIntBinder = {number: Int -> binders.add { it: SQLiteStatement, idx: Int -> it.bindInt(idx, number) }}
+        if (!tags.isNullOrEmpty()) {
+            for (tag in tags) {
+                stringBuilder.append("AND instr(tags, ?) ")
+                addStringBinder(tag)
+            }
+        }
+        if (title.isNotBlank()) {
+            stringBuilder.append("AND instr(title, ?) ")
+            addStringBinder(title)        }
+
+        stringBuilder.append("ORDER BY startDate ")
+        stringBuilder.append("LIMIT ? OFFSET ?")
+        addIntBinder(limit)
+        addIntBinder(offset)
+        val query = RoomRawQuery(
+            sql = stringBuilder.toString(),
+            onBindStatement = { statement -> binders.forEachIndexed { idx, binder->  binder(statement, idx+1) } }
+        )
+        return eventDatabase.eventDao().getEventsByArguments(query)
     }
 
     override suspend fun getRole(eventId: String): EventRole {

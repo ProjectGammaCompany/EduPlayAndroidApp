@@ -11,6 +11,7 @@ import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.localrepository.LocalRepository
+import com.eduplay.moblie.repository.localrepository.pagingSources.LocalAllEventsPagingSource
 import com.eduplay.moblie.repository.pagingSources.AllEventsPagingWebSource
 import com.eduplay.moblie.repository.pagingSources.CompletedEventsPagingSource
 import com.eduplay.moblie.repository.pagingSources.CreatedEventsPagingSource
@@ -25,13 +26,17 @@ import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.webrepository.WebRepository
+import com.eduplay.moblie.services.OfflineModeManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import java.time.LocalDateTime
 
 class EduRepository @Inject constructor(
     private val webRepository: WebRepository,
     private val localRepository: LocalRepository,
+    private val offlineModeManager: OfflineModeManager
 ) {
 
 
@@ -68,7 +73,7 @@ class EduRepository @Inject constructor(
         return authResult
     }
 
-    fun getEvents(
+    suspend fun getEvents(
         pageSize: Int = 20,
         enablePlaceHolders: Boolean = false,
         prefetchDistance: Int = 10,
@@ -80,6 +85,26 @@ class EduRepository @Inject constructor(
         favorites: Boolean = false,
         title: String = ""
     ): Flow<PagingData<QuestShortInfo>> {
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+            return Pager(
+                config = PagingConfig(
+                    pageSize = pageSize,
+                    enablePlaceholders = enablePlaceHolders,
+                    prefetchDistance = prefetchDistance,
+                    initialLoadSize = initialLoadSize,
+                    maxSize = maxCacheSize
+                ), pagingSourceFactory = {
+                    AllEventsPagingWebSource(
+                        webRepository,
+                        tags,
+                        decliningRating,
+                        active,
+                        favorites,
+                        title
+                    )
+                }
+            ).flow
+        }
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
@@ -87,14 +112,13 @@ class EduRepository @Inject constructor(
                 prefetchDistance = prefetchDistance,
                 initialLoadSize = initialLoadSize,
                 maxSize = maxCacheSize
-            ), pagingSourceFactory = {
-                AllEventsPagingWebSource(
-                    webRepository,
-                    tags,
-                    decliningRating,
-                    active,
-                    favorites,
-                    title
+            ),
+            pagingSourceFactory = {
+                LocalAllEventsPagingSource(
+                    repository = localRepository,
+                    tags = tags,
+                    active = active,
+                    title = title
                 )
             }
         ).flow

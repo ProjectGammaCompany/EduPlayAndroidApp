@@ -36,14 +36,6 @@ interface Repository {
     ): AnswerResult
 
     suspend fun register(auth: RegistrationData): AuthResult
-    suspend fun getEvents(
-        page: Int,
-        tags: List<String>? = null,
-        decliningRating: Boolean = false,
-        active: Boolean = false,
-        favorites: Boolean = false,
-        title: String = ""
-    ): List<QuestShortInfo>
 
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean
     suspend fun getResults(eventId: String): PlayerStats

@@ -21,7 +21,7 @@ class OfflineModeManager(private val context: Context) {
 
         companion object {
             fun valueOf(value: Int): AppModes {
-                for (mode in AppModes.values()) {
+                for (mode in entries) {
                     if (mode.modeNumber == value) return mode
                 }
                 throw IllegalAccessException("cant cast $value to AppModes")

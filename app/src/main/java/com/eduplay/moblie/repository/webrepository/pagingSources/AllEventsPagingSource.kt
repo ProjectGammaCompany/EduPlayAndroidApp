@@ -5,9 +5,10 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
+import com.eduplay.moblie.repository.webrepository.WebRepository
 
 class AllEventsPagingWebSource(
-    private val webRepository: Repository,
+    private val webRepository: WebRepository,
     private val tags: List<String>? = null,
     private val decliningRating: Boolean = false,
     private val active: Boolean = false,
