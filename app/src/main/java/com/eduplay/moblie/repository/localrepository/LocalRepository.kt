@@ -113,8 +113,32 @@ class LocalRepository @Inject constructor(
         )
     }
 
-    override suspend fun getOwnerEventInfo(eventId: String): EventOwnerInfo {
-        TODO("Not yet implemented")
+    override suspend fun getOwnerEventInfo(eventId: String): EventOwnerInfo { // теоритически такое может случиться
+        val event = eventDatabase.eventDao().getEventById(eventId)
+        if (event == null) {
+            throw IllegalAccessException("event not downloaded $eventId")
+        }
+        val tags = Gson()
+            .fromJson<List<String>>(event.tags, String::class.java)
+            .mapIndexed {idx, it-> EventTag(idx.toString(), it) }
+
+        return EventOwnerInfo(
+            title = event.title,
+            description = event.description,
+            tags = tags,
+            cover = event.cover,
+            startDate = event.startDate,
+            endDate = event.endDate,
+            private = false,
+            password = "",
+            lastEditionDate = event.lastEditionDate,
+            groupEvent = false,
+            groupNames = listOf(),
+            groups = listOf(),
+            eventRating = 0.0f,
+            collaboratos = listOf(),
+            allowDownloading = true
+        )
     }
 
     override suspend fun getFavouriteEvents(

@@ -125,15 +125,15 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun getRole(eventId: String): EventRole {
-        return webRepository.getRole(eventId)
+        return getRepository().getRole(eventId)
     }
 
     suspend fun getEventInfoPlayer(eventId: String): EventPlayerInfo {
-        return webRepository.getPlayerEventInfo(eventId)
+        return getRepository().getPlayerEventInfo(eventId)
     }
 
     suspend fun getEventInfoOwner(eventId: String): EventOwnerInfo {
-        return webRepository.getOwnerEventInfo(eventId)
+        return getRepository().getOwnerEventInfo(eventId)
     }
 
     fun getFavouriteEvents(
