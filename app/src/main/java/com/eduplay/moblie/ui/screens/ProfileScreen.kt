@@ -214,8 +214,11 @@ private fun Settings(
     isOffline: State<Flow<OfflineModeManager.AppModes>>,
     onToggleOffline: (Boolean)->Unit
 ) {
-    Column (modifier = Modifier.padding(top = 10.dp)) {
-        HorizontalDivider()
+    HorizontalDivider(
+        color = colorScheme.primaryContainer,
+        modifier = Modifier.padding(top = 3.dp)
+    )
+    Column (modifier = Modifier.padding(top = 5.dp)) {
         Text(
             text = stringResource(R.string.settings),
             style = typography.titleLarge.copy(color = colorScheme.onBackground),
