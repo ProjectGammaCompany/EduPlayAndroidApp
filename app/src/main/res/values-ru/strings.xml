@@ -95,4 +95,6 @@
     <string name="allow_download">"Разрешить скачивание события "</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
+    <string name="settings">Настройки</string>
+    <string name="trun_offline">Офлайн режим</string>
 </resources>

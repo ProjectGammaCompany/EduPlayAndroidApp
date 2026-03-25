@@ -1,35 +1,47 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.EduRepository
+import com.eduplay.moblie.services.OfflineModeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.net.ConnectException
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
+class ProfileViewModel @Inject constructor(
+    private val repository: EduRepository,
+    private val offlineModeManager: OfflineModeManager
+) : ViewModel() {
 
     val email = mutableStateOf("")
     val avatar = mutableStateOf("")
     val password = mutableStateOf("")
     val canLogout = mutableStateOf(false)
-    val gotData = mutableStateOf(false)
 
     val unauthorised = mutableStateOf(false)
+    val noInternet = mutableStateOf(false)
 
-    fun logout(onErrorCallBack: () -> Unit) {
+    val isOffline: MutableState<Flow<OfflineModeManager.AppModes>> = mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE))
+
+    fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 canLogout.value = repository.logout()
             } catch (_: ConnectException) {
-                onErrorCallBack()
+                noInternet.value = true
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
                 canLogout.value = true
@@ -39,21 +51,22 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
         }
     }
 
-    fun fetchProfileInfo(onErrorCallBack: () -> Unit) {
+    init {
+        isOffline.value = offlineModeManager.getAppMode()
         viewModelScope.launch(Dispatchers.IO) {
             var result: ProfileInfo = ProfileInfo("", "")
             try {
                 result = repository.getProfile()
-                gotData.value = true
+                email.value = result.username
+                avatar.value = result.avatar
             } catch (_: ConnectException) {
-                onErrorCallBack()
+                noInternet.value = true
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
             } catch (e: Exception) {
                 Log.e("fetch profile", e.message ?: "", e)
             }
-            email.value = result.username
-            avatar.value = result.avatar
+
         }
     }
 
@@ -62,6 +75,16 @@ class ProfileViewModel @Inject constructor(private val repository: EduRepository
             return !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
         } else {
             return false
+        }
+    }
+
+    fun toggleAppMode(isOffline: Boolean) {
+        viewModelScope.launch {
+            if (isOffline) {
+                offlineModeManager.saveAppMode(OfflineModeManager.AppModes.OFFLINE)
+            } else {
+                offlineModeManager.saveAppMode(OfflineModeManager.AppModes.ONLINE)
+            }
         }
     }
 }

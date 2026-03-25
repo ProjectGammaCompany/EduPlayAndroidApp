@@ -1,6 +1,7 @@
 package com.eduplay.moblie.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,13 +15,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,16 +41,21 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.room.util.TableInfo
 import coil3.compose.AsyncImage
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
+import com.eduplay.moblie.services.OfflineModeManager
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
+import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.ProfileViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun ProfileScreen(
@@ -55,17 +64,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
-
-    var noInternet by remember { mutableStateOf(false) }
-    var gotProfile by remember { mutableStateOf(false) }
-    val onNoInternet = { noInternet = true }
-    { }
-    if (!gotProfile) {
-        viewModel.fetchProfileInfo(onNoInternet)
-        gotProfile = true
-    }
-
-    if (noInternet) {
+    if (viewModel.noInternet.value) {
         NoInternetConnectionToast()
     }
     if (viewModel.unauthorised.value) {
@@ -77,9 +76,7 @@ fun ProfileScreen(
     }
     val hasEmailErrors = { email: String -> viewModel.checkEmail(email) }
     val onLogout = {
-        viewModel.logout(
-            onNoInternet
-        )
+        viewModel.logout()
     }
 
     if (viewModel.canLogout.value) {
@@ -94,7 +91,9 @@ fun ProfileScreen(
         onLogout,
         viewModel.avatar.value,
         imageHeaderViewModel.headers,
-        { image: String -> imageHeaderViewModel.getFullUrl(image) }
+        { image: String -> imageHeaderViewModel.getFullUrl(image) },
+        isOffline = viewModel.isOffline,
+        {mode:Boolean -> viewModel.toggleAppMode(mode)}
     )
 
 }
@@ -108,7 +107,9 @@ private fun ProfileScreen(
     onLogout: () -> Unit,
     avatar: String,
     headers: State<NetworkHeaders>,
-    imageUrl: (String) -> String
+    imageUrl: (String) -> String,
+    isOffline: State<Flow<OfflineModeManager.AppModes>>,
+    onToggleOffline: (Boolean)->Unit
 ) {
 
     Column(
@@ -123,91 +124,73 @@ private fun ProfileScreen(
     ) {
         ProfileTopBar()
 
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl(avatar))
-                .httpHeaders(headers = headers.value)
-                .networkCachePolicy(CachePolicy.ENABLED)
-                .memoryCachePolicy(CachePolicy.ENABLED)
-                .build(),
-            contentDescription = email.value,
-            placeholder = painterResource(R.drawable.eduplaylogo),
-            error = painterResource(id = R.drawable.ic_launcher_background),
+        Column(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(10.dp)
-                .width(130.dp)
-                .clip(CircleShape)
-
-        )
-
-        // email
-        Text(
-            text = stringResource(R.string.profile_info),
-            style = typography.titleLarge.copy(color = colorScheme.onBackground),
-            modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
-        )
-        Row {
-            Text(
-                text = stringResource(R.string.email),
-                style = typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
-                    .copy(color = colorScheme.onBackground),
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(end = 5.dp)
-            )
-//            if (!editEmail) {
-            Text(
-                text = email.value,
-                style = typography.bodyLarge.copy(color = colorScheme.onBackground),
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(end = 5.dp)
-            )
-//                IconButton(onClick = { editEmail = true }) {
-//                    Icon(
-//                        ImageVector.vectorResource(R.drawable.edit),
-//                        stringResource(R.string.edit_email)
-//                    )
-//                }
-//            } else {
-//                OutlinedTextField(
-//                    value = emailValue,
-//                    onValueChange = { newEmail ->
-//                        emailValue = newEmail
-//                        updateEmail(newEmail)
-//                    },
-//                    maxLines = 1,
-//                    isError = hasEmailErrors(emailValue),
-//                    label = { Text(stringResource(R.string.email)) },
-//                    keyboardOptions = KeyboardOptions(
-//                        keyboardType = KeyboardType.Email
-//                    ),
-//                    modifier = Modifier
-//                        .fillMaxWidth(0.9f)
-//                        .padding(bottom = 15.dp)
-//                )
-//            }
-        }
-
-
-
-        OutlinedButton(
-            onClick = { onLogout() },
-            colors = ButtonColors(
-                containerColor = colorScheme.errorContainer,
-                contentColor = colorScheme.error,
-                disabledContainerColor = colorScheme.errorContainer,
-                disabledContentColor = colorScheme.error
-            ),
-            shape = RoundedCornerShape(5.dp),
-            border = BorderStroke(1.dp, colorScheme.error),
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
+                .fillMaxSize()
+                .padding(horizontal = 10.dp)
         ) {
-            Text(
-                stringResource(R.string.logout),
-                style = typography.labelLarge.copy(color = colorScheme.error)
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(imageUrl(avatar))
+                    .httpHeaders(headers = headers.value)
+                    .networkCachePolicy(CachePolicy.ENABLED)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .build(),
+                contentDescription = email.value,
+                placeholder = painterResource(R.drawable.eduplaylogo),
+                error = painterResource(id = R.drawable.ic_launcher_background),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+                    .width(130.dp)
+                    .clip(CircleShape)
+
             )
+
+            // email
+            Text(
+                text = stringResource(R.string.profile_info),
+                style = typography.titleLarge.copy(color = colorScheme.onBackground),
+                modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
+            )
+            Row {
+                Text(
+                    text = stringResource(R.string.email),
+                    style = typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                        .copy(color = colorScheme.onBackground),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 5.dp)
+                )
+                Text(
+                    text = email.value,
+                    style = typography.bodyLarge.copy(color = colorScheme.onBackground),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 5.dp)
+                )
+            }
+
+            Settings(isOffline, onToggleOffline)
+
+
+            OutlinedButton(
+                onClick = { onLogout() },
+                colors = ButtonColors(
+                    containerColor = colorScheme.errorContainer,
+                    contentColor = colorScheme.error,
+                    disabledContainerColor = colorScheme.errorContainer,
+                    disabledContentColor = colorScheme.error
+                ),
+                shape = RoundedCornerShape(5.dp),
+                border = BorderStroke(1.dp, colorScheme.error),
+                modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
+            ) {
+                Text(
+                    stringResource(R.string.logout),
+                    style = typography.labelLarge.copy(color = colorScheme.error)
+                )
+            }
         }
     }
 }
@@ -227,16 +210,51 @@ private fun ProfileTopBar() {
 }
 
 @Composable
+private fun Settings(
+    isOffline: State<Flow<OfflineModeManager.AppModes>>,
+    onToggleOffline: (Boolean)->Unit
+) {
+    Column (modifier = Modifier.padding(top = 10.dp)) {
+        HorizontalDivider()
+        Text(
+            text = stringResource(R.string.settings),
+            style = typography.titleLarge.copy(color = colorScheme.onBackground),
+        )
+        val offlineState = isOffline.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
+        Row {
+            Switch(
+                checked = offlineState.value == OfflineModeManager.AppModes.OFFLINE,
+                onCheckedChange = {
+                    onToggleOffline(it)
+                }
+            )
+            Text(
+                text = stringResource(R.string.trun_offline),
+                style = typography.bodyLarge
+                    .copy(color = colorScheme.onBackground),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(5.dp)
+            )
+        }
+    }
+}
+
+@Composable
 @Preview
 fun ProfilePreview() {
-    ProfileScreen(
-        PaddingValues(),
-        {},
-        remember { mutableStateOf("email") },
-        { false },
-        {},
-        "",
-        remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-        { it }
-    )
+    EduPlayTheme {
+        ProfileScreen(
+            PaddingValues(),
+            {},
+            remember { mutableStateOf("email") },
+            { false },
+            {},
+            "",
+            remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+            { it },
+            remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) },
+            {}
+        )
+    }
 }

@@ -100,7 +100,12 @@ class LocalRepository @Inject constructor(
     }
 
     override suspend fun getProfile(): ProfileInfo {
-        TODO("Not yet implemented")
+        val userId = offlineModeManager.getCurrentUserId().first()
+        val user = eventDatabase.userDao().getUserById(userId)
+        return ProfileInfo(
+            username = user?.email ?: "",
+            avatar = user?.avatar ?: ""
+        )
     }
 
     override suspend fun getNextStage(eventId: String): EventStage {

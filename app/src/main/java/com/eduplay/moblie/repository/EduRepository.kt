@@ -197,7 +197,7 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun getProfile(): ProfileInfo {
-        return webRepository.getProfile()
+        return getRepository().getProfile()
     }
 
     suspend fun getNextStage(eventId: String): EventStage {
@@ -260,5 +260,12 @@ class EduRepository @Inject constructor(
 
     suspend fun getJoinCode(eventId: String): JoinCodeInfo {
         return webRepository.getJoinCode(eventId)
+    }
+
+    private suspend fun getRepository(): Repository {
+        return when (offlineModeManager.getAppMode().first()) {
+            OfflineModeManager.AppModes.ONLINE ->  webRepository
+            OfflineModeManager.AppModes.OFFLINE -> localRepository
+        }
     }
 }

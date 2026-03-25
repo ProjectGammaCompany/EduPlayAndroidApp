@@ -94,4 +94,6 @@
     <string name="allow_download">Allow downloading this event</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="settings">Settings</string>
+    <string name="trun_offline">Offline mode</string>
 </resources>
