@@ -8,6 +8,8 @@ import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.EventStatus
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
@@ -15,11 +17,13 @@ import com.eduplay.moblie.repository.localrepository.entity.EventEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
+import com.eduplay.moblie.repository.responseTypes.Author
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.services.JwtDecoder
 import com.eduplay.moblie.services.OfflineModeManager
 import com.eduplay.moblie.useCases.TokenManager
+import com.google.gson.Gson
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -67,11 +71,46 @@ class LocalRepository @Inject constructor(
     }
 
     override suspend fun getRole(eventId: String): EventRole {
-        TODO("Not yet implemented")
+        val authorsJson = eventDatabase.eventDao().getEventById(eventId)?.authorId
+        if (authorsJson == null) return EventRole.PARTICIPANT
+
+        val authors = Gson().fromJson<List<String>>(authorsJson, String::class.java)
+        val userId = getCurrentUser()
+        return if (authors.contains(userId)) EventRole.AUTHOR else EventRole.PARTICIPANT
     }
 
     override suspend fun getPlayerEventInfo(eventId: String): EventPlayerInfo {
-        TODO("Not yet implemented")
+        val event = eventDatabase.eventDao().getEventById(eventId)
+        if (event == null) {
+            throw IllegalAccessException("event not downloaded $eventId")
+        }
+        val tags = Gson()
+            .fromJson<List<String>>(event.tags, String::class.java)
+            .mapIndexed {idx, it-> EventTag(idx.toString(), it) }
+
+        val status = eventDatabase.userEventStatus()
+            .getStatusByUserAndEvent(getCurrentUser(), eventId)
+        val textStatus = if (status == null) {
+            EventStatus.NOT_STARTED.status
+        } else if (status.isFinished) {
+            EventStatus.ENDED.status
+        } else {
+            EventStatus.STARTED.status
+        }
+
+        return EventPlayerInfo(
+            title = event.title,
+            description = event.description,
+            rate = 0.0f,
+            favorite = false,
+            startDate = event.startDate,
+            endDate = event.endDate,
+            tags = tags,
+            cover = event.tags,
+            status = textStatus,
+            lastEditionDate = event.lastEditionDate,
+            authors = listOf()
+        )
     }
 
     override suspend fun getOwnerEventInfo(eventId: String): EventOwnerInfo {
@@ -171,14 +210,14 @@ class LocalRepository @Inject constructor(
             eventDatabase.userDao().insertUser(UserEntity(email, "", userId))
         }
 
-        if (getCurrentUser().first() != userId) {
+        if (getCurrentUser() != userId) {
             offlineModeManager.saveCurrentUserId(userId)
             Log.d("SAVE_USER", "saved $userId")
         }
     }
 
-    fun getCurrentUser(): Flow<String> {
-        return offlineModeManager.getCurrentUserId()
+    private suspend fun getCurrentUser(): String {
+        return offlineModeManager.getCurrentUserId().first()
     }
 
     suspend fun removeCurrentUser() {

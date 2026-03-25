@@ -66,28 +66,4 @@ data class EventEntity(
         groupEvent,
         Gson().toJson(authorId)
     )
-
-    // для динамического поиска по базе
-    companion object {
-        @Ignore
-        val idFieldName = "eventId"
-        @Ignore
-        val titleFieldName = "title"
-        @Ignore
-        val descriptionFieldName = "description"
-        @Ignore
-        val tagsFieldName = "tags"
-        @Ignore
-        val coverFieldName = "cover"
-        @Ignore
-        val startDateFieldName = "startDate"
-        @Ignore
-        val endDateFieldName = "endDate"
-        @Ignore
-        val lastEditionDateFieldName = "lastEditionDate"
-        @Ignore
-        val groupEventFieldName = "groupEvent"
-        @Ignore
-        val authorIdFieldName = "authorId"
-    }
 }
