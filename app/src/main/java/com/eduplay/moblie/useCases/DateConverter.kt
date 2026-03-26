@@ -5,11 +5,15 @@ import java.time.format.DateTimeFormatter
 
 class DateConverter {
     companion object {
-        private val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
+        private val serverDateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
         private val presentingFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
 
         fun convertFromServerFormat(string: String): LocalDateTime {
-            return LocalDateTime.parse(string, dateFormatter)
+            return LocalDateTime.parse(string, serverDateFormatter)
+        }
+
+        fun convertToServerFormat(date: LocalDateTime): String {
+            return date.format(serverDateFormatter)
         }
 
         fun convertForDisplay(date: LocalDateTime): String {
@@ -17,7 +21,7 @@ class DateConverter {
         }
 
         fun convertForDisplay(string: String): String {
-            return LocalDateTime.parse(string, dateFormatter).format(presentingFormatter)
+            return LocalDateTime.parse(string, serverDateFormatter).format(presentingFormatter)
         }
     }
 }

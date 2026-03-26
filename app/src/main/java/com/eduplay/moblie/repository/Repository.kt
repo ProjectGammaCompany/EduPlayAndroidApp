@@ -4,6 +4,7 @@ import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
+import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
@@ -16,9 +17,6 @@ interface Repository {
     suspend fun getRole(eventId: String): EventRole
     suspend fun getPlayerEventInfo(eventId: String): EventPlayerInfo
     suspend fun getOwnerEventInfo(eventId: String): EventOwnerInfo
-    suspend fun getFavouriteEvents(page: Int, maxOnPage: Int): List<QuestShortInfo>
-    suspend fun getCreatedEvents(page: Int, maxOnPage: Int): List<QuestShortInfo>
-    suspend fun getCompletedEvents(page: Int, maxOnPage: Int): List<QuestShortInfo>
     suspend fun getProfile(): ProfileInfo
     suspend fun getNextStage(eventId: String): EventStage
     suspend fun postTaskStartTime(
@@ -35,9 +33,9 @@ interface Repository {
         answers: List<String>
     ): AnswerResult
 
-    suspend fun register(auth: RegistrationData): AuthResult
-
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean
     suspend fun getResults(eventId: String): PlayerStats
     suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean
+    suspend fun getEventResults(eventId: String): PlayerStats
+    suspend fun getTags(): EventTagList
 }
