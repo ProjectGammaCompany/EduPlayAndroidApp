@@ -35,16 +35,28 @@ data class AnswerEntity(
     val options: String, // as json
     @ColumnInfo(name = "userId")
     val userId: String,
+    @ColumnInfo(name = "startTime")
+    val startTime: String,
+    @ColumnInfo(name = "endTime")
+    val endTime: String,
+    @ColumnInfo(name = "points")
+    val points: Int,
     @PrimaryKey(autoGenerate = true)
     val answerId: Long = 0L
 ) {
     constructor(
         taskId: String,
         options: List<String>,
-        userId: String
+        userId: String,
+        startTime: String,
+        endTime: String,
+        points: Int
     ) : this(
         taskId,
         Gson().toJson(options),
-        userId
+        userId,
+        startTime,
+        endTime,
+        points
     )
 }

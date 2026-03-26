@@ -253,7 +253,7 @@ class EduRepository @Inject constructor(
         taskId: String,
         taskStartTime: LocalDateTime
     ): Boolean {
-        return webRepository.postTaskStartTime(eventId, blockId, taskId, taskStartTime)
+        return getRepository().postTaskStartTime(eventId, blockId, taskId, taskStartTime)
     }
 
     suspend fun postAnswer(
@@ -262,7 +262,7 @@ class EduRepository @Inject constructor(
         taskId: String,
         answers: List<String>
     ): AnswerResult {
-        return webRepository.postTaskAnswer(
+        return getRepository().postTaskAnswer(
             eventId,
             blockId,
             taskId,

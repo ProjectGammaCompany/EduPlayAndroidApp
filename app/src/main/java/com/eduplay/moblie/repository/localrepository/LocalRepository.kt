@@ -1,8 +1,8 @@
 package com.eduplay.moblie.repository.localrepository
 
-import androidx.sqlite.SQLiteStatement
 import android.util.Log
 import androidx.room.RoomRawQuery
+import androidx.sqlite.SQLiteStatement
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
@@ -12,11 +12,13 @@ import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
+import com.eduplay.moblie.repository.localrepository.entity.AnswerEntity
 import com.eduplay.moblie.repository.localrepository.entity.EventEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
+import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.services.JwtDecoder
 import com.eduplay.moblie.services.OfflineModeManager
 import com.eduplay.moblie.useCases.DateConverter
@@ -40,12 +42,26 @@ class LocalRepository @Inject constructor(
         offset: Int = 0
     ): List<EventEntity> {
         val stringBuilder = StringBuilder("SELECT * FROM events ")
-        val binders = mutableListOf<(SQLiteStatement, Int)->Unit>()
+        val binders = mutableListOf<(SQLiteStatement, Int) -> Unit>()
         if (!tags.isNullOrEmpty() || active || title.isNotBlank()) {
             stringBuilder.append("WHERE 1=1 ") // вот это условие тут только для более красивого добавление условий через AND
         }
-        val addStringBinder = { str:String -> binders.add { it: SQLiteStatement, idx: Int -> it.bindText(binders.size + 1, str.trim()) } }
-        val addIntBinder = {number: Int -> binders.add { it: SQLiteStatement, idx: Int -> it.bindInt(idx, number) }}
+        val addStringBinder = { str: String ->
+            binders.add { it: SQLiteStatement, idx: Int ->
+                it.bindText(
+                    binders.size + 1,
+                    str.trim()
+                )
+            }
+        }
+        val addIntBinder = { number: Int ->
+            binders.add { it: SQLiteStatement, idx: Int ->
+                it.bindInt(
+                    idx,
+                    number
+                )
+            }
+        }
         if (!tags.isNullOrEmpty()) {
             for (tag in tags) {
                 stringBuilder.append("AND instr(tags, ?) ")
@@ -69,7 +85,14 @@ class LocalRepository @Inject constructor(
         addIntBinder(offset)
         val query = RoomRawQuery(
             sql = stringBuilder.toString(),
-            onBindStatement = { statement -> binders.forEachIndexed { idx, binder->  binder(statement, idx+1) } }
+            onBindStatement = { statement ->
+                binders.forEachIndexed { idx, binder ->
+                    binder(
+                        statement,
+                        idx + 1
+                    )
+                }
+            }
         )
         return eventDatabase.eventDao().getEventsByArguments(query)
     }
@@ -90,7 +113,7 @@ class LocalRepository @Inject constructor(
         }
         val tags = Gson()
             .fromJson<List<String>>(event.tags, String::class.java)
-            .mapIndexed {idx, it-> EventTag(idx.toString(), it) }
+            .mapIndexed { idx, it -> EventTag(idx.toString(), it) }
 
         val status = eventDatabase.userEventStatus()
             .getStatusByUserAndEvent(getCurrentUser(), eventId)
@@ -124,7 +147,7 @@ class LocalRepository @Inject constructor(
         }
         val tags = Gson()
             .fromJson<List<String>>(event.tags, String::class.java)
-            .mapIndexed {idx, it-> EventTag(idx.toString(), it) }
+            .mapIndexed { idx, it -> EventTag(idx.toString(), it) }
 
         return EventOwnerInfo(
             title = event.title,
@@ -150,9 +173,16 @@ class LocalRepository @Inject constructor(
         offset: Int
     ): List<EventEntity> {
         val stringBuilder = StringBuilder("SELECT * FROM events ")
-        val binders = mutableListOf<(SQLiteStatement, Int)->Unit>()
+        val binders = mutableListOf<(SQLiteStatement, Int) -> Unit>()
 
-        val addIntBinder = {number: Int -> binders.add { it: SQLiteStatement, idx: Int -> it.bindInt(idx, number) }}
+        val addIntBinder = { number: Int ->
+            binders.add { it: SQLiteStatement, idx: Int ->
+                it.bindInt(
+                    idx,
+                    number
+                )
+            }
+        }
 
         stringBuilder.append("ORDER BY startDate ")
         stringBuilder.append("LIMIT ? OFFSET ?")
@@ -160,7 +190,14 @@ class LocalRepository @Inject constructor(
         addIntBinder(offset)
         val query = RoomRawQuery(
             sql = stringBuilder.toString(),
-            onBindStatement = { statement -> binders.forEachIndexed { idx, binder->  binder(statement, idx+1) } }
+            onBindStatement = { statement ->
+                binders.forEachIndexed { idx, binder ->
+                    binder(
+                        statement,
+                        idx + 1
+                    )
+                }
+            }
         )
         return eventDatabase.eventDao().getEventsByArguments(query)
     }
@@ -202,16 +239,19 @@ class LocalRepository @Inject constructor(
         taskId: String,
         startTime: LocalDateTime
     ): Boolean {
-        TODO("добавить соответствующую штуку к ответам в базу")
-    }
-
-    suspend fun postTaskEndTime(
-        eventId: String,
-        blockId: String,
-        taskId: String,
-        startTime: LocalDateTime
-    ): Boolean {
-        TODO("добавить соответствующую штуку к ответам в базу")
+        val task = eventDatabase.taskDao().getTaskById(taskId)
+        if (task == null) return false
+        val userId = getCurrentUser()
+        val answer = AnswerEntity(
+            taskId = taskId,
+            options = listOf<String>(),
+            userId = userId,
+            startTime =  DateConverter.convertToServerFormat(startTime),
+            endTime = DateConverter.convertToServerFormat(LocalDateTime.MIN),
+            points = -1
+        )
+        eventDatabase.answerDao().insertAnswer(answer)
+        return true
     }
 
     override suspend fun postTaskAnswer(
@@ -220,7 +260,65 @@ class LocalRepository @Inject constructor(
         taskId: String,
         answers: List<String>
     ): AnswerResult {
-        TODO("Not yet implemented")
+        val endTime = LocalDateTime.now()
+
+        val task = eventDatabase.taskDao().getTaskById(taskId)
+        if (task == null) {
+            throw IllegalAccessException("no such task in database $taskId")
+        }
+
+        val userId = getCurrentUser()
+        var answer = eventDatabase.answerDao().getAnswerByTaskAndUserId(taskId, userId)
+
+        if (answer == null) {
+            throw IllegalAccessException("no time preloaded to answer")
+        }
+
+        var points: Int? = 0
+        var rightAnswer: List<String>? = null
+        var isCorrect: TaskAnswerStatus? = null
+        val block = eventDatabase.blockDao().getBlockById(blockId)
+
+        if (block == null) throw IllegalAccessException("no block $blockId")
+
+        // проверяем ответ
+        val correctAnswers =
+            eventDatabase.correctAnswerDao().getAnswersByTask(taskId).map { it.value }
+        if (block.showAnswers) {
+            rightAnswer = correctAnswers
+        }
+        val intersection = correctAnswers.toSet().intersect(answers)
+        if (intersection.isEmpty()) {
+            isCorrect = TaskAnswerStatus.INCORRECT
+            points = 0
+        } else if (intersection.size == correctAnswers.size) {
+            isCorrect = TaskAnswerStatus.CORRECT
+            points = task.points
+        } else if (block.partialPoints || task.partialPoints) {
+            isCorrect = TaskAnswerStatus.PARTIALLY
+            points = (intersection.size / correctAnswers.size) * task.points
+        }
+
+        answer = AnswerEntity(
+            taskId = answer.taskId,
+            options = answers,
+            userId = answer.userId,
+            startTime = answer.startTime,
+            endTime = DateConverter.convertToServerFormat(endTime),
+            points = points!!
+        )
+        // сохраняем ответ
+        eventDatabase.answerDao().updateAnswer(
+            answer
+        )
+
+        if (!block.showPoints) points = null
+        if (!block.showAnswers) isCorrect = null
+        return AnswerResult(
+            rightAnswer = rightAnswer,
+            points = points,
+            isCorrect = isCorrect
+        )
     }
 
     override suspend fun postTaskChoice(
