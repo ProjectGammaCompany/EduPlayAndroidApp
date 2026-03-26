@@ -15,6 +15,7 @@ import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventStatus
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.repository.EduRepository
+import com.eduplay.moblie.useCases.DateConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -89,27 +90,21 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         info.add(
             Pair(R.string.rating, data.rate.toString() + '⭐')
         )
-        val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
-        val presentingFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
 
+        var startTime = LocalDateTime.MAX
         if (data.startDate?.isNotBlank() ?: false) {
-            val startTime = LocalDateTime.parse(data.startDate, dateFormatter)
-            info.add(Pair(R.string.opens, startTime.format(presentingFormatter)))
+            startTime = DateConverter.convertFromServerFormat(data.startDate)
+            info.add(Pair(R.string.opens, DateConverter.convertForDisplay(startTime) ))
         }
+        var endTime = LocalDateTime.MIN
         if (data.endDate?.isNotBlank() ?: false) {
-            val endTime = LocalDateTime.parse(data.endDate, dateFormatter)
-            Pair(R.string.closes, endTime.format(presentingFormatter))
+            endTime = DateConverter.convertFromServerFormat(data.endDate)
+            Pair(R.string.closes, DateConverter.convertForDisplay(endTime))
         }
 
         isOpen.value = EventStatus.statusOf(data.status) != EventStatus.ENDED
-                && (data.startDate == null || data.startDate.isBlank() || LocalDateTime.now() >= LocalDateTime.parse(
-            data.startDate,
-            dateFormatter
-        ))
-                && (data.endDate == null || data.endDate.isBlank() || LocalDateTime.now() <= LocalDateTime.parse(
-            data.endDate,
-            dateFormatter
-        ))
+                && (data.startDate == null || data.startDate.isBlank() || LocalDateTime.now() >= startTime)
+                && (data.endDate == null || data.endDate.isBlank() || LocalDateTime.now() <= endTime)
         isContinuing.value =
             isOpen.value && EventStatus.statusOf(data.status) == EventStatus.STARTED
         isCompleted.value = EventStatus.statusOf(data.status) == EventStatus.ENDED
@@ -126,16 +121,11 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
 
         info.clear()
 
-        val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
-        val presentingFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
-
         if (data.startDate?.isNotBlank() ?: false) {
-            val startTime = LocalDateTime.parse(data.startDate, dateFormatter)
-            info.add(Pair(R.string.opens, startTime.format(presentingFormatter)))
+            info.add(Pair(R.string.opens, DateConverter.convertForDisplay(data.startDate)))
         }
         if (data.endDate?.isNotBlank() ?: false) {
-            val endTime = LocalDateTime.parse(data.endDate, dateFormatter)
-            Pair(R.string.closes, endTime.format(presentingFormatter))
+            Pair(R.string.closes, DateConverter.convertForDisplay(data.endDate))
         }
         password.value = data.password ?: ""
         groups.addAll(data.groups ?: listOf())

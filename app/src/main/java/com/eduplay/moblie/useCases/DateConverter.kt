@@ -1,0 +1,23 @@
+package com.eduplay.moblie.useCases
+
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+class DateConverter {
+    companion object {
+        private val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
+        private val presentingFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+
+        fun convertFromServerFormat(string: String): LocalDateTime {
+            return LocalDateTime.parse(string, dateFormatter)
+        }
+
+        fun convertForDisplay(date: LocalDateTime): String {
+            return date.format(presentingFormatter)
+        }
+
+        fun convertForDisplay(string: String): String {
+            return LocalDateTime.parse(string, dateFormatter).format(presentingFormatter)
+        }
+    }
+}
