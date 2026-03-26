@@ -12,10 +12,13 @@ import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.localrepository.LocalRepository
 import com.eduplay.moblie.repository.localrepository.pagingSources.LocalAllEventsPagingSource
-import com.eduplay.moblie.repository.pagingSources.AllEventsPagingWebSource
-import com.eduplay.moblie.repository.pagingSources.CompletedEventsPagingSource
-import com.eduplay.moblie.repository.pagingSources.CreatedEventsPagingSource
-import com.eduplay.moblie.repository.pagingSources.FavoriteEventsPagingSource
+import com.eduplay.moblie.repository.localrepository.pagingSources.LocalCompletedEventsPagingSource
+import com.eduplay.moblie.repository.localrepository.pagingSources.LocalCreatedEventsPagingSource
+import com.eduplay.moblie.repository.localrepository.pagingSources.LocalFavoriteEventsPagingSource
+import com.eduplay.moblie.repository.webrepository.pagingSources.AllEventsPagingWebSource
+import com.eduplay.moblie.repository.webrepository.pagingSources.CompletedEventsPagingSource
+import com.eduplay.moblie.repository.webrepository.pagingSources.CreatedEventsPagingSource
+import com.eduplay.moblie.repository.webrepository.pagingSources.FavoriteEventsPagingSource
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventPasswords
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
@@ -30,7 +33,6 @@ import com.eduplay.moblie.services.OfflineModeManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
 import java.time.LocalDateTime
 
 class EduRepository @Inject constructor(
@@ -100,7 +102,8 @@ class EduRepository @Inject constructor(
                         decliningRating,
                         active,
                         favorites,
-                        title
+                        title,
+                        localRepository::isEventDownloaded
                     )
                 }
             ).flow
@@ -136,13 +139,60 @@ class EduRepository @Inject constructor(
         return getRepository().getOwnerEventInfo(eventId)
     }
 
-    fun getFavouriteEvents(
+    suspend fun getFavouriteEvents(
         pageSize: Int = 20,
         enablePlaceHolders: Boolean = false,
         prefetchDistance: Int = 10,
         initialLoadSize: Int = 20,
         maxCacheSize: Int = 2000
     ): Flow<PagingData<QuestShortInfo>> {
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+            return Pager(
+                config = PagingConfig(
+                    pageSize = pageSize,
+                    enablePlaceholders = enablePlaceHolders,
+                    prefetchDistance = prefetchDistance,
+                    initialLoadSize = initialLoadSize,
+                    maxSize = maxCacheSize
+                ), pagingSourceFactory = {
+                    FavoriteEventsPagingSource(webRepository, localRepository::isEventDownloaded)
+                }
+            ).flow
+        } else {
+            return Pager(
+                config = PagingConfig(
+                    pageSize = pageSize,
+                    enablePlaceholders = enablePlaceHolders,
+                    prefetchDistance = prefetchDistance,
+                    initialLoadSize = initialLoadSize,
+                    maxSize = maxCacheSize
+                ), pagingSourceFactory = {
+                    LocalFavoriteEventsPagingSource(localRepository)
+                }
+            ).flow
+        }
+    }
+
+    suspend fun getCreatedEvents(
+        pageSize: Int = 20,
+        enablePlaceHolders: Boolean = false,
+        prefetchDistance: Int = 10,
+        initialLoadSize: Int = 20,
+        maxCacheSize: Int = 2000
+    ): Flow<PagingData<QuestShortInfo>> {
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+            return Pager(
+                config = PagingConfig(
+                    pageSize = pageSize,
+                    enablePlaceholders = enablePlaceHolders,
+                    prefetchDistance = prefetchDistance,
+                    initialLoadSize = initialLoadSize,
+                    maxSize = maxCacheSize
+                ), pagingSourceFactory = {
+                    CreatedEventsPagingSource(webRepository, localRepository::isEventDownloaded)
+                }
+            ).flow
+        }
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
@@ -151,18 +201,31 @@ class EduRepository @Inject constructor(
                 initialLoadSize = initialLoadSize,
                 maxSize = maxCacheSize
             ), pagingSourceFactory = {
-                FavoriteEventsPagingSource(webRepository)
+                LocalCreatedEventsPagingSource(localRepository)
             }
         ).flow
     }
 
-    fun getCreatedEvents(
+    suspend fun getCompletedEvents(
         pageSize: Int = 20,
         enablePlaceHolders: Boolean = false,
         prefetchDistance: Int = 10,
         initialLoadSize: Int = 20,
         maxCacheSize: Int = 2000
     ): Flow<PagingData<QuestShortInfo>> {
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+            return Pager(
+                config = PagingConfig(
+                    pageSize = pageSize,
+                    enablePlaceholders = enablePlaceHolders,
+                    prefetchDistance = prefetchDistance,
+                    initialLoadSize = initialLoadSize,
+                    maxSize = maxCacheSize
+                ), pagingSourceFactory = {
+                    CompletedEventsPagingSource(webRepository, localRepository::isEventDownloaded)
+                }
+            ).flow
+        }
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
@@ -171,27 +234,7 @@ class EduRepository @Inject constructor(
                 initialLoadSize = initialLoadSize,
                 maxSize = maxCacheSize
             ), pagingSourceFactory = {
-                CreatedEventsPagingSource(webRepository)
-            }
-        ).flow
-    }
-
-    fun getCompletedEvents(
-        pageSize: Int = 20,
-        enablePlaceHolders: Boolean = false,
-        prefetchDistance: Int = 10,
-        initialLoadSize: Int = 20,
-        maxCacheSize: Int = 2000
-    ): Flow<PagingData<QuestShortInfo>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = enablePlaceHolders,
-                prefetchDistance = prefetchDistance,
-                initialLoadSize = initialLoadSize,
-                maxSize = maxCacheSize
-            ), pagingSourceFactory = {
-                CompletedEventsPagingSource(webRepository)
+                LocalCompletedEventsPagingSource(localRepository)
             }
         ).flow
     }

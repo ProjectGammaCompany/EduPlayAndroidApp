@@ -166,17 +166,21 @@ class LocalRepository @Inject constructor(
     }
 
     suspend fun getCreatedEvents(
-        page: Int,
-        maxOnPage: Int
+        offset: Int,
+        limit: Int
     ): List<QuestShortInfo> {
-        TODO("Not yet implemented")
+        val userId = getCurrentUser()
+        return eventDatabase.eventDao().getEventByAuthor(userId, limit, offset)
+            .map { QuestShortInfo(it) }
     }
 
     suspend fun getCompletedEvents(
-        page: Int,
-        maxOnPage: Int
+        limit: Int,
+        offset: Int
     ): List<QuestShortInfo> {
-        TODO("Not yet implemented")
+        val userId = getCurrentUser()
+        return eventDatabase.eventDao().getCompletedEventByUserId(userId, limit, offset)
+            .map { QuestShortInfo(it) }
     }
 
     override suspend fun getProfile(): ProfileInfo {
@@ -238,9 +242,6 @@ class LocalRepository @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getEventResults(eventId: String): PlayerStats {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun getTags(): EventTagList {
         TODO("Not yet implemented")

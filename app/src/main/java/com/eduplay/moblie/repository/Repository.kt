@@ -36,6 +36,5 @@ interface Repository {
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean
     suspend fun getResults(eventId: String): PlayerStats
     suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean
-    suspend fun getEventResults(eventId: String): PlayerStats
     suspend fun getTags(): EventTagList
 }

@@ -29,4 +29,15 @@ interface EventDao {
     @Transaction
     @RawQuery
     suspend fun getEventsByArguments(query: RoomRawQuery): List<EventEntity>
+
+    @Transaction
+    @Query("SELECT * FROM events  " +
+            "WHERE eventId = (SELECT eventId FROM user_status WHERE userId = :userId AND isFinished = 1 LIMIT 1)" +
+            "ORDER BY startDate LIMIT :limit OFFSET :offset")
+    suspend fun getCompletedEventByUserId(userId: String, limit: Int, offset: Int): List<EventEntity>
+
+    @Transaction
+    @Query("SELECT * FROM events  WHERE instr(authorId, :userId) " +
+            "ORDER BY startDate LIMIT :limit OFFSET :offset")
+    suspend fun getEventByAuthor(userId: String, limit: Int, offset: Int): List<EventEntity>
 }
