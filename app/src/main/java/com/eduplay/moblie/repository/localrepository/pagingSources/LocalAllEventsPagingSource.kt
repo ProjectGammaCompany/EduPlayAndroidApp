@@ -27,20 +27,7 @@ class LocalAllEventsPagingSource(
                     tags = tags,
                     active = active,
                     title = title,
-                ).mapIndexed { idx, it ->
-                    val jsonTags = Gson().fromJson<List<String>>(it.tags, String::class.java)
-
-                    QuestShortInfo(
-                        id = it.id,
-                        name = it.title,
-                        description = it.description,
-                        imageUrl = it.cover,
-                        rate = 0.0,
-                        isFavourite = true,
-                        tags = jsonTags.map { tag -> EventTag(idx.toString(), tag) },
-                        isDownloaded = true
-                    )
-                }
+                ).map { QuestShortInfo(it) }
 
             LoadResult.Page(
                 data = data,

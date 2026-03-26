@@ -57,7 +57,7 @@ class WebRepository @Inject constructor(
         return false
     }
 
-    override suspend fun register(auth: RegistrationData): AuthResult {
+    suspend fun register(auth: RegistrationData): AuthResult {
         val response = authApi.register(auth)
         val body = response.body()
         Log.d("Requests AUTHORISATION", response.code().toString() + response.raw())
@@ -77,7 +77,8 @@ class WebRepository @Inject constructor(
         decliningRating: Boolean,
         active: Boolean,
         favorites: Boolean,
-        title: String
+        title: String,
+        isDownloaded: suspend (String)->Boolean
     ): List<QuestShortInfo> {
         val response = api.allEvents(
             page = page,
@@ -90,7 +91,7 @@ class WebRepository @Inject constructor(
         val body = response.body()
         Log.d("Requests events", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
-            return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
+            return body.events.map { QuestShortInfo(it, isDownloaded(it.id)) }
         } // TODO(оделать проверку на причины отказа)
         return listOf()
     }
@@ -126,32 +127,32 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("No info for this event")
     }
 
-    override suspend fun getFavouriteEvents(page: Int, maxOnPage: Int): List<QuestShortInfo> {
+    suspend fun getFavouriteEvents(page: Int, maxOnPage: Int, isDownloaded: suspend (String)-> Boolean): List<QuestShortInfo> {
         val response = api.favouriteEvents(page, maxOnPage)
         val body = response.body()
         Log.d("Requests get favourite", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
-            return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
+            return body.events.map { QuestShortInfo(it, isDownloaded(it.id)) }
         }
         return listOf()
     }
 
-    override suspend fun getCreatedEvents(page: Int, maxOnPage: Int): List<QuestShortInfo> {
+    suspend fun getCreatedEvents(page: Int, maxOnPage: Int, isDownloaded: suspend (String)-> Boolean): List<QuestShortInfo> {
         val response = api.createdEvents(page, maxOnPage)
         val body = response.body()
         Log.d("Requests created events", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
-            return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
+            return body.events.map { QuestShortInfo(it, isDownloaded(it.id)) }
         }
         return listOf()
     }
 
-    override suspend fun getCompletedEvents(page: Int, maxOnPage: Int): List<QuestShortInfo> {
+    suspend fun getCompletedEvents(page: Int, maxOnPage: Int, isDownloaded: suspend (String)->Boolean): List<QuestShortInfo> {
         val response = api.completedEvents(page, maxOnPage)
         val body = response.body()
         Log.d("Requests completed events", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
-            return ResponseConverter.convertListEventResponseToListQuestShortInfo(body)
+            return body.events.map { QuestShortInfo(it, isDownloaded(it.id)) }
         }
         return listOf()
     }
@@ -242,7 +243,7 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("cant complain $eventId")
     }
 
-    suspend fun getTags(): EventTagList {
+    override suspend fun getTags(): EventTagList {
         val response = api.getTags()
         val body = response.body()
         if (response.isSuccessful && body != null) {

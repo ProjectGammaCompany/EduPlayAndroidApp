@@ -277,4 +277,8 @@ class LocalRepository @Inject constructor(
     suspend fun removeCurrentUser() {
         offlineModeManager.removeCurrentUserId()
     }
+
+    suspend fun isEventDownloaded(eventId: String): Boolean {
+        return eventDatabase.eventDao().getEventById(eventId) != null
+    }
 }

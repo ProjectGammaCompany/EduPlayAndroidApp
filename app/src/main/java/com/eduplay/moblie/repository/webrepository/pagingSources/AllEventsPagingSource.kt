@@ -1,10 +1,9 @@
-package com.eduplay.moblie.repository.pagingSources
+package com.eduplay.moblie.repository.webrepository.pagingSources
 
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.eduplay.moblie.models.QuestShortInfo
-import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.webrepository.WebRepository
 
 class AllEventsPagingWebSource(
@@ -13,7 +12,8 @@ class AllEventsPagingWebSource(
     private val decliningRating: Boolean = false,
     private val active: Boolean = false,
     private val favorites: Boolean = false,
-    private val title: String = ""
+    private val title: String = "",
+    private val isDownloaded: suspend (String)-> Boolean
 ) :
     PagingSource<Int, QuestShortInfo>() {
     private val numOfOffScreenPage: Int = 4
@@ -30,6 +30,7 @@ class AllEventsPagingWebSource(
                     active = active,
                     favorites = favorites,
                     title = title,
+                    isDownloaded = isDownloaded
                 )
 
             LoadResult.Page(
