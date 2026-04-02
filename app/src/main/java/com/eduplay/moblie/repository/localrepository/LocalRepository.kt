@@ -15,6 +15,7 @@ import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.localrepository.entity.AnswerEntity
 import com.eduplay.moblie.repository.localrepository.entity.EventEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
+import com.eduplay.moblie.repository.localrepository.entity.UserEventStatusEntity
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
@@ -34,6 +35,9 @@ class LocalRepository @Inject constructor(
     private val offlineModeManager: OfflineModeManager
 
 ) : Repository {
+
+    private var choseTaskInParallelBlock = false
+
     // TODO("make fts search virtual table to search by name https://habr.com/ru/companies/simbirsoft/articles/534656/")
     suspend fun getEvents(
         tags: List<String>?,
@@ -247,7 +251,7 @@ class LocalRepository @Inject constructor(
             taskId = taskId,
             options = listOf<String>(),
             userId = userId,
-            startTime =  DateConverter.convertToServerFormat(startTime),
+            startTime = DateConverter.convertToServerFormat(startTime),
             endTime = DateConverter.convertToServerFormat(LocalDateTime.MIN),
             points = -1
         )
@@ -327,23 +331,67 @@ class LocalRepository @Inject constructor(
         blockId: String,
         taskId: String
     ): Boolean {
-        TODO("Not yet implemented")
+        val userId = getCurrentUser()
+        val currentStatus = eventDatabase.userEventStatus().getStatusByUserAndEvent(userId, eventId)
+        if (currentStatus == null) return false
+        if (currentStatus.blockId != blockId) return false
+        val block = eventDatabase.blockDao().getBlockById(currentStatus.blockId)
+        if (!(block?.isParallel ?: false)) return false
+
+        val task = eventDatabase.taskDao().getTaskById(taskId)
+        if (task == null || task.blockId != blockId) return false
+
+        val answer = eventDatabase.answerDao().getAnswerByTaskAndUserId(taskId, userId)
+
+        if (answer != null && answer.points != -1) return false
+
+        val updatedStatus = UserEventStatusEntity(
+            userId = currentStatus.userId,
+            eventId = currentStatus.eventId,
+            blockId = currentStatus.blockId,
+            taskId = taskId,
+            isFinished = currentStatus.isFinished,
+            choseTaskInBlock = true,
+            id = currentStatus.id
+        )
+
+        eventDatabase.userEventStatus().updateStatus(updatedStatus)
+        choseTaskInParallelBlock = true
+        return true
     }
 
     override suspend fun getResults(eventId: String): PlayerStats {
-        TODO("Not yet implemented")
+        val userId = getCurrentUser()
+        val currentStatus = eventDatabase.userEventStatus().getStatusByUserAndEvent(userId, eventId)
+
+        if (currentStatus == null || !currentStatus.isFinished) throw IllegalAccessException("trying to get results for unfinished event $eventId")
+
+        val totalPoints = eventDatabase.answerDao().getTotalPointsForEvent(eventId, userId)
+        return PlayerStats(
+            fullStats = false,
+            groupEvent = false,
+            users = listOf(
+                PlayerStats.StatUser(
+                    id = userId,
+                    username = getProfile().username,
+                    avatar = null,
+                    points = totalPoints,
+                )
+            ),
+            groups = null
+        )
     }
 
     override suspend fun addToFavourite(
         eventId: String,
         isFavorite: Boolean
     ): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
 
     override suspend fun getTags(): EventTagList {
-        TODO("Not yet implemented")
+        return EventTagList(listOf())
     }
 
     suspend fun saveUser() {

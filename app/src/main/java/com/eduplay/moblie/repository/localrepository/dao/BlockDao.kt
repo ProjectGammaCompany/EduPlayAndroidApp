@@ -13,6 +13,7 @@ interface BlockDao {
     @Insert
     suspend fun insertBlock(block: BlockEntity)
 
+    @Transaction
     @Update
     suspend fun updateBlock(block: BlockEntity)
 

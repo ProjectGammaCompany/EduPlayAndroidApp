@@ -271,11 +271,11 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun postTaskChoice(eventId: String, blockId: String, taskId: String): Boolean {
-        return webRepository.postTaskChoice(eventId = eventId, blockId = blockId, taskId = taskId)
+        return getRepository().postTaskChoice(eventId = eventId, blockId = blockId, taskId = taskId)
     }
 
     suspend fun addToFavourites(eventId: String, isFavorite: Boolean): Boolean {
-        return webRepository.addToFavourite(eventId, isFavorite)
+        return getRepository().addToFavourite(eventId, isFavorite)
     }
 
     suspend fun complain(eventId: String, reason: String) {
@@ -283,11 +283,11 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun getEventResults(eventId: String): PlayerStats {
-        return webRepository.getResults(eventId)
+        return getRepository().getResults(eventId)
     }
 
     suspend fun getTags(): EventTagList {
-        return webRepository.getTags()
+        return getRepository().getTags()
     }
 
     suspend fun getRequiredJoinFields(joinCode: String): RequiredJoinFields {

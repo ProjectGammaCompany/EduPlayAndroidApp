@@ -52,8 +52,8 @@ data class UserEventStatusEntity(
     val taskId: String,
     @ColumnInfo(name = "isFinished")
     val isFinished: Boolean,
-    @ColumnInfo(name = "taskStartTime")
-    val taskStartTime: Boolean,
+    @ColumnInfo(name = "choseTaskInBlock")
+    val choseTaskInBlock: Boolean,
     @PrimaryKey(autoGenerate = true)
     val id: Int
 )
