@@ -54,7 +54,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
                     noInternetConnection.value = true
                 } catch (e: Exception) {
                     Log.e("login error", e.message ?: "", e)
-                    callBack()
+                    //callBack()
                 }
             }
         } else {

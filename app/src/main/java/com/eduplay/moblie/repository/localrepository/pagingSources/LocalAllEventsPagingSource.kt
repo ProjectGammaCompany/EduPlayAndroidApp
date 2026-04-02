@@ -35,7 +35,7 @@ class LocalAllEventsPagingSource(
                 nextKey = if (data.isEmpty()) null else (params.key ?: 1) + 1
             )
         } catch (e: Exception) {
-            Log.e("DATA_BASE_MAIN_EVENT_LIST", (e.message ?: "") + ((e.cause?.message) ?: " "))
+            Log.e("DATA_BASE_MAIN_EVENT_LIST", (e.message ?: "") + ((e.cause?.message) ?: " "), e)
             LoadResult.Error(e)
         }
     }

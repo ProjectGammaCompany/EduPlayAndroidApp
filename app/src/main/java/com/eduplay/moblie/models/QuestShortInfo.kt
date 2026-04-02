@@ -21,7 +21,7 @@ data class QuestShortInfo(
         event.cover,
         0.0,
         false,
-        Gson().fromJson<List<String>>(event.tags, String::class.java)
+        Gson().fromJson<List<String>>(event.tags, List::class.java)
             .mapIndexed { idx, it -> EventTag(idx.toString(), it) },
         true
     )

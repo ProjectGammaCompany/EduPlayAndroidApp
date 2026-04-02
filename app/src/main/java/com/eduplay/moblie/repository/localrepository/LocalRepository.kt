@@ -101,7 +101,7 @@ class LocalRepository @Inject constructor(
         val authorsJson = eventDatabase.eventDao().getEventById(eventId)?.authorId
         if (authorsJson == null) return EventRole.PARTICIPANT
 
-        val authors = Gson().fromJson<List<String>>(authorsJson, String::class.java)
+        val authors = Gson().fromJson<List<String>>(authorsJson, List::class.java)
         val userId = getCurrentUser()
         return if (authors.contains(userId)) EventRole.AUTHOR else EventRole.PARTICIPANT
     }
@@ -112,7 +112,7 @@ class LocalRepository @Inject constructor(
             throw IllegalAccessException("event not downloaded $eventId")
         }
         val tags = Gson()
-            .fromJson<List<String>>(event.tags, String::class.java)
+            .fromJson<List<String>>(event.tags, List::class.java)
             .mapIndexed { idx, it -> EventTag(idx.toString(), it) }
 
         val status = eventDatabase.userEventStatus()
@@ -146,7 +146,7 @@ class LocalRepository @Inject constructor(
             throw IllegalAccessException("event not downloaded $eventId")
         }
         val tags = Gson()
-            .fromJson<List<String>>(event.tags, String::class.java)
+            .fromJson<List<String>>(event.tags, List::class.java)
             .mapIndexed { idx, it -> EventTag(idx.toString(), it) }
 
         return EventOwnerInfo(
