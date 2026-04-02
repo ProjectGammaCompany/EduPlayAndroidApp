@@ -34,6 +34,7 @@ class LocalRepository @Inject constructor(
     private val offlineModeManager: OfflineModeManager
 
 ) : Repository {
+    // TODO("make fts search virtual table to search by name https://habr.com/ru/companies/simbirsoft/articles/534656/")
     suspend fun getEvents(
         tags: List<String>?,
         active: Boolean,
@@ -49,7 +50,7 @@ class LocalRepository @Inject constructor(
         val addStringBinder = { str: String ->
             binders.add { it: SQLiteStatement, idx: Int ->
                 it.bindText(
-                    binders.size + 1,
+                    idx,
                     str.trim()
                 )
             }
@@ -64,12 +65,12 @@ class LocalRepository @Inject constructor(
         }
         if (!tags.isNullOrEmpty()) {
             for (tag in tags) {
-                stringBuilder.append("AND instr(tags, ?) ")
+                stringBuilder.append("AND tags,?) ")
                 addStringBinder(tag)
             }
         }
         if (title.isNotBlank()) {
-            stringBuilder.append("AND instr(title, ?) ")
+            stringBuilder.append("AND instr(lower(title),  lower(?)) ")
             addStringBinder(title)
         }
 
