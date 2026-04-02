@@ -18,9 +18,9 @@ import java.net.ConnectException
 
 @HiltViewModel
 class MyEventsViewModel @Inject constructor(private val repository: EduRepository) : ViewModel() {
-    var favourite: Flow<PagingData<QuestShortInfo>> = flowOf()
-    var completed: Flow<PagingData<QuestShortInfo>> = flowOf()
-    var created: Flow<PagingData<QuestShortInfo>> = flowOf()
+    val favourite = mutableStateOf(flowOf<PagingData<QuestShortInfo>>())
+    val completed = mutableStateOf(flowOf<PagingData<QuestShortInfo>>())
+    val created = mutableStateOf(flowOf<PagingData<QuestShortInfo>>())
     val unauthorised = mutableStateOf(false)
 
     val noInternetConnection = mutableStateOf(false)
@@ -28,9 +28,9 @@ class MyEventsViewModel @Inject constructor(private val repository: EduRepositor
     init {
         viewModelScope.launch {
             try {
-                favourite = repository.getFavouriteEvents().cachedIn(viewModelScope)
-                completed = repository.getCompletedEvents().cachedIn(viewModelScope)
-                created = repository.getCreatedEvents().cachedIn(viewModelScope)
+                favourite.value = repository.getFavouriteEvents().cachedIn(viewModelScope)
+                completed.value = repository.getCompletedEvents().cachedIn(viewModelScope)
+                created.value = repository.getCreatedEvents().cachedIn(viewModelScope)
             } catch (_: ConnectException) {
                 noInternetConnection.value = true
             } catch (_: NotAuthorisedException) {

@@ -80,9 +80,9 @@ fun MyEventsScreen(
 private fun MyEventsScreen(
     innerPaddingValues: PaddingValues,
     onFavouriteToggle: (String, Boolean) -> Unit,
-    favorite: Flow<PagingData<QuestShortInfo>>,
-    completed: Flow<PagingData<QuestShortInfo>>,
-    created: Flow<PagingData<QuestShortInfo>>,
+    favorite: State<Flow<PagingData<QuestShortInfo>>>,
+    completed: State<Flow<PagingData<QuestShortInfo>>>,
+    created: State<Flow<PagingData<QuestShortInfo>>>,
     onEventClick: (String) -> Unit,
     headers: State<NetworkHeaders>,
     imageUrl: (String) -> String
@@ -158,13 +158,13 @@ private fun MyEventsScreen(
 
 @Composable
 private fun ListOfEvents(
-    events: Flow<PagingData<QuestShortInfo>>,
+    events: State<Flow<PagingData<QuestShortInfo>>>,
     onFavouriteToggle: (String, Boolean) -> Unit,
     onEventClick: (String) -> Unit,
     headers: State<NetworkHeaders>,
     imageUrl: (String) -> String
 ) {
-    val eventsInfo = events.collectAsLazyPagingItems()
+    val eventsInfo = events.value.collectAsLazyPagingItems()
     Column {
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
