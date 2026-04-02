@@ -11,7 +11,8 @@ class LocalFavoriteEventsPagingSource(private val repository: LocalRepository) :
     private val numOfOffScreenPage: Int = 4
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, QuestShortInfo> {
-        val offset = ((params.key ?: 1) - 1) * params.loadSize
+        val page = params.key?: 0
+        val offset = page * params.loadSize
         return try {
             val data = repository
                 .getFavouriteEvents(
@@ -21,8 +22,8 @@ class LocalFavoriteEventsPagingSource(private val repository: LocalRepository) :
 
             LoadResult.Page(
                 data = data,
-                prevKey = if (params.key == 1) null else (params.key ?: 1)  - 1,
-                nextKey = if (data.isEmpty()) null else (params.key ?: 1) + 1
+                prevKey = if (page == 0) null else page-1,
+                nextKey = if (data.isEmpty()) null else page + 1
             )
         } catch (e: Exception) {
             Log.e("DATA_BASE_MAIN_EVENT_LIST", (e.message ?: "") + ((e.cause?.message) ?: " "), e)
