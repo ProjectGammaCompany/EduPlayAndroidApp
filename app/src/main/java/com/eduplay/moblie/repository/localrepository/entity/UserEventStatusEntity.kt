@@ -55,5 +55,5 @@ data class UserEventStatusEntity(
     @ColumnInfo(name = "choseTaskInBlock")
     val choseTaskInBlock: Boolean,
     @PrimaryKey(autoGenerate = true)
-    val id: Int
+    val id: Int = 0
 )

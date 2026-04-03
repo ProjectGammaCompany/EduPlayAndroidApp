@@ -12,15 +12,15 @@ import com.eduplay.moblie.repository.localrepository.entity.UserEventStatusEntit
 interface UserEventStatusDao {
     @Transaction
     @Insert
-    suspend fun insertStatus(task: UserEventStatusEntity)
+    suspend fun insertStatus(status: UserEventStatusEntity)
 
     @Transaction
     @Update
-    suspend fun updateStatus(task: UserEventStatusEntity)
+    suspend fun updateStatus(status: UserEventStatusEntity)
 
     @Transaction
     @Delete
-    suspend fun deleteStatus(task: UserEventStatusEntity)
+    suspend fun deleteStatus(status: UserEventStatusEntity)
 
     @Transaction
     @Query(

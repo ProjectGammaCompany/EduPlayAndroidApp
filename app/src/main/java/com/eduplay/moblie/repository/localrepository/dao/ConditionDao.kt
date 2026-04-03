@@ -19,5 +19,5 @@ interface ConditionDao {
 
     @Transaction
     @Query("SELECT * FROM conditions WHERE prevBlockId = :currBlockId")
-    suspend fun getConditionByBlockId(currBlockId: String): ConditionEntity?
+    suspend fun getConditionsByBlockId(currBlockId: String): List<ConditionEntity>
 }

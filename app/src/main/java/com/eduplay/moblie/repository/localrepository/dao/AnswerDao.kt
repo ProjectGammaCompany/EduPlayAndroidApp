@@ -22,12 +22,26 @@ interface AnswerDao {
     suspend fun getAnswerByTaskAndUserId(taskId: String, userId: String): AnswerEntity?
 
     @Transaction
-    @Query("""
+    @Query(
+        """
         SELECT SUM(points) 
         FROM answers 
         JOIN tasks ON answers.taskId = tasks.taskId
         JOIN blocks ON tasks.blockId = blocks.blockId
         WHERE blocks.eventId = :eventId AND answers.userId = :userId
-        """)
+        """
+    )
     suspend fun getTotalPointsForEvent(eventId: String, userId: String): Int
+
+    @Transaction
+    @Query(
+        """
+        DELETE
+        FROM answers
+        WHERE EXISTS 
+            (SELECT * FROM tasks JOIN blocks ON tasks.blockId = blocks.blockId 
+            WHERE answers.taskId = tasks.taskId)
+        """
+    )
+    suspend fun deleteAllAnswersInBlock(blockId: String, userId: String): Int
 }

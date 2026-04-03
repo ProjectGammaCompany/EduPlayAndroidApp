@@ -41,6 +41,8 @@ data class AnswerEntity(
     val endTime: String,
     @ColumnInfo(name = "points")
     val points: Int,
+    @ColumnInfo(name = "isFinal")
+    val isFinal: Boolean,
     @PrimaryKey(autoGenerate = true)
     val answerId: Long = 0L
 ) {
@@ -50,13 +52,15 @@ data class AnswerEntity(
         userId: String,
         startTime: String,
         endTime: String,
-        points: Int
+        points: Int,
+        isFinal: Boolean
     ) : this(
         taskId,
         Gson().toJson(options),
         userId,
         startTime,
         endTime,
-        points
+        points,
+        isFinal
     )
 }

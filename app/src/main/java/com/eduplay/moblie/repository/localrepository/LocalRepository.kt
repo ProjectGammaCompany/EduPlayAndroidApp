@@ -13,13 +13,19 @@ import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.localrepository.entity.AnswerEntity
+import com.eduplay.moblie.repository.localrepository.entity.BlockEntity
 import com.eduplay.moblie.repository.localrepository.entity.EventEntity
+import com.eduplay.moblie.repository.localrepository.entity.GroupEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEventStatusEntity
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
-import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.responseTypes.Block
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
+import com.eduplay.moblie.repository.responseTypes.ShortTask
+import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
+import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.services.JwtDecoder
 import com.eduplay.moblie.services.OfflineModeManager
 import com.eduplay.moblie.useCases.DateConverter
@@ -235,7 +241,181 @@ class LocalRepository @Inject constructor(
     }
 
     override suspend fun getNextStage(eventId: String): EventStage {
-        TODO("Not yet implemented")
+        val user = getCurrentUser()
+        var status = eventDatabase.userEventStatus().getStatusByUserAndEvent(user, eventId)
+        if (status != null && status.isFinished) {
+            return eventEnded()
+        }
+
+        if (status == null) status = fillStarterStatus(eventId)
+        val currentBlock = eventDatabase.blockDao().getBlockById(status.blockId)
+
+        if (currentBlock == null) {
+            Log.i("NEXT_STAGE", "did not find block ${status.blockId}")
+            return eventEnded()
+        }
+
+        var allTasksCompleted = true
+        val tasks = eventDatabase.taskDao().getAllTasksInBlock(currentBlock.id)
+            .map { task ->
+                val answer = eventDatabase.answerDao().getAnswerByTaskAndUserId(task.id, user)
+                val isCompleted = answer != null && answer.isFinal // дан ответ на задание
+                allTasksCompleted = allTasksCompleted && isCompleted
+                ShortTask(
+                    id = task.id,
+                    name = task.name,
+                    time = task.time,
+                    isCompleted = isCompleted
+                )
+            }
+
+        return if (allTasksCompleted) {
+            proceedToNextBlock(currentBlock, status)
+        } else {
+            displayCurrentBlock(currentBlock, tasks, status)
+        }
+    }
+
+    private suspend fun fillStarterStatus(eventId: String) : UserEventStatusEntity {
+        val block = eventDatabase.blockDao().getBlockByEventIdAndBlockOrder(eventId, 1)
+        val task = eventDatabase.taskDao().getTaskByBlockIdAndOrder(block?.eventId ?: "", 1)
+        val user = getCurrentUser()
+        val status = UserEventStatusEntity(
+            userId = user,
+            eventId = eventId,
+            blockId = block?.id ?: throw IllegalAccessException("no block downloaded for event $eventId"),
+            taskId = task?.id ?: throw IllegalAccessException("no block downloaded for event ${block.id}"),
+            isFinished = false,
+            choseTaskInBlock = false
+        )
+        eventDatabase.userEventStatus().insertStatus(status)
+        return status
+    }
+
+    private suspend fun displayCurrentBlock(
+        currentBlock: BlockEntity,
+        tasks: List<ShortTask>,
+        status: UserEventStatusEntity
+    ): EventStage {
+        val user = getCurrentUser()
+        if (currentBlock.isParallel) {
+            if (status.choseTaskInBlock) {
+                return displayTask(status.taskId, user)
+            } else {
+                return displayParallelBlock(currentBlock, tasks)
+            }
+        } else {
+            val taskIdx = tasks.indexOfFirst { it.id == status.taskId }
+
+            val taskId = if (taskIdx != -1) {
+                tasks[taskIdx + 1].id
+            } else {
+                tasks.first().id
+            }
+            return displayTask(taskId, user)
+        }
+    }
+
+    private suspend fun displayTask(taskId: String, userId: String): EventStage {
+        val task = eventDatabase.taskDao().getTaskById(taskId)
+        if (task == null) throw IllegalAccessException("didnt download task $taskId")
+        val options = eventDatabase.optionDao().getOptionsByTaskId(taskId)
+        val startTime = eventDatabase.answerDao().getAnswerByTaskAndUserId(taskId, userId)
+        return EventStage(
+            type = StageType.TASK.stageName,
+            task = Task(task, options, startTime?.startTime),
+            block = null
+        )
+    }
+
+    private fun displayParallelBlock(block: BlockEntity, tasks: List<ShortTask>): EventStage {
+        return EventStage(
+            type = StageType.BLOCK.stageName,
+            task = null,
+            block = Block(
+                id = block.id,
+                name = block.name,
+                tasks = tasks
+            )
+        )
+    }
+
+    private suspend fun proceedToNextBlock(currentBlock: BlockEntity, status: UserEventStatusEntity): EventStage {
+        val user = getCurrentUser()
+        val conditions = eventDatabase.conditionDao().getConditionsByBlockId(currentBlock.id)
+        val points = eventDatabase.blockDao().getPointsInBlockById(currentBlock.id)
+        val groups: List<GroupEntity> = eventDatabase.userDao().getUserWithGroupsById(user)?.groups ?: listOf()
+
+        for (condition in conditions) {
+            var gotConditions  = true
+            if (condition.max != null) {
+                gotConditions = points >= condition.max
+            }
+            if (condition.min != null) {
+                gotConditions = points < condition.min
+            }
+
+            if (condition.groupName != null) {
+                gotConditions = groups.any { group -> group.eventId == currentBlock.eventId && group.login == condition.groupName }
+            }
+
+            if (gotConditions) {
+                val newBlock = eventDatabase.blockDao().getBlockById(condition.nextBlockId) ?: throw IllegalAccessException("no block found for condition ${condition.conditionId}")
+                return changeBlock(newBlock, user, status)
+            }
+        }
+        val nextBlockByOrder = eventDatabase.blockDao().getBlockByEventIdAndBlockOrder(currentBlock.eventId, currentBlock.blockOrder+1)
+        if (nextBlockByOrder == null) {
+            return eventEnded()
+        }
+        return changeBlock(nextBlockByOrder, user, status)
+
+    }
+
+    private suspend fun changeBlock(newBlock: BlockEntity, user: String, status: UserEventStatusEntity): EventStage {
+        var allTasksCompleted = true
+        var tasks = eventDatabase.taskDao().getAllTasksInBlock(newBlock.id)
+            .map { task ->
+                val answer = eventDatabase.answerDao().getAnswerByTaskAndUserId(task.id, user)
+                val isCompleted = answer != null && answer.isFinal // дан ответ на задание
+                allTasksCompleted = allTasksCompleted && isCompleted
+                ShortTask(
+                    id = task.id,
+                    name = task.name,
+                    time = task.time,
+                    isCompleted = isCompleted
+                )
+            }
+        if (allTasksCompleted) { // если заходим второй раз в блок затираем все ответы
+            eventDatabase.answerDao().deleteAllAnswersInBlock(newBlock.id, user)
+            tasks = tasks.map { task ->
+                ShortTask(
+                    id = task.id,
+                    name = task.name,
+                    time = task.time,
+                    isCompleted = false
+                )
+            }
+        }
+        val newStatus = UserEventStatusEntity(
+            userId = status.userId,
+            eventId = status.eventId,
+            blockId = newBlock.id ,
+            taskId = "",
+            isFinished = false,
+            choseTaskInBlock = false,
+            id = status.id
+        )
+        eventDatabase.userEventStatus().updateStatus(newStatus)
+        return displayCurrentBlock(newBlock, tasks, newStatus)
+    }
+
+    private fun eventEnded(): EventStage {
+        return EventStage(
+            type = StageType.END.stageName,
+            task = null,
+            block = null
+        )
     }
 
     override suspend fun postTaskStartTime(
@@ -253,7 +433,8 @@ class LocalRepository @Inject constructor(
             userId = userId,
             startTime = DateConverter.convertToServerFormat(startTime),
             endTime = DateConverter.convertToServerFormat(LocalDateTime.MIN),
-            points = -1
+            points = -1,
+            isFinal = false
         )
         eventDatabase.answerDao().insertAnswer(answer)
         return true
@@ -310,12 +491,30 @@ class LocalRepository @Inject constructor(
             userId = answer.userId,
             startTime = answer.startTime,
             endTime = DateConverter.convertToServerFormat(endTime),
-            points = points!!
+            points = points!!,
+            isFinal = true
         )
         // сохраняем ответ
         eventDatabase.answerDao().updateAnswer(
             answer
         )
+
+        if (block.isParallel) { // отмечаем что надо перейти обратно в блок
+            val status = eventDatabase.userEventStatus().getStatusByUserAndEvent(userId, eventId)
+            if (status != null) {
+                eventDatabase.userEventStatus().updateStatus(
+                    UserEventStatusEntity(
+                        userId = status.userId,
+                        eventId = status.eventId,
+                        blockId = status.blockId,
+                        taskId = status.taskId,
+                        isFinished = status.isFinished,
+                        choseTaskInBlock = false,
+                        id = status.id
+                    )
+                )
+            }
+        }
 
         if (!block.showPoints) points = null
         if (!block.showAnswers) isCorrect = null

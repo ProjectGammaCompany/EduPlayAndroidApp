@@ -37,9 +37,9 @@ data class ConditionEntity(
     val nextBlockId: String,
 
     @ColumnInfo(name = "groupName")
-    val groupName: String,
+    val groupName: String?,
     @ColumnInfo(name = "min")
-    val min: Int,
+    val min: Int?,
     @ColumnInfo(name = "max")
-    val max: Int
+    val max: Int?
 )

@@ -1,4 +1,6 @@
-package com.eduplay.moblie.repository.responseTypes
+package com.eduplay.moblie.repository.webrepository.responseTypes
+
+import com.eduplay.moblie.repository.responseTypes.Block
 
 data class EventStage(
     val type: String,

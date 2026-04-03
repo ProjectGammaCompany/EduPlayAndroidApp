@@ -24,4 +24,12 @@ interface BlockDao {
     @Transaction
     @Query("SELECT * FROM blocks WHERE eventId = :eventId AND blockOrder = :blockOrder")
     suspend fun getBlockByEventIdAndBlockOrder(eventId: String, blockOrder: Int): BlockEntity?
+
+    @Transaction
+    @Query("""
+        SELECT SUM(points) FROM tasks
+        JOIN blocks ON tasks.blockId = blocks.blockId 
+        WHERE blocks.blockId = :blockId
+    """)
+    suspend fun getPointsInBlockById(blockId: String): Int
 }

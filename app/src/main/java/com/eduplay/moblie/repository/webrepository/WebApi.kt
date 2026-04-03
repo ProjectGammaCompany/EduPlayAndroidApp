@@ -13,7 +13,7 @@ import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
 import com.eduplay.moblie.repository.responseTypes.EventRoleResponse
-import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields

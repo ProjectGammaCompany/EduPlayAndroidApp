@@ -24,7 +24,7 @@ import com.eduplay.moblie.repository.requestTypes.EventPasswords
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventIdResponse
-import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
@@ -244,7 +244,7 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun getNextStage(eventId: String): EventStage {
-        return webRepository.getNextStage(eventId)
+        return getRepository().getNextStage(eventId)
     }
 
     suspend fun postTaskStartTime(

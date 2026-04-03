@@ -1,15 +1,12 @@
 package com.eduplay.moblie.repository
 
-import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
-import com.eduplay.moblie.models.QuestShortInfo
-import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
-import com.eduplay.moblie.repository.responseTypes.EventStage
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import java.time.LocalDateTime
 

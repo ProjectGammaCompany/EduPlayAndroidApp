@@ -11,7 +11,7 @@ import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.StageType
-import com.eduplay.moblie.repository.responseTypes.Task
+import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.useCases.FileDownloadStatus
 import com.eduplay.moblie.useCases.TaskDownloadUseCase

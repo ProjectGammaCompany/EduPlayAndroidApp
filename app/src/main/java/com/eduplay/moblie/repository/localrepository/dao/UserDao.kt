@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
+import com.eduplay.moblie.repository.localrepository.entity.UserWithGroups
 
 @Dao
 interface UserDao {
@@ -22,4 +23,8 @@ interface UserDao {
     @Transaction
     @Query("SELECT * FROM users WHERE userId = :id")
     suspend fun getUserById(id: String): UserEntity?
+
+    @Transaction
+    @Query("SELECT * FROM users WHERE userId = :id")
+    suspend fun getUserWithGroupsById(id: String): UserWithGroups?
 }

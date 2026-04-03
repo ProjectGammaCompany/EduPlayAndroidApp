@@ -22,6 +22,10 @@ interface TaskDao {
     suspend fun getTaskByBlockIdAndOrder(blockId: String, order: Int): TaskEntity?
 
     @Transaction
+    @Query("SELECT * FROM tasks WHERE blockId = :blockId ORDER BY taskOrder")
+    suspend fun getAllTasksInBlock(blockId: String): List<TaskEntity>
+
+    @Transaction
     @Query("SELECT * FROM tasks WHERE taskId = :taskId")
     suspend fun getTaskById(taskId: String): TaskEntity?
 }
