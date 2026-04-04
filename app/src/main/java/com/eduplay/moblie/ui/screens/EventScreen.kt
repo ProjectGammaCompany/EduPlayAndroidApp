@@ -81,6 +81,7 @@ import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
+import com.eduplay.moblie.ui.elements.JoinGroupDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
@@ -227,13 +228,32 @@ fun EventScreen(
         navController.navigate("play_event/${eventId}")
     }
 
+    val showGroupDialog = remember { mutableStateOf(false) }
+    val turnOffDialog = {
+        showGroupDialog.value = false
+    }
+    if (showGroupDialog.value) {
+        val start = {
+            if (isCompetitionMode.value) {
+                showConnectionList()
+            } else {
+                navController.navigate("play_event/${eventId}")
+            }
+        }
+        JoinGroupDialog(eventId, turnOffDialog, start)
+    }
+
     val startEvent = {
-        if (isCompetitionMode.value) {
+        if (viewModel.needGroup.value) {
+            showGroupDialog.value = true
+        } else if (isCompetitionMode.value) {
             showConnectionList()
         } else {
             navController.navigate("play_event/${eventId}")
         }
     }
+
+
 
 
     if (canShowConnectionList) {

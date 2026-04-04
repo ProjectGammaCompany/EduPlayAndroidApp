@@ -43,6 +43,9 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val password = mutableStateOf("")
     val groups = mutableStateListOf<EventGroup>()
     val joinCode = mutableStateOf("")
+    val canDownload = mutableStateOf(false)
+    val needGroup = mutableStateOf(false)
+    val isRated = mutableStateOf(false)
 
     fun fetchData(
         eventId: String,
@@ -87,6 +90,9 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         cover.value = data.cover
         tags.clear()
         tags.addAll(data.tags ?: listOf())
+        canDownload.value = data.canBeDownloaded
+        needGroup.value = data.needGroup
+        isRated.value = data.rated
 
 
         info.clear()

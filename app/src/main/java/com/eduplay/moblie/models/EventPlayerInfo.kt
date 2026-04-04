@@ -15,5 +15,8 @@ data class EventPlayerInfo(
     val status: String,
     @SerializedName("lastEditionDate")
     val lastEditionDate: String,
-    val authors: List<Author>
+    val authors: List<Author>,
+    val needGroup: Boolean,
+    val canBeDownloaded: Boolean,
+    val rated: Boolean
 )

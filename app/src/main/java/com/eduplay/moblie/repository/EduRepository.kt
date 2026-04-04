@@ -40,8 +40,6 @@ class EduRepository @Inject constructor(
     private val localRepository: LocalRepository,
     private val offlineModeManager: OfflineModeManager
 ) {
-
-
     suspend fun login(auth: Auth): AuthResult {
         var authResult: AuthResult
         try {
@@ -303,6 +301,10 @@ class EduRepository @Inject constructor(
 
     suspend fun getJoinCode(eventId: String): JoinCodeInfo {
         return webRepository.getJoinCode(eventId)
+    }
+
+    suspend fun enterGroupEvent(eventId: String, groupName: String, groupPassword: String) {
+        getRepository().enterGroupEvent(eventId, groupName, groupPassword)
     }
 
     private suspend fun getRepository(): Repository {
