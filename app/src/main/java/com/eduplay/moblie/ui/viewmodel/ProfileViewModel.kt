@@ -53,7 +53,7 @@ class ProfileViewModel @Inject constructor(
 
     init {
         isOffline.value = offlineModeManager.getAppMode()
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch() {
             var result: ProfileInfo = ProfileInfo("", "")
             try {
                 result = repository.getProfile()
