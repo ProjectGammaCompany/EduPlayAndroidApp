@@ -24,4 +24,8 @@ interface GroupDao {
     @Transaction
     @Query("SELECT * FROM `groups` WHERE login = :login")
     suspend fun getGroupByLogin(login: String): GroupEntity?
+
+    @Transaction
+    @Query("SELECT * FROM `groups` WHERE login = :login AND eventId = :eventId")
+    suspend fun getGroupByEventIdAndLogin(eventId: String, login: String): GroupEntity?
 }

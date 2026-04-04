@@ -138,6 +138,13 @@ class LocalRepository @Inject constructor(
             EventStatus.STARTED.status
         }
 
+        var needGroup = event.groupEvent
+        if (needGroup) {
+            val groups =
+                eventDatabase.userDao().getUserWithGroupsById(getCurrentUser())?.groups ?: listOf()
+            needGroup = groups.none { it.eventId == eventId }
+        }
+
         return EventPlayerInfo(
             title = event.title,
             description = event.description,
@@ -149,7 +156,10 @@ class LocalRepository @Inject constructor(
             cover = event.cover,
             status = textStatus,
             lastEditionDate = event.lastEditionDate,
-            authors = listOf()
+            authors = listOf(),
+            needGroup = needGroup,
+            canBeDownloaded = false,
+            rated = false,
         )
     }
 
@@ -498,17 +508,17 @@ class LocalRepository @Inject constructor(
         val block = eventDatabase.blockDao().getBlockById(blockId)
 
         if (block == null) throw IllegalAccessException("no block $blockId")
+        val hashedAnswers = answers.map { hashString(it) }
 
         // проверяем ответ
-        var correctAnswers = listOf<String>()
-
         if (TaskType.valueOf(task.type) != TaskType.INFO) {
-            correctAnswers =
-                eventDatabase.correctAnswerDao().getAnswersByTask(taskId).map { it.value }
+            val correctAnswers =
+                eventDatabase.correctAnswerDao().getAnswersByTask(taskId).map { it.value }.toSet()
             if (block.showAnswers) {
-                rightAnswer = correctAnswers
+                rightAnswer = findCorrectAnswers(correctAnswers, taskId)
+
             }
-            val intersection = correctAnswers.toSet().intersect(answers)
+            val intersection = correctAnswers.intersect(hashedAnswers)
             if (intersection.isEmpty()) {
                 isCorrect = TaskAnswerStatus.INCORRECT
                 points = 0
@@ -523,7 +533,7 @@ class LocalRepository @Inject constructor(
 
         answer = AnswerEntity(
             taskId = answer.taskId,
-            options = Gson().toJson(answers),
+            options = Gson().toJson(hashedAnswers),
             userId = answer.userId,
             startTime = answer.startTime,
             endTime = DateConverter.convertToServerFormat(endTime),
@@ -560,6 +570,17 @@ class LocalRepository @Inject constructor(
             points = points,
             isCorrect = isCorrect
         )
+    }
+
+    private suspend fun findCorrectAnswers(correctAnswers: Set<String>, taskId: String): List<String> {
+        val answers = mutableListOf<String>()
+        val allOptions = eventDatabase.optionDao().getOptionsByTaskId(taskId)
+        allOptions.forEach { optionEntity ->
+            if (correctAnswers.contains(hashString(optionEntity.value))) {
+                answers.add(optionEntity.value)
+            }
+        }
+        return answers
     }
 
     override suspend fun postTaskChoice(
@@ -635,7 +656,9 @@ class LocalRepository @Inject constructor(
         groupName: String,
         groupPassword: String
     ) {
-        TODO("Not yet implemented")
+        val group = eventDatabase.groupDao().getGroupByEventIdAndLogin(eventId, groupName)
+        if (group == null) throw IllegalAccessException("wrong group or password")
+        if (hashString(groupPassword) != group.password) throw IllegalAccessException("wrong group or password")
     }
 
     suspend fun saveUser() {
@@ -672,5 +695,10 @@ class LocalRepository @Inject constructor(
 
     suspend fun isEventDownloaded(eventId: String): Boolean {
         return eventDatabase.eventDao().getEventById(eventId) != null
+    }
+
+    private fun hashString(s: String): String {
+        // TODO(настроить хеширование)
+        return s
     }
 }
