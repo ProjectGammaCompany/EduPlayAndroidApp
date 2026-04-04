@@ -22,6 +22,7 @@ import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
 import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEventStatusEntity
+import com.eduplay.moblie.repository.localrepository.entity.UserGroupEntity
 
 @Database(
     entities = [
@@ -34,7 +35,8 @@ import com.eduplay.moblie.repository.localrepository.entity.UserEventStatusEntit
         OptionEntity::class,
         TaskEntity::class,
         UserEventStatusEntity::class,
-        UserEntity::class
+        UserEntity::class,
+        UserGroupEntity::class
     ],
     version = 1
 )

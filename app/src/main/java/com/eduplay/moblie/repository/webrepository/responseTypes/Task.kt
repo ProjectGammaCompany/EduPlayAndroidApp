@@ -31,7 +31,7 @@ data class Task(
                 value = it.value
             )
         },
-        files = Gson().fromJson<List<String>>(task.files, String::class.java),
+        files = Gson().fromJson<List<String>>(task.files, List::class.java),
         time = task.time,
         timeStamp = startTime
     )

@@ -24,7 +24,7 @@ interface AnswerDao {
     @Transaction
     @Query(
         """
-        SELECT SUM(points) 
+        SELECT SUM(answers.points) 
         FROM answers 
         JOIN tasks ON answers.taskId = tasks.taskId
         JOIN blocks ON tasks.blockId = blocks.blockId
@@ -40,7 +40,7 @@ interface AnswerDao {
         FROM answers
         WHERE EXISTS 
             (SELECT * FROM tasks JOIN blocks ON tasks.blockId = blocks.blockId 
-            WHERE answers.taskId = tasks.taskId)
+            WHERE answers.taskId = tasks.taskId AND blocks.blockId = :blockId AND answers.userId = :userId)
         """
     )
     suspend fun deleteAllAnswersInBlock(blockId: String, userId: String): Int
