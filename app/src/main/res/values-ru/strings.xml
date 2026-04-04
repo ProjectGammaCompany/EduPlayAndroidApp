@@ -97,4 +97,5 @@
     <string name="no">Нет</string>
     <string name="settings">Настройки</string>
     <string name="trun_offline">Офлайн режим</string>
+    <string name="join_group">Войти в группу</string>
 </resources>

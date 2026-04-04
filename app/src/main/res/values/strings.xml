@@ -96,4 +96,5 @@
     <string name="no">No</string>
     <string name="settings">Settings</string>
     <string name="trun_offline">Offline mode</string>
+    <string name="join_group">Join group</string>
 </resources>
