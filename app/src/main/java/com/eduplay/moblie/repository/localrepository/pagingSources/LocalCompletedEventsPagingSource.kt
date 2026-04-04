@@ -24,7 +24,7 @@ class LocalCompletedEventsPagingSource(private val repository: LocalRepository) 
 
             LoadResult.Page(
                 data = data,
-                prevKey = if (params.key == 0) null else page - 1,
+                prevKey = if (page == 0) null else page-1,
                 nextKey = if (data.isEmpty()) null else page + 1
             )
         } catch (e: Exception) {
