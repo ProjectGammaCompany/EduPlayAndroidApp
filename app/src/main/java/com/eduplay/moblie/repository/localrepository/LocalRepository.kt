@@ -365,11 +365,11 @@ class LocalRepository @Inject constructor(
 
         for (condition in conditions) {
             var gotConditions  = true
-            if (condition.max != null) {
-                gotConditions = points >= condition.max
-            }
             if (condition.min != null) {
-                gotConditions = points < condition.min
+                gotConditions = points >= condition.min
+            }
+            if (condition.max != null) {
+                gotConditions = points < condition.max
             }
 
             if (condition.groupName != null) {
@@ -418,7 +418,7 @@ class LocalRepository @Inject constructor(
             userId = status.userId,
             eventId = status.eventId,
             blockId = newBlock.id ,
-            taskId = "",
+            taskId = tasks.first().id,
             isFinished = false,
             choseTaskInBlock = false,
             id = status.id
