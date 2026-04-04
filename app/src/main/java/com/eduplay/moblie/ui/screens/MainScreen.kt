@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,16 +43,19 @@ import coil3.network.NetworkHeaders
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
+import com.eduplay.moblie.services.OfflineModeManager
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinByCodeDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
 import com.eduplay.moblie.ui.elements.TryAgainLaterToast
 import com.eduplay.moblie.ui.theme.EduPlayTheme
+import com.eduplay.moblie.ui.viewmodel.CurrentModeViewModel
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
@@ -62,7 +66,8 @@ fun MainScreen(
     onStopCompetition: () -> Unit,
     viewModel: MainScreenViewModel = hiltViewModel(),
     eventListViewModel: EventListViewModel = hiltViewModel(),
-    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
+    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel(),
+    currentModeViewModel: CurrentModeViewModel = hiltViewModel()
 ) {
     val onEventClick = { eventId: String ->
         navController.navigate("event_screen/$eventId")
@@ -100,6 +105,8 @@ fun MainScreen(
         JoinByCodeDialog({ joinByCode = false }, navController)
     }
 
+    val currentMode = currentModeViewModel.currentMode.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
+
     MainScreen(
         innerPaddingValues,
         events,
@@ -110,7 +117,8 @@ fun MainScreen(
         isCompetitionMode,
         onStopCompetition,
         onSearch,
-        onJoinByCode
+        onJoinByCode,
+        currentMode
     )
 }
 
@@ -126,7 +134,8 @@ private fun MainScreen(
     isCompetitionMode: State<Boolean>,
     onStopCompetition: () -> Unit,
     onSearch: () -> Unit,
-    onJoinByCode: () -> Unit
+    onJoinByCode: () -> Unit,
+    currentMode: State<OfflineModeManager.AppModes>
 ) {
     Column(
         modifier = Modifier
@@ -167,11 +176,13 @@ private fun MainScreen(
 
 
 
-        Button(
-            onClick = { onJoinByCode() },
-            modifier = Modifier.align(Alignment.End)
-        ) {
-            Text(stringResource(R.string.join_by_code))
+        if (currentMode.value == OfflineModeManager.AppModes.ONLINE) {
+            Button(
+                onClick = { onJoinByCode() },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(stringResource(R.string.join_by_code))
+            }
         }
 
 
@@ -243,7 +254,8 @@ fun MainScreenPreview() {
             remember { mutableStateOf(false) },
             {},
             {},
-            {}
+            {},
+            remember { mutableStateOf(OfflineModeManager.AppModes.OFFLINE) }
         )
     }
 
