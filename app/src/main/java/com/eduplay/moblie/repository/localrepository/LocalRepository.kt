@@ -630,6 +630,14 @@ class LocalRepository @Inject constructor(
         return EventTagList(listOf())
     }
 
+    override suspend fun enterGroupEvent(
+        eventId: String,
+        groupName: String,
+        groupPassword: String
+    ) {
+        TODO("Not yet implemented")
+    }
+
     suspend fun saveUser() {
         val token = tokenManager.getAccessToken().first()
         val userId = JwtDecoder.getUserId(token)

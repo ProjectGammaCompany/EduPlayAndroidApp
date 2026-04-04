@@ -23,6 +23,7 @@ import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
+import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.useCases.TokenManager
 import jakarta.inject.Inject
 import java.time.LocalDateTime
@@ -287,6 +288,22 @@ class WebRepository @Inject constructor(
             return body
         }
         throw IllegalAccessException("cant get join code for $eventId")
+    }
+
+    override suspend fun enterGroupEvent(
+        eventId: String,
+        groupName: String,
+        groupPassword: String
+    ) {
+        val response = api.postGroupPasswordsToEnterPublicGroupEvent(eventId, GroupCredentials(groupName, groupPassword))
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return
+        }
+        if (response.code() == 403) {
+            throw IllegalAccessException("wrong password")
+        }
+        throw IllegalAccessException("cant access event")
     }
 
 }

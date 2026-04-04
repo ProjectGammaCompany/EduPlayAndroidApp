@@ -18,6 +18,7 @@ import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
+import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -144,6 +145,13 @@ interface WebApi {
         @Path("joinCode") joinCode: String,
         @Body eventPasswords: EventPasswords
     ): Response<EventIdResponse>
+
+    @POST("event/{eventId}/join")
+    @InjectAuth
+    suspend fun postGroupPasswordsToEnterPublicGroupEvent(
+        @Path("eventId") eventId: String,
+        @Body groupPassword: GroupCredentials
+    ): Response<Unit>
 
     @GET("events/{eventId}/joinCode")
     @InjectAuth

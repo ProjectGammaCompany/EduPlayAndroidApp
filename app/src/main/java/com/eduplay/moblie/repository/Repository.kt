@@ -34,4 +34,5 @@ interface Repository {
     suspend fun getResults(eventId: String): PlayerStats
     suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean
     suspend fun getTags(): EventTagList
+    suspend fun enterGroupEvent(eventId: String, groupName: String, groupPassword: String)
 }
