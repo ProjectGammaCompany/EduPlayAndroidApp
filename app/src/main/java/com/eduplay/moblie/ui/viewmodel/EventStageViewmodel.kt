@@ -13,6 +13,7 @@ import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
+import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.FileDownloadStatus
 import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,7 +51,6 @@ class EventStageViewmodel @Inject constructor(
 
 
     override fun getNextStage(eventId: String, onNoInternet: () -> Unit, retry: Boolean) {
-        //currentStageType.value = StageType.NONE
         viewModelScope.launch {
             try {
                 val result = repository.getNextStage(eventId)
@@ -62,7 +62,7 @@ class EventStageViewmodel @Inject constructor(
                     if (result.task?.timeStamp == null || result.task.timeStamp.isBlank()) {
                         LocalDateTime.now()
                     } else {
-                        LocalDateTime.parse(result.task.timeStamp)
+                        DateConverter.convertFromServerFormat(result.task.timeStamp)
                     }
 
             } catch (_: ConnectException) {

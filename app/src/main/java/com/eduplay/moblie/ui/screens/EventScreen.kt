@@ -656,8 +656,8 @@ private fun EventScreenHeader(
 @Composable
 private fun GeneralInfo(
     tags: SnapshotStateList<EventTag>,
-    info: List<Pair<Int, String?>>,
-    description: String
+    info: SnapshotStateList<Pair<Int, String?>>,
+    description: State<String>
 ) {
     Column(
         modifier = Modifier
@@ -709,7 +709,7 @@ private fun GeneralInfo(
                 modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
             )
             Text(
-                text = description,
+                text = description.value,
                 style = typography.bodyMedium.copy(color = colorScheme.onBackground)
             )
         }
@@ -720,7 +720,7 @@ private fun GeneralInfo(
 @Composable
 private fun GeneralUserBody(
     tags: SnapshotStateList<EventTag>,
-    info: List<Pair<Int, String?>>,
+    info: SnapshotStateList<Pair<Int, String?>>,
     description: State<String>,
     isOpen: State<Boolean>,
     isContinuing: State<Boolean>,
@@ -730,7 +730,7 @@ private fun GeneralUserBody(
 ) {
     Column(verticalArrangement = Arrangement.Center) {
         Box(modifier = Modifier.fillMaxHeight(if (isOpen.value || isCompleted.value) 0.85f else 1f)) {
-            GeneralInfo(tags, info, description.value)
+            GeneralInfo(tags, info, description)
         }
 
         if (isOpen.value && !isCompleted.value) {
@@ -797,7 +797,7 @@ private fun EventTag(tagName: String) {
 @Composable
 private fun EventCreatorBody(
     tags: SnapshotStateList<EventTag>,
-    info: List<Pair<Int, String?>>,
+    info: SnapshotStateList<Pair<Int, String?>>,
     description: State<String>,
     privateEvent: State<Boolean>,
     password: State<String>,
@@ -833,15 +833,9 @@ private fun EventCreatorBody(
             }
         }
     }
-    val infoP = info.toMutableList()
-    infoP.add(
-        Pair(
-            R.string.private_event_flag,
-            if (privateEvent.value) stringResource(R.string.private_event) else stringResource(R.string.public_event)
-        ),
-    )
+
     when (selectedTabIdx) {
-        0 -> GeneralInfo(tags, infoP, description.value)
+        0 -> GeneralInfo(tags, info, description)
         1 -> StatisticsInfo()
         2 -> PrivacySettings(password, groups, joinCode)
         else -> Box {}

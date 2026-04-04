@@ -11,9 +11,11 @@ import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
+import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.localrepository.entity.AnswerEntity
 import com.eduplay.moblie.repository.localrepository.entity.BlockEntity
+import com.eduplay.moblie.repository.localrepository.entity.CorrectAnswerEntity
 import com.eduplay.moblie.repository.localrepository.entity.EventEntity
 import com.eduplay.moblie.repository.localrepository.entity.GroupEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
@@ -144,7 +146,7 @@ class LocalRepository @Inject constructor(
             startDate = event.startDate,
             endDate = event.endDate,
             tags = tags,
-            cover = event.tags,
+            cover = event.cover,
             status = textStatus,
             lastEditionDate = event.lastEditionDate,
             authors = listOf()
@@ -251,7 +253,7 @@ class LocalRepository @Inject constructor(
         val currentBlock = eventDatabase.blockDao().getBlockById(status.blockId)
 
         if (currentBlock == null) {
-            Log.i("NEXT_STAGE", "did not find block ${status.blockId}")
+            Log.e("NEXT_STAGE", "did not find block ${status.blockId}")
             return eventEnded()
         }
 
@@ -278,13 +280,13 @@ class LocalRepository @Inject constructor(
 
     private suspend fun fillStarterStatus(eventId: String) : UserEventStatusEntity {
         val block = eventDatabase.blockDao().getBlockByEventIdAndBlockOrder(eventId, 1)
-        val task = eventDatabase.taskDao().getTaskByBlockIdAndOrder(block?.eventId ?: "", 1)
+        val task = eventDatabase.taskDao().getTaskByBlockIdAndOrder(block?.id ?: "", 1)
         val user = getCurrentUser()
         val status = UserEventStatusEntity(
             userId = user,
             eventId = eventId,
             blockId = block?.id ?: throw IllegalAccessException("no block downloaded for event $eventId"),
-            taskId = task?.id ?: throw IllegalAccessException("no block downloaded for event ${block.id}"),
+            taskId = task?.id ?: throw IllegalAccessException("no block downloaded for event $eventId"),
             isFinished = false,
             choseTaskInBlock = false
         )
@@ -300,25 +302,40 @@ class LocalRepository @Inject constructor(
         val user = getCurrentUser()
         if (currentBlock.isParallel) {
             if (status.choseTaskInBlock) {
-                return displayTask(status.taskId, user)
+                return displayTask(status.taskId, user, status)
             } else {
                 return displayParallelBlock(currentBlock, tasks)
             }
         } else {
             val taskIdx = tasks.indexOfFirst { it.id == status.taskId }
 
-            val taskId = if (taskIdx != -1) {
+            val taskId = if (taskIdx != -1 && tasks[taskIdx].isCompleted) {
                 tasks[taskIdx + 1].id
+            } else if (taskIdx != -1 && !tasks[taskIdx].isCompleted) {
+                tasks[taskIdx].id
             } else {
                 tasks.first().id
             }
-            return displayTask(taskId, user)
+            return displayTask(taskId, user, status)
         }
     }
 
-    private suspend fun displayTask(taskId: String, userId: String): EventStage {
+    private suspend fun displayTask(taskId: String, userId: String, status: UserEventStatusEntity): EventStage {
         val task = eventDatabase.taskDao().getTaskById(taskId)
         if (task == null) throw IllegalAccessException("didnt download task $taskId")
+
+        eventDatabase.userEventStatus().updateStatus(
+            UserEventStatusEntity(
+                userId = status.userId,
+                eventId = status.eventId,
+                blockId = task.blockId,
+                taskId = taskId,
+                isFinished = status.isFinished,
+                choseTaskInBlock = false,
+                id = status.id
+            )
+        )
+
         val options = eventDatabase.optionDao().getOptionsByTaskId(taskId)
         val startTime = eventDatabase.answerDao().getAnswerByTaskAndUserId(taskId, userId)
         return EventStage(
@@ -366,7 +383,7 @@ class LocalRepository @Inject constructor(
         }
         val nextBlockByOrder = eventDatabase.blockDao().getBlockByEventIdAndBlockOrder(currentBlock.eventId, currentBlock.blockOrder+1)
         if (nextBlockByOrder == null) {
-            return eventEnded()
+            return eventEnded(status)
         }
         return changeBlock(nextBlockByOrder, user, status)
 
@@ -416,6 +433,21 @@ class LocalRepository @Inject constructor(
             task = null,
             block = null
         )
+    }
+
+    private suspend fun eventEnded(status: UserEventStatusEntity): EventStage { // also updates player status to finished
+        eventDatabase.userEventStatus().updateStatus(
+            UserEventStatusEntity(
+                userId = status.userId,
+                eventId = status.eventId,
+                blockId = status.blockId,
+                taskId = status.taskId,
+                isFinished = true,
+                choseTaskInBlock = false,
+                id = status.id
+            )
+        )
+        return eventEnded()
     }
 
     override suspend fun postTaskStartTime(
@@ -468,31 +500,36 @@ class LocalRepository @Inject constructor(
         if (block == null) throw IllegalAccessException("no block $blockId")
 
         // проверяем ответ
-        val correctAnswers =
-            eventDatabase.correctAnswerDao().getAnswersByTask(taskId).map { it.value }
-        if (block.showAnswers) {
-            rightAnswer = correctAnswers
-        }
-        val intersection = correctAnswers.toSet().intersect(answers)
-        if (intersection.isEmpty()) {
-            isCorrect = TaskAnswerStatus.INCORRECT
-            points = 0
-        } else if (intersection.size == correctAnswers.size) {
-            isCorrect = TaskAnswerStatus.CORRECT
-            points = task.points
-        } else if (block.partialPoints || task.partialPoints) {
-            isCorrect = TaskAnswerStatus.PARTIALLY
-            points = (intersection.size / correctAnswers.size) * task.points
+        var correctAnswers = listOf<String>()
+
+        if (TaskType.valueOf(task.type) != TaskType.INFO) {
+            correctAnswers =
+                eventDatabase.correctAnswerDao().getAnswersByTask(taskId).map { it.value }
+            if (block.showAnswers) {
+                rightAnswer = correctAnswers
+            }
+            val intersection = correctAnswers.toSet().intersect(answers)
+            if (intersection.isEmpty()) {
+                isCorrect = TaskAnswerStatus.INCORRECT
+                points = 0
+            } else if (intersection.size == correctAnswers.size) {
+                isCorrect = TaskAnswerStatus.CORRECT
+                points = task.points
+            } else if (block.partialPoints || task.partialPoints) {
+                isCorrect = TaskAnswerStatus.PARTIALLY
+                points = (intersection.size / correctAnswers.size) * task.points
+            }
         }
 
         answer = AnswerEntity(
             taskId = answer.taskId,
-            options = answers,
+            options = Gson().toJson(answers),
             userId = answer.userId,
             startTime = answer.startTime,
             endTime = DateConverter.convertToServerFormat(endTime),
             points = points!!,
-            isFinal = true
+            isFinal = true,
+            answerId = answer.answerId
         )
         // сохраняем ответ
         eventDatabase.answerDao().updateAnswer(

@@ -50,7 +50,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         onNoInternet: () -> Unit,
         context: Context
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val role = repository.getRole(eventId)
 
             eventCreatorMode.value = role == EventRole.AUTHOR
@@ -59,12 +59,14 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
                     EventRole.AUTHOR -> fetchOwnerData(eventId, context)
                     EventRole.PARTICIPANT -> fetchPlayerData(eventId)
                 }
-            } catch (_: ConnectException) {
+            } catch (e: ConnectException) {
+                Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
                 onNoInternet()
             } catch (e: NotAuthorisedException) {
                 Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
                 unauthorised.value = true
-            } catch (_: IllegalStateException) {
+            } catch (e: IllegalStateException) {
+                Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
                 onNoInternet()
             } catch (e: Exception) {
                 Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
@@ -79,12 +81,13 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         val data = repository.getEventInfoPlayer(eventId)
 
         isEventFavourite.value = data.favorite
-
-        tags.addAll(data.tags ?: listOf())
         description.value = data.description
         eventName.value = data.title
         author.value = data.authors.joinToString(", ") { it.email }
         cover.value = data.cover
+        tags.clear()
+        tags.addAll(data.tags ?: listOf())
+
 
         info.clear()
         info.add(
@@ -114,6 +117,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         val data = repository.getEventInfoOwner(eventId)
 
         eventName.value = data?.title ?: ""
+        tags.clear()
         tags = data.tags?.toMutableStateList() ?: mutableStateListOf()
         description.value = data.description
         privateEvent.value = data.private
