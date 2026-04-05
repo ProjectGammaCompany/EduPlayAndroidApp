@@ -5,7 +5,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.eduplay.moblie.ui.viewmodel.AppThemeViewModel
+import com.eduplay.moblie.useCases.AppSettingsManager
 
 private val DarkColorScheme = darkColorScheme(
     primary = Blue200,
@@ -36,19 +40,15 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun EduPlayTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    appThemeViewModel: AppThemeViewModel = hiltViewModel(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-//        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-//            val context = LocalContext.current
-//            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-//        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val darkTheme = isSystemInDarkTheme()
+    val theme = appThemeViewModel.getTheme().collectAsState(AppSettingsManager.Themes.SYSTEM)
+    val colorScheme = when (theme.value) {
+        AppSettingsManager.Themes.SYSTEM -> if (darkTheme) DarkColorScheme else LightColorScheme
+        AppSettingsManager.Themes.LIGHT -> LightColorScheme
+        AppSettingsManager.Themes.DARK -> DarkColorScheme
     }
 
     MaterialTheme(

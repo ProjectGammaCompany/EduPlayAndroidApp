@@ -43,7 +43,7 @@ import coil3.network.NetworkHeaders
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
-import com.eduplay.moblie.services.OfflineModeManager
+import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinByCodeDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
@@ -55,7 +55,6 @@ import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 
 @Composable

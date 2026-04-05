@@ -98,4 +98,11 @@
     <string name="settings">Настройки</string>
     <string name="trun_offline">Офлайн режим</string>
     <string name="join_group">Войти в группу</string>
+    <string name="theme">Тема</string>
+    <string name="dark">Тёмная</string>
+    <string name="light">Светлая</string>
+    <string name="system">Как в системе</string>
+    <string name="language">Язык</string>
+    <string name="russian">Русский</string>
+    <string name="english">Английский</string>
 </resources>

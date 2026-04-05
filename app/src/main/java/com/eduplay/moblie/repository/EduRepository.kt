@@ -29,7 +29,7 @@ import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.webrepository.WebRepository
-import com.eduplay.moblie.services.OfflineModeManager
+import com.eduplay.moblie.useCases.OfflineModeManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

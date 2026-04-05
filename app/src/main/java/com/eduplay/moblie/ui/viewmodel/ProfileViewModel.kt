@@ -1,17 +1,15 @@
 package com.eduplay.moblie.ui.viewmodel
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.EduRepository
-import com.eduplay.moblie.services.OfflineModeManager
+import com.eduplay.moblie.useCases.AppSettingsManager
+import com.eduplay.moblie.useCases.OfflineModeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +21,8 @@ import java.net.ConnectException
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val repository: EduRepository,
-    private val offlineModeManager: OfflineModeManager
+    private val offlineModeManager: OfflineModeManager,
+    private val appSettingsManager: AppSettingsManager
 ) : ViewModel() {
 
     val email = mutableStateOf("")
@@ -35,6 +34,8 @@ class ProfileViewModel @Inject constructor(
     val noInternet = mutableStateOf(false)
 
     val isOffline: MutableState<Flow<OfflineModeManager.AppModes>> = mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE))
+
+    val theme = mutableStateOf(flowOf<AppSettingsManager.Themes>())
 
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -53,6 +54,7 @@ class ProfileViewModel @Inject constructor(
 
     init {
         isOffline.value = offlineModeManager.getAppMode()
+        theme.value = appSettingsManager.getTheme()
         viewModelScope.launch() {
             var result: ProfileInfo = ProfileInfo("", "")
             try {
@@ -85,6 +87,12 @@ class ProfileViewModel @Inject constructor(
             } else {
                 offlineModeManager.saveAppMode(OfflineModeManager.AppModes.ONLINE)
             }
+        }
+    }
+
+    fun changeTheme(theme: AppSettingsManager.Themes) {
+        viewModelScope.launch {
+            appSettingsManager.saveTheme(theme)
         }
     }
 }

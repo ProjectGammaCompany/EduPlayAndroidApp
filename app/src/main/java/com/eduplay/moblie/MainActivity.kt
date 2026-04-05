@@ -37,6 +37,7 @@ import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.SplashViewModel
 import com.eduplay.moblie.ui.viewmodel.factories.BluetoothViewModelFactory
+import com.eduplay.moblie.useCases.AppSettingsManager
 import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
 import dagger.hilt.android.AndroidEntryPoint
 

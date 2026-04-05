@@ -15,7 +15,6 @@ import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.localrepository.entity.AnswerEntity
 import com.eduplay.moblie.repository.localrepository.entity.BlockEntity
-import com.eduplay.moblie.repository.localrepository.entity.CorrectAnswerEntity
 import com.eduplay.moblie.repository.localrepository.entity.EventEntity
 import com.eduplay.moblie.repository.localrepository.entity.GroupEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
@@ -29,7 +28,7 @@ import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.services.JwtDecoder
-import com.eduplay.moblie.services.OfflineModeManager
+import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.TokenManager
 import com.google.gson.Gson

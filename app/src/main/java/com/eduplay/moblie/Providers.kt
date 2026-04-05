@@ -7,7 +7,8 @@ import com.eduplay.moblie.repository.webrepository.AuthApi
 import com.eduplay.moblie.repository.webrepository.AuthInterceptor
 import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
-import com.eduplay.moblie.services.OfflineModeManager
+import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.AppSettingsManager
 import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import com.eduplay.moblie.useCases.TokenManager
 import dagger.Module
@@ -27,6 +28,7 @@ class Providers {
 
     private var tokenManager: TokenManager? = null
     private var offlineModeManager: OfflineModeManager? = null
+    private var settingsManager: AppSettingsManager? = null
 
     @Provides
     @Singleton
@@ -49,6 +51,15 @@ class Providers {
             offlineModeManager = OfflineModeManager(context)
         }
         return offlineModeManager!!
+    }
+
+    @Provides
+    @Singleton
+    fun provideSettingsManager(@ApplicationContext context: Context): AppSettingsManager {
+        if (settingsManager == null) {
+            settingsManager = AppSettingsManager(context)
+        }
+        return settingsManager!!
     }
 
     @Provides
