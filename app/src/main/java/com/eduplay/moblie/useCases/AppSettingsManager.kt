@@ -11,22 +11,7 @@ import kotlinx.coroutines.flow.map
 
 class AppSettingsManager(private val context: Context) {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_settings")
-    private val language = intPreferencesKey("language")
     private val screenMode = intPreferencesKey("screenMode")
-
-    enum class LanguageModes(val modeNumber: Int) {
-        RUSSIAN(0),
-        ENGLISH(1);
-
-        companion object {
-            fun valueOf(value: Int): LanguageModes {
-                for (mode in entries) {
-                    if (mode.modeNumber == value) return mode
-                }
-                throw IllegalAccessException("cant cast $value to LanguageModes")
-            }
-        }
-    }
 
     enum class Themes(val themeNumber: Int) {
         SYSTEM(0),
@@ -40,18 +25,6 @@ class AppSettingsManager(private val context: Context) {
                 }
                 throw IllegalAccessException("cant cast $value to ScreenModes")
             }
-        }
-    }
-
-    fun getLanguage(): Flow<LanguageModes> {
-        return context.dataStore.data.map { preferences ->
-            LanguageModes.valueOf(preferences[language] ?: 0)
-        }
-    }
-
-    suspend fun saveLanguage(mode: LanguageModes) {
-        context.dataStore.edit { preferences ->
-            preferences[language] = mode.modeNumber
         }
     }
 
