@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 class DateConverter {
     companion object {
         private val serverDateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
-        private val presentingFormatter = DateTimeFormatter.ofPattern("H:m, d MMMM yyyy")
+        private val presentingFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, H:m")
 
         fun convertFromServerFormat(string: String): LocalDateTime {
             return LocalDateTime.parse(string, serverDateFormatter)

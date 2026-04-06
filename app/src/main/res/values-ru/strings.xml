@@ -107,4 +107,9 @@
     <string name="english">Английский</string>
     <string name="favorite_event">Избранное событие</string>
     <string name="started">началось</string>
+    <string name="you_havent_started">Вы еще не начали проходить</string>
+    <string name="event_is_ending_soon">скоро завершится</string>
+    <string name="is_ending">завершится</string>
+    <string name="in_hour">через час</string>
+    <string name="tomorrow">завтра</string>
 </resources>

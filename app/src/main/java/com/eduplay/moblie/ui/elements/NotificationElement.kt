@@ -18,6 +18,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.NotificationData
+import com.eduplay.moblie.models.NotificationData.EndEventNotificationData
+import com.eduplay.moblie.models.NotificationData.EndEventNotificationData.TimeLeft
+import com.eduplay.moblie.models.NotificationData.FavoriteNotificationData
+import com.eduplay.moblie.models.NotificationData.EmptyNotification
 import com.eduplay.moblie.useCases.DateConverter
 import java.time.LocalDateTime
 
@@ -34,13 +38,17 @@ fun NotificationElement(
             .fillMaxWidth()
     ) {
         when (notificationData) {
-            is NotificationData.FavoriteNotificationData -> FavoriteEventNotification(
+            is FavoriteNotificationData -> FavoriteEventNotification(
                 notificationData,
                 onNavigate
             )
 
-            is NotificationData.EndEventNotificationData -> TODO()
-            is NotificationData.EmptyNotification -> {}
+            is EndEventNotificationData -> EndEventNotification(
+                notificationData,
+                onNavigate
+            )
+
+            is EmptyNotification -> {}
         }
         HorizontalDivider(color = colorScheme.tertiary)
     }
@@ -50,7 +58,7 @@ fun NotificationElement(
 
 @Composable
 private fun FavoriteEventNotification(
-    notification: NotificationData.FavoriteNotificationData,
+    notification: FavoriteNotificationData,
     onNavigate: (String) -> Unit
 ) {
     Column(
@@ -60,10 +68,55 @@ private fun FavoriteEventNotification(
             .clickable(enabled = true, onClick = { onNavigate(notification.eventId) })
     ) {
         Text(
-            stringResource(R.string.favorite_event) + " \"${notification.eventName}\" " + stringResource(
-                R.string.started
-            ),
+            text = stringResource(R.string.favorite_event) + " \"${notification.eventName}\" "
+                    + stringResource(R.string.started),
             style = typography.titleMedium
+        )
+        Text(
+            DateConverter.convertForDisplay(notification.date),
+            style = typography.bodyLarge,
+            modifier = Modifier.align(Alignment.End)
+        )
+    }
+}
+
+@Composable
+private fun EndEventNotification(
+    notification: EndEventNotificationData,
+    onNavigate: (String) -> Unit
+) {
+    val title = StringBuilder()
+
+    if (notification.notStartedFavorite) {
+        title.append(stringResource(R.string.you_havent_started))
+        title.append(" \"${notification.eventName}\".")
+    } else {
+        title.append("\"${notification.eventName}\" ")
+        title.append(stringResource(R.string.event_is_ending_soon))
+        title.append(".")
+    }
+    val body = StringBuilder()
+    body.append("\"${notification.eventName}\" ")
+    body.append(stringResource(R.string.is_ending))
+    body.append(" ")
+    when(notification.timeLeft) {
+        TimeLeft.HOUR -> body.append(stringResource(R.string.in_hour) + ".")
+        TimeLeft.DAY -> body.append(stringResource(R.string.tomorrow) + ".")
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+            .clickable(enabled = true, onClick = { onNavigate(notification.eventId) })
+    ) {
+        Text(
+            text = title.toString(),
+            style = typography.titleMedium
+        )
+        Text(
+            body.toString(),
+            style = typography.bodyLarge,
         )
         Text(
             DateConverter.convertForDisplay(notification.date),
@@ -81,8 +134,55 @@ private fun NotificationPreview() {
         "eve1", "Event 1",
         LocalDateTime.now().plusDays(10)
     )
-    NotificationElement(
-        favoriteEventStarted,
-        rememberNavController()
+
+    val endNotificationHour = EndEventNotificationData(
+        "eve1", "Event 1",
+        LocalDateTime.now().plusDays(10),
+        timeLeft = TimeLeft.HOUR,
+        notStartedFavorite = false
     )
+
+    val notStartedendNotificationHour = EndEventNotificationData(
+        "eve1", "Event 1",
+        LocalDateTime.now().plusDays(10),
+        timeLeft = TimeLeft.HOUR,
+        notStartedFavorite = true
+    )
+
+    val endNotificationDay = EndEventNotificationData(
+        "eve1", "Event 1",
+        LocalDateTime.now().plusDays(10),
+        timeLeft = TimeLeft.DAY,
+        notStartedFavorite = false
+    )
+
+    val notStartedendNotificationDay = EndEventNotificationData(
+        "eve1", "Event 1",
+        LocalDateTime.now().plusDays(10),
+        timeLeft = TimeLeft.DAY,
+        notStartedFavorite = true
+    )
+    Column {
+        NotificationElement(
+            favoriteEventStarted,
+            rememberNavController()
+        )
+        NotificationElement(
+            endNotificationHour,
+            rememberNavController()
+        )
+
+        NotificationElement(
+            notStartedendNotificationHour,
+            rememberNavController()
+        )
+        NotificationElement(
+            endNotificationDay,
+            rememberNavController()
+        )
+        NotificationElement(
+            notStartedendNotificationDay,
+            rememberNavController()
+        )
+    }
 }
