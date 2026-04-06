@@ -6,6 +6,7 @@ import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventTagList
+import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.Repository
@@ -18,12 +19,14 @@ import com.eduplay.moblie.repository.requestTypes.TaskAnswer
 import com.eduplay.moblie.repository.requestTypes.TaskStartTime
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventIdResponse
-import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
+import com.eduplay.moblie.repository.webrepository.responseTypes.Notification
+import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.TokenManager
 import jakarta.inject.Inject
 import java.time.LocalDateTime
@@ -79,7 +82,7 @@ class WebRepository @Inject constructor(
         active: Boolean,
         favorites: Boolean,
         title: String,
-        isDownloaded: suspend (String)->Boolean
+        isDownloaded: suspend (String) -> Boolean
     ): List<QuestShortInfo> {
         val response = api.allEvents(
             page = page,
@@ -128,7 +131,11 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("No info for this event")
     }
 
-    suspend fun getFavouriteEvents(page: Int, maxOnPage: Int, isDownloaded: suspend (String)-> Boolean): List<QuestShortInfo> {
+    suspend fun getFavouriteEvents(
+        page: Int,
+        maxOnPage: Int,
+        isDownloaded: suspend (String) -> Boolean
+    ): List<QuestShortInfo> {
         val response = api.favouriteEvents(page, maxOnPage)
         val body = response.body()
         Log.d("Requests get favourite", response.code().toString() + response.raw())
@@ -138,7 +145,11 @@ class WebRepository @Inject constructor(
         return listOf()
     }
 
-    suspend fun getCreatedEvents(page: Int, maxOnPage: Int, isDownloaded: suspend (String)-> Boolean): List<QuestShortInfo> {
+    suspend fun getCreatedEvents(
+        page: Int,
+        maxOnPage: Int,
+        isDownloaded: suspend (String) -> Boolean
+    ): List<QuestShortInfo> {
         val response = api.createdEvents(page, maxOnPage)
         val body = response.body()
         Log.d("Requests created events", response.code().toString() + response.raw())
@@ -148,7 +159,11 @@ class WebRepository @Inject constructor(
         return listOf()
     }
 
-    suspend fun getCompletedEvents(page: Int, maxOnPage: Int, isDownloaded: suspend (String)->Boolean): List<QuestShortInfo> {
+    suspend fun getCompletedEvents(
+        page: Int,
+        maxOnPage: Int,
+        isDownloaded: suspend (String) -> Boolean
+    ): List<QuestShortInfo> {
         val response = api.completedEvents(page, maxOnPage)
         val body = response.body()
         Log.d("Requests completed events", response.code().toString() + response.raw())
@@ -295,7 +310,10 @@ class WebRepository @Inject constructor(
         groupName: String,
         groupPassword: String
     ) {
-        val response = api.postGroupPasswordsToEnterPublicGroupEvent(eventId, GroupCredentials(groupName, groupPassword))
+        val response = api.postGroupPasswordsToEnterPublicGroupEvent(
+            eventId,
+            GroupCredentials(groupName, groupPassword)
+        )
         val body = response.body()
         if (response.isSuccessful && body != null) {
             return
@@ -304,6 +322,47 @@ class WebRepository @Inject constructor(
             throw IllegalAccessException("wrong password")
         }
         throw IllegalAccessException("cant access event")
+    }
+
+
+    override suspend fun getNotifications(page: Int, maxOnPage: Int): List<NotificationData> {
+        val response = api.getNotifications(page, maxOnPage)
+        val body = response.body()
+        Log.d("Requests notifications", response.code().toString() + response.raw())
+        if (response.isSuccessful && body != null) {
+            return body.notifications
+                .filter { Notification.NotificationType.valueByType(it.type) != null }
+                .map { notification ->
+                    when (Notification.NotificationType.valueByType(notification.type)) {
+                        Notification.NotificationType.FAVORITE_START -> {
+                            val extra = notification.favoriteEventStartExtra
+                                ?: return@map NotificationData.EmptyNotification()
+                            NotificationData.FavoriteNotificationData(
+                                extra.id,
+                                extra.eventName,
+                                DateConverter.convertFromServerFormat(notification.date)
+                            )
+                        }
+
+                        Notification.NotificationType.EVENT_END -> {
+                            val extra = notification.eventEndExtra
+                                ?: return@map NotificationData.EmptyNotification()
+                            val timeLeft =
+                                NotificationData.EndEventNotificationData.TimeLeft.valueByTime(extra.timeLeft)
+                            NotificationData.EndEventNotificationData(
+                                extra.id,
+                                extra.eventName,
+                                DateConverter.convertFromServerFormat(notification.date),
+                                timeLeft = timeLeft!!,
+                                notStartedFavorite = extra.notStartedFavorite,
+                            )
+                        }
+
+                        null -> NotificationData.EmptyNotification()
+                    }
+                }
+        }
+        return listOf()
     }
 
 }

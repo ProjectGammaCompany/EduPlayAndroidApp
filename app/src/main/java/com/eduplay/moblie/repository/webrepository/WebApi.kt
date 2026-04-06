@@ -19,6 +19,7 @@ import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
+import com.eduplay.moblie.repository.webrepository.responseTypes.NotificationList
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -61,7 +62,7 @@ interface WebApi {
         @Query("maxOnPage") maxOnPage: Int = 10,
     ): Response<EventListResponse>
 
-    @PUT("events/personal/favorites")
+    @PUT("/events/personal/favorites")
     @InjectAuth
     suspend fun addToFavourite(
         @Body event: FavoriteEvent
@@ -102,7 +103,7 @@ interface WebApi {
         @Body task: TaskFromBlock
     ): Response<Unit>
 
-    @POST("event/{eventId}/block/{blockId}/task/{taskId}/timestamp")
+    @POST("/event/{eventId}/block/{blockId}/task/{taskId}/timestamp")
     @InjectAuth
     suspend fun postTaskStartTime(
         @Path("eventId") eventId: String,
@@ -111,7 +112,7 @@ interface WebApi {
         @Body timeStamp: TaskStartTime
     ): Response<Unit>
 
-    @POST("event/{eventId}/blocks/{blockId}/tasks/{taskId}/answer")
+    @POST("/event/{eventId}/blocks/{blockId}/tasks/{taskId}/answer")
     @InjectAuth
     suspend fun postTaskAnswer(
         @Path("eventId") eventId: String,
@@ -146,17 +147,24 @@ interface WebApi {
         @Body eventPasswords: EventPasswords
     ): Response<EventIdResponse>
 
-    @POST("event/{eventId}/join")
+    @POST("/event/{eventId}/join")
     @InjectAuth
     suspend fun postGroupPasswordsToEnterPublicGroupEvent(
         @Path("eventId") eventId: String,
         @Body groupPassword: GroupCredentials
     ): Response<Unit>
 
-    @GET("events/{eventId}/joinCode")
+    @GET("/events/{eventId}/joinCode")
     @InjectAuth
     suspend fun getJoinCode(
         @Path("eventId") eventId: String,
     ): Response<JoinCodeInfo>
+
+    @GET("/notifications")
+    @InjectAuth
+    suspend fun getNotifications(
+        @Query("page") page: Int = 1,
+        @Query("maxOnPage") maxOnPage: Int = 10,
+    ): Response<NotificationList>
 
 }

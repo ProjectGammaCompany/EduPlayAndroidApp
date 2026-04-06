@@ -4,6 +4,7 @@ import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventTagList
+import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
@@ -35,4 +36,5 @@ interface Repository {
     suspend fun addToFavourite(eventId: String, isFavorite: Boolean): Boolean
     suspend fun getTags(): EventTagList
     suspend fun enterGroupEvent(eventId: String, groupName: String, groupPassword: String)
+    suspend fun getNotifications(page: Int, maxOnPage: Int): List<NotificationData>
 }

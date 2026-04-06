@@ -9,6 +9,7 @@ import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventStatus
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.EventTagList
+import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.models.TaskType
@@ -658,6 +659,13 @@ class LocalRepository @Inject constructor(
         val group = eventDatabase.groupDao().getGroupByEventIdAndLogin(eventId, groupName)
         if (group == null) throw IllegalAccessException("wrong group or password")
         if (hashString(groupPassword) != group.password) throw IllegalAccessException("wrong group or password")
+    }
+
+    override suspend fun getNotifications(
+        page: Int,
+        maxOnPage: Int
+    ): List<NotificationData> {
+        return listOf()
     }
 
     suspend fun saveUser() {

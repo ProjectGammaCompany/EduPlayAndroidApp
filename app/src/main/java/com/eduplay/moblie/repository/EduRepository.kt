@@ -8,6 +8,7 @@ import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventTagList
+import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.localrepository.LocalRepository
@@ -29,10 +30,12 @@ import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.webrepository.WebRepository
+import com.eduplay.moblie.repository.webrepository.pagingSources.NotificationPagingSource
 import com.eduplay.moblie.useCases.OfflineModeManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDateTime
 
 class EduRepository @Inject constructor(
@@ -305,6 +308,33 @@ class EduRepository @Inject constructor(
 
     suspend fun enterGroupEvent(eventId: String, groupName: String, groupPassword: String) {
         getRepository().enterGroupEvent(eventId, groupName, groupPassword)
+    }
+
+    suspend fun getLatestNotifications(): List<NotificationData> {
+        return getRepository().getNotifications(1, 5)
+    }
+
+    suspend fun getNotifications(
+        pageSize: Int = 20,
+        enablePlaceHolders: Boolean = false,
+        prefetchDistance: Int = 10,
+        initialLoadSize: Int = 20,
+        maxCacheSize: Int = 2000
+    ): Flow<PagingData<NotificationData>> {
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+            return Pager(
+                config = PagingConfig(
+                    pageSize = pageSize,
+                    enablePlaceholders = enablePlaceHolders,
+                    prefetchDistance = prefetchDistance,
+                    initialLoadSize = initialLoadSize,
+                    maxSize = maxCacheSize
+                ), pagingSourceFactory = {
+                    NotificationPagingSource(webRepository)
+                }
+            ).flow
+        }
+        return flowOf()
     }
 
     private suspend fun getRepository(): Repository {
