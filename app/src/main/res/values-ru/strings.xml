@@ -105,4 +105,6 @@
     <string name="language">Язык</string>
     <string name="russian">Русский</string>
     <string name="english">Английский</string>
+    <string name="favorite_event">Избранное событие</string>
+    <string name="started">началось</string>
 </resources>

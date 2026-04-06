@@ -7,13 +7,13 @@ sealed class NotificationData () {
     class EmptyNotification():NotificationData()
 
     data class FavoriteNotificationData(
-        val notificationId: String,
+        val eventId: String,
         val eventName: String,
         val date: LocalDateTime
     ) :NotificationData()
 
     data class EndEventNotificationData(
-        val notificationId: String,
+        val eventId: String,
         val eventName: String,
         val date: LocalDateTime,
         val timeLeft: TimeLeft,

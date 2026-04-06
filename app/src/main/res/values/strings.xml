@@ -104,4 +104,6 @@
     <string name="language">Language</string>
     <string name="russian">Russian</string>
     <string name="english">English</string>
+    <string name="favorite_event">Favorite event</string>
+    <string name="started">started</string>
 </resources>
