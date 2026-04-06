@@ -112,4 +112,6 @@
     <string name="is_ending">завершится</string>
     <string name="in_hour">через час</string>
     <string name="tomorrow">завтра</string>
+    <string name="all_notifications">Все уведомления</string>
+    <string name="no_notifications">Уведомлений нет</string>
 </resources>

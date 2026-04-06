@@ -2,10 +2,12 @@ package com.eduplay.moblie.ui.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.exceptions.NotAuthorisedException
+import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.useCases.AppSettingsManager
@@ -36,6 +38,7 @@ class ProfileViewModel @Inject constructor(
     val isOffline: MutableState<Flow<OfflineModeManager.AppModes>> = mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE))
 
     val theme = mutableStateOf(flowOf<AppSettingsManager.Themes>())
+    val notifications = mutableStateListOf<NotificationData>()
 
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -61,6 +64,7 @@ class ProfileViewModel @Inject constructor(
                 result = repository.getProfile()
                 email.value = result.username
                 avatar.value = result.avatar
+                notifications.addAll(repository.getLatestNotifications())
             } catch (_: ConnectException) {
                 noInternet.value = true
             } catch (_: NotAuthorisedException) {

@@ -111,4 +111,6 @@
     <string name="is_ending">is ending</string>
     <string name="in_hour">in an hour</string>
     <string name="tomorrow">tomorrow</string>
+    <string name="all_notifications">All notifications</string>
+    <string name="no_notifications">There are no notifications</string>
 </resources>

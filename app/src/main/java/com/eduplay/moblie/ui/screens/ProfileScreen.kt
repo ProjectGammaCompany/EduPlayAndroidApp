@@ -11,11 +11,15 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.ButtonColors
@@ -31,12 +35,15 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,14 +56,17 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
+import com.eduplay.moblie.ui.elements.NotificationElement
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.ProfileViewModel
 import com.eduplay.moblie.useCases.AppSettingsManager
@@ -89,23 +99,22 @@ fun ProfileScreen(
     if (viewModel.canLogout.value) {
         AuthScreenNavigator(navController)
     }
-    val theme =
-
-        ProfileScreen(
-            innerPaddingValues,
-            updateEmail,
-            viewModel.email,
-            hasEmailErrors,
-            onLogout,
-            viewModel.avatar.value,
-            imageHeaderViewModel.headers,
-            { image: String -> imageHeaderViewModel.getFullUrl(image) },
-            isOffline = viewModel.isOffline,
-            { mode: Boolean -> viewModel.toggleAppMode(mode) },
-            theme = viewModel.theme.value.collectAsState(AppSettingsManager.Themes.SYSTEM),
-            onChooseTheme = viewModel::changeTheme
-        )
-
+    ProfileScreen(
+        innerPaddingValues,
+        updateEmail,
+        viewModel.email,
+        hasEmailErrors,
+        onLogout,
+        viewModel.avatar.value,
+        imageHeaderViewModel.headers,
+        { image: String -> imageHeaderViewModel.getFullUrl(image) },
+        isOffline = viewModel.isOffline,
+        { mode: Boolean -> viewModel.toggleAppMode(mode) },
+        theme = viewModel.theme.value.collectAsState(AppSettingsManager.Themes.SYSTEM),
+        onChooseTheme = viewModel::changeTheme,
+        notifications = viewModel.notifications,
+        navController = navController
+    )
 }
 
 @Composable
@@ -121,7 +130,9 @@ private fun ProfileScreen(
     isOffline: State<Flow<OfflineModeManager.AppModes>>,
     onToggleOffline: (Boolean) -> Unit,
     theme: State<AppSettingsManager.Themes>,
-    onChooseTheme: (AppSettingsManager.Themes) -> Unit
+    onChooseTheme: (AppSettingsManager.Themes) -> Unit,
+    notifications: SnapshotStateList<NotificationData>,
+    navController: NavController
 ) {
 
     Column(
@@ -139,6 +150,7 @@ private fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 10.dp)
         ) {
             AsyncImage(
@@ -155,8 +167,8 @@ private fun ProfileScreen(
                     .align(Alignment.CenterHorizontally)
                     .padding(10.dp)
                     .width(130.dp)
+                    .height(130.dp)
                     .clip(CircleShape)
-
             )
 
             // email
@@ -184,6 +196,7 @@ private fun ProfileScreen(
             }
 
             Settings(isOffline, onToggleOffline, theme, onChooseTheme)
+            LatestNotifications(notifications, navController)
 
 
             OutlinedButton(
@@ -222,6 +235,45 @@ private fun ProfileTopBar() {
 }
 
 @Composable
+private fun LatestNotifications(notifications: SnapshotStateList<NotificationData>, navController: NavController) {
+    Column {
+        HorizontalDivider(
+            color = colorScheme.primaryContainer,
+            modifier = Modifier.padding(top = 5.dp)
+        )
+        TextButton(
+            onClick = {},//TODO("navigate to notification screen")
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Start)
+        ) {
+            Text(
+                text = stringResource(R.string.all_notifications),
+                style = typography.titleMedium.copy(color = colorScheme.onBackground),
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                Icons.AutoMirrored.Default.ArrowForwardIos,
+                "",
+                tint = colorScheme.onBackground
+            )
+        }
+        if (notifications.isNotEmpty()) {
+            for (notification in notifications) {
+                NotificationElement(notification, navController)
+            }
+        } else {
+            Text(
+                stringResource(R.string.no_notifications),
+                style = typography.bodyMedium.copy(colorScheme.secondary),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+
+    }
+}
+
+@Composable
 private fun Settings(
     isOffline: State<Flow<OfflineModeManager.AppModes>>,
     onToggleOffline: (Boolean) -> Unit,
@@ -232,12 +284,14 @@ private fun Settings(
         color = colorScheme.primaryContainer,
         modifier = Modifier.padding(top = 3.dp)
     )
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(top = 5.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 5.dp)
+    ) {
         Text(
             text = stringResource(R.string.settings),
-            style = typography.titleLarge.copy(color = colorScheme.onBackground),
+            style = typography.titleMedium.copy(color = colorScheme.onBackground),
         )
         val offlineState = isOffline.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -335,7 +389,9 @@ fun ProfilePreview() {
         remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) },
         {},
         remember { mutableStateOf(AppSettingsManager.Themes.SYSTEM) },
-        { _ -> }
+        { _ -> },
+        remember { mutableStateListOf() },
+        rememberNavController()
     )
     //}
 }
