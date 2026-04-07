@@ -196,4 +196,8 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     fun downloadEvent(eventId: String, onDownloadEvent: () -> ComponentName?) {
         onDownloadEvent()
     }
+
+    fun rateEvent(rating: Int) {
+
+    }
 }

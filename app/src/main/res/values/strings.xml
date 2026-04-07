@@ -115,4 +115,6 @@
     <string name="no_notifications">There are no notifications</string>
     <string name="notifications">Notifications</string>
     <string name="change_avatar">Change avatar</string>
+    <string name="rate_event">Did you like this event?</string>
+    <string name="submit">Submit</string>
 </resources>
