@@ -394,6 +394,7 @@ class WebRepository @Inject constructor(
         if (!fileUploadResponse.isSuccessful || serverImageUrlBody == null) {
             throw IllegalAccessException("cant upload file to server")
         }
+        imageFile.delete()
         val response = api.putAvatar(AvatarUpdate(serverImageUrlBody))
         if (!response.isSuccessful) {
             throw IllegalAccessException("cant upload file to server")

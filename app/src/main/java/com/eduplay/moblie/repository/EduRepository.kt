@@ -350,8 +350,9 @@ class EduRepository @Inject constructor(
 
     suspend fun updateAvatar(avatar: Uri, contentResolver: ContentResolver, context: Context): String {
         if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE ) throw IllegalAccessException("currently offline, cant update avatar")
-        val sheme = context.contentResolver.getType(avatar)?.dropWhile { it != '/' }?.substring(1) ?: ""
-        val file = File(context.cacheDir, "tempFile.$sheme")
+        val fileType = context.contentResolver.getType(avatar)?.dropWhile { it != '/' }?.substring(1) ?: ""
+
+        val file = File(context.cacheDir, "tempFile.$fileType")
 
         contentResolver.openInputStream(avatar)?.use { inputStream ->
             file.outputStream().use { outputStream ->
