@@ -483,6 +483,7 @@ private fun ComplaintDialog(onClose: () -> Unit, onComplain: (String) -> Unit) {
             TextButton(
                 onClick = {
                     onComplain(reasonSate.text.toString())
+                    onClose()
                     reasonSate.clearText()
                 }
             ) {

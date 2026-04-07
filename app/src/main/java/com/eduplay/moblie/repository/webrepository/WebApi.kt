@@ -18,6 +18,7 @@ import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.repository.webrepository.requestTypes.AvatarUpdate
+import com.eduplay.moblie.repository.webrepository.requestTypes.EventRating
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
@@ -184,4 +185,7 @@ interface WebApi {
         @Query("maxOnPage") maxOnPage: Int = 10,
     ): Response<NotificationList>
 
+    @POST("/event/{eventId}/rate")
+    @InjectAuth
+    suspend fun postRating(@Body rating: EventRating): Response<Unit>
 }

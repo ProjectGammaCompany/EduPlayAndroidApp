@@ -47,6 +47,8 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val needGroup = mutableStateOf(false)
     val isRated = mutableStateOf(false)
 
+    val noInternetConnection = mutableStateOf(false)
+
     fun fetchData(
         eventId: String,
         callBack: () -> Unit,
@@ -189,7 +191,17 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
 
     fun complain(eventId: String, reason: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.complain(eventId, reason)
+            try {
+                repository.complain(eventId, reason)
+            }  catch (e: ConnectException) {
+                Log.e("complain", e.message ?: e.toString(), e)
+                noInternetConnection.value = true
+            } catch (e: NotAuthorisedException) {
+                Log.e("complain", e.message ?: e.toString(), e)
+                unauthorised.value = true
+            } catch (e: Exception) {
+                Log.e("complain", e.message ?: e.toString(), e)
+            }
         }
     }
 
@@ -198,6 +210,21 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     }
 
     fun rateEvent(rating: Int) {
-
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                isRated.value = repository.postEventRating(rating)
+            } catch (e: ConnectException) {
+                Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
+                noInternetConnection.value = true
+            } catch (e: NotAuthorisedException) {
+                Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
+                unauthorised.value = true
+            } catch (e: IllegalStateException) {
+                Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
+                noInternetConnection.value = true
+            } catch (e: Exception) {
+                Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
+            }
+        }
     }
 }

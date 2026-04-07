@@ -24,6 +24,7 @@ import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.repository.webrepository.requestTypes.AvatarUpdate
+import com.eduplay.moblie.repository.webrepository.requestTypes.EventRating
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
@@ -400,6 +401,14 @@ class WebRepository @Inject constructor(
             throw IllegalAccessException("cant upload file to server")
         }
         return serverImageUrlBody
+    }
+
+    suspend fun postRating(rating: Int) {
+        val response = api.postRating(EventRating(rating))
+        if (response.isSuccessful) {
+            return
+        }
+        throw IllegalAccessException("cant post rating")
     }
 
 }
