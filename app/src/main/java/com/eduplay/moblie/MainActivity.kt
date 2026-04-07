@@ -63,7 +63,6 @@ class MainActivity : FragmentActivity() {
 
     @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
-
         val updateAdapter = { adapter: BluetoothAdapter? -> this.adapter.value = adapter }
         val updateManger = { manager: BluetoothManager? -> this.manager.value = manager }
         val splashScreen = installSplashScreen()
@@ -139,7 +138,7 @@ class MainActivity : FragmentActivity() {
                         }
 
                         composable("profile") {
-                            ProfileScreen(innerPadding, navController)
+                            ProfileScreen(innerPadding, navController, contentResolver)
                         }
                         composable("search") {
                             SearchScreen(navController, innerPadding)

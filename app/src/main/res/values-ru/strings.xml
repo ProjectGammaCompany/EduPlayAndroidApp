@@ -115,4 +115,5 @@
     <string name="all_notifications">Все уведомления</string>
     <string name="no_notifications">Уведомлений нет</string>
     <string name="notifications">Уведомления</string>
+    <string name="change_avatar">Изменить аватар</string>
 </resources>

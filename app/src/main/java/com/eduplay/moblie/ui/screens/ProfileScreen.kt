@@ -1,5 +1,10 @@
 package com.eduplay.moblie.ui.screens
 
+import android.content.ContentResolver
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +32,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -82,6 +88,7 @@ import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.ProfileViewModel
 import com.eduplay.moblie.useCases.AppSettingsManager
 import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -89,9 +96,11 @@ import kotlinx.coroutines.flow.flowOf
 fun ProfileScreen(
     innerPaddingValues: PaddingValues,
     navController: NavController,
+    contentResolver: ContentResolver,
     viewModel: ProfileViewModel = hiltViewModel(),
     imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     if (viewModel.noInternet.value) {
         NoInternetConnectionToast()
     }
@@ -110,6 +119,7 @@ fun ProfileScreen(
     if (viewModel.canLogout.value) {
         AuthScreenNavigator(navController)
     }
+
     ProfileScreen(
         innerPaddingValues,
         updateEmail,
@@ -118,12 +128,13 @@ fun ProfileScreen(
         onLogout,
         viewModel.avatar.value,
         imageHeaderViewModel.headers,
-        { image: String -> imageHeaderViewModel.getFullUrl(image) },
+        imageHeaderViewModel::getFullUrl,
         isOffline = viewModel.isOffline,
-        { mode: Boolean -> viewModel.toggleAppMode(mode) },
+         onToggleOffline = viewModel::toggleAppMode ,
         theme = viewModel.theme.value.collectAsState(AppSettingsManager.Themes.SYSTEM),
         onChooseTheme = viewModel::changeTheme,
         notifications = viewModel.notifications,
+        onAvatarPicked =  {uri: Uri -> viewModel.updateAvatar(uri, contentResolver, context) },
         navController = navController
     )
 }
@@ -138,14 +149,15 @@ private fun ProfileScreen(
     avatar: String,
     headers: State<NetworkHeaders>,
     imageUrl: (String) -> String,
-    isOffline: State<Flow<OfflineModeManager.AppModes>>,
+    isOffline: State<Flow<AppModes>>,
     onToggleOffline: (Boolean) -> Unit,
     theme: State<AppSettingsManager.Themes>,
     onChooseTheme: (AppSettingsManager.Themes) -> Unit,
     notifications: SnapshotStateList<NotificationData>,
+    onAvatarPicked: (Uri) -> Unit,
     navController: NavController
 ) {
-
+    val currentMode = isOffline.value.collectAsState(AppModes.OFFLINE)
     Column(
         modifier = Modifier
             .padding(
@@ -157,7 +169,17 @@ private fun ProfileScreen(
             .fillMaxSize()
     ) {
         ProfileTopBar()
+        val pickImage = remember { mutableStateOf(false)}
 
+        val pickMediaLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            pickImage.value = false
+            if (uri != null) {
+                onAvatarPicked(uri)
+            }
+        }
+        if (pickImage.value) {
+            pickMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -181,6 +203,18 @@ private fun ProfileScreen(
                     .height(130.dp)
                     .clip(CircleShape)
             )
+        if (currentMode.value == AppModes.ONLINE) {
+            IconButton(
+                onClick = { pickImage.value = true },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Icon(
+                    Icons.Default.ImageSearch,
+                    stringResource(R.string.change_avatar)
+                )
+            }
+        }
 
             // email
             Text(
@@ -190,7 +224,7 @@ private fun ProfileScreen(
             )
 
             val showEditEmailField = remember { mutableStateOf(false) }
-            if (showEditEmailField.value) {
+            if (showEditEmailField.value && currentMode.value == AppModes.ONLINE) {
                 val newEmail = rememberTextFieldState(email.value)
                 Row {
                     OutlinedTextField(
@@ -257,20 +291,23 @@ private fun ProfileScreen(
                             .align(Alignment.CenterVertically)
                             .padding(end = 5.dp)
                     )
-                    IconButton(
-                        onClick = { showEditEmailField.value = true }
-                    ) {
-                        Icon(
-                            ImageVector.vectorResource(R.drawable.edit),
-                            stringResource(R.string.edit_email)
-                        )
+                    if (currentMode.value == AppModes.ONLINE) {
+                        IconButton(
+                            onClick = { showEditEmailField.value = true }
+                        ) {
+                            Icon(
+                                ImageVector.vectorResource(R.drawable.edit),
+                                stringResource(R.string.edit_email)
+                            )
+                        }
                     }
                 }
             }
 
             Settings(isOffline, onToggleOffline, theme, onChooseTheme)
-            LatestNotifications(notifications, navController)
-
+            if (currentMode.value == AppModes.ONLINE) {
+                LatestNotifications(notifications, navController)
+            }
 
             OutlinedButton(
                 onClick = { onLogout() },
@@ -471,6 +508,7 @@ fun ProfilePreview() {
         remember { mutableStateOf(AppSettingsManager.Themes.SYSTEM) },
         { _ -> },
         remember { mutableStateListOf() },
+        {_ -> },
         rememberNavController()
     )
     //}

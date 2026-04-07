@@ -23,6 +23,7 @@ import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
+import com.eduplay.moblie.repository.webrepository.requestTypes.AvatarUpdate
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
@@ -30,6 +31,11 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.Notification
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.TokenManager
 import jakarta.inject.Inject
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 import java.time.LocalDateTime
 
 
@@ -372,6 +378,27 @@ class WebRepository @Inject constructor(
             return
         }
         throw IllegalAccessException("cant update username")
+    }
+
+    suspend fun updateAvatar(imageFile: File): String {
+        val requestBody: RequestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart(
+                "file",
+                imageFile.name,
+                imageFile.asRequestBody("image/*".toMediaTypeOrNull())
+            )
+            .build()
+        val fileUploadResponse = api.postFile(requestBody)
+        val serverImageUrlBody = fileUploadResponse.body()
+        if (!fileUploadResponse.isSuccessful || serverImageUrlBody == null) {
+            throw IllegalAccessException("cant upload file to server")
+        }
+        val response = api.putAvatar(AvatarUpdate(serverImageUrlBody))
+        if (!response.isSuccessful) {
+            throw IllegalAccessException("cant upload file to server")
+        }
+        return serverImageUrlBody
     }
 
 }

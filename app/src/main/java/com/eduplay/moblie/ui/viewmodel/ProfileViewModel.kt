@@ -1,5 +1,8 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
@@ -104,20 +107,29 @@ class ProfileViewModel @Inject constructor(
         if (checkEmail(newEmail)) return
 
         viewModelScope.launch {
-            var hadExceptions = false
             try {
                 repository.updateUserName(newEmail)
+                email.value = newEmail
             } catch (_: ConnectException) {
                 noInternet.value = true
-                hadExceptions = true
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
-                hadExceptions = true
             } catch (e: Exception) {
                 Log.e("update_profile", e.message ?: "", e)
-                hadExceptions = true
-            } finally {
-                if (!hadExceptions) email.value = newEmail
+            }
+        }
+    }
+
+    fun updateAvatar(uri: Uri, contentResolver: ContentResolver, context: Context) {
+        viewModelScope.launch {
+            try {
+                avatar.value = repository.updateAvatar(uri, contentResolver, context)
+            } catch (_: ConnectException) {
+                noInternet.value = true
+            } catch (_: NotAuthorisedException) {
+                unauthorised.value = true
+            } catch (e: Exception) {
+                Log.e("update_avatar", e.message ?: "", e)
             }
         }
     }

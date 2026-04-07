@@ -1,8 +1,12 @@
 package com.eduplay.moblie.repository
 
+import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import coil3.toCoilUri
 import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
@@ -36,6 +40,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import java.io.File
 import java.time.LocalDateTime
 
 class EduRepository @Inject constructor(
@@ -341,6 +346,19 @@ class EduRepository @Inject constructor(
         if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE ) return
 
         webRepository.updateUsername(username)
+    }
+
+    suspend fun updateAvatar(avatar: Uri, contentResolver: ContentResolver, context: Context): String {
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE ) throw IllegalAccessException("currently offline, cant update avatar")
+        val sheme = context.contentResolver.getType(avatar)?.dropWhile { it != '/' }?.substring(1) ?: ""
+        val file = File(context.cacheDir, "tempFile.$sheme")
+
+        contentResolver.openInputStream(avatar)?.use { inputStream ->
+            file.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+        return webRepository.updateAvatar(file)
     }
 
     private suspend fun getRepository(): Repository {

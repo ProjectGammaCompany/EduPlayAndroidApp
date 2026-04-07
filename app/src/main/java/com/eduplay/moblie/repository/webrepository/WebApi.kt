@@ -13,14 +13,16 @@ import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.responseTypes.EventListResponse
 import com.eduplay.moblie.repository.responseTypes.EventRoleResponse
-import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
+import com.eduplay.moblie.repository.webrepository.requestTypes.AvatarUpdate
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.NotificationList
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -91,9 +93,19 @@ interface WebApi {
     @InjectAuth
     suspend fun getProfile(): Response<ProfileInfo>
 
+    @POST("")
+
     @PUT("/profile/username")
     @InjectAuth
     suspend fun putUserName(@Body update: ProfileUpdate): Response<Unit>
+
+    @PUT("/profile/avatar")
+    @InjectAuth
+    suspend fun putAvatar(@Body update: AvatarUpdate): Response<Unit>
+
+    @POST("/file")
+    @InjectAuth
+    suspend fun postFile(@Body body: RequestBody): Response<String>
 
     @GET("/event/{eventId}/nextStage")
     @InjectAuth

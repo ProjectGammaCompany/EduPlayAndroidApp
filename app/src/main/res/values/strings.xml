@@ -114,4 +114,5 @@
     <string name="all_notifications">All notifications</string>
     <string name="no_notifications">There are no notifications</string>
     <string name="notifications">Notifications</string>
+    <string name="change_avatar">Change avatar</string>
 </resources>
