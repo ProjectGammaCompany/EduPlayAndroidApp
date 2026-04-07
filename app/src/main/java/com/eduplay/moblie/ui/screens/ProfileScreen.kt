@@ -1,6 +1,7 @@
 package com.eduplay.moblie.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -17,22 +18,29 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,10 +55,13 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -89,7 +100,7 @@ fun ProfileScreen(
     }
 
     val updateEmail: (String) -> Unit = { newEmail: String ->
-        viewModel.email.value = newEmail
+        viewModel.updateEmail(newEmail)
     }
     val hasEmailErrors = { email: String -> viewModel.checkEmail(email) }
     val onLogout = {
@@ -177,22 +188,84 @@ private fun ProfileScreen(
                 style = typography.titleLarge.copy(color = colorScheme.onBackground),
                 modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
             )
-            Row {
-                Text(
-                    text = stringResource(R.string.email),
-                    style = typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
-                        .copy(color = colorScheme.onBackground),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(end = 5.dp)
-                )
-                Text(
-                    text = email.value,
-                    style = typography.bodyLarge.copy(color = colorScheme.onBackground),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(end = 5.dp)
-                )
+
+            val showEditEmailField = remember { mutableStateOf(false) }
+            if (showEditEmailField.value) {
+                val newEmail = rememberTextFieldState(email.value)
+                Row {
+                    OutlinedTextField(
+                        state = newEmail,
+                        label = { Text(stringResource(R.string.email)) },
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email
+                        ),
+                        isError = hasEmailErrors(newEmail.text.toString()),
+                        trailingIcon = {
+                            IconButton({ showEditEmailField.value = false })
+                            {
+                                Icon(
+                                    Icons.Default.Cancel,
+                                    stringResource(R.string.close),
+                                    tint = colorScheme.secondary
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .weight(1f)
+                    )
+                    TextButton(
+                        onClick = { updateEmail(newEmail.text.toString()) },
+                        colors = ButtonDefaults.buttonColors().copy(
+                            containerColor = colorScheme.primaryContainer,
+                            contentColor = colorScheme.onPrimaryContainer
+                        ),
+                        modifier = Modifier
+                            //.weight(1f)
+                            .align(Alignment.CenterVertically)
+                            .padding(horizontal = 5.dp)
+                            .border(
+                                1.dp,
+                                color = colorScheme.primary,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(color = colorScheme.primaryContainer)
+                    ) {
+                        Text(
+                            stringResource(R.string.edit_email),
+                            style = typography.labelMedium, //.copy(colorScheme.secondary),
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
+                    }
+                }
+            } else {
+                Row {
+                    Text(
+                        text = stringResource(R.string.email),
+                        style = typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                            .copy(color = colorScheme.onBackground),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 5.dp)
+                    )
+                    Text(
+                        text = email.value,
+                        style = typography.bodyLarge.copy(color = colorScheme.onBackground),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 5.dp)
+                    )
+                    IconButton(
+                        onClick = { showEditEmailField.value = true }
+                    ) {
+                        Icon(
+                            ImageVector.vectorResource(R.drawable.edit),
+                            stringResource(R.string.edit_email)
+                        )
+                    }
+                }
             }
 
             Settings(isOffline, onToggleOffline, theme, onChooseTheme)
@@ -235,14 +308,17 @@ private fun ProfileTopBar() {
 }
 
 @Composable
-private fun LatestNotifications(notifications: SnapshotStateList<NotificationData>, navController: NavController) {
+private fun LatestNotifications(
+    notifications: SnapshotStateList<NotificationData>,
+    navController: NavController
+) {
     Column {
         HorizontalDivider(
             color = colorScheme.primaryContainer,
             modifier = Modifier.padding(top = 5.dp)
         )
         TextButton(
-            onClick = {navController.navigate("notifications")},
+            onClick = { navController.navigate("notifications") },
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.Start)

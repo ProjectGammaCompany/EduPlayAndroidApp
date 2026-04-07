@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -212,6 +213,7 @@ private fun EmailPasswordForm(
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Email
         ),
+        lineLimits = TextFieldLineLimits.SingleLine,
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 15.dp)
@@ -227,6 +229,7 @@ private fun EmailPasswordForm(
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password
         ),
+        maxLines = 1,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             val image = if (passwordVisible)

@@ -24,6 +24,7 @@ import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
+import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Notification
 import com.eduplay.moblie.useCases.DateConverter
@@ -363,6 +364,14 @@ class WebRepository @Inject constructor(
                 }
         }
         return listOf()
+    }
+
+    suspend fun updateUsername(userName: String) {
+        val response = api.putUserName(ProfileUpdate(userName))
+        if (response.isSuccessful) {
+            return
+        }
+        throw IllegalAccessException("cant update username")
     }
 
 }

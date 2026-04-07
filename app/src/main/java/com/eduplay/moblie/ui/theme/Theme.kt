@@ -34,7 +34,8 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White,
-    primaryContainer = LightBlue500
+    primaryContainer = LightBlue500,
+    onPrimaryContainer = Blue500
 
 )
 

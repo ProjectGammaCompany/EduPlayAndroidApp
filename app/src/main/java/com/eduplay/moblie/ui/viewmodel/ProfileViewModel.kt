@@ -99,4 +99,26 @@ class ProfileViewModel @Inject constructor(
             appSettingsManager.saveTheme(theme)
         }
     }
+
+    fun updateEmail(newEmail: String) {
+        if (checkEmail(newEmail)) return
+
+        viewModelScope.launch {
+            var hadExceptions = false
+            try {
+                repository.updateUserName(newEmail)
+            } catch (_: ConnectException) {
+                noInternet.value = true
+                hadExceptions = true
+            } catch (_: NotAuthorisedException) {
+                unauthorised.value = true
+                hadExceptions = true
+            } catch (e: Exception) {
+                Log.e("update_profile", e.message ?: "", e)
+                hadExceptions = true
+            } finally {
+                if (!hadExceptions) email.value = newEmail
+            }
+        }
+    }
 }

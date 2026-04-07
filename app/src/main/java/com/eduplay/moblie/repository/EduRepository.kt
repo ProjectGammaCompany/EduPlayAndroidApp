@@ -337,6 +337,12 @@ class EduRepository @Inject constructor(
         return flowOf()
     }
 
+    suspend fun updateUserName(username: String) {
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE ) return
+
+        webRepository.updateUsername(username)
+    }
+
     private suspend fun getRepository(): Repository {
         return when (offlineModeManager.getAppMode().first()) {
             OfflineModeManager.AppModes.ONLINE ->  webRepository

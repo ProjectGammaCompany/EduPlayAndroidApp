@@ -19,6 +19,7 @@ import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
+import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.NotificationList
 import retrofit2.Response
 import retrofit2.http.Body
@@ -89,6 +90,10 @@ interface WebApi {
     @GET("/profile")
     @InjectAuth
     suspend fun getProfile(): Response<ProfileInfo>
+
+    @PUT("/profile/username")
+    @InjectAuth
+    suspend fun putUserName(@Body update: ProfileUpdate): Response<Unit>
 
     @GET("/event/{eventId}/nextStage")
     @InjectAuth
