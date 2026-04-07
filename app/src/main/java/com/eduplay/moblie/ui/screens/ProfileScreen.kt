@@ -242,7 +242,7 @@ private fun LatestNotifications(notifications: SnapshotStateList<NotificationDat
             modifier = Modifier.padding(top = 5.dp)
         )
         TextButton(
-            onClick = {},//TODO("navigate to notification screen")
+            onClick = {navController.navigate("notifications")},
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.Start)
@@ -269,6 +269,10 @@ private fun LatestNotifications(notifications: SnapshotStateList<NotificationDat
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
+        HorizontalDivider(
+            color = colorScheme.primaryContainer,
+            modifier = Modifier.padding(top = 3.dp)
+        )
 
     }
 }

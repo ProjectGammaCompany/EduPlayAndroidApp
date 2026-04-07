@@ -31,6 +31,7 @@ import com.eduplay.moblie.ui.screens.EventStageScreen
 import com.eduplay.moblie.ui.screens.FakeSplashScreen
 import com.eduplay.moblie.ui.screens.MainScreen
 import com.eduplay.moblie.ui.screens.MyEventsScreen
+import com.eduplay.moblie.ui.screens.NotificationScreen
 import com.eduplay.moblie.ui.screens.ProfileScreen
 import com.eduplay.moblie.ui.screens.SearchScreen
 import com.eduplay.moblie.ui.theme.EduPlayTheme
@@ -165,6 +166,10 @@ class MainActivity : FragmentActivity() {
                                 bluetoothViewModel = bluetoothViewModel,
                                 isCompetitionMode = isCompetitionMode
                             )
+                        }
+
+                        composable("notifications") {
+                            NotificationScreen(innerPadding, navController)
                         }
                     }
                 }

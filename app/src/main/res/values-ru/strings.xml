@@ -114,4 +114,5 @@
     <string name="tomorrow">завтра</string>
     <string name="all_notifications">Все уведомления</string>
     <string name="no_notifications">Уведомлений нет</string>
+    <string name="notifications">Уведомления</string>
 </resources>
