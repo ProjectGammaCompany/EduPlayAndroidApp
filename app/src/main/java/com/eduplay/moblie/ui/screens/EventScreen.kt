@@ -301,7 +301,8 @@ fun EventScreen(
         onDownload,
         viewModel.canDownload,
         viewModel.isRated,
-        viewModel::rateEvent
+        viewModel::rateEvent,
+        viewModel.groupEvent
     )
 }
 
@@ -336,7 +337,8 @@ fun EventScreen(
     onDownload: () -> Unit,
     canDownLoad: State<Boolean>,
     isRated: State<Boolean>,
-    onRate: (Int) -> Unit
+    onRate: (Int) -> Unit,
+    groupEvent: State<Boolean>
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -402,7 +404,8 @@ fun EventScreen(
                     privateEvent,
                     password,
                     groups,
-                    joinCode
+                    joinCode,
+                    groupEvent
                 )
             } else {
                 GeneralUserBody(
@@ -913,7 +916,8 @@ private fun EventCreatorBody(
     privateEvent: State<Boolean>,
     password: State<String>,
     groups: SnapshotStateList<EventGroup>,
-    joinCode: State<String>
+    joinCode: State<String>,
+    groupEvent: State<Boolean>
 ) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
@@ -926,7 +930,7 @@ private fun EventCreatorBody(
     Column {
         SecondaryTabRow(selectedTabIndex = selectedTabIdx) {
             tabs.forEachIndexed { index, title ->
-                if (index == 2 && !privateEvent.value) return@forEachIndexed
+                if (index == 2 && (!privateEvent.value && !groupEvent.value)) return@forEachIndexed
                 Tab(
                     selected = selectedTabIdx == index,
                     onClick = { selectedTabIdx = index },
@@ -948,7 +952,7 @@ private fun EventCreatorBody(
     when (selectedTabIdx) {
         0 -> GeneralInfo(tags, info, description)
         1 -> StatisticsInfo()
-        2 -> PrivacySettings(password, groups, joinCode)
+        2 -> PrivacySettings(password, groups, joinCode, privateEvent, groupEvent)
         else -> Box {}
     }
 
@@ -958,7 +962,9 @@ private fun EventCreatorBody(
 fun PrivacySettings(
     password: State<String>,
     groups: SnapshotStateList<EventGroup>,
-    joinCode: State<String>
+    joinCode: State<String>,
+    privateEvent: State<Boolean>,
+    groupEvent: State<Boolean>
 ) {
     Column(
         modifier = Modifier
@@ -966,39 +972,44 @@ fun PrivacySettings(
             .fillMaxHeight()
             .verticalScroll(rememberScrollState())
     ) {
-        Row {
-            Text(
-                text = stringResource(R.string.join_code),
-                style = typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Medium,
-                    color = colorScheme.onBackground
-                ),
-                modifier = Modifier.padding(end = 5.dp)
-            )
-            Text(
-                text = joinCode.value,
-                style = typography.bodyLarge.copy(
-                    color = colorScheme.onBackground
-                ),
-                modifier = Modifier.padding(end = 5.dp)
-            )
-        }
-        Row {
-            Text(
-                text = stringResource(R.string.event_password),
-                style = typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium,
-                    color = colorScheme.onBackground
-                ),
-                modifier = Modifier.padding(end = 5.dp)
-            )
-            Text(
-                text = password.value,
-                style = typography.bodyMedium.copy(color = colorScheme.onBackground)
-            )
+        if (privateEvent.value) {
+            Row {
+
+                Text(
+                    text = stringResource(R.string.join_code),
+                    style = typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = colorScheme.onBackground
+                    ),
+                    modifier = Modifier.padding(end = 5.dp)
+                )
+                Text(
+                    text = joinCode.value,
+                    style = typography.bodyLarge.copy(
+                        color = colorScheme.onBackground
+                    ),
+                    modifier = Modifier.padding(end = 5.dp)
+                )
+            }
+
+
+            Row {
+                Text(
+                    text = stringResource(R.string.event_password),
+                    style = typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = colorScheme.onBackground
+                    ),
+                    modifier = Modifier.padding(end = 5.dp)
+                )
+                Text(
+                    text = password.value,
+                    style = typography.bodyMedium.copy(color = colorScheme.onBackground)
+                )
+            }
         }
 
-        if (groups.isNotEmpty()) {
+        if (groupEvent.value && groups.isNotEmpty()) {
             Text(
                 text = stringResource(R.string.groups),
                 style = typography.bodyLarge.copy(
@@ -1007,21 +1018,21 @@ fun PrivacySettings(
                 ),
                 modifier = Modifier.padding(end = 5.dp)
             )
-        }
 
-        groups.forEach { group ->
-            Text(
-                text = group.login,
-                style = typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium,
-                    color = colorScheme.onBackground
-                ),
-                modifier = Modifier.padding(end = 5.dp)
-            )
-            Text(
-                text = group.password,
-                style = typography.bodyMedium.copy(color = colorScheme.onBackground)
-            )
+            groups.forEach { group ->
+                Text(
+                    text = group.login,
+                    style = typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = colorScheme.onBackground
+                    ),
+                    modifier = Modifier.padding(end = 5.dp)
+                )
+                Text(
+                    text = stringResource(R.string.password) + ": " + group.password,
+                    style = typography.bodyMedium.copy(color = colorScheme.onBackground)
+                )
+            }
         }
     }
 }

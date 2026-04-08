@@ -46,6 +46,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val canDownload = mutableStateOf(false)
     val needGroup = mutableStateOf(false)
     val isRated = mutableStateOf(false)
+    val groupEvent = mutableStateOf(false)
 
     val noInternetConnection = mutableStateOf(false)
 
@@ -130,6 +131,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         description.value = data.description
         privateEvent.value = data.private
         author.value = data.collaboratos?.joinToString(", ") ?: ""
+        groupEvent.value = data.groupEvent
 
         info.clear()
 
@@ -145,7 +147,6 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         info.addAll(
             listOf(
                 Pair(R.string.rating, (data.eventRating?.toString() ?: "0") + '⭐'),
-                Pair(R.string.groups, data.groupNames?.joinToString { ", " } ?: ""),
                 Pair(R.string.last_edition, data.lastEditionDate),
                 Pair(
                     R.string.private_event_flag,
