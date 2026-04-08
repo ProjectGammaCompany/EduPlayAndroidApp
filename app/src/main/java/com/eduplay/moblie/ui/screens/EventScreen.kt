@@ -554,7 +554,7 @@ private fun TopAppBarEventScreen(
                     modifier = Modifier.testTag("report_btn")
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.hand),
+                        imageVector = ImageVector.vectorResource(R.drawable.exclamation),
                         contentDescription = stringResource(R.string.report_event)
                     )
                 }
