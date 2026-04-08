@@ -157,14 +157,16 @@ private fun MainScreen(
                     IconButton(onClick = { onStopCompetition() }) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.bluetooth_disabled),
-                            contentDescription = stringResource(R.string.turn_off_bluetooth)
+                            contentDescription = stringResource(R.string.turn_off_bluetooth),
+                            tint = colorScheme.onPrimaryFixed
                         )
                     }
                 }
                 IconButton(onClick = { onSearch() }) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = stringResource(R.string.search_events)
+                        contentDescription = stringResource(R.string.search_events),
+                        tint = colorScheme.onPrimaryFixed
                     )
                 }
             },
