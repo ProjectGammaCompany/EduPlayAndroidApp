@@ -58,7 +58,7 @@ fun QuestListElement(
         modifier = Modifier
             .padding(horizontal = 3.dp, vertical = 5.dp)
             .fillMaxWidth()
-            .border(1.dp, colorScheme.tertiary, RoundedCornerShape(10.dp))
+            .border(1.dp, colorScheme.secondary, RoundedCornerShape(10.dp))
             .padding(5.dp)
             .clickable(true, onClick = { onClick() })
             .testTag("quest_element_main_container")
@@ -172,7 +172,7 @@ fun QuestListElement(
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.star_filled),
                     contentDescription = stringResource(id = R.string.remove_from_favourite),
-                    tint = colorScheme.onBackground,
+                    tint = colorScheme.primary,
                     modifier = Modifier.testTag("quest_element_is_favourite")
                 )
             } else {

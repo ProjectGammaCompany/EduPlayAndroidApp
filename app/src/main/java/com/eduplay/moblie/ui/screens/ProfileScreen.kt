@@ -335,8 +335,8 @@ private fun ProfileScreen(
 private fun ProfileTopBar() {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = colorScheme.primaryContainer,
-            titleContentColor = colorScheme.primary,
+            containerColor = colorScheme.primary,
+            titleContentColor = colorScheme.onPrimaryFixed,
         ),
         title = {
             Text(stringResource(R.string.profile))

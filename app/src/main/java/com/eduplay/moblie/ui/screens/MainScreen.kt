@@ -149,8 +149,8 @@ private fun MainScreen(
     ) {
         CenterAlignedTopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = colorScheme.primaryContainer,
-                titleContentColor = colorScheme.primary,
+                containerColor = colorScheme.primary,
+                titleContentColor = colorScheme.onPrimaryFixed,
             ),
             actions = {
                 if (isCompetitionMode.value) {

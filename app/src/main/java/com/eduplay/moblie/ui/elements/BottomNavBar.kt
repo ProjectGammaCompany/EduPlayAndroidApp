@@ -2,6 +2,7 @@ package com.eduplay.moblie.ui.elements
 
 import android.util.Log
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
@@ -53,7 +54,11 @@ fun BottomNavBar(
     ) {
         Log.d("SCREEN_BOTTOM", navController.currentDestination?.route ?: "")
 
-        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+        NavigationBar(
+            windowInsets = NavigationBarDefaults.windowInsets,
+            containerColor = colorScheme.primaryContainer,
+            contentColor = colorScheme.onPrimaryContainer
+        ) {
             Destination.entries.forEachIndexed { index, destination ->
                 NavigationBarItem(
                     selected = selectedDestination == index,
