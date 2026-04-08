@@ -28,6 +28,7 @@ import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventPasswords
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
+import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.EventIdResponse
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
@@ -35,6 +36,7 @@ import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.webrepository.WebRepository
 import com.eduplay.moblie.repository.webrepository.pagingSources.NotificationPagingSource
+import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.OfflineModeManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -250,7 +252,39 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun getNextStage(eventId: String): EventStage {
-        return getRepository().getNextStage(eventId)
+        val stage = getRepository().getNextStage(eventId)
+        // shuffle options
+        val task = if (stage.task == null) {
+            null
+        } else {
+            Task(
+                id = stage.task.id,
+                blockId = stage.task.blockId,
+                name = stage.task.name,
+                description = stage.task.description,
+                type = stage.task.type,
+                options = stage.task.options?.shuffled(),
+                files = stage.task.files,
+                time = stage.task.time,
+                timeStamp = stage.task.timeStamp
+            )
+        }
+        // shuffle tasks
+        val block = if (stage.block == null) {
+            null
+        } else {
+            Block(
+                id = stage.block.id,
+                name = stage.block.name,
+                tasks = stage.block.tasks.shuffled()
+            )
+        }
+        
+        return EventStage(
+            type = stage.type,
+            task = task,
+            block = block
+        )
     }
 
     suspend fun postTaskStartTime(
