@@ -35,7 +35,9 @@ import com.eduplay.moblie.useCases.TokenManager
 import com.google.gson.Gson
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.first
+import java.security.MessageDigest
 import java.time.LocalDateTime
+import java.util.Base64
 
 class LocalRepository @Inject constructor(
     private val eventDatabase: Database,
@@ -705,7 +707,9 @@ class LocalRepository @Inject constructor(
     }
 
     private fun hashString(s: String): String {
-        // TODO(настроить хеширование)
-        return s
+        val md = MessageDigest.getInstance("SHA-256")
+        val input = s.toByteArray()
+        val bytes = md.digest(input)
+        return Base64.getEncoder().encodeToString(bytes)
     }
 }

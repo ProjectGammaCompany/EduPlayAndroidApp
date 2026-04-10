@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.TaskType
+import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 import com.eduplay.moblie.useCases.FileDownloadStatus
 import kotlinx.coroutines.delay
@@ -192,7 +193,7 @@ private fun TaskHeader(
     description: String,
     time: Int?,
     startTime: LocalDateTime,
-    files: List<String>,
+    files: List<Task.TaskFile>,
     invokeEndOnTime: () -> Unit,
     onDownload: (String, String) -> Unit,
     onOpen: (String) -> Unit,
@@ -346,7 +347,7 @@ private fun SubmitBtn(taskType: TaskType, onSubmit: () -> Unit) {
 
 @Composable
 fun FileView(
-    files: List<String>,
+    files: List<Task.TaskFile>,
     onDownload: (String, String) -> Unit,
     onOpen: (String) -> Unit,
     downloadStatus: SnapshotStateMap<String, Flow<FileDownloadStatus>>
@@ -354,7 +355,7 @@ fun FileView(
 
     Column {
         files.forEach { file ->
-            val fileStatus = (downloadStatus[file]
+            val fileStatus = (downloadStatus[file.url]
                 ?: flowOf()).collectAsState(
                 FileDownloadStatus.NOT_STARTED
             )
@@ -365,11 +366,11 @@ fun FileView(
                         fileStatus.value == FileDownloadStatus.FAILED
                     ) {
                         onDownload(
-                            file,
-                            file
+                            file.name,
+                            file.url
                         )
                     } else if (fileStatus.value == FileDownloadStatus.SUCCESS) {
-                        onOpen(file)
+                        onOpen(file.name)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -396,12 +397,12 @@ fun FileView(
                 // file icon
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.files),
-                    contentDescription = file,
+                    contentDescription = file.name,
                     modifier = Modifier.padding(end = 10.dp)
                 )
                 //file name
                 Text(
-                    text = file,
+                    text = file.name,
                     textAlign = TextAlign.Start,
                     style = typography.bodyMedium,
                     modifier = Modifier
@@ -413,7 +414,7 @@ fun FileView(
                     FileDownloadStatus.NOT_STARTED, FileDownloadStatus.FAILED -> {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.download),
-                            contentDescription = file,
+                            contentDescription = file.name,
                             modifier = Modifier.padding(end = 10.dp)
                         )
                     }
@@ -422,7 +423,7 @@ fun FileView(
                     FileDownloadStatus.LOADING, FileDownloadStatus.PAUSED -> {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.progress),
-                            contentDescription = file,
+                            contentDescription = file.name,
                             modifier = Modifier
                                 .padding(end = 10.dp)
                                 .rotate(angle)

@@ -14,7 +14,7 @@ data class Task(
     val description: String?,
     val type: Int,
     val options: List<AnswerOption>?,
-    val files: List<String>,
+    val files: List<TaskFile>,
     val time: Int?,
     @SerializedName("timestamp")
     val timeStamp: String?
@@ -31,8 +31,13 @@ data class Task(
                 value = it.value
             )
         },
-        files = Gson().fromJson<List<String>>(task.files, List::class.java),
+        files = Gson().fromJson<List<TaskFile>>(task.files, List::class.java),
         time = task.time,
         timeStamp = startTime
+    )
+
+    data class TaskFile(
+        val url: String,
+        val name: String,
     )
 }
