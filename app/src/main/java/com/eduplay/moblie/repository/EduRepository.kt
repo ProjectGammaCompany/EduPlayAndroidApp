@@ -376,6 +376,11 @@ class EduRepository @Inject constructor(
         return flowOf()
     }
 
+    suspend fun deleteNotifications(id: String): Boolean {
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE ) return false
+        return webRepository.deleteNotification(id)
+    }
+
     suspend fun updateUserName(username: String) {
         if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE ) return
 

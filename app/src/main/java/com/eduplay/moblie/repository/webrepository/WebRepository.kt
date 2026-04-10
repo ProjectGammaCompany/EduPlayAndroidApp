@@ -346,6 +346,7 @@ class WebRepository @Inject constructor(
                             val extra = notification.favoriteEventStartExtra
                                 ?: return@map NotificationData.EmptyNotification()
                             NotificationData.FavoriteNotificationData(
+                                notification.id,
                                 extra.id,
                                 extra.eventName,
                                 DateConverter.convertFromServerFormat(notification.date)
@@ -358,6 +359,7 @@ class WebRepository @Inject constructor(
                             val timeLeft =
                                 NotificationData.EndEventNotificationData.TimeLeft.valueByTime(extra.timeLeft)
                             NotificationData.EndEventNotificationData(
+                                notification.id,
                                 extra.id,
                                 extra.eventName,
                                 DateConverter.convertFromServerFormat(notification.date),
@@ -371,6 +373,12 @@ class WebRepository @Inject constructor(
                 }
         }
         return listOf()
+    }
+
+    suspend fun deleteNotification(id: String): Boolean {
+        val response = api.deleteNotification(id)
+        Log.d("delete notifications", response.code().toString() + response.raw())
+        return response.isSuccessful
     }
 
     suspend fun updateUsername(userName: String) {

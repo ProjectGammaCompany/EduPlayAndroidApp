@@ -26,6 +26,7 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.NotificationLis
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -184,6 +185,10 @@ interface WebApi {
         @Query("page") page: Int = 1,
         @Query("maxOnPage") maxOnPage: Int = 10,
     ): Response<NotificationList>
+
+    @DELETE("/notifications/{id}")
+    @InjectAuth
+    suspend fun deleteNotification(@Path("id") notificationId: String): Response<Unit>
 
     @POST("/event/{eventId}/rate")
     @InjectAuth

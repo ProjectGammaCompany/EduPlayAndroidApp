@@ -21,6 +21,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -48,7 +51,9 @@ fun NotificationScreen(
         innerPaddingValues,
         {navController.popBackStack()},
         navController,
-        viewModel.notifications
+        viewModel.notifications,
+        viewModel::deleteNotification,
+        viewModel.deletedNotifications
     )
 }
 
@@ -57,7 +62,9 @@ fun NotificationScreen(
     innerPaddingValues: PaddingValues,
     onReturn: () -> Unit,
     navController: NavController,
-    notifications: State<Flow<PagingData<NotificationData>>>
+    notifications: State<Flow<PagingData<NotificationData>>>,
+    onDelete: (String)->Unit,
+    deletedNotifications: SnapshotStateSet<String>
 ) {
 
     Column(
@@ -81,10 +88,15 @@ fun NotificationScreen(
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(items.itemCount) { it ->
-                    NotificationElement(
-                        notificationData = items[it] ?: NotificationData.EmptyNotification(),
-                        navController = navController
-                    )
+                    if (!deletedNotifications.contains((items[it]?.notificationId) ?: "")) {
+                        NotificationElement(
+                            notificationData = items[it] ?: NotificationData.EmptyNotification(),
+                            navController = navController,
+                            showDeleteButton = true,
+                            onDelete = onDelete,
+                            showNotification = true
+                        )
+                    }
                 }
             }
         }
