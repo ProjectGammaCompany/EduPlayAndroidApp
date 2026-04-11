@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.eduplay.moblie.repository.localrepository.Database
 import com.eduplay.moblie.repository.webrepository.AuthApi
 import com.eduplay.moblie.repository.webrepository.AuthInterceptor
+import com.eduplay.moblie.repository.webrepository.EventFilesApi
 import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
 import com.eduplay.moblie.useCases.OfflineModeManager
@@ -97,6 +98,18 @@ class Providers {
             )
             .build()
             .create(AuthApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGeneratedFilesRetrofit(okHttpClient: OkHttpClient): EventFilesApi {
+        val url = BuildConfig.BACKEND_EVENT_FILE_URL
+        return Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(OkHttpClient.Builder().build())
+            .build()
+            .create(EventFilesApi::class.java)
     }
 
     @Provides

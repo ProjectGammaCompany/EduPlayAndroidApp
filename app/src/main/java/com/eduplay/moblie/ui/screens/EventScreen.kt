@@ -107,7 +107,7 @@ fun EventScreen(
     isCompetitionMode: State<Boolean>,
     toggleCompetitionMode: (Boolean) -> Unit,
     bluetoothViewModel: BluetoothViewModel,
-    onDownloadEvent: () -> ComponentName?
+    onDownloadEvent: (String) -> ComponentName?
 ) {
     var dataFetched by remember { mutableStateOf(false) }
     var noInternet by remember { mutableStateOf(false) }

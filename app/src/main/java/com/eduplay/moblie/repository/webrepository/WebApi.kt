@@ -21,6 +21,7 @@ import com.eduplay.moblie.repository.webrepository.requestTypes.AvatarUpdate
 import com.eduplay.moblie.repository.webrepository.requestTypes.EventRating
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
+import com.eduplay.moblie.repository.webrepository.responseTypes.DownloadPath
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.NotificationList
 import okhttp3.RequestBody
@@ -193,4 +194,8 @@ interface WebApi {
     @POST("/event/{eventId}/rate")
     @InjectAuth
     suspend fun postRating(@Body rating: EventRating): Response<Unit>
+
+    @GET("event/{eventId}/download")
+    @InjectAuth
+    suspend fun getEventFileUrl(@Path("eventId") eventId: String): Response<DownloadPath>
 }

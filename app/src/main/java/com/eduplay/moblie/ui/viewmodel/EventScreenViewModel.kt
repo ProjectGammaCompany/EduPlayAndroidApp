@@ -20,9 +20,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.net.ConnectException
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 
 @HiltViewModel
@@ -206,8 +206,16 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         }
     }
 
-    fun downloadEvent(eventId: String, onDownloadEvent: () -> ComponentName?) {
-        onDownloadEvent()
+    fun downloadEvent(eventId: String, onDownloadEvent: (String) -> ComponentName?) {
+        viewModelScope.launch {
+            val url = try {
+                repository.getEventFileUrl(eventId)
+            } catch (e: IllegalAccessException) {
+                Log.e("download_service", e.message ?: "", e)
+                return@launch
+            }
+            onDownloadEvent(url)
+        }
     }
 
     fun rateEvent(rating: Int) {

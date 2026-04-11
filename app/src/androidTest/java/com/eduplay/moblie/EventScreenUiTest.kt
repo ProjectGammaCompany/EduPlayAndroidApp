@@ -103,7 +103,7 @@ class EventScreenUiTest {
             onReturn = eventData.onReturn,
             headers = eventData.networkHeaders,
             toggleBluetooth= {},
-        isCompetitionMode= eventData.isCompletionMode,
+        isCompetitionMode = eventData.isCompletionMode,
         canShowConnectionList= false
         )
     }

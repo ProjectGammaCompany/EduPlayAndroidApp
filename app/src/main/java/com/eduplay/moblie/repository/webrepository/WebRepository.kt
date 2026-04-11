@@ -419,4 +419,14 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("cant post rating")
     }
 
+    suspend fun getEventFileUrl(eventId: String): String {
+        val response = api.getEventFileUrl(eventId)
+        val body = response.body()
+        Log.d("pathForDownload", response.code().toString() + response.raw())
+        if (response.isSuccessful && body != null) {
+            return body.downloadPath
+        }
+        throw IllegalAccessException("failed to get file path")
+    }
+
 }
