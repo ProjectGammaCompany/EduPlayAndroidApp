@@ -119,4 +119,6 @@
     <string name="rate_event">Вам понравилось событие?</string>
     <string name="submit">Отправить</string>
     <string name="delete_notification">Удалить уведомление</string>
+    <string name="delete_event">Удалить событие</string>
+    <string name="downloading">загрузка</string>
 </resources>

@@ -779,4 +779,13 @@ class LocalRepository @Inject constructor(
             eventDatabase.correctAnswerDao().updateAnswer(correctAnswerEntity)
         }
     }
+
+    suspend fun deleteEvent(eventId: String) : Boolean {
+        val event = eventDatabase.eventDao().getEventById(eventId)
+        if (event != null) {
+            eventDatabase.eventDao().deleteEvent(event)
+            return true
+        }
+        return false
+    }
 }

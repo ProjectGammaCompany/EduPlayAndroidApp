@@ -426,6 +426,10 @@ class EduRepository @Inject constructor(
         return webRepository.getEventFileUrl(eventId)
     }
 
+    suspend fun deleteEvent(eventId: String) : Boolean {
+        return localRepository.deleteEvent(eventId)
+    }
+
     private suspend fun getRepository(): Repository {
         return when (offlineModeManager.getAppMode().first()) {
             OfflineModeManager.AppModes.ONLINE -> webRepository

@@ -4,6 +4,11 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.ComponentName
 import android.util.Log
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +66,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -307,7 +313,8 @@ fun EventScreen(
         viewModel.groupEvent,
         viewModel.downloadStatusObserver.downloading,
         viewModel.downloadStatusObserver.downloaded,
-        viewModel.isDownloaded
+        viewModel.isDownloaded,
+        {viewModel.deleteEventFromDevice(eventId)}
     )
 }
 
@@ -346,7 +353,8 @@ fun EventScreen(
     groupEvent: State<Boolean>,
     downloadingEvents: SnapshotStateMap<String, String>,
     downloadedEvents: SnapshotStateSet<String>,
-    isDownloaded: State<Boolean>
+    isDownloaded: State<Boolean>,
+    onDeleteEvent: ()->Unit
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -396,7 +404,8 @@ fun EventScreen(
                 downloadingEvents,
                 downloadedEvents,
                 eventId,
-                isDownloaded
+                isDownloaded,
+                onDeleteEvent
             )
 
             EventScreenHeader(
@@ -536,7 +545,8 @@ private fun TopAppBarEventScreen(
     downloadingEvents: SnapshotStateMap<String, String>,
     downloadedEvents: SnapshotStateSet<String>,
     eventId: String,
-    isDownloaded: State<Boolean>
+    isDownloaded: State<Boolean>,
+    onDelete: ()->Unit
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -578,25 +588,35 @@ private fun TopAppBarEventScreen(
                     )
                 }
                 if (downloadingEvents.values.contains(eventId)) {
+
                     IconButton(
                         onClick = { },
                         modifier = Modifier.testTag("in_progress")
                     ) {
+                        val infiniteTransition = rememberInfiniteTransition()
+                        val angle by infiniteTransition.animateFloat(
+                            initialValue = 0F, targetValue = 360F, animationSpec = infiniteRepeatable(
+                                animation = tween(2000, easing = LinearEasing)
+                            )
+                        )
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.progress),
-                            contentDescription = stringResource(R.string.download_event)
+                            contentDescription = stringResource(R.string.downloading),
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .rotate(angle)
                         )
                     }
                 } else if (isDownloaded.value || downloadedEvents.contains(eventId)) {
-//                    IconButton(
-//                        onClick = { onDelete() },
-//                        modifier = Modifier.testTag("delete_from_device_btn")
-//                    ) {
-//                        Icon(
-//                            imageVector = ImageVector.vectorResource(R.drawable.download),
-//                            contentDescription = stringResource(R.string.download_event)
-//                        )
-//                    }
+                    IconButton(
+                        onClick = { onDelete() },
+                        modifier = Modifier.testTag("delete_from_device_btn")
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.delete),
+                            contentDescription = stringResource(R.string.delete_event)
+                        )
+                    }
                     //TODO("Delete button")
                 } else if (canDownLoad.value) {
                     IconButton(
