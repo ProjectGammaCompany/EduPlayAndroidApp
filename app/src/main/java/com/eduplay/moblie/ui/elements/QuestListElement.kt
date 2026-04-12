@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,22 +35,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
+import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
+import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
+import java.io.File
 
 @Composable
 fun QuestListElement(
     questShortInfo: QuestShortInfo,
     onClick: () -> Unit,
     onFavouriteToggle: (Boolean) -> Unit,
-    headers: State<NetworkHeaders>,
-    imageUrl: (String) -> String
+    viewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
 
     val isFavourite = remember { mutableStateOf(questShortInfo.isFavourite) }
@@ -63,23 +68,43 @@ fun QuestListElement(
             .clickable(true, onClick = { onClick() })
             .testTag("quest_element_main_container")
     ) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl(questShortInfo.imageUrl))
-                .httpHeaders(headers.value)
-                .networkCachePolicy(CachePolicy.ENABLED)
-                .memoryCachePolicy(CachePolicy.ENABLED)
-                .build(),
-            contentDescription = questShortInfo.name,
-            placeholder = painterResource(R.drawable.eduplaylogo),
-            error = painterResource(id = R.drawable.ic_launcher_background),
-            modifier = Modifier
-                .testTag("quest_element_image")
-                .height(60.dp)
-                .width(60.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .align(Alignment.CenterVertically)
-        )
+        val appMode = viewModel.appMode.value.collectAsState(AppModes.ONLINE)
+        val context = LocalContext.current
+        if (appMode.value == AppModes.ONLINE) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(viewModel.getFullUrl(questShortInfo.imageUrl))
+                    .httpHeaders(viewModel.headers.value)
+                    .networkCachePolicy(CachePolicy.ENABLED)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .build(),
+                contentDescription = questShortInfo.name,
+                placeholder = painterResource(R.drawable.eduplaylogo),
+                error = painterResource(id = R.drawable.ic_launcher_background),
+                modifier = Modifier
+                    .testTag("quest_element_image")
+                    .height(60.dp)
+                    .width(60.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .align(Alignment.CenterVertically)
+            )
+        } else {
+            AsyncImage(
+                model =  ImageRequest.Builder(LocalContext.current)
+                    .data(File(context.filesDir, questShortInfo.imageUrl))
+                    .crossfade(true)
+                    .build(),
+                contentDescription = questShortInfo.name,
+                placeholder = painterResource(R.drawable.eduplaylogo),
+                error = painterResource(id = R.drawable.ic_launcher_background),
+                modifier = Modifier
+                    .testTag("quest_element_image")
+                    .height(60.dp)
+                    .width(60.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .align(Alignment.CenterVertically)
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -202,67 +227,4 @@ private fun QuestTag(tagName: String) {
             .background(colorScheme.secondary, shape = RoundedCornerShape(5.dp))
             .padding(2.dp)
     )
-}
-
-@Composable
-@Preview
-fun QuestListElementPreview() {
-    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
-    Column {
-        QuestListElement(
-            QuestShortInfo(
-                "id_funny",
-                "The very funny name",
-                "long enough description",
-                "some url",
-                4.3333333,
-                true,
-                listOf(
-                    EventTag("", "tag 1"),
-                    EventTag("", "funny"),
-                    EventTag("", "long as hell tag")
-                ),
-                true
-            ), {}, {}, headers, { it }
-        )
-
-        QuestListElement(
-            QuestShortInfo(
-                "id_funny",
-                "Название квеста",
-                "",
-                "some url",
-                4.3333333,
-                false,
-                listOf(
-                    EventTag("", "tag 1"),
-                    EventTag("", "funny"),
-                    EventTag("", "long as hell tag"),
-                    EventTag("", "long as hell tag"),
-                    EventTag("", "long as hell tag"),
-                    EventTag("", "long as hell tag"),
-                ),
-                false
-            ), {},
-            {},
-            headers,
-            { it }
-
-        )
-
-        QuestListElement(
-            QuestShortInfo(
-                "id_funny",
-                "The very fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuunny name",
-                "loooooooooooooong \n  enough  \n description \n long",
-                "some url",
-                5.00,
-                false,
-                listOf(),
-                false
-            ), {}, {},
-            headers,
-            { it }
-        )
-    }
 }

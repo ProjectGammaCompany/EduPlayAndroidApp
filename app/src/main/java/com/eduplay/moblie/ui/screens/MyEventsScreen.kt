@@ -176,9 +176,7 @@ private fun ListOfEvents(
                     QuestListElement(
                         itemValue,
                         { onEventClick(itemValue.id) },
-                        { onFavouriteToggle(itemValue.id, itemValue.isFavourite) },
-                        headers,
-                        imageUrl
+                        { onFavouriteToggle(itemValue.id, itemValue.isFavourite) }
                     )
                 }
             }

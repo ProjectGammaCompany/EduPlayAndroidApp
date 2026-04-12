@@ -86,7 +86,7 @@ class TaskDownloadUseCase(private val context: Context) {
         if (!eventFile.exists()) {
             eventFile.createNewFile()
         }
-        val response = fileApi.getEventFile(fileUri).execute()
+        val response = fileApi.getRegularFile(fileUri).execute()
         val body = response.body()
         if (response.isSuccessful && body != null) {
             body.byteStream().use {
@@ -94,6 +94,7 @@ class TaskDownloadUseCase(private val context: Context) {
                     it.copyTo(targetOutputStream)
                 }
             }
+
             Log.d("downloaded", "$eventFile")
         } else {
             Log.d("not downloaded", response.message())

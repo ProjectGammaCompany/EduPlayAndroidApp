@@ -1,8 +1,10 @@
 package com.eduplay.moblie.ui.screens
 
+import android.R.attr.bitmap
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.ComponentName
+import android.graphics.BitmapFactory
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
@@ -10,6 +12,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +60,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -69,6 +73,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -84,10 +89,12 @@ import androidx.fragment.compose.AndroidFragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import coil3.compose.rememberAsyncImagePainter
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.eduplay.moblie.BuildConfig
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventGroup
@@ -95,13 +102,15 @@ import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinGroupDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
-import com.eduplay.moblie.ui.elements.TryAgainLaterToast
 import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.useCases.BluetoothConnectionFragment
+import com.eduplay.moblie.useCases.OfflineModeManager
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -338,7 +347,8 @@ fun EventScreen(
             viewModel.downloadStatusObserver.downloaded,
             viewModel.isDownloaded,
             { viewModel.deleteEventFromDevice(eventId) },
-            viewModel.failedToSendAnswers
+            viewModel.failedToSendAnswers,
+            imageHeaderViewModel.appMode
         )
     }
 }
@@ -379,8 +389,9 @@ fun EventScreen(
     downloadingEvents: SnapshotStateMap<String, String>,
     downloadedEvents: SnapshotStateSet<String>,
     isDownloaded: State<Boolean>,
-    onDeleteEvent: ()->Unit,
-    failedToSendAnswers: State<Boolean>
+    onDeleteEvent: () -> Unit,
+    failedToSendAnswers: State<Boolean>,
+    appMode: State<Flow<OfflineModeManager.AppModes>>
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -440,7 +451,8 @@ fun EventScreen(
                 eventCreatorMode,
                 isCompleted,
                 cover,
-                headers
+                headers,
+                appMode
             )
 
             if (eventCreatorMode.value) {
@@ -573,7 +585,7 @@ private fun TopAppBarEventScreen(
     downloadedEvents: SnapshotStateSet<String>,
     eventId: String,
     isDownloaded: State<Boolean>,
-    onDelete: ()->Unit
+    onDelete: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -622,7 +634,9 @@ private fun TopAppBarEventScreen(
                     ) {
                         val infiniteTransition = rememberInfiniteTransition()
                         val angle by infiniteTransition.animateFloat(
-                            initialValue = 0F, targetValue = 360F, animationSpec = infiniteRepeatable(
+                            initialValue = 0F,
+                            targetValue = 360F,
+                            animationSpec = infiniteRepeatable(
                                 animation = tween(2000, easing = LinearEasing)
                             )
                         )
@@ -697,24 +711,50 @@ private fun EventScreenHeader(
     isCompleted: State<Boolean>,
     cover: String?,
     headers: State<NetworkHeaders>,
+    appMode: State<Flow<OfflineModeManager.AppModes>>
 ) {
+    val context = LocalContext.current
+    val isOffline = appMode.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
     Row(Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(cover)
-                .httpHeaders(headers = headers.value)
-                .networkCachePolicy(CachePolicy.ENABLED)
-                .memoryCachePolicy(CachePolicy.ENABLED)
-                .build(),
-            contentDescription = eventName.value,
-            placeholder = painterResource(R.drawable.eduplaylogo),
-            error = painterResource(id = R.drawable.ic_launcher_background),
-            modifier = Modifier
-                .width(130.dp)
-                .weight(0.35f)
-                .testTag("event_image")
+        if (isOffline.value == OfflineModeManager.AppModes.ONLINE) {
+            AsyncImage(
+                model =
+                    ImageRequest.Builder(LocalContext.current)
+                        .data(cover)
+                        .httpHeaders(headers = headers.value)
+                        .networkCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .build(),
+                contentDescription = eventName.value,
+                placeholder = painterResource(R.drawable.eduplaylogo),
+                error = painterResource(id = R.drawable.ic_launcher_background),
+                modifier = Modifier
+                    .width(130.dp)
+                    .height(130.dp)
+                    .weight(0.35f)
+                    .testTag("event_image")
 
-        )
+            )
+        } else {
+            val context = LocalContext.current
+            if (cover != null && cover.isNotBlank()) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(File(context.filesDir, cover))
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = eventName.value,
+                    placeholder = painterResource(R.drawable.eduplaylogo),
+                    error = painterResource(id = R.drawable.ic_launcher_background),
+                    modifier = Modifier
+                        .width(130.dp)
+                        .height(130.dp)
+                        .weight(0.35f)
+                        .testTag("event_image")
+
+                )
+            }
+        }
         Text(
             eventName.value,
             style = typography.headlineMedium
@@ -774,6 +814,7 @@ private fun EventScreenHeader(
         }
     }
 }
+
 
 @Composable
 private fun GeneralInfo(

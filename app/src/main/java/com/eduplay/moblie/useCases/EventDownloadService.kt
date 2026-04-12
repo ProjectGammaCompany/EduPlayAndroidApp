@@ -131,7 +131,7 @@ class EventDownloadService : Service() {
                 fileName = file,
                 directory = this.filesDir.absolutePath
             )
-            fileLocations[file] = location
+            fileLocations[file] = file
         }
         runBlocking {
             // add event

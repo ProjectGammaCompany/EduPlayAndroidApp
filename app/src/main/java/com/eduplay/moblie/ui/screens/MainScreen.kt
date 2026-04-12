@@ -198,9 +198,7 @@ private fun MainScreen(
                     QuestListElement(
                         itemValue,
                         onEventClick,
-                        { isFavourite -> onFavourite(itemValue.id, isFavourite) },
-                        headers,
-                        imageUrl
+                        { isFavourite -> onFavourite(itemValue.id, isFavourite) }
                     )
                 }
             }

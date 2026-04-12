@@ -11,4 +11,8 @@ interface EventFilesApi {
     @GET("/eduplay-bucket/generated/{fileName}")
     @Streaming
     fun getEventFile(@Path("fileName") fileName: String): Call<ResponseBody>
+
+    @GET("/eduplay-bucket/uploads/{fileName}")
+    @Streaming
+    fun getRegularFile(@Path("fileName") fileName: String): Call<ResponseBody>
 }
