@@ -15,7 +15,7 @@ interface TaskDao {
 
     @Transaction
     @Update
-    suspend fun updateEvent(task: TaskEntity)
+    suspend fun updateTask(task: TaskEntity)
 
     @Transaction
     @Query("SELECT * FROM tasks WHERE blockId = :blockId AND taskOrder = :order")

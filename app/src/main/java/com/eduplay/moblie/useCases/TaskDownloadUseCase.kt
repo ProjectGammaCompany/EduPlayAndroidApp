@@ -5,21 +5,30 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import androidx.core.content.FileProvider.getUriForFile
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
 import androidx.core.net.toUri
 import com.eduplay.moblie.BuildConfig
+import com.eduplay.moblie.repository.webrepository.EventFilesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
+import java.io.FileOutputStream
 
 
 class TaskDownloadUseCase(private val context: Context) {
     private val downloadingFiles: MutableMap<String, Long> = mutableMapOf()
     private val fileUriBase: String = BuildConfig.BACKEND_FILE_URL
     private val downloadManager = context.getSystemService(DownloadManager::class.java)
+    private val fileApi = Retrofit.Builder().baseUrl(BuildConfig.BACKEND_EVENT_FILE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(OkHttpClient.Builder().build()).build().create(EventFilesApi::class.java)
 
     fun download(fileUri: String, fileName: String): Flow<FileDownloadStatus> {
         val request = DownloadManager.Request((fileUriBase + fileUri).toUri())
@@ -70,6 +79,26 @@ class TaskDownloadUseCase(private val context: Context) {
             intent.setDataAndType(file, context.contentResolver.getType(file))
             context.startActivity(intent)
         }
+    }
+
+    fun downloadToAppStorage(fileUri: String, fileName: String, directory: String): String {
+        val eventFile: File = File(directory, fileName)
+        if (!eventFile.exists()) {
+            eventFile.createNewFile()
+        }
+        val response = fileApi.getEventFile(fileUri).execute()
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            body.byteStream().use {
+                FileOutputStream(eventFile).use { targetOutputStream ->
+                    it.copyTo(targetOutputStream)
+                }
+            }
+            Log.d("downloaded", "$eventFile")
+        } else {
+            Log.d("not downloaded", response.message())
+        }
+        return eventFile.absolutePath
     }
 
     private fun getFileUrl(fileId: Long): Uri {

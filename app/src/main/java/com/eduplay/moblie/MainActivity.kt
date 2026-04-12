@@ -49,6 +49,7 @@ class MainActivity : FragmentActivity() {
     private val startDownloadService = { eventId: String ->
         val intent = Intent(this, EventDownloadService::class.java)
         intent.putExtra("eventUrl", eventId)
+        val bundle = Bundle()
         startService(intent)
     }
 

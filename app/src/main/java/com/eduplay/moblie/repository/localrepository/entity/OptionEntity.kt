@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.eduplay.moblie.useCases.downloadTaskTypes.DownloadOption
 
 @Entity(
     tableName = "options",
@@ -26,4 +27,10 @@ data class OptionEntity(
     val taskId: String,
     @ColumnInfo(name = "value")
     val value: String,
-)
+) {
+    constructor(option: DownloadOption): this(
+        option.optionId,
+        option.taskId,
+        option.value
+    )
+}

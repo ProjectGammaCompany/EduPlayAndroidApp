@@ -1,6 +1,7 @@
 package com.eduplay.moblie.useCases
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
@@ -12,15 +13,33 @@ import android.util.Log
 import android.widget.Toast
 import com.eduplay.moblie.BuildConfig
 import com.eduplay.moblie.R
+import com.eduplay.moblie.repository.localrepository.LocalRepository
+import com.eduplay.moblie.repository.localrepository.entity.BlockEntity
+import com.eduplay.moblie.repository.localrepository.entity.ConditionEntity
+import com.eduplay.moblie.repository.localrepository.entity.CorrectAnswerEntity
+import com.eduplay.moblie.repository.localrepository.entity.EventEntity
+import com.eduplay.moblie.repository.localrepository.entity.GroupEntity
+import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
+import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
 import com.eduplay.moblie.repository.webrepository.EventFilesApi
+import com.eduplay.moblie.useCases.downloadTaskTypes.FullEventData
+import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileOutputStream
 
-class EventDownloadService @Inject constructor() : Service() {
+@AndroidEntryPoint
+class EventDownloadService constructor() : Service() {
+
+    @Inject
+    lateinit var repository: LocalRepository
+    @Inject
+    lateinit var fileDownloader: TaskDownloadUseCase
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -35,7 +54,8 @@ class EventDownloadService @Inject constructor() : Service() {
 
     private inner class ServiceHandler(looper: Looper) : Handler(looper) {
         /*
-            msg.arg1: string - id файла события
+            msg.arg1 - service id
+            msg.obj: string - id файла события
          */
         override fun handleMessage(msg: Message) {
             val eventUrl = msg.obj.toString()
@@ -56,13 +76,10 @@ class EventDownloadService @Inject constructor() : Service() {
                 toastFail()
                 stopSelf(msg.arg1)
             }
-
-
-
+            parseFile(eventFile)
             eventFile.delete()
             // stream everything to eventFile https://stackoverflow.com/questions/32878478/how-to-download-file-in-android-using-retrofit-library
             // send everything to db
-            // TODO("сделать запросы к бд")
             // TODO("сделать уведу про скачивание с обновлением состояния") // https://stackoverflow.com/questions/73725629/how-to-legally-prevent-notification-get-removed-in-android
 
             // Stop the service using the startId, so that we don't stop
@@ -100,5 +117,59 @@ class EventDownloadService @Inject constructor() : Service() {
 
     override fun onDestroy() {
         Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun parseFile(file: File) {
+        val json = file.readText()
+        val event = Gson().fromJson<FullEventData>(json, FullEventData::class.java)
+        val fileLocations = mutableMapOf<String, String>()
+        // downloading external files
+        for (file in event.files) {
+            val location = fileDownloader.downloadToAppStorage(
+                fileUri = file,
+                fileName = file,
+                directory = this.filesDir.absolutePath
+            )
+            fileLocations[file] = location
+        }
+
+
+        runBlocking {
+            // add event
+            val eventEntity = EventEntity(event.event, fileLocations[event.event.cover] ?: "")
+            repository.addEvent(eventEntity)
+
+            // add eventBlocks
+            for (block in event.blocks) {
+                repository.addBlock(BlockEntity(block))
+            }
+
+            //add conditions
+            for (condition in event.conditions) {
+                repository.addCondition(ConditionEntity(condition))
+            }
+
+            //add groups
+            for (group in event.groups) {
+                repository.addGroup(GroupEntity(group))
+            }
+
+            //add tasks
+            for (task in event.tasks) {
+                val files = task.files.map { fileLocations[it] ?: "" }.toList()
+                repository.addTask(TaskEntity(task, files))
+            }
+
+            for (option in event.options) {
+                repository.addOption(OptionEntity(option))
+            }
+
+            for (answer in event.correctAnswers) {
+                for (value in answer.values) {
+                    repository.addAnswer(CorrectAnswerEntity(answer.taskId, value))
+                }
+            }
+        }
+
     }
 }

@@ -20,4 +20,8 @@ interface OptionDao {
     @Transaction
     @Query("SELECT * FROM options WHERE taskId = :taskId")
     suspend fun getOptionsByTaskId(taskId: String): List<OptionEntity>
+
+    @Transaction
+    @Query("SELECT * FROM options WHERE optionId = :optionId")
+    suspend fun getOptionById(optionId: String): OptionEntity?
 }
