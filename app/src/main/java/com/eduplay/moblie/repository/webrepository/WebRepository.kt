@@ -23,6 +23,7 @@ import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
+import com.eduplay.moblie.repository.webrepository.requestTypes.AnswerBatch
 import com.eduplay.moblie.repository.webrepository.requestTypes.AvatarUpdate
 import com.eduplay.moblie.repository.webrepository.requestTypes.EventRating
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
@@ -427,6 +428,11 @@ class WebRepository @Inject constructor(
             return body.downloadPath
         }
         throw IllegalAccessException("failed to get file path")
+    }
+
+    suspend fun postAnswerBatch(answerBatch: AnswerBatch): Boolean {
+        val response = api.postAnswerBatch(answerBatch)
+        return response.isSuccessful
     }
 
 }

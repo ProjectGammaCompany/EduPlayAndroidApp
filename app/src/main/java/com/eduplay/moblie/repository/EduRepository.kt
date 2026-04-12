@@ -430,6 +430,13 @@ class EduRepository @Inject constructor(
         return localRepository.deleteEvent(eventId)
     }
 
+    suspend fun postAnswerBatch(eventId: String) : Boolean {
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE) return true
+        val answerBatch = localRepository.getCurrentPlayerStatus(eventId)
+        if (answerBatch == null) return true
+        return webRepository.postAnswerBatch(answerBatch)
+    }
+
     private suspend fun getRepository(): Repository {
         return when (offlineModeManager.getAppMode().first()) {
             OfflineModeManager.AppModes.ONLINE -> webRepository

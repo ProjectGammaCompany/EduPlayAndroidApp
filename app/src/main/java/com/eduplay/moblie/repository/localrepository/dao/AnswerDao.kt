@@ -22,6 +22,16 @@ interface AnswerDao {
     suspend fun getAnswerByTaskAndUserId(taskId: String, userId: String): AnswerEntity?
 
     @Transaction
+    @Query("""
+        SELECT *
+        FROM answers 
+        JOIN tasks ON answers.taskId = tasks.taskId
+        JOIN blocks ON tasks.blockId = blocks.blockId
+        WHERE blocks.eventId = :eventId AND answers.userId = :userId AND isFinal = 1
+    """)
+    suspend fun getAnswerByEventAndUserId(eventId: String, userId: String): List<AnswerEntity>
+
+    @Transaction
     @Query(
         """
         SELECT SUM(answers.points) 

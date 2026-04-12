@@ -48,6 +48,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
     val isRated = mutableStateOf(false)
     val groupEvent = mutableStateOf(false)
     val isDownloaded = mutableStateOf(false)
+    val failedToSendAnswers = mutableStateOf(false)
 
     val noInternetConnection = mutableStateOf(false)
 
@@ -85,6 +86,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
     }
 
     private suspend fun fetchPlayerData(eventId: String) {
+
         val data = repository.getEventInfoPlayer(eventId)
 
         isEventFavourite.value = data.favorite
@@ -122,6 +124,12 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
         isContinuing.value =
             isOpen.value && EventStatus.statusOf(data.status) == EventStatus.STARTED
         isCompleted.value = EventStatus.statusOf(data.status) == EventStatus.ENDED
+
+        // заранее отправляем ответы
+        if (isDownloaded.value) {
+            val result = repository.postAnswerBatch(eventId)
+            if (!result) isOpen.value = false
+        }
     }
 
     private suspend fun fetchOwnerData(eventId: String, context: Context) {

@@ -121,4 +121,6 @@
     <string name="delete_notification">Удалить уведомление</string>
     <string name="delete_event">Удалить событие</string>
     <string name="downloading">загрузка</string>
+    <string name="failed_send_answers">Не удалось отправить ваши ответы. Обновите страницу чтобы отправить из заново. Если вы продолжите без обновления вам придется заново пройти некоторые заания. В итоге будут засчитаны те ответы которые были сданы раньше.</string>
+    <string name="failed_send_answers_results">Не удалось отправить ваши ответы. Перезагрузите страницу чтобы получить актуальные результаты.</string>
 </resources>

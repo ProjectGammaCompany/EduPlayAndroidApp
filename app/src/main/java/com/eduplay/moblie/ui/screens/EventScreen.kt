@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.ComponentName
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -52,6 +53,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -93,6 +95,7 @@ import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinGroupDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
+import com.eduplay.moblie.ui.elements.TryAgainLaterToast
 import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
@@ -122,13 +125,22 @@ fun EventScreen(
 
     val context = LocalContext.current
 
+    var isRefreshing by remember { mutableStateOf(false) }
     if (!dataFetched) {
         viewModel.fetchData(
             eventId,
-            { dataFetched = true },
+            {
+                dataFetched = true
+                isRefreshing = false
+            },
             { noInternet = true },
             context
         )
+    }
+
+    if (viewModel.failedToSendAnswers.value) {
+        Toast.makeText(context, stringResource(R.string.no_internet), Toast.LENGTH_LONG).show()
+        viewModel.failedToSendAnswers.value = true
     }
 
     if (viewModel.unauthorised.value) {
@@ -279,43 +291,56 @@ fun EventScreen(
         )
     }
 
-    EventScreen(
-        innerPaddingValues,
-        viewModel.eventCreatorMode,
-        viewModel.isEventFavourite,
-        viewModel.eventName,
-        viewModel.tags,
-        viewModel.author,
-        viewModel.isCompleted,
-        imageHeaderViewModel.getFullUrl(viewModel.cover.value),
-        viewModel.info,
-        viewModel.description,
-        viewModel.privateEvent,
-        viewModel.isOpen,
-        viewModel.isContinuing,
-        onAddToFavourite,
-        onComplain,
-        startEvent,
-        showResults,
-        onReturn,
-        imageHeaderViewModel.headers,
-        turnOnBluetooth,
-        isCompetitionMode,
-        canShowConnectionList,
-        viewModel.password,
-        viewModel.groups,
-        eventId,
-        viewModel.joinCode,
-        onDownload,
-        viewModel.canDownload,
-        viewModel.isRated,
-        viewModel::rateEvent,
-        viewModel.groupEvent,
-        viewModel.downloadStatusObserver.downloading,
-        viewModel.downloadStatusObserver.downloaded,
-        viewModel.isDownloaded,
-        {viewModel.deleteEventFromDevice(eventId)}
-    )
+
+    val onRefresh = {
+        dataFetched = false
+        isRefreshing = true
+    }
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        EventScreen(
+            innerPaddingValues,
+            viewModel.eventCreatorMode,
+            viewModel.isEventFavourite,
+            viewModel.eventName,
+            viewModel.tags,
+            viewModel.author,
+            viewModel.isCompleted,
+            imageHeaderViewModel.getFullUrl(viewModel.cover.value),
+            viewModel.info,
+            viewModel.description,
+            viewModel.privateEvent,
+            viewModel.isOpen,
+            viewModel.isContinuing,
+            onAddToFavourite,
+            onComplain,
+            startEvent,
+            showResults,
+            onReturn,
+            imageHeaderViewModel.headers,
+            turnOnBluetooth,
+            isCompetitionMode,
+            canShowConnectionList,
+            viewModel.password,
+            viewModel.groups,
+            eventId,
+            viewModel.joinCode,
+            onDownload,
+            viewModel.canDownload,
+            viewModel.isRated,
+            viewModel::rateEvent,
+            viewModel.groupEvent,
+            viewModel.downloadStatusObserver.downloading,
+            viewModel.downloadStatusObserver.downloaded,
+            viewModel.isDownloaded,
+            { viewModel.deleteEventFromDevice(eventId) },
+            viewModel.failedToSendAnswers
+        )
+    }
 }
 
 @Composable
@@ -354,7 +379,8 @@ fun EventScreen(
     downloadingEvents: SnapshotStateMap<String, String>,
     downloadedEvents: SnapshotStateSet<String>,
     isDownloaded: State<Boolean>,
-    onDeleteEvent: ()->Unit
+    onDeleteEvent: ()->Unit,
+    failedToSendAnswers: State<Boolean>
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -440,6 +466,7 @@ fun EventScreen(
                     showResults,
                     isRated,
                     onRate,
+                    failedToSendAnswers
                 )
             }
         }
@@ -828,7 +855,8 @@ private fun GeneralUserBody(
     startEvent: () -> Unit,
     showResults: () -> Unit,
     isRated: State<Boolean>,
-    onRate: ((Int) -> Unit)
+    onRate: ((Int) -> Unit),
+    failedToSendAnswers: State<Boolean>
 ) {
     Column(verticalArrangement = Arrangement.Center) {
         Box(modifier = Modifier.fillMaxHeight(if (isOpen.value || isCompleted.value) 0.85f else 1f)) {
@@ -836,6 +864,13 @@ private fun GeneralUserBody(
         }
 
         if (isOpen.value && !isCompleted.value) {
+            if (failedToSendAnswers.value) {
+                Text(
+                    stringResource(R.string.failed_send_answers),
+                    style = typography.labelSmall.copy(colorScheme.secondary),
+                    modifier = Modifier.fillMaxWidth(0.8f)
+                )
+            }
             Button(
                 onClick = startEvent,
                 modifier = Modifier
@@ -859,6 +894,13 @@ private fun GeneralUserBody(
         }
 
         if (isCompleted.value) {
+            if (failedToSendAnswers.value) {
+                Text(
+                    stringResource(R.string.failed_send_answers),
+                    style = typography.labelSmall.copy(colorScheme.secondary),
+                    modifier = Modifier.fillMaxWidth(0.8f)
+                )
+            }
             Button(
                 onClick = { showResults() },
                 modifier = Modifier
@@ -1099,31 +1141,3 @@ private fun StatisticsInfo() {
     Text("Coming soon")
     //TODO("статистики на экране статистик")
 }
-
-//@Composable
-//@Preview
-//private fun Event() {
-//    EventScreen(
-//        PaddingValues(),
-//        isEventFavourite = statetrue,
-//        eventCreatorMode = false,
-//        eventName = "Событие",
-//        tags = remember { mutableStateListOf<EventTag>(EventTag("", "tag1")) },
-//        author = "Author",
-//        isCompleted = false,
-//        cover = "",
-//        info = remember { mutableStateListOf() },
-//        description = "Some information",
-//        privateEvent = false,
-//        isOpen = false,
-//        isContinuing = false,
-//        onAddToFavourite = { },
-//        onComplain = { _: String -> },
-//        startEvent = {},
-//        showResults = { },
-//        onReturn = { false },
-//        headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-//        toggleBluetooth = {},
-//        isCompetitionMode = remember { mutableStateOf(false) }
-//    )
-//}

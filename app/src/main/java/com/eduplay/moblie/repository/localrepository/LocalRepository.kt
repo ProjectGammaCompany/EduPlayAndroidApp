@@ -31,6 +31,7 @@ import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.ShortTask
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
+import com.eduplay.moblie.repository.webrepository.requestTypes.AnswerBatch
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.services.JwtDecoder
 import com.eduplay.moblie.useCases.OfflineModeManager
@@ -787,5 +788,28 @@ class LocalRepository @Inject constructor(
             return true
         }
         return false
+    }
+
+    suspend fun getCurrentPlayerStatus(eventId: String): AnswerBatch?{
+        val user = getCurrentUser()
+        val status = eventDatabase.userEventStatus().getStatusByUserAndEvent(user, eventId)
+        if (status == null) return null
+        val points = eventDatabase.answerDao().getTotalPointsForEvent(eventId, user)
+        val answers = eventDatabase
+            .answerDao().getAnswerByEventAndUserId(eventId, user)
+            .map {
+                AnswerBatch.Answer(
+                    taskId = it.taskId,
+                    options = Gson().fromJson<List<String>>(it.options, List::class.java)
+                )
+            }
+        return AnswerBatch(
+            userId = user,
+            answers = answers,
+            totalPoints = points,
+            currentBlock = status.blockId,
+            currentTask = status.taskId,
+            isDone = status.isFinished
+        )
     }
 }
