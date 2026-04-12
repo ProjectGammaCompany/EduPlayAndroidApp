@@ -46,9 +46,10 @@ class MainActivity : FragmentActivity() {
     private val hideBottomBarScreens = listOf("auth_screen", "play_event", "fake_splash")
     private val viewModel: SplashViewModel by viewModels()
 
-    private val startDownloadService = { eventId: String ->
+    private val startDownloadService = { eventUrl: String, eventId:String ->
         val intent = Intent(this, EventDownloadService::class.java)
-        intent.putExtra("eventUrl", eventId)
+        intent.putExtra("eventUrl", eventUrl)
+        intent.putExtra("eventId", eventId)
         val bundle = Bundle()
         startService(intent)
     }

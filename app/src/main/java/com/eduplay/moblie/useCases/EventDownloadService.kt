@@ -1,7 +1,6 @@
 package com.eduplay.moblie.useCases
 
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
@@ -34,12 +33,16 @@ import java.io.File
 import java.io.FileOutputStream
 
 @AndroidEntryPoint
-class EventDownloadService constructor() : Service() {
+class EventDownloadService : Service() {
 
     @Inject
     lateinit var repository: LocalRepository
     @Inject
     lateinit var fileDownloader: TaskDownloadUseCase
+    @Inject
+    lateinit var downloadStatusKeeper: DownloadStatusObserver
+
+
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -61,7 +64,6 @@ class EventDownloadService constructor() : Service() {
             val eventUrl = msg.obj.toString()
 
             val eventFile = File.createTempFile(eventUrl, ".json")
-
             val response = eventFilesApi.getEventFile(eventUrl).execute()
             val body = response.body()
             if (response.isSuccessful && body != null) {
@@ -73,17 +75,15 @@ class EventDownloadService constructor() : Service() {
                 Log.d("downloaded", "${eventFile.length()}")
             } else {
                 Log.d("not downloaded", response.message())
+                downloadStatusKeeper.downloadFailed(eventUrl)
                 toastFail()
                 stopSelf(msg.arg1)
             }
             parseFile(eventFile)
             eventFile.delete()
-            // stream everything to eventFile https://stackoverflow.com/questions/32878478/how-to-download-file-in-android-using-retrofit-library
-            // send everything to db
-            // TODO("сделать уведу про скачивание с обновлением состояния") // https://stackoverflow.com/questions/73725629/how-to-legally-prevent-notification-get-removed-in-android
+            downloadStatusKeeper.updateDownloaded(eventUrl)
 
-            // Stop the service using the startId, so that we don't stop
-            // the service in the middle of handling another job
+            // TODO("сделать уведу про скачивание с обновлением состояния") // https://stackoverflow.com/questions/73725629/how-to-legally-prevent-notification-get-removed-in-android
             stopSelf(msg.arg1)
         }
     }
@@ -104,8 +104,10 @@ class EventDownloadService constructor() : Service() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val eventUrl = intent.getStringExtra("eventUrl")
-        Toast.makeText(this, "start download $eventUrl", Toast.LENGTH_SHORT).show()
-
+        val eventId = intent.getStringExtra("eventId")
+        if (eventId != null && eventUrl != null) {
+            downloadStatusKeeper.addToDownloading(eventId, eventUrl)
+        }
         serviceHandler?.obtainMessage()?.also { msg ->
             msg.arg1 = startId
             msg.obj = eventUrl
@@ -116,7 +118,6 @@ class EventDownloadService constructor() : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show()
     }
 
     private fun parseFile(file: File) {
@@ -132,8 +133,6 @@ class EventDownloadService constructor() : Service() {
             )
             fileLocations[file] = location
         }
-
-
         runBlocking {
             // add event
             val eventEntity = EventEntity(event.event, fileLocations[event.event.cover] ?: "")

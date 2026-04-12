@@ -16,17 +16,17 @@ import com.eduplay.moblie.models.EventStatus
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.useCases.DateConverter
+import com.eduplay.moblie.useCases.DownloadStatusObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.net.ConnectException
 import java.time.LocalDateTime
 
 
 @HiltViewModel
-class EventScreenViewModel @Inject constructor(val repository: EduRepository) : ViewModel() {
+class EventScreenViewModel @Inject constructor(val repository: EduRepository, val downloadStatusObserver: DownloadStatusObserver) : ViewModel() {
     val eventCreatorMode = mutableStateOf(false)
     val isEventFavourite = mutableStateOf(false)
     val isCompleted = mutableStateOf(false)
@@ -47,6 +47,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
     val needGroup = mutableStateOf(false)
     val isRated = mutableStateOf(false)
     val groupEvent = mutableStateOf(false)
+    val isDownloaded = mutableStateOf(false)
 
     val noInternetConnection = mutableStateOf(false)
 
@@ -96,6 +97,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         canDownload.value = data.canBeDownloaded
         needGroup.value = data.needGroup
         isRated.value = data.rated
+        isDownloaded.value = data.isDownloaded
 
 
         info.clear()
@@ -206,7 +208,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
         }
     }
 
-    fun downloadEvent(eventId: String, onDownloadEvent: (String) -> ComponentName?) {
+    fun downloadEvent(eventId: String, onDownloadEvent: (String, String) -> ComponentName?) {
         viewModelScope.launch {
             val url = try {
                 repository.getEventFileUrl(eventId)
@@ -214,7 +216,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository) : 
                 Log.e("download_service", e.message ?: "", e)
                 return@launch
             }
-            onDownloadEvent(url)
+            onDownloadEvent(url, eventId)
         }
     }
 

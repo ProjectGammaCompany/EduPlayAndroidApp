@@ -10,6 +10,7 @@ import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.AppSettingsManager
+import com.eduplay.moblie.useCases.DownloadStatusObserver
 import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import com.eduplay.moblie.useCases.TokenManager
 import dagger.Module
@@ -121,5 +122,11 @@ class Providers {
         )
             .allowMainThreadQueries()
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun profideDownloadStatusObserver(): DownloadStatusObserver {
+        return DownloadStatusObserver
     }
 }

@@ -139,7 +139,9 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun getEventInfoPlayer(eventId: String): EventPlayerInfo {
-        return getRepository().getPlayerEventInfo(eventId)
+        val info =  getRepository().getPlayerEventInfo(eventId)
+        info.isDownloaded = localRepository.isEventDownloaded(eventId)
+        return info
     }
 
     suspend fun getEventInfoOwner(eventId: String): EventOwnerInfo {

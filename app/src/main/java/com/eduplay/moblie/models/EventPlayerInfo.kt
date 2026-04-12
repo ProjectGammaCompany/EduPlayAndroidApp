@@ -18,5 +18,6 @@ data class EventPlayerInfo(
     val authors: List<Author>,
     val needGroup: Boolean,
     val canBeDownloaded: Boolean,
-    val rated: Boolean
+    val rated: Boolean,
+    var isDownloaded: Boolean = false
 )

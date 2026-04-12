@@ -57,6 +57,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -107,7 +109,7 @@ fun EventScreen(
     isCompetitionMode: State<Boolean>,
     toggleCompetitionMode: (Boolean) -> Unit,
     bluetoothViewModel: BluetoothViewModel,
-    onDownloadEvent: (String) -> ComponentName?
+    onDownloadEvent: (String, String) -> ComponentName?
 ) {
     var dataFetched by remember { mutableStateOf(false) }
     var noInternet by remember { mutableStateOf(false) }
@@ -302,7 +304,10 @@ fun EventScreen(
         viewModel.canDownload,
         viewModel.isRated,
         viewModel::rateEvent,
-        viewModel.groupEvent
+        viewModel.groupEvent,
+        viewModel.downloadStatusObserver.downloading,
+        viewModel.downloadStatusObserver.downloaded,
+        viewModel.isDownloaded
     )
 }
 
@@ -338,7 +343,10 @@ fun EventScreen(
     canDownLoad: State<Boolean>,
     isRated: State<Boolean>,
     onRate: (Int) -> Unit,
-    groupEvent: State<Boolean>
+    groupEvent: State<Boolean>,
+    downloadingEvents: SnapshotStateMap<String, String>,
+    downloadedEvents: SnapshotStateSet<String>,
+    isDownloaded: State<Boolean>
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -384,7 +392,11 @@ fun EventScreen(
                 toggleBluetooth,
                 isCompetitionMode,
                 onDownload,
-                canDownLoad
+                canDownLoad,
+                downloadingEvents,
+                downloadedEvents,
+                eventId,
+                isDownloaded
             )
 
             EventScreenHeader(
@@ -520,7 +532,11 @@ private fun TopAppBarEventScreen(
     toggleBluetooth: () -> Unit,
     isCompetitionMode: State<Boolean>,
     onDownload: () -> Unit,
-    canDownLoad: State<Boolean>
+    canDownLoad: State<Boolean>,
+    downloadingEvents: SnapshotStateMap<String, String>,
+    downloadedEvents: SnapshotStateSet<String>,
+    eventId: String,
+    isDownloaded: State<Boolean>
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -561,7 +577,28 @@ private fun TopAppBarEventScreen(
                         contentDescription = stringResource(R.string.report_event)
                     )
                 }
-                if (canDownLoad.value) {
+                if (downloadingEvents.values.contains(eventId)) {
+                    IconButton(
+                        onClick = { },
+                        modifier = Modifier.testTag("in_progress")
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.progress),
+                            contentDescription = stringResource(R.string.download_event)
+                        )
+                    }
+                } else if (isDownloaded.value || downloadedEvents.contains(eventId)) {
+//                    IconButton(
+//                        onClick = { onDelete() },
+//                        modifier = Modifier.testTag("delete_from_device_btn")
+//                    ) {
+//                        Icon(
+//                            imageVector = ImageVector.vectorResource(R.drawable.download),
+//                            contentDescription = stringResource(R.string.download_event)
+//                        )
+//                    }
+                    //TODO("Delete button")
+                } else if (canDownLoad.value) {
                     IconButton(
                         onClick = { onDownload() },
                         modifier = Modifier.testTag("download_btn")
@@ -774,7 +811,7 @@ private fun GeneralUserBody(
     onRate: ((Int) -> Unit)
 ) {
     Column(verticalArrangement = Arrangement.Center) {
-        Box(modifier = Modifier.fillMaxHeight(if (isOpen.value || isCompleted.value ) 0.85f else 1f)) {
+        Box(modifier = Modifier.fillMaxHeight(if (isOpen.value || isCompleted.value) 0.85f else 1f)) {
             GeneralInfo(tags, info, description, !isRated.value && isCompleted.value, onRate)
         }
 
@@ -845,7 +882,7 @@ private fun RateBar(onRate: (Int) -> Unit) {
                 .align(Alignment.CenterHorizontally)
                 .padding(bottom = 5.dp, top = 10.dp)
         )
-        Row (
+        Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
@@ -856,7 +893,7 @@ private fun RateBar(onRate: (Int) -> Unit) {
                         for (i in 0..idx) {
                             rateStates[i] = true
                         }
-                        for (i in idx+1..<rateStates.size) {
+                        for (i in idx + 1..<rateStates.size) {
                             rateStates[i] = false
                         }
                     },
@@ -879,7 +916,7 @@ private fun RateBar(onRate: (Int) -> Unit) {
             }
         }
         OutlinedButton(
-            onClick = {onRate(currentlyRated.value)},
+            onClick = { onRate(currentlyRated.value) },
             modifier = Modifier
                 .padding(horizontal = 10.dp, vertical = 4.dp)
                 .fillMaxWidth()
