@@ -381,11 +381,11 @@ class LocalRepository @Inject constructor(
 
         for (condition in conditions) {
             var gotConditions  = true
-            if (condition.max != null) {
-                gotConditions = points >= condition.max
-            }
             if (condition.min != null) {
-                gotConditions = points < condition.min
+                gotConditions = points >= condition.min
+            }
+            if (condition.max != null) {
+                gotConditions = points < condition.max
             }
 
             if (condition.groupName != null) {
