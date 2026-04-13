@@ -22,4 +22,9 @@ object DownloadStatusObserver {
     fun downloadFailed(eventUrl: String) {
         downloading.remove(eventUrl)
     }
+
+    fun deletedFile(eventId: String) {
+        downloaded.remove(eventId)
+    }
+
 }

@@ -252,6 +252,9 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
     fun deleteEventFromDevice(eventId: String) {
         viewModelScope.launch {
             isDownloaded.value = !repository.deleteEvent(eventId)
+            if (isDownloaded.value == false) {
+                downloadStatusObserver.deletedFile(eventId)
+            }
         }
     }
 }
