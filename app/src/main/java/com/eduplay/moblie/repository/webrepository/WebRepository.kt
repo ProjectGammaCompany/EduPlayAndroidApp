@@ -25,11 +25,14 @@ import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.repository.webrepository.requestTypes.AnswerBatch
 import com.eduplay.moblie.repository.webrepository.requestTypes.AvatarUpdate
+import com.eduplay.moblie.repository.webrepository.requestTypes.EventIdList
 import com.eduplay.moblie.repository.webrepository.requestTypes.EventRating
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Notification
+import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatus
+import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatusList
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.TokenManager
 import jakarta.inject.Inject
@@ -434,6 +437,15 @@ class WebRepository @Inject constructor(
     suspend fun postAnswerBatch(answerBatch: AnswerBatch): Boolean {
         val response = api.postAnswerBatch(answerBatch)
         return response.isSuccessful
+    }
+
+    suspend fun getDownloadedEventsStatus(events: List<String>): List<UserEventStatus>? {
+        val response = api.getUserEventsStatuses(EventIdList(events))
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body.events
+        }
+        return null
     }
 
 }

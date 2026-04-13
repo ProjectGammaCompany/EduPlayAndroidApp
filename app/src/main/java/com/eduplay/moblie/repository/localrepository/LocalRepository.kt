@@ -24,18 +24,20 @@ import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
 import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEventStatusEntity
+import com.eduplay.moblie.repository.localrepository.entity.UserGroupEntity
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.Block
-import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.ShortTask
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.repository.webrepository.requestTypes.AnswerBatch
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
+import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatus
 import com.eduplay.moblie.services.JwtDecoder
-import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.DateConverter
+import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.TokenManager
 import com.google.gson.Gson
 import jakarta.inject.Inject
@@ -295,15 +297,17 @@ class LocalRepository @Inject constructor(
         }
     }
 
-    private suspend fun fillStarterStatus(eventId: String) : UserEventStatusEntity {
+    private suspend fun fillStarterStatus(eventId: String): UserEventStatusEntity {
         val block = eventDatabase.blockDao().getBlockByEventIdAndBlockOrder(eventId, 1)
         val task = eventDatabase.taskDao().getTaskByBlockIdAndOrder(block?.id ?: "", 1)
         val user = getCurrentUser()
         val status = UserEventStatusEntity(
             userId = user,
             eventId = eventId,
-            blockId = block?.id ?: throw IllegalAccessException("no block downloaded for event $eventId"),
-            taskId = task?.id ?: throw IllegalAccessException("no block downloaded for event $eventId"),
+            blockId = block?.id
+                ?: throw IllegalAccessException("no block downloaded for event $eventId"),
+            taskId = task?.id
+                ?: throw IllegalAccessException("no block downloaded for event $eventId"),
             isFinished = false,
             choseTaskInBlock = false
         )
@@ -337,7 +341,11 @@ class LocalRepository @Inject constructor(
         }
     }
 
-    private suspend fun displayTask(taskId: String, userId: String, status: UserEventStatusEntity): EventStage {
+    private suspend fun displayTask(
+        taskId: String,
+        userId: String,
+        status: UserEventStatusEntity
+    ): EventStage {
         val task = eventDatabase.taskDao().getTaskById(taskId)
         if (task == null) throw IllegalAccessException("didnt download task $taskId")
 
@@ -374,14 +382,18 @@ class LocalRepository @Inject constructor(
         )
     }
 
-    private suspend fun proceedToNextBlock(currentBlock: BlockEntity, status: UserEventStatusEntity): EventStage {
+    private suspend fun proceedToNextBlock(
+        currentBlock: BlockEntity,
+        status: UserEventStatusEntity
+    ): EventStage {
         val user = getCurrentUser()
         val conditions = eventDatabase.conditionDao().getConditionsByBlockId(currentBlock.id)
         val points = eventDatabase.blockDao().getPointsInBlockById(currentBlock.id)
-        val groups: List<GroupEntity> = eventDatabase.userDao().getUserWithGroupsById(user)?.groups ?: listOf()
+        val groups: List<GroupEntity> =
+            eventDatabase.userDao().getUserWithGroupsById(user)?.groups ?: listOf()
 
         for (condition in conditions) {
-            var gotConditions  = true
+            var gotConditions = true
             if (condition.min != null) {
                 gotConditions = points >= condition.min
             }
@@ -390,15 +402,18 @@ class LocalRepository @Inject constructor(
             }
 
             if (condition.groupName != null) {
-                gotConditions = groups.any { group -> group.eventId == currentBlock.eventId && group.login == condition.groupName }
+                gotConditions =
+                    groups.any { group -> group.eventId == currentBlock.eventId && group.login == condition.groupName }
             }
 
             if (gotConditions) {
-                val newBlock = eventDatabase.blockDao().getBlockById(condition.nextBlockId) ?: throw IllegalAccessException("no block found for condition ${condition.conditionId}")
+                val newBlock = eventDatabase.blockDao().getBlockById(condition.nextBlockId)
+                    ?: throw IllegalAccessException("no block found for condition ${condition.conditionId}")
                 return changeBlock(newBlock, user, status)
             }
         }
-        val nextBlockByOrder = eventDatabase.blockDao().getBlockByEventIdAndBlockOrder(currentBlock.eventId, currentBlock.blockOrder+1)
+        val nextBlockByOrder = eventDatabase.blockDao()
+            .getBlockByEventIdAndBlockOrder(currentBlock.eventId, currentBlock.blockOrder + 1)
         if (nextBlockByOrder == null) {
             return eventEnded(status)
         }
@@ -406,7 +421,11 @@ class LocalRepository @Inject constructor(
 
     }
 
-    private suspend fun changeBlock(newBlock: BlockEntity, user: String, status: UserEventStatusEntity): EventStage {
+    private suspend fun changeBlock(
+        newBlock: BlockEntity,
+        user: String,
+        status: UserEventStatusEntity
+    ): EventStage {
         var allTasksCompleted = true
         var tasks = eventDatabase.taskDao().getAllTasksInBlock(newBlock.id)
             .map { task ->
@@ -434,7 +453,7 @@ class LocalRepository @Inject constructor(
         val newStatus = UserEventStatusEntity(
             userId = status.userId,
             eventId = status.eventId,
-            blockId = newBlock.id ,
+            blockId = newBlock.id,
             taskId = tasks.first().id,
             isFinished = false,
             choseTaskInBlock = false,
@@ -579,7 +598,10 @@ class LocalRepository @Inject constructor(
         )
     }
 
-    private suspend fun findCorrectAnswers(correctAnswers: Set<String>, taskId: String): List<String> {
+    private suspend fun findCorrectAnswers(
+        correctAnswers: Set<String>,
+        taskId: String
+    ): List<String> {
         val answers = mutableListOf<String>()
         val allOptions = eventDatabase.optionDao().getOptionsByTaskId(taskId)
         allOptions.forEach { optionEntity ->
@@ -626,11 +648,6 @@ class LocalRepository @Inject constructor(
 
     override suspend fun getResults(eventId: String): PlayerStats {
         val userId = getCurrentUser()
-        val currentStatus = eventDatabase.userEventStatus().getStatusByUserAndEvent(userId, eventId)
-
-        if (currentStatus == null || !currentStatus.isFinished) throw IllegalAccessException("trying to get results for unfinished event $eventId")
-
-        val totalPoints = eventDatabase.answerDao().getTotalPointsForEvent(eventId, userId)
         return PlayerStats(
             fullStats = false,
             groupEvent = false,
@@ -639,7 +656,7 @@ class LocalRepository @Inject constructor(
                     id = userId,
                     username = getProfile().username,
                     avatar = null,
-                    points = totalPoints,
+                    points = 0,
                 )
             ),
             groups = null
@@ -663,9 +680,17 @@ class LocalRepository @Inject constructor(
         groupName: String,
         groupPassword: String
     ) {
+        val userId = getCurrentUser()
+        val userGroup = eventDatabase.userDao()
+            .getUserWithGroupsById(userId)
+            ?.groups?.firstOrNull { it.eventId == eventId }
         val group = eventDatabase.groupDao().getGroupByEventIdAndLogin(eventId, groupName)
+        if (userGroup != null) {
+            return
+        }
         if (group == null) throw IllegalAccessException("wrong group or password")
         if (hashString(groupPassword) != group.password) throw IllegalAccessException("wrong group or password")
+        eventDatabase.groupDao().insertUserGroup(UserGroupEntity(userId, group.groupId))
     }
 
     override suspend fun getNotifications(
@@ -781,7 +806,7 @@ class LocalRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteEvent(eventId: String) : Boolean {
+    suspend fun deleteEvent(eventId: String): Boolean {
         val event = eventDatabase.eventDao().getEventById(eventId)
         if (event != null) {
             eventDatabase.eventDao().deleteEvent(event)
@@ -790,7 +815,7 @@ class LocalRepository @Inject constructor(
         return false
     }
 
-    suspend fun getCurrentPlayerStatus(eventId: String): AnswerBatch?{
+    suspend fun getCurrentPlayerStatus(eventId: String): AnswerBatch? {
         val user = getCurrentUser()
         val status = eventDatabase.userEventStatus().getStatusByUserAndEvent(user, eventId)
         if (status == null) return null
@@ -813,9 +838,90 @@ class LocalRepository @Inject constructor(
         )
     }
 
-    suspend fun getLastUpdateDate(eventId: String) : String? {
+    suspend fun getLastUpdateDate(eventId: String): String? {
         val event = eventDatabase.eventDao().getEventById(eventId)
         if (event == null) return null
         return event.lastEditionDate
+    }
+
+    suspend fun updateUserStatuses(okEvents: List<UserEventStatus>) {
+        val user = getCurrentUser()
+        for (event in okEvents) {
+            val status =
+                eventDatabase.userEventStatus().getStatusByUserAndEvent(user, event.eventId)
+            val isFinished = StageType.stringValueOf(event.status) == StageType.END
+
+            // заполняем статусы
+            if (status != null) {
+                val newStatus = UserEventStatusEntity(
+                    userId = status.userId,
+                    eventId = status.eventId,
+                    blockId = event.blockId ?: "",
+                    taskId = event.taskId ?: "",
+                    isFinished = isFinished,
+                    choseTaskInBlock = false,
+                    id = status.id
+                )
+                eventDatabase.userEventStatus().updateStatus(newStatus)
+            } else {
+                val newStatus = UserEventStatusEntity(
+                    userId = user,
+                    eventId = event.eventId,
+                    blockId = event.blockId ?: "",
+                    taskId = event.taskId ?: "",
+                    isFinished = isFinished,
+                    choseTaskInBlock = false,
+                )
+                eventDatabase.userEventStatus().insertStatus(newStatus)
+            }
+
+            // обновили группу
+            if (event.groupName != null) {
+                val userGroup =
+                    eventDatabase.userDao().getUserWithGroupsById(user)?.groups?.firstOrNull {
+                        it.eventId == event.eventId
+                    }
+                if (userGroup == null) {
+                    eventDatabase.groupDao().insertUserGroup(UserGroupEntity(user, event.eventId))
+                }
+            }
+
+            // залили ответы
+            if (event.blockId == null || isFinished) return
+
+            eventDatabase.answerDao().deleteAllAnswersInBlock(event.blockId, user)
+
+            val date = DateConverter.convertToServerFormat(LocalDateTime.MIN)
+            val fakeAnswers = event.completedTasksInBlock.mapIndexed { idx, task ->
+                if (idx == 0 && event.pointsInBlock != 0) {
+                    AnswerEntity(
+                        taskId = task,
+                        options = listOf(),
+                        userId = user,
+                        startTime = date,
+                        endTime = date,
+                        points = event.pointsInBlock,
+                        isFinal = true
+                    )
+                } else {
+                    AnswerEntity(
+                        taskId = task,
+                        options = listOf(),
+                        userId = user,
+                        startTime = date,
+                        endTime = date,
+                        points = 0,
+                        isFinal = true
+                    )
+                }
+            }
+            for (answer in fakeAnswers) {
+                eventDatabase.answerDao().insertAnswer(answer)
+            }
+
+            if (event.timeStamp != null && event.timeStamp.isNotBlank()) {
+                postTaskStartTime(event.eventId, event.blockId, event.taskId!!, DateConverter.convertFromServerFormat(event.timeStamp))
+            }
+        }
     }
 }

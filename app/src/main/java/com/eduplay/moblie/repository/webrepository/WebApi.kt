@@ -19,12 +19,14 @@ import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.repository.webrepository.requestTypes.AnswerBatch
 import com.eduplay.moblie.repository.webrepository.requestTypes.AvatarUpdate
+import com.eduplay.moblie.repository.webrepository.requestTypes.EventIdList
 import com.eduplay.moblie.repository.webrepository.requestTypes.EventRating
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.DownloadPath
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.NotificationList
+import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatusList
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -203,4 +205,8 @@ interface WebApi {
     @POST("/event/{eventId}/answerBatch")
     @InjectAuth
     suspend fun postAnswerBatch(@Body answerBatch: AnswerBatch): Response<Unit>
+
+    @POST("/user/eventStatus")
+    @InjectAuth
+    suspend fun getUserEventsStatuses(@Body eventIds: EventIdList): Response<UserEventStatusList>
 }

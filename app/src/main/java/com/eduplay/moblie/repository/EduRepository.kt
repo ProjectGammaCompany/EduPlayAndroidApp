@@ -15,6 +15,7 @@ import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.localrepository.LocalRepository
+import com.eduplay.moblie.repository.localrepository.entity.EventEntity
 import com.eduplay.moblie.repository.localrepository.pagingSources.LocalAllEventsPagingSource
 import com.eduplay.moblie.repository.localrepository.pagingSources.LocalCompletedEventsPagingSource
 import com.eduplay.moblie.repository.localrepository.pagingSources.LocalCreatedEventsPagingSource
@@ -36,6 +37,7 @@ import com.eduplay.moblie.repository.webrepository.pagingSources.FavoriteEventsP
 import com.eduplay.moblie.repository.webrepository.pagingSources.NotificationPagingSource
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
+import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatus
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
 import jakarta.inject.Inject
@@ -57,8 +59,7 @@ class EduRepository @Inject constructor(
         } catch (e: Exception) {
             throw e
         }
-        if (authResult == AuthResult.SUCCESSES)
-            localRepository.saveUser()
+        if (authResult == AuthResult.SUCCESSES) localRepository.saveUser()
         return authResult
     }
 
@@ -80,8 +81,7 @@ class EduRepository @Inject constructor(
         } catch (e: Exception) {
             throw e
         }
-        if (authResult == AuthResult.SUCCESSES)
-            localRepository.saveUser()
+        if (authResult == AuthResult.SUCCESSES) localRepository.saveUser()
         return authResult
     }
 
@@ -115,8 +115,7 @@ class EduRepository @Inject constructor(
                         title,
                         localRepository::isEventDownloaded
                     )
-                }
-            ).flow
+                }).flow
         }
         return Pager(
             config = PagingConfig(
@@ -125,16 +124,11 @@ class EduRepository @Inject constructor(
                 prefetchDistance = prefetchDistance,
                 initialLoadSize = initialLoadSize,
                 maxSize = maxCacheSize
-            ),
-            pagingSourceFactory = {
+            ), pagingSourceFactory = {
                 LocalAllEventsPagingSource(
-                    repository = localRepository,
-                    tags = tags,
-                    active = active,
-                    title = title
+                    repository = localRepository, tags = tags, active = active, title = title
                 )
-            }
-        ).flow
+            }).flow
     }
 
     suspend fun getRole(eventId: String): EventRole {
@@ -142,7 +136,7 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun getEventInfoPlayer(eventId: String): EventPlayerInfo {
-        val info =  getRepository().getPlayerEventInfo(eventId)
+        val info = getRepository().getPlayerEventInfo(eventId)
         info.isDownloaded = localRepository.isEventDownloaded(eventId)
         if (offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
             info.needsUpdate = localRepository.getLastUpdateDate(eventId) != info.lastEditionDate
@@ -161,7 +155,7 @@ class EduRepository @Inject constructor(
         initialLoadSize: Int = 20,
         maxCacheSize: Int = 2000
     ): Flow<PagingData<QuestShortInfo>> {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+        if (offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
             return Pager(
                 config = PagingConfig(
                     pageSize = pageSize,
@@ -171,8 +165,7 @@ class EduRepository @Inject constructor(
                     maxSize = maxCacheSize
                 ), pagingSourceFactory = {
                     FavoriteEventsPagingSource(webRepository, localRepository::isEventDownloaded)
-                }
-            ).flow
+                }).flow
         } else {
             return Pager(
                 config = PagingConfig(
@@ -183,8 +176,7 @@ class EduRepository @Inject constructor(
                     maxSize = maxCacheSize
                 ), pagingSourceFactory = {
                     LocalFavoriteEventsPagingSource(localRepository)
-                }
-            ).flow
+                }).flow
         }
     }
 
@@ -195,7 +187,7 @@ class EduRepository @Inject constructor(
         initialLoadSize: Int = 20,
         maxCacheSize: Int = 2000
     ): Flow<PagingData<QuestShortInfo>> {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+        if (offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
             return Pager(
                 config = PagingConfig(
                     pageSize = pageSize,
@@ -205,8 +197,7 @@ class EduRepository @Inject constructor(
                     maxSize = maxCacheSize
                 ), pagingSourceFactory = {
                     CreatedEventsPagingSource(webRepository, localRepository::isEventDownloaded)
-                }
-            ).flow
+                }).flow
         }
         return Pager(
             config = PagingConfig(
@@ -217,8 +208,7 @@ class EduRepository @Inject constructor(
                 maxSize = maxCacheSize
             ), pagingSourceFactory = {
                 LocalCreatedEventsPagingSource(localRepository)
-            }
-        ).flow
+            }).flow
     }
 
     suspend fun getCompletedEvents(
@@ -228,7 +218,7 @@ class EduRepository @Inject constructor(
         initialLoadSize: Int = 20,
         maxCacheSize: Int = 2000
     ): Flow<PagingData<QuestShortInfo>> {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+        if (offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
             return Pager(
                 config = PagingConfig(
                     pageSize = pageSize,
@@ -238,8 +228,7 @@ class EduRepository @Inject constructor(
                     maxSize = maxCacheSize
                 ), pagingSourceFactory = {
                     CompletedEventsPagingSource(webRepository, localRepository::isEventDownloaded)
-                }
-            ).flow
+                }).flow
         }
         return Pager(
             config = PagingConfig(
@@ -250,8 +239,7 @@ class EduRepository @Inject constructor(
                 maxSize = maxCacheSize
             ), pagingSourceFactory = {
                 LocalCompletedEventsPagingSource(localRepository)
-            }
-        ).flow
+            }).flow
     }
 
     suspend fun getProfile(): ProfileInfo {
@@ -281,39 +269,26 @@ class EduRepository @Inject constructor(
             null
         } else {
             Block(
-                id = stage.block.id,
-                name = stage.block.name,
-                tasks = stage.block.tasks.shuffled()
+                id = stage.block.id, name = stage.block.name, tasks = stage.block.tasks.shuffled()
             )
         }
 
         return EventStage(
-            type = stage.type,
-            task = task,
-            block = block
+            type = stage.type, task = task, block = block
         )
     }
 
     suspend fun postTaskStartTime(
-        eventId: String,
-        blockId: String,
-        taskId: String,
-        taskStartTime: LocalDateTime
+        eventId: String, blockId: String, taskId: String, taskStartTime: LocalDateTime
     ): Boolean {
         return getRepository().postTaskStartTime(eventId, blockId, taskId, taskStartTime)
     }
 
     suspend fun postAnswer(
-        eventId: String,
-        blockId: String,
-        taskId: String,
-        answers: List<String>
+        eventId: String, blockId: String, taskId: String, answers: List<String>
     ): AnswerResult {
         return getRepository().postTaskAnswer(
-            eventId,
-            blockId,
-            taskId,
-            answers.map { it.lowercase() }.toList()
+            eventId, blockId, taskId, answers.map { it.lowercase() }.toList()
         )
     }
 
@@ -342,8 +317,7 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun enterPrivateEvent(
-        joinCode: String,
-        eventPasswords: EventPasswords
+        joinCode: String, eventPasswords: EventPasswords
     ): EventIdResponse {
         return webRepository.enterPrivateEvent(joinCode, eventPasswords)
     }
@@ -367,7 +341,7 @@ class EduRepository @Inject constructor(
         initialLoadSize: Int = 20,
         maxCacheSize: Int = 2000
     ): Flow<PagingData<NotificationData>> {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+        if (offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
             return Pager(
                 config = PagingConfig(
                     pageSize = pageSize,
@@ -377,32 +351,27 @@ class EduRepository @Inject constructor(
                     maxSize = maxCacheSize
                 ), pagingSourceFactory = {
                     NotificationPagingSource(webRepository)
-                }
-            ).flow
+                }).flow
         }
         return flowOf()
     }
 
     suspend fun deleteNotifications(id: String): Boolean {
-        if (offlineModeManager.getAppMode()
-                .first() == OfflineModeManager.AppModes.OFFLINE
-        ) return false
+        if (offlineModeManager.getAppMode().first() == AppModes.OFFLINE) return false
         return webRepository.deleteNotification(id)
     }
 
     suspend fun updateUserName(username: String) {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE) return
+        if (offlineModeManager.getAppMode().first() == AppModes.OFFLINE) return
 
         webRepository.updateUsername(username)
     }
 
     suspend fun updateAvatar(
-        avatar: Uri,
-        contentResolver: ContentResolver,
-        context: Context
+        avatar: Uri, contentResolver: ContentResolver, context: Context
     ): String {
         if (offlineModeManager.getAppMode()
-                .first() == OfflineModeManager.AppModes.OFFLINE
+                .first() == AppModes.OFFLINE
         ) throw IllegalAccessException("currently offline, cant update avatar")
         val fileType =
             context.contentResolver.getType(avatar)?.dropWhile { it != '/' }?.substring(1) ?: ""
@@ -418,35 +387,51 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun postEventRating(rating: Int): Boolean {
-        if (offlineModeManager.getAppMode()
-                .first() == OfflineModeManager.AppModes.OFFLINE
-        ) return false
+        if (offlineModeManager.getAppMode().first() == AppModes.OFFLINE) return false
 
         webRepository.postRating(rating)
         return true
     }
 
     suspend fun getEventFileUrl(eventId: String): String {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE)
-            throw IllegalAccessException("failed to get file path")
+        if (offlineModeManager.getAppMode()
+                .first() == AppModes.OFFLINE
+        ) throw IllegalAccessException("failed to get file path")
         return webRepository.getEventFileUrl(eventId)
     }
 
-    suspend fun deleteEvent(eventId: String) : Boolean {
+    suspend fun deleteEvent(eventId: String): Boolean {
         return localRepository.deleteEvent(eventId)
     }
 
-    suspend fun postAnswerBatch(eventId: String) : Boolean {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE) return true
+    suspend fun postAnswerBatch(eventId: String): Boolean {
+        if (offlineModeManager.getAppMode().first() == AppModes.OFFLINE) return true
         val answerBatch = localRepository.getCurrentPlayerStatus(eventId)
         if (answerBatch == null) return true
         return webRepository.postAnswerBatch(answerBatch)
     }
 
+    suspend fun updateDownloadedEventsStatuses(): List<QuestShortInfo>? {
+        val downloadedEvents: Map<String, EventEntity> =
+            localRepository.getEvents(null, false, "", Int.MAX_VALUE).associateBy { it.id }
+        val eventStatuses = webRepository.getDownloadedEventsStatus(
+            downloadedEvents.keys.toList()
+        )
+        if (eventStatuses == null) return null
+        val eventsThatNeedUpdates = eventStatuses.filter {
+            downloadedEvents[it.eventId] != null && downloadedEvents[it.eventId]?.lastEditionDate != it.lastEditionDate
+        }.map { QuestShortInfo(downloadedEvents[it.eventId]!!) }
+        val okEvents = eventStatuses.filter {
+            downloadedEvents[it.eventId]?.lastEditionDate == it.lastEditionDate
+        }
+        localRepository.updateUserStatuses(okEvents)
+        return eventsThatNeedUpdates
+    }
+
     private suspend fun getRepository(): Repository {
         return when (offlineModeManager.getAppMode().first()) {
-            OfflineModeManager.AppModes.ONLINE -> webRepository
-            OfflineModeManager.AppModes.OFFLINE -> localRepository
+            AppModes.ONLINE -> webRepository
+            AppModes.OFFLINE -> localRepository
         }
     }
 }

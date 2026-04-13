@@ -6,12 +6,17 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.eduplay.moblie.repository.localrepository.entity.GroupEntity
+import com.eduplay.moblie.repository.localrepository.entity.UserGroupEntity
 
 @Dao
 interface GroupDao {
     @Transaction
     @Insert
     suspend fun insertGroup(group: GroupEntity)
+
+    @Transaction
+    @Insert
+    suspend fun insertUserGroup(usergroup: UserGroupEntity)
 
     @Transaction
     @Update
