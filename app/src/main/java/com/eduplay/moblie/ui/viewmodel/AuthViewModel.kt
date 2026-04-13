@@ -31,11 +31,12 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
 
     fun passwordHasErrors(password: String): Boolean {
         if (password.isNotEmpty()) {
-            return !(password.length >= 8 &&
-                    password.any { it.isDigit() } &&
-                    password.any { it.isLetter() } &&
-                    password.any { it.isLowerCase() } &&
-                    password.any { it.isUpperCase() })
+            return !(password.length >= 5 //&&
+//                    password.any { it.isDigit() } &&
+//                    password.any { it.isLetter() } &&
+//                    password.any { it.isLowerCase() } &&
+//                    password.any { it.isUpperCase() }
+        )
         } else {
             return false
         }
@@ -47,7 +48,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
         callBack: () -> Unit
     ) {
         if (!emailHasErrors(email) && !passwordHasErrors(password)) {
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch {
                 try {
                     authResult.value = repository.login(Auth(email, password))
                 } catch (_: ConnectException) {
