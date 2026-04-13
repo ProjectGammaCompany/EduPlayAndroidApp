@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.eduplay.moblie.useCases.downloadTaskTypes.DownloadGroup
 
 @Entity(
     tableName = "groups",
@@ -30,4 +31,11 @@ data class GroupEntity(
     val login: String,
     @ColumnInfo(name = "password")
     val password: String
-)
+) {
+    constructor(group: DownloadGroup): this(
+        groupId = group.groupId,
+        eventId = group.eventId,
+        login = group.login,
+        password = group.password
+    )
+}

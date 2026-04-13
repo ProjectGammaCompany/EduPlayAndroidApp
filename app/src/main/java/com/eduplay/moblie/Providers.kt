@@ -5,10 +5,12 @@ import androidx.room.Room
 import com.eduplay.moblie.repository.localrepository.Database
 import com.eduplay.moblie.repository.webrepository.AuthApi
 import com.eduplay.moblie.repository.webrepository.AuthInterceptor
+import com.eduplay.moblie.repository.webrepository.EventFilesApi
 import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.AppSettingsManager
+import com.eduplay.moblie.useCases.DownloadStatusObserver
 import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import com.eduplay.moblie.useCases.TokenManager
 import dagger.Module
@@ -101,6 +103,18 @@ class Providers {
 
     @Provides
     @Singleton
+    fun provideGeneratedFilesRetrofit(okHttpClient: OkHttpClient): EventFilesApi {
+        val url = BuildConfig.BACKEND_EVENT_FILE_URL
+        return Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(OkHttpClient.Builder().build())
+            .build()
+            .create(EventFilesApi::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideDatabase(@ApplicationContext context: Context): Database {
         return Room.databaseBuilder(
             context,
@@ -108,5 +122,11 @@ class Providers {
         )
             .allowMainThreadQueries()
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun profideDownloadStatusObserver(): DownloadStatusObserver {
+        return DownloadStatusObserver
     }
 }

@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import coil3.toCoilUri
 import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
@@ -20,22 +19,22 @@ import com.eduplay.moblie.repository.localrepository.pagingSources.LocalAllEvent
 import com.eduplay.moblie.repository.localrepository.pagingSources.LocalCompletedEventsPagingSource
 import com.eduplay.moblie.repository.localrepository.pagingSources.LocalCreatedEventsPagingSource
 import com.eduplay.moblie.repository.localrepository.pagingSources.LocalFavoriteEventsPagingSource
-import com.eduplay.moblie.repository.webrepository.pagingSources.AllEventsPagingWebSource
-import com.eduplay.moblie.repository.webrepository.pagingSources.CompletedEventsPagingSource
-import com.eduplay.moblie.repository.webrepository.pagingSources.CreatedEventsPagingSource
-import com.eduplay.moblie.repository.webrepository.pagingSources.FavoriteEventsPagingSource
 import com.eduplay.moblie.repository.requestTypes.Auth
 import com.eduplay.moblie.repository.requestTypes.EventPasswords
 import com.eduplay.moblie.repository.requestTypes.RegistrationData
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
 import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.EventIdResponse
-import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.webrepository.WebRepository
+import com.eduplay.moblie.repository.webrepository.pagingSources.AllEventsPagingWebSource
+import com.eduplay.moblie.repository.webrepository.pagingSources.CompletedEventsPagingSource
+import com.eduplay.moblie.repository.webrepository.pagingSources.CreatedEventsPagingSource
+import com.eduplay.moblie.repository.webrepository.pagingSources.FavoriteEventsPagingSource
 import com.eduplay.moblie.repository.webrepository.pagingSources.NotificationPagingSource
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.OfflineModeManager
 import jakarta.inject.Inject
@@ -140,7 +139,9 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun getEventInfoPlayer(eventId: String): EventPlayerInfo {
-        return getRepository().getPlayerEventInfo(eventId)
+        val info =  getRepository().getPlayerEventInfo(eventId)
+        info.isDownloaded = localRepository.isEventDownloaded(eventId)
+        return info
     }
 
     suspend fun getEventInfoOwner(eventId: String): EventOwnerInfo {
@@ -279,7 +280,7 @@ class EduRepository @Inject constructor(
                 tasks = stage.block.tasks.shuffled()
             )
         }
-        
+
         return EventStage(
             type = stage.type,
             task = task,
@@ -376,15 +377,29 @@ class EduRepository @Inject constructor(
         return flowOf()
     }
 
+    suspend fun deleteNotifications(id: String): Boolean {
+        if (offlineModeManager.getAppMode()
+                .first() == OfflineModeManager.AppModes.OFFLINE
+        ) return false
+        return webRepository.deleteNotification(id)
+    }
+
     suspend fun updateUserName(username: String) {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE ) return
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE) return
 
         webRepository.updateUsername(username)
     }
 
-    suspend fun updateAvatar(avatar: Uri, contentResolver: ContentResolver, context: Context): String {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE ) throw IllegalAccessException("currently offline, cant update avatar")
-        val fileType = context.contentResolver.getType(avatar)?.dropWhile { it != '/' }?.substring(1) ?: ""
+    suspend fun updateAvatar(
+        avatar: Uri,
+        contentResolver: ContentResolver,
+        context: Context
+    ): String {
+        if (offlineModeManager.getAppMode()
+                .first() == OfflineModeManager.AppModes.OFFLINE
+        ) throw IllegalAccessException("currently offline, cant update avatar")
+        val fileType =
+            context.contentResolver.getType(avatar)?.dropWhile { it != '/' }?.substring(1) ?: ""
 
         val file = File(context.cacheDir, "tempFile.$fileType")
 
@@ -397,15 +412,27 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun postEventRating(rating: Int): Boolean {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE ) return false
+        if (offlineModeManager.getAppMode()
+                .first() == OfflineModeManager.AppModes.OFFLINE
+        ) return false
 
         webRepository.postRating(rating)
         return true
     }
 
+    suspend fun getEventFileUrl(eventId: String): String {
+        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE)
+            throw IllegalAccessException("failed to get file path")
+        return webRepository.getEventFileUrl(eventId)
+    }
+
+    suspend fun deleteEvent(eventId: String) : Boolean {
+        return localRepository.deleteEvent(eventId)
+    }
+
     private suspend fun getRepository(): Repository {
         return when (offlineModeManager.getAppMode().first()) {
-            OfflineModeManager.AppModes.ONLINE ->  webRepository
+            OfflineModeManager.AppModes.ONLINE -> webRepository
             OfflineModeManager.AppModes.OFFLINE -> localRepository
         }
     }

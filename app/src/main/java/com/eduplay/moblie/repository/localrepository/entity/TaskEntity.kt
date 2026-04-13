@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.eduplay.moblie.models.TaskType
+import com.eduplay.moblie.useCases.downloadTaskTypes.DownloadTask
 import com.google.gson.Gson
 
 @Entity(
@@ -65,5 +66,18 @@ data class TaskEntity(
         points,
         partialPoints,
         taskOrder
+    )
+
+    constructor(task: DownloadTask, files: List<String>) : this(
+        task.taskId,
+        task.blockId,
+        task.name,
+        task.description,
+        task.type,
+        Gson().toJson(files),
+        task.time,
+        task.points,
+        task.partialPoints,
+        task.taskOrder
     )
 }

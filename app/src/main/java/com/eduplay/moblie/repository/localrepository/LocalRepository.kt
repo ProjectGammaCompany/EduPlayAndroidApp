@@ -16,8 +16,12 @@ import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.Repository
 import com.eduplay.moblie.repository.localrepository.entity.AnswerEntity
 import com.eduplay.moblie.repository.localrepository.entity.BlockEntity
+import com.eduplay.moblie.repository.localrepository.entity.ConditionEntity
+import com.eduplay.moblie.repository.localrepository.entity.CorrectAnswerEntity
 import com.eduplay.moblie.repository.localrepository.entity.EventEntity
 import com.eduplay.moblie.repository.localrepository.entity.GroupEntity
+import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
+import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEventStatusEntity
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
@@ -35,7 +39,9 @@ import com.eduplay.moblie.useCases.TokenManager
 import com.google.gson.Gson
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.first
+import java.security.MessageDigest
 import java.time.LocalDateTime
+import java.util.Base64
 
 class LocalRepository @Inject constructor(
     private val eventDatabase: Database,
@@ -705,7 +711,81 @@ class LocalRepository @Inject constructor(
     }
 
     private fun hashString(s: String): String {
-        // TODO(настроить хеширование)
-        return s
+        val md = MessageDigest.getInstance("SHA-256")
+        val input = s.toByteArray()
+        val bytes = md.digest(input)
+        return Base64.getEncoder().encodeToString(bytes)
+    }
+
+    suspend fun addEvent(eventEntity: EventEntity) {
+        val event = eventDatabase.eventDao().getEventById(eventEntity.id)
+        if (event == null) {
+            eventDatabase.eventDao().insertEvent(eventEntity)
+        } else {
+            eventDatabase.eventDao().updateEvent(eventEntity)
+        }
+    }
+
+    suspend fun addBlock(block: BlockEntity) {
+        val event = eventDatabase.blockDao().getBlockById(block.id)
+        if (event == null) {
+            eventDatabase.blockDao().insertBlock(block)
+        } else {
+            eventDatabase.blockDao().updateBlock(block)
+        }
+    }
+
+    suspend fun addCondition(conditionEntity: ConditionEntity) {
+        val event = eventDatabase.conditionDao().getConditionById(conditionEntity.conditionId)
+        if (event == null) {
+            eventDatabase.conditionDao().insertCondition(conditionEntity)
+        } else {
+            eventDatabase.conditionDao().updateCondition(conditionEntity)
+        }
+    }
+
+    suspend fun addGroup(groupEntity: GroupEntity) {
+        val event = eventDatabase.groupDao().getGroupById(groupEntity.groupId)
+        if (event == null) {
+            eventDatabase.groupDao().insertGroup(groupEntity)
+        } else {
+            eventDatabase.groupDao().updateGroup(groupEntity)
+        }
+    }
+
+    suspend fun addTask(taskEntity: TaskEntity) {
+        val event = eventDatabase.taskDao().getTaskById(taskEntity.id)
+        if (event == null) {
+            eventDatabase.taskDao().insertTask(taskEntity)
+        } else {
+            eventDatabase.taskDao().updateTask(taskEntity)
+        }
+    }
+
+    suspend fun addOption(optionEntity: OptionEntity) {
+        val event = eventDatabase.optionDao().getOptionById(optionEntity.id)
+        if (event == null) {
+            eventDatabase.optionDao().insertOption(optionEntity)
+        } else {
+            eventDatabase.optionDao().updateOption(optionEntity)
+        }
+    }
+
+    suspend fun addAnswer(correctAnswerEntity: CorrectAnswerEntity) {
+        val event = eventDatabase.correctAnswerDao().getAnswerByValue(correctAnswerEntity.value)
+        if (event == null) {
+            eventDatabase.correctAnswerDao().insertAnswer(correctAnswerEntity)
+        } else {
+            eventDatabase.correctAnswerDao().updateAnswer(correctAnswerEntity)
+        }
+    }
+
+    suspend fun deleteEvent(eventId: String) : Boolean {
+        val event = eventDatabase.eventDao().getEventById(eventId)
+        if (event != null) {
+            eventDatabase.eventDao().deleteEvent(event)
+            return true
+        }
+        return false
     }
 }

@@ -14,10 +14,15 @@ interface CorrectAnswerDao {
     @Insert
     suspend fun insertAnswer(answer: CorrectAnswerEntity)
 
+    @Transaction
     @Update
     suspend fun updateAnswer(answer: CorrectAnswerEntity)
 
     @Transaction
     @Query("SELECT * FROM correct_answers WHERE taskId = :taskId")
     suspend fun getAnswersByTask(taskId: String,): List<CorrectAnswerEntity>
+
+    @Transaction
+    @Query("SELECT * FROM correct_answers WHERE value = :value")
+    suspend fun getAnswerByValue(value: String,): CorrectAnswerEntity?
 }

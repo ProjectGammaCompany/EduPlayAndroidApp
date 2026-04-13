@@ -2,23 +2,25 @@ package com.eduplay.moblie.models
 
 import java.time.LocalDateTime
 
-sealed class NotificationData () {
+sealed class NotificationData (val notificationId: String,) {
 
-    class EmptyNotification():NotificationData()
+    class EmptyNotification():NotificationData("")
 
-    data class FavoriteNotificationData(
+    class FavoriteNotificationData(
+        notificationId: String,
         val eventId: String,
         val eventName: String,
         val date: LocalDateTime
-    ) :NotificationData()
+    ) :NotificationData(notificationId)
 
-    data class EndEventNotificationData(
+    class EndEventNotificationData(
+        notificationId: String,
         val eventId: String,
         val eventName: String,
         val date: LocalDateTime,
         val timeLeft: TimeLeft,
         val notStartedFavorite: Boolean
-    ) : NotificationData() {
+    ) : NotificationData(notificationId) {
         enum class TimeLeft(val time: String) {
             HOUR("hour"),
             DAY("day");

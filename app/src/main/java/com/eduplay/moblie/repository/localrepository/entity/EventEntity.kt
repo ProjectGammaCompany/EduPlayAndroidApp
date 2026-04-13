@@ -6,18 +6,14 @@ import androidx.room.ForeignKey
 import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.eduplay.moblie.useCases.downloadTaskTypes.DownloadEvent
 import com.google.gson.Gson
 
 @Entity(
     tableName = "events",
-    foreignKeys = [ForeignKey(
-        entity = UserEntity::class,
-        parentColumns = arrayOf("userId"),
-        childColumns = arrayOf("authorId"),
-        onDelete = ForeignKey.NO_ACTION
-    )],
     indices = [
-        Index("authorId")
+        Index("authorId"),
+        Index("title")
     ]
 )
 data class EventEntity(
@@ -33,9 +29,9 @@ data class EventEntity(
     @ColumnInfo(name = "cover")
     val cover: String,
     @ColumnInfo(name = "startDate")
-    val startDate: String,
+    val startDate: String?,
     @ColumnInfo(name = "endDate")
-    val endDate: String,
+    val endDate: String?,
     @ColumnInfo(name = "lastEditionDate")
     val lastEditionDate: String,
     @ColumnInfo(name = "groupEvent")
@@ -49,8 +45,8 @@ data class EventEntity(
          description: String,
          tags: List<String>,
          cover: String,
-         startDate: String,
-         endDate: String,
+         startDate: String?,
+         endDate: String?,
          lastEditionDate: String,
          groupEvent: Boolean,
          authorId: List<String>
@@ -65,5 +61,21 @@ data class EventEntity(
         lastEditionDate,
         groupEvent,
         Gson().toJson(authorId)
+    )
+
+    constructor(
+        event: DownloadEvent,
+        coverPath: String
+    ) : this(
+        event.eventId,
+        event.title,
+        event.description,
+        Gson().toJson(event.tags ?: listOf<String>()),
+        coverPath,
+        if (event.startDate == "01.01.1970 00:00:00.000") null else event.startDate,
+        if (event.endDate == "01.01.1970 00:00:00.000") null else event.endDate,
+        event.lastEditionDate,
+        event.groupEvent,
+        Gson().toJson(event.authorId)
     )
 }

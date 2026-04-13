@@ -2,18 +2,28 @@ package com.eduplay.moblie.ui.elements
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.eduplay.moblie.R
@@ -28,29 +38,38 @@ import java.time.LocalDateTime
 @Composable
 fun NotificationElement(
     notificationData: NotificationData,
-    navController: NavController
+    navController: NavController,
+    showNotification: Boolean = true,
+    showDeleteButton: Boolean = false,
+    onDelete: (String) -> Unit = {_->}
 ) {
-    val onNavigate = { eventId: String ->
-        navController.navigate("event_screen/$eventId")
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        when (notificationData) {
-            is FavoriteNotificationData -> FavoriteEventNotification(
-                notificationData,
-                onNavigate
-            )
-
-            is EndEventNotificationData -> EndEventNotification(
-                notificationData,
-                onNavigate
-            )
-
-            is EmptyNotification -> {}
+    if (showNotification) {
+        val onNavigate = { eventId: String ->
+            navController.navigate("event_screen/$eventId")
         }
-        HorizontalDivider(color = colorScheme.tertiary)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            when (notificationData) {
+                is FavoriteNotificationData -> FavoriteEventNotification(
+                    notificationData,
+                    onNavigate,
+                    showDeleteButton,
+                    onDelete
+                )
+
+                is EndEventNotificationData -> EndEventNotification(
+                    notificationData,
+                    onNavigate,
+                    showDeleteButton,
+                    onDelete
+                )
+
+                is EmptyNotification -> {}
+            }
+            HorizontalDivider(color = colorScheme.tertiary)
+        }
     }
 
 
@@ -59,7 +78,9 @@ fun NotificationElement(
 @Composable
 private fun FavoriteEventNotification(
     notification: FavoriteNotificationData,
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    showDeleteButton: Boolean,
+    onDelete: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -67,11 +88,25 @@ private fun FavoriteEventNotification(
             .padding(5.dp)
             .clickable(enabled = true, onClick = { onNavigate(notification.eventId) })
     ) {
-        Text(
-            text = stringResource(R.string.favorite_event) + " \"${notification.eventName}\" "
-                    + stringResource(R.string.started),
-            style = typography.titleMedium
-        )
+        Row {
+            Text(
+                text = stringResource(R.string.favorite_event) + " \"${notification.eventName}\" "
+                        + stringResource(R.string.started),
+                style = typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp
+                ),
+                modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
+            )
+            if (showDeleteButton) {
+                IconButton(onClick = { onDelete(notification.notificationId) }) {
+                    Icon(
+                        ImageVector.vectorResource(R.drawable.cross),
+                        stringResource(R.string.delete_notification)
+                    )
+                }
+            }
+        }
         Text(
             DateConverter.convertForDisplay(notification.date),
             style = typography.bodyLarge,
@@ -83,7 +118,9 @@ private fun FavoriteEventNotification(
 @Composable
 private fun EndEventNotification(
     notification: EndEventNotificationData,
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    showDeleteButton: Boolean,
+    onDelete: (String) -> Unit
 ) {
     val title = StringBuilder()
 
@@ -110,10 +147,25 @@ private fun EndEventNotification(
             .padding(5.dp)
             .clickable(enabled = true, onClick = { onNavigate(notification.eventId) })
     ) {
-        Text(
-            text = title.toString(),
-            style = typography.titleMedium
-        )
+        Row {
+            Text(
+                text = title.toString(),
+                style = typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp
+                ),
+                modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
+
+            )
+            if (showDeleteButton) {
+                IconButton(onClick = { onDelete(notification.notificationId) }) {
+                    Icon(
+                        ImageVector.vectorResource(R.drawable.cross),
+                        stringResource(R.string.delete_notification)
+                    )
+                }
+            }
+        }
         Text(
             body.toString(),
             style = typography.bodyLarge,
@@ -131,33 +183,33 @@ private fun EndEventNotification(
 @Preview
 private fun NotificationPreview() {
     val favoriteEventStarted = NotificationData.FavoriteNotificationData(
-        "eve1", "Event 1",
+        "n1","eve1", "Event 1",
         LocalDateTime.now().plusDays(10)
     )
 
     val endNotificationHour = EndEventNotificationData(
-        "eve1", "Event 1",
+        "n1","eve1", "Event 1",
         LocalDateTime.now().plusDays(10),
         timeLeft = TimeLeft.HOUR,
         notStartedFavorite = false
     )
 
     val notStartedendNotificationHour = EndEventNotificationData(
-        "eve1", "Event 1",
+        "n1","eve1", "Event 1",
         LocalDateTime.now().plusDays(10),
         timeLeft = TimeLeft.HOUR,
         notStartedFavorite = true
     )
 
     val endNotificationDay = EndEventNotificationData(
-        "eve1", "Event 1",
+        "n1","eve1", "Event 1",
         LocalDateTime.now().plusDays(10),
         timeLeft = TimeLeft.DAY,
         notStartedFavorite = false
     )
 
     val notStartedendNotificationDay = EndEventNotificationData(
-        "eve1", "Event 1",
+        "n1", "eve1", "Event 1",
         LocalDateTime.now().plusDays(10),
         timeLeft = TimeLeft.DAY,
         notStartedFavorite = true

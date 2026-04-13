@@ -21,11 +21,13 @@ import com.eduplay.moblie.repository.webrepository.requestTypes.AvatarUpdate
 import com.eduplay.moblie.repository.webrepository.requestTypes.EventRating
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
+import com.eduplay.moblie.repository.webrepository.responseTypes.DownloadPath
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.NotificationList
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -185,7 +187,15 @@ interface WebApi {
         @Query("maxOnPage") maxOnPage: Int = 10,
     ): Response<NotificationList>
 
+    @DELETE("/notifications/{id}")
+    @InjectAuth
+    suspend fun deleteNotification(@Path("id") notificationId: String): Response<Unit>
+
     @POST("/event/{eventId}/rate")
     @InjectAuth
     suspend fun postRating(@Body rating: EventRating): Response<Unit>
+
+    @GET("event/{eventId}/download")
+    @InjectAuth
+    suspend fun getEventFileUrl(@Path("eventId") eventId: String): Response<DownloadPath>
 }

@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.eduplay.moblie.useCases.downloadTaskTypes.DownloadBlock
 
 @Entity(
     tableName = "blocks", foreignKeys = [ForeignKey(
@@ -35,4 +36,15 @@ data class BlockEntity(
     val partialPoints: Boolean,
     @ColumnInfo(name = "eventId")
     val eventId: String
-)
+) {
+    constructor(block: DownloadBlock) : this(
+        id = block.blockId,
+        name = block.name,
+        blockOrder = block.blockOrder,
+        isParallel = block.isParallel,
+        showPoints = block.showPoints,
+        showAnswers = block.showAnswers,
+        partialPoints = block.partialPoints,
+        eventId = block.eventId
+    )
+}

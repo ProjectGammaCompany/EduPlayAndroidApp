@@ -18,6 +18,10 @@ interface ConditionDao {
     suspend fun updateCondition(condition: ConditionEntity)
 
     @Transaction
+    @Query("SELECT * FROM conditions WHERE conditionId = :conditionId")
+    suspend fun getConditionById(conditionId: String): ConditionEntity?
+
+    @Transaction
     @Query("SELECT * FROM conditions WHERE prevBlockId = :currBlockId")
     suspend fun getConditionsByBlockId(currBlockId: String): List<ConditionEntity>
 }
