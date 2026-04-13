@@ -19,5 +19,6 @@ data class EventPlayerInfo(
     val needGroup: Boolean,
     val canBeDownloaded: Boolean,
     val rated: Boolean,
-    var isDownloaded: Boolean = false
+    var isDownloaded: Boolean = false,
+    var needsUpdate: Boolean = false
 )

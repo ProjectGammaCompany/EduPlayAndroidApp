@@ -812,4 +812,10 @@ class LocalRepository @Inject constructor(
             isDone = status.isFinished
         )
     }
+
+    suspend fun getLastUpdateDate(eventId: String) : String? {
+        val event = eventDatabase.eventDao().getEventById(eventId)
+        if (event == null) return null
+        return event.lastEditionDate
+    }
 }

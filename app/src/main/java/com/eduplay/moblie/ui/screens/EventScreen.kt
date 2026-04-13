@@ -33,9 +33,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -70,7 +72,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -93,11 +97,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.fragment.compose.AndroidFragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.room.util.TableInfo
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import coil3.network.NetworkHeaders
@@ -120,6 +126,7 @@ import com.eduplay.moblie.useCases.BluetoothConnectionFragment
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -295,7 +302,9 @@ fun EventScreen(
     }
 
 
-
+    if (viewModel.downloadStatusObserver.downloaded.contains(eventId)) {
+        viewModel.needsUpdate.value = false
+    }
 
     if (canShowConnectionList) {
         BluetoothDeviceListScreen(
@@ -358,7 +367,8 @@ fun EventScreen(
             viewModel.isDownloaded,
             { viewModel.deleteEventFromDevice(eventId) },
             viewModel.failedToSendAnswers,
-            imageHeaderViewModel.appMode
+            imageHeaderViewModel.appMode,
+            viewModel.needsUpdate
         )
     }
 }
@@ -401,7 +411,8 @@ fun EventScreen(
     isDownloaded: State<Boolean>,
     onDeleteEvent: () -> Unit,
     failedToSendAnswers: State<Boolean>,
-    appMode: State<Flow<OfflineModeManager.AppModes>>
+    appMode: State<Flow<OfflineModeManager.AppModes>>,
+    needsUpdate: State<Boolean>
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -452,7 +463,8 @@ fun EventScreen(
                 downloadedEvents,
                 eventId,
                 isDownloaded,
-                onDeleteEvent
+                onDeleteEvent,
+                needsUpdate
             )
 
             EventScreenHeader(
@@ -462,7 +474,9 @@ fun EventScreen(
                 isCompleted,
                 cover,
                 headers,
-                appMode
+                appMode,
+                needsUpdate,
+                onDownload
             )
 
             if (eventCreatorMode.value) {
@@ -595,7 +609,8 @@ private fun TopAppBarEventScreen(
     downloadedEvents: SnapshotStateSet<String>,
     eventId: String,
     isDownloaded: State<Boolean>,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    needsUpdate: State<Boolean>
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -637,27 +652,21 @@ private fun TopAppBarEventScreen(
                     )
                 }
                 if (downloadingEvents.values.contains(eventId)) {
-
-                    IconButton(
-                        onClick = { },
-                        modifier = Modifier.testTag("in_progress")
-                    ) {
-                        val infiniteTransition = rememberInfiniteTransition()
-                        val angle by infiniteTransition.animateFloat(
-                            initialValue = 0F,
-                            targetValue = 360F,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(2000, easing = LinearEasing)
-                            )
+                    val infiniteTransition = rememberInfiniteTransition()
+                    val angle by infiniteTransition.animateFloat(
+                        initialValue = 0F,
+                        targetValue = 360F,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2000, easing = LinearEasing)
                         )
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.progress),
-                            contentDescription = stringResource(R.string.downloading),
-                            modifier = Modifier
-                                .padding(end = 10.dp)
-                                .rotate(angle)
-                        )
-                    }
+                    )
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.progress),
+                        contentDescription = stringResource(R.string.downloading),
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                            .rotate(angle)
+                    )
                 } else if (isDownloaded.value || downloadedEvents.contains(eventId)) {
                     IconButton(
                         onClick = { onDelete() },
@@ -668,8 +677,10 @@ private fun TopAppBarEventScreen(
                             contentDescription = stringResource(R.string.delete_event)
                         )
                     }
-                    //TODO("Delete button")
-                } else if (canDownLoad.value) {
+
+                }
+
+                if ((!isDownloaded.value && canDownLoad.value) || (isDownloaded.value && needsUpdate.value)) {
                     IconButton(
                         onClick = { onDownload() },
                         modifier = Modifier.testTag("download_btn")
@@ -680,6 +691,7 @@ private fun TopAppBarEventScreen(
                         )
                     }
                 }
+
                 IconButton(
                     onClick = { onAddToFavourite() },
                     modifier = Modifier.testTag("favourite_btn")
@@ -721,7 +733,9 @@ private fun EventScreenHeader(
     isCompleted: State<Boolean>,
     cover: String?,
     headers: State<NetworkHeaders>,
-    appMode: State<Flow<OfflineModeManager.AppModes>>
+    appMode: State<Flow<OfflineModeManager.AppModes>>,
+    needsUpdate: State<Boolean>,
+    onDownload: () -> Unit
 ) {
     val context = LocalContext.current
     val isOffline = appMode.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
@@ -755,24 +769,38 @@ private fun EventScreenHeader(
                     .testTag("event_image")
 
             )
-        Text(
-            eventName.value,
-            style = typography.headlineMedium
-                .copy(color = colorScheme.onBackground),
-            maxLines = 3,
-            modifier = Modifier
-                .weight(0.6f)
-                .align(Alignment.Bottom)
-                .padding(horizontal = 10.dp)
-                .testTag("event_title")
-        )
-    }
-    Row(modifier = Modifier.padding(horizontal = 10.dp)) {
-        Box(
-            modifier = Modifier
-                .width(120.dp)
-                .weight(0.35f)
+        Column (
+            verticalArrangement = Arrangement.Bottom, modifier = Modifier
+            .weight(0.6f)
+            .align(Alignment.Bottom)
+            .heightIn(min = 130.dp)
         ) {
+            Text(
+                eventName.value,
+                style = typography.headlineMedium
+                    .copy(color = colorScheme.onBackground),
+                modifier = Modifier
+                    //.weight(0.6f)
+                    .align(Alignment.Start)
+                    .padding(horizontal = 10.dp)
+                    .testTag("event_title")
+            )
+            if (!eventCreatorMode.value) {
+                Text(
+                    author.value,
+                    style = typography.labelLarge
+                        .copy(color = colorScheme.onBackground),
+                    maxLines = 1,
+                    color = colorScheme.primary,
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .align(Alignment.Start)
+                        .testTag("author")
+                )
+            }
+        }
+    }
+    FlowRow (modifier = Modifier.padding(horizontal = 10.dp)) {
             if (!eventCreatorMode.value && isCompleted.value) {
                 AssistChip(
                     onClick = {}, //так и должно быть при нажатии ничего не происходит
@@ -791,28 +819,37 @@ private fun EventScreenHeader(
                         )
                     },
                     modifier = Modifier
-                        .align(Alignment.Center)
+                        .align(Alignment.CenterVertically)
                         .testTag("is_completed_chip")
+                        .padding(horizontal = 3.dp)
+                )
+            }
 
-
+            if (needsUpdate.value) {
+                AssistChip(
+                    onClick = onDownload,
+                    label = {
+                        Text(
+                            stringResource(R.string.update_event),
+                            style = typography.labelSmall
+                                .copy(color = colorScheme.onBackground)
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            ImageVector.vectorResource(R.drawable.download),
+                            contentDescription = stringResource(R.string.update_event),
+                            Modifier.size(AssistChipDefaults.IconSize)
+                        )
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .testTag("hasUpdated_chip")
+                        .padding(horizontal = 3.dp)
                 )
             }
         }
-        if (!eventCreatorMode.value) {
-            Text(
-                author.value,
-                style = typography.labelLarge
-                    .copy(color = colorScheme.onBackground),
-                maxLines = 1,
-                color = colorScheme.primary,
-                modifier = Modifier
-                    .weight(0.6f)
-                    .padding(horizontal = 10.dp)
-                    .align(Alignment.CenterVertically)
-                    .testTag("author")
-            )
-        }
-    }
+
 }
 
 @Composable
@@ -1180,4 +1217,49 @@ fun PrivacySettings(
 private fun StatisticsInfo() {
     Text("Coming soon")
     //TODO("статистики на экране статистик")
+}
+
+@Composable
+@Preview
+fun EventScreenPreview() {
+    EventScreen(
+        innerPaddingValues = PaddingValues(0.dp),
+        eventCreatorMode = remember { mutableStateOf(false) },
+        isEventFavourite = remember { mutableStateOf(false) },
+        eventName = remember { mutableStateOf("EVENT") },
+        tags = remember { mutableStateListOf() },
+        author = remember { mutableStateOf("EVENT") },
+        isCompleted = remember { mutableStateOf(true) },
+        cover = "EVENT",
+        info = remember { mutableStateListOf() },
+        description = remember { mutableStateOf("EVENT") },
+        privateEvent = remember { mutableStateOf(false) },
+        isOpen = remember { mutableStateOf(true) },
+        isContinuing = remember { mutableStateOf(false) },
+        onAddToFavourite = {},
+        onComplain = {_->},
+        startEvent = {},
+        showResults = {},
+        onReturn = {true},
+        headers = remember { mutableStateOf(NetworkHeaders.EMPTY) },
+        toggleBluetooth = {},
+        isCompetitionMode = remember { mutableStateOf(false) },
+        canShowConnectionList = false,
+        password = remember { mutableStateOf("") },
+        groups = remember { mutableStateListOf() },
+        eventId ="",
+        joinCode = remember { mutableStateOf("") },
+        onDownload = {},
+        canDownLoad = remember { mutableStateOf(true) },
+        isRated = remember { mutableStateOf(true) },
+        onRate = {},
+        groupEvent = remember { mutableStateOf(true) },
+        downloadingEvents = remember { mutableStateMapOf() },
+        downloadedEvents = remember { mutableStateSetOf() },
+        isDownloaded = remember { mutableStateOf(true) },
+        onDeleteEvent = {},
+        failedToSendAnswers = remember { mutableStateOf(false) },
+        appMode = remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) },
+        needsUpdate = remember { mutableStateOf(true) },
+    )
 }

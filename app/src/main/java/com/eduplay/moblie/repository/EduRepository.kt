@@ -37,6 +37,7 @@ import com.eduplay.moblie.repository.webrepository.pagingSources.NotificationPag
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -94,7 +95,7 @@ class EduRepository @Inject constructor(
         favorites: Boolean = false,
         title: String = ""
     ): Flow<PagingData<QuestShortInfo>> {
-        if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+        if (offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
             return Pager(
                 config = PagingConfig(
                     pageSize = pageSize,
@@ -141,6 +142,9 @@ class EduRepository @Inject constructor(
     suspend fun getEventInfoPlayer(eventId: String): EventPlayerInfo {
         val info =  getRepository().getPlayerEventInfo(eventId)
         info.isDownloaded = localRepository.isEventDownloaded(eventId)
+        if (offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
+            info.needsUpdate = localRepository.getLastUpdateDate(eventId) != info.lastEditionDate
+        }
         return info
     }
 

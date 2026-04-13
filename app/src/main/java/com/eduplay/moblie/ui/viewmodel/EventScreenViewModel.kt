@@ -49,6 +49,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
     val groupEvent = mutableStateOf(false)
     val isDownloaded = mutableStateOf(false)
     val failedToSendAnswers = mutableStateOf(false)
+    val needsUpdate = mutableStateOf(false)
 
     val noInternetConnection = mutableStateOf(false)
 
@@ -100,6 +101,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
         needGroup.value = data.needGroup
         isRated.value = data.rated
         isDownloaded.value = data.isDownloaded
+        needsUpdate.value = data.needsUpdate
 
 
         info.clear()

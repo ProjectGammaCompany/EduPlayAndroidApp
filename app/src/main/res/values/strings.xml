@@ -122,4 +122,5 @@
     <string name="downloading">downloading</string>
     <string name="failed_send_answers">Failed to send answers. Refresh the event to send them correctly. You may have to redo some tasks if you choose to proceed without resending them now. Only results that are recorded earlier will be applied during grading.</string>
     <string name="failed_send_answers_results">Failed to send your answers. Refresh the screen to get actual results.</string>
+    <string name="update_event">Download latest event update</string>
 </resources>
