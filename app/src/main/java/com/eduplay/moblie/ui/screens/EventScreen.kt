@@ -13,6 +13,12 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -72,6 +78,10 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -716,18 +726,28 @@ private fun EventScreenHeader(
     val context = LocalContext.current
     val isOffline = appMode.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
     Row(Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
-        if (isOffline.value == OfflineModeManager.AppModes.ONLINE) {
+
             AsyncImage(
-                model =
+                model = if (isOffline.value == OfflineModeManager.AppModes.ONLINE) {
                     ImageRequest.Builder(LocalContext.current)
                         .data(cover)
                         .httpHeaders(headers = headers.value)
                         .networkCachePolicy(CachePolicy.ENABLED)
                         .memoryCachePolicy(CachePolicy.ENABLED)
-                        .build(),
+                        .build()
+                } else {
+                    ImageRequest.Builder(LocalContext.current)
+                        .data(File(context.filesDir, cover))
+                        .crossfade(true)
+                        .build()
+                },
                 contentDescription = eventName.value,
-                placeholder = painterResource(R.drawable.eduplaylogo),
-                error = painterResource(id = R.drawable.ic_launcher_background),
+                placeholder = BrushPainter(
+                    Brush.linearGradient(listOf(colorScheme.primary, colorScheme.secondary, colorScheme.tertiary))
+                ),
+                error = BrushPainter(
+                    Brush.linearGradient(listOf(colorScheme.primary, colorScheme.secondary, colorScheme.tertiary))
+                ),
                 modifier = Modifier
                     .width(130.dp)
                     .height(130.dp)
@@ -735,26 +755,6 @@ private fun EventScreenHeader(
                     .testTag("event_image")
 
             )
-        } else {
-            val context = LocalContext.current
-            if (cover != null && cover.isNotBlank()) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(File(context.filesDir, cover))
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = eventName.value,
-                    placeholder = painterResource(R.drawable.eduplaylogo),
-                    error = painterResource(id = R.drawable.ic_launcher_background),
-                    modifier = Modifier
-                        .width(130.dp)
-                        .height(130.dp)
-                        .weight(0.35f)
-                        .testTag("event_image")
-
-                )
-            }
-        }
         Text(
             eventName.value,
             style = typography.headlineMedium
@@ -814,7 +814,6 @@ private fun EventScreenHeader(
         }
     }
 }
-
 
 @Composable
 private fun GeneralInfo(

@@ -61,9 +61,10 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -130,11 +131,11 @@ fun ProfileScreen(
         imageHeaderViewModel.headers,
         imageHeaderViewModel::getFullUrl,
         isOffline = viewModel.isOffline,
-         onToggleOffline = viewModel::toggleAppMode ,
+        onToggleOffline = viewModel::toggleAppMode,
         theme = viewModel.theme.value.collectAsState(AppSettingsManager.Themes.SYSTEM),
         onChooseTheme = viewModel::changeTheme,
         notifications = viewModel.notifications,
-        onAvatarPicked =  {uri: Uri -> viewModel.updateAvatar(uri, contentResolver, context) },
+        onAvatarPicked = { uri: Uri -> viewModel.updateAvatar(uri, contentResolver, context) },
         navController = navController
     )
 }
@@ -169,14 +170,15 @@ private fun ProfileScreen(
             .fillMaxSize()
     ) {
         ProfileTopBar()
-        val pickImage = remember { mutableStateOf(false)}
+        val pickImage = remember { mutableStateOf(false) }
 
-        val pickMediaLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            pickImage.value = false
-            if (uri != null) {
-                onAvatarPicked(uri)
+        val pickMediaLauncher =
+            rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                pickImage.value = false
+                if (uri != null) {
+                    onAvatarPicked(uri)
+                }
             }
-        }
         if (pickImage.value) {
             pickMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
@@ -194,8 +196,24 @@ private fun ProfileScreen(
                     .memoryCachePolicy(CachePolicy.ENABLED)
                     .build(),
                 contentDescription = email.value,
-                placeholder = painterResource(R.drawable.eduplaylogo),
-                error = painterResource(id = R.drawable.ic_launcher_background),
+                placeholder = BrushPainter(
+                    Brush.linearGradient(
+                        listOf(
+                            colorScheme.primary,
+                            colorScheme.secondary,
+                            colorScheme.tertiary
+                        )
+                    )
+                ),
+                error = BrushPainter(
+                    Brush.linearGradient(
+                        listOf(
+                            colorScheme.primary,
+                            colorScheme.secondary,
+                            colorScheme.tertiary
+                        )
+                    )
+                ),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(10.dp)
@@ -203,18 +221,18 @@ private fun ProfileScreen(
                     .height(130.dp)
                     .clip(CircleShape)
             )
-        if (currentMode.value == AppModes.ONLINE) {
-            IconButton(
-                onClick = { pickImage.value = true },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                Icon(
-                    Icons.Default.ImageSearch,
-                    stringResource(R.string.change_avatar)
-                )
+            if (currentMode.value == AppModes.ONLINE) {
+                IconButton(
+                    onClick = { pickImage.value = true },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    Icon(
+                        Icons.Default.ImageSearch,
+                        stringResource(R.string.change_avatar)
+                    )
+                }
             }
-        }
 
             // email
             Text(
@@ -309,22 +327,25 @@ private fun ProfileScreen(
                 LatestNotifications(notifications, navController)
             }
 
-            OutlinedButton(
-                onClick = { onLogout() },
-                colors = ButtonColors(
-                    containerColor = colorScheme.errorContainer,
-                    contentColor = colorScheme.error,
-                    disabledContainerColor = colorScheme.errorContainer,
-                    disabledContentColor = colorScheme.error
-                ),
-                shape = RoundedCornerShape(5.dp),
-                border = BorderStroke(1.dp, colorScheme.error),
-                modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
-            ) {
-                Text(
-                    stringResource(R.string.logout),
-                    style = typography.labelLarge.copy(color = colorScheme.error)
-                )
+            val appMode = isOffline.value.collectAsState(AppModes.ONLINE)
+            if (appMode.value == AppModes.ONLINE) {
+                OutlinedButton(
+                    onClick = { onLogout() },
+                    colors = ButtonColors(
+                        containerColor = colorScheme.errorContainer,
+                        contentColor = colorScheme.error,
+                        disabledContainerColor = colorScheme.errorContainer,
+                        disabledContentColor = colorScheme.error
+                    ),
+                    shape = RoundedCornerShape(5.dp),
+                    border = BorderStroke(1.dp, colorScheme.error),
+                    modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.logout),
+                        style = typography.labelLarge.copy(color = colorScheme.error)
+                    )
+                }
             }
         }
     }
@@ -508,7 +529,7 @@ fun ProfilePreview() {
         remember { mutableStateOf(AppSettingsManager.Themes.SYSTEM) },
         { _ -> },
         remember { mutableStateListOf() },
-        {_ -> },
+        { _ -> },
         rememberNavController()
     )
     //}

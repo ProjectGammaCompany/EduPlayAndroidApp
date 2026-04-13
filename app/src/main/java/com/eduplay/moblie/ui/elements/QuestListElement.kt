@@ -25,6 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -37,13 +42,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
-import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.eduplay.moblie.R
-import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
@@ -70,41 +73,35 @@ fun QuestListElement(
     ) {
         val appMode = viewModel.appMode.value.collectAsState(AppModes.ONLINE)
         val context = LocalContext.current
-        if (appMode.value == AppModes.ONLINE) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
+
+        AsyncImage(
+            model = if (appMode.value == AppModes.ONLINE) {
+                ImageRequest.Builder(LocalContext.current)
                     .data(viewModel.getFullUrl(questShortInfo.imageUrl))
                     .httpHeaders(viewModel.headers.value)
                     .networkCachePolicy(CachePolicy.ENABLED)
                     .memoryCachePolicy(CachePolicy.ENABLED)
-                    .build(),
-                contentDescription = questShortInfo.name,
-                placeholder = painterResource(R.drawable.eduplaylogo),
-                error = painterResource(id = R.drawable.ic_launcher_background),
-                modifier = Modifier
-                    .testTag("quest_element_image")
-                    .height(60.dp)
-                    .width(60.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .align(Alignment.CenterVertically)
-            )
-        } else {
-            AsyncImage(
-                model =  ImageRequest.Builder(LocalContext.current)
+                    .build()
+            } else {
+                ImageRequest.Builder(LocalContext.current)
                     .data(File(context.filesDir, questShortInfo.imageUrl))
                     .crossfade(true)
-                    .build(),
-                contentDescription = questShortInfo.name,
-                placeholder = painterResource(R.drawable.eduplaylogo),
-                error = painterResource(id = R.drawable.ic_launcher_background),
-                modifier = Modifier
-                    .testTag("quest_element_image")
-                    .height(60.dp)
-                    .width(60.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .align(Alignment.CenterVertically)
-            )
-        }
+                    .build()
+            },
+            contentDescription = questShortInfo.name,
+            placeholder = BrushPainter(
+                Brush.linearGradient(listOf(colorScheme.primary, colorScheme.secondary, colorScheme.tertiary))
+            ),
+            error = BrushPainter(
+                Brush.linearGradient(colors = listOf(colorScheme.primary, colorScheme.secondary,  colorScheme.tertiary))
+            ),
+            modifier = Modifier
+                .testTag("quest_element_image")
+                .height(60.dp)
+                .width(60.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .align(Alignment.CenterVertically)
+        )
 
         Column(
             modifier = Modifier
