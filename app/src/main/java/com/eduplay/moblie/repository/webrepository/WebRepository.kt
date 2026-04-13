@@ -57,7 +57,8 @@ class WebRepository @Inject constructor(
             tokenManager.saveRefreshToken(body.refreshToken)
             return AuthResult.SUCCESSES
         }
-        return AuthResult.INVALID_USER
+        if (response.code() == 404) return AuthResult.INVALID_USER
+        return AuthResult.INVALID_PASSWORD
     }
 
     suspend fun logout(): Boolean {

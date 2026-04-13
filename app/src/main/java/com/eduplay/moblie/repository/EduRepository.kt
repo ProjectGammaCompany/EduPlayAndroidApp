@@ -57,7 +57,8 @@ class EduRepository @Inject constructor(
         } catch (e: Exception) {
             throw e
         }
-        localRepository.saveUser()
+        if (authResult == AuthResult.SUCCESSES)
+            localRepository.saveUser()
         return authResult
     }
 
@@ -79,7 +80,8 @@ class EduRepository @Inject constructor(
         } catch (e: Exception) {
             throw e
         }
-        localRepository.saveUser()
+        if (authResult == AuthResult.SUCCESSES)
+            localRepository.saveUser()
         return authResult
     }
 
