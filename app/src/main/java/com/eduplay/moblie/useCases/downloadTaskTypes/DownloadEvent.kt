@@ -6,8 +6,8 @@ data class DownloadEvent(
     val description: String,
     val tags: List<String>,
     val cover: String,
-    val startDate: String?,
-    val endDate: String?,
+    val startDate: String,
+    val endDate: String,
     val lastEditionDate: String,
     val groupEvent: Boolean,
     val authorId: List<String>

@@ -72,8 +72,8 @@ data class EventEntity(
         event.description,
         Gson().toJson(event.tags ?: listOf<String>()),
         coverPath,
-        if (event.startDate == "01.01.1970 00:00:00.000") null else event.startDate,
-        if (event.endDate == "01.01.1970 00:00:00.000") null else event.endDate,
+        event.startDate.ifBlank { null },
+        event.endDate.ifBlank { null },
         event.lastEditionDate,
         event.groupEvent,
         Gson().toJson(event.authorId)
