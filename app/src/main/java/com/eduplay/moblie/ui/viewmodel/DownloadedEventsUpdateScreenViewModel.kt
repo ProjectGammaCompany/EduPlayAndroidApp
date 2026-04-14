@@ -24,19 +24,21 @@ class DownloadedEventsUpdateScreenViewModel @Inject constructor(
     val events = mutableStateListOf<QuestShortInfo>()
     val noInternet = mutableStateOf(false)
     val isOfflineOn = mutableStateOf(false)
+    val gotUpdates = mutableStateOf(false)
     init {
         viewModelScope.launch {
-            val temEvents = try {
-                repository.updateDownloadedEventsStatuses() ?: listOf<QuestShortInfo>()
+            var temEvents: List<QuestShortInfo>? = listOf<QuestShortInfo>()
+            try {
+                temEvents = repository.updateDownloadedEventsStatuses()
+                gotUpdates.value = true
             } catch (e: ConnectException) {
                 noInternet.value = true
-                listOf<QuestShortInfo>()
             } catch (e: Exception) {
                 Log.e("Updates", e.message ?: "", e)
                 noInternet.value = true
-                listOf<QuestShortInfo>()
             }
-            events.addAll(temEvents)
+            if (temEvents == null) noInternet.value = true
+            else events.addAll(temEvents)
         }
     }
 
@@ -55,6 +57,16 @@ class DownloadedEventsUpdateScreenViewModel @Inject constructor(
                 return@launch
             }
             onDownloadEvent(url, eventId)
+        }
+    }
+
+    fun deleteEventFromDevice(eventId: String) {
+        viewModelScope.launch {
+            val isDeleted = repository.deleteEvent(eventId)
+            if (isDeleted) {
+                observer.deletedFile(eventId)
+                events.remove(events.first { it.id == eventId })
+            }
         }
     }
 }

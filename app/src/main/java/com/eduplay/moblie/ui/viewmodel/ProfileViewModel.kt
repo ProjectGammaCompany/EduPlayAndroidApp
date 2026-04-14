@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.models.ProfileInfo
@@ -38,7 +39,8 @@ class ProfileViewModel @Inject constructor(
     val unauthorised = mutableStateOf(false)
     val noInternet = mutableStateOf(false)
 
-    val isOffline: MutableState<Flow<OfflineModeManager.AppModes>> = mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE))
+    val isOffline: MutableState<Flow<OfflineModeManager.AppModes>> =
+        mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE))
 
     val theme = mutableStateOf(flowOf<AppSettingsManager.Themes>())
     val notifications = mutableStateListOf<NotificationData>()
@@ -87,13 +89,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun toggleAppMode(isOffline: Boolean) {
-        viewModelScope.launch {
-            if (isOffline) {
-
-                //TODO(navigate)
-                //offlineModeManager.saveAppMode(OfflineModeManager.AppModes.OFFLINE)
-            } else {
+    fun toggleAppMode(isOffline: Boolean, navController: NavController) {
+        if (isOffline) {
+            navController.navigate("updateEvents")
+        } else {
+            viewModelScope.launch {
                 offlineModeManager.saveAppMode(OfflineModeManager.AppModes.ONLINE)
             }
         }

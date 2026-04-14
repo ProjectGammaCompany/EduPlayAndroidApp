@@ -25,6 +25,7 @@ import com.eduplay.moblie.useCases.EventDownloadService
 import com.eduplay.moblie.ui.elements.BluetoothPermissionElement
 import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
+import com.eduplay.moblie.ui.screens.DownloadedEventsUpdateScreen
 import com.eduplay.moblie.ui.screens.EventResultScreen
 import com.eduplay.moblie.ui.screens.EventScreen
 import com.eduplay.moblie.ui.screens.EventStageScreen
@@ -172,6 +173,10 @@ class MainActivity : FragmentActivity() {
 
                         composable("notifications") {
                             NotificationScreen(innerPadding, navController)
+                        }
+
+                        composable("updateEvents"){
+                            DownloadedEventsUpdateScreen(innerPadding, startDownloadService, navController)
                         }
                     }
                 }

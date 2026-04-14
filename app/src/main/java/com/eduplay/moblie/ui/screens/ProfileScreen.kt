@@ -131,7 +131,7 @@ fun ProfileScreen(
         imageHeaderViewModel.headers,
         imageHeaderViewModel::getFullUrl,
         isOffline = viewModel.isOffline,
-        onToggleOffline = viewModel::toggleAppMode,
+        onToggleOffline = {isOffline -> viewModel.toggleAppMode(isOffline, navController)},
         theme = viewModel.theme.value.collectAsState(AppSettingsManager.Themes.SYSTEM),
         onChooseTheme = viewModel::changeTheme,
         notifications = viewModel.notifications,

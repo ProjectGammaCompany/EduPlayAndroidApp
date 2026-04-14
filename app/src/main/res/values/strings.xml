@@ -125,6 +125,5 @@
     <string name="update_event">Download latest event update</string>
     <string name="update_events_before_ofline">These events need to be updated before you turn offline mode on. Proceeding without updates may affect you final score. You can choose to download updates for specific events.</string>
     <string name="error_sync_answers">A network error occured while syncing your event playthrough. You might have to complete some tasks again, it might affect your score in the end.</string>
-    <string name="download_updates">Download updates</string>
-    <string name="proceed_no_update">Proceed without updates</string>
+    <string name="proceed_to_offline">Proceed to offline mode</string>
 </resources>
