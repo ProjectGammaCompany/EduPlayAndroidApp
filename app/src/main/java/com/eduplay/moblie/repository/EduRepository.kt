@@ -138,7 +138,7 @@ class EduRepository @Inject constructor(
     suspend fun getEventInfoPlayer(eventId: String): EventPlayerInfo {
         val info = getRepository().getPlayerEventInfo(eventId)
         info.isDownloaded = localRepository.isEventDownloaded(eventId)
-        if (offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
+        if (info.isDownloaded && offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
             info.needsUpdate = localRepository.getLastUpdateDate(eventId) != info.lastEditionDate
         }
         return info
