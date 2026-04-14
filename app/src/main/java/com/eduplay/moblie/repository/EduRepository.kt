@@ -408,7 +408,11 @@ class EduRepository @Inject constructor(
         if (offlineModeManager.getAppMode().first() == AppModes.OFFLINE) return true
         val answerBatch = localRepository.getCurrentPlayerStatus(eventId)
         if (answerBatch == null) return true
-        return webRepository.postAnswerBatch(answerBatch)
+        val success = webRepository.postAnswerBatch(answerBatch)
+        if (success) {
+            localRepository.markAnswersAsSynchronised(answerBatch.answers)
+        }
+        return success
     }
 
     suspend fun updateDownloadedEventsStatuses(): List<QuestShortInfo>? {

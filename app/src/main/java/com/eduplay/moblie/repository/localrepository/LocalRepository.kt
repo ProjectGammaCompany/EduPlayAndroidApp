@@ -502,7 +502,8 @@ class LocalRepository @Inject constructor(
             startTime = DateConverter.convertToServerFormat(startTime),
             endTime = DateConverter.convertToServerFormat(LocalDateTime.MIN),
             points = -1,
-            isFinal = false
+            isFinal = false,
+            isSynchronized = false
         )
         eventDatabase.answerDao().insertAnswer(answer)
         return true
@@ -565,7 +566,8 @@ class LocalRepository @Inject constructor(
             endTime = DateConverter.convertToServerFormat(endTime),
             points = points!!,
             isFinal = true,
-            answerId = answer.answerId
+            answerId = answer.answerId,
+            isSynchronized = false
         )
         // сохраняем ответ
         eventDatabase.answerDao().updateAnswer(
@@ -821,7 +823,7 @@ class LocalRepository @Inject constructor(
         if (status == null) return null
         val points = eventDatabase.answerDao().getTotalPointsForEvent(eventId, user)
         val answers = eventDatabase
-            .answerDao().getAnswerByEventAndUserId(eventId, user)
+            .answerDao().getUnsynchronisedAnswersByEventAndUserId(eventId, user)
             .map {
                 AnswerBatch.Answer(
                     taskId = it.taskId,
@@ -836,6 +838,27 @@ class LocalRepository @Inject constructor(
             currentTask = status.taskId,
             isDone = status.isFinished
         )
+    }
+
+    suspend fun markAnswersAsSynchronised(answers: List<AnswerBatch.Answer>) {
+        val user = getCurrentUser()
+        for (answer in answers) {
+            val entity = eventDatabase.answerDao().getAnswerByTaskAndUserId(answer.taskId, user)
+            if (entity == null) continue
+            eventDatabase.answerDao().updateAnswer(
+                AnswerEntity(
+                    taskId = entity.taskId,
+                    options = entity.options,
+                    userId = entity.userId,
+                    startTime = entity.startTime,
+                    endTime = entity.endTime,
+                    points = entity.points,
+                    isFinal = entity.isFinal,
+                    isSynchronized = true,
+                    answerId = entity.answerId
+                )
+            )
+        }
     }
 
     suspend fun getLastUpdateDate(eventId: String): String? {
@@ -901,7 +924,8 @@ class LocalRepository @Inject constructor(
                         startTime = date,
                         endTime = date,
                         points = event.pointsInBlock,
-                        isFinal = true
+                        isFinal = true,
+                        isSynchronized = true
                     )
                 } else {
                     AnswerEntity(
@@ -911,7 +935,8 @@ class LocalRepository @Inject constructor(
                         startTime = date,
                         endTime = date,
                         points = 0,
-                        isFinal = true
+                        isFinal = true,
+                        isSynchronized = true
                     )
                 }
             }
@@ -924,4 +949,6 @@ class LocalRepository @Inject constructor(
             }
         }
     }
+
+
 }

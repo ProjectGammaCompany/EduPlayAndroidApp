@@ -26,6 +26,9 @@ import com.google.gson.Gson
     indices = [
         Index("taskId"),
         Index("userId"),
+        Index("isSynchronized"),
+        Index("isFinal"),
+
     ]
 )
 data class AnswerEntity(
