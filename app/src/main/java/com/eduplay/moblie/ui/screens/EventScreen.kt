@@ -1,10 +1,8 @@
 package com.eduplay.moblie.ui.screens
 
-import android.R.attr.bitmap
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.ComponentName
-import android.graphics.BitmapFactory
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
@@ -12,13 +10,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +28,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -84,15 +74,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BrushPainter
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -103,9 +89,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.compose.AndroidFragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.room.util.TableInfo
 import coil3.compose.AsyncImage
-import coil3.compose.rememberAsyncImagePainter
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
@@ -162,6 +146,12 @@ fun EventScreen(
             { noInternet = true },
             context
         )
+    }
+    if (
+        viewModel.downloadStatusObserver.downloaded.contains(eventId) ||
+        viewModel.downloadStatusObserver.downloading.keys.contains(eventId)
+    ) {
+        viewModel.isDownloaded.value = true
     }
 
     if (viewModel.failedToSendAnswers.value) {
@@ -680,7 +670,10 @@ private fun TopAppBarEventScreen(
 
                 }
 
-                if ((!isDownloaded.value && canDownLoad.value) || (isDownloaded.value && needsUpdate.value)) {
+                if (
+                    (!isDownloaded.value && canDownLoad.value)
+                    || needsUpdate.value
+                ) {
                     IconButton(
                         onClick = { onDownload() },
                         modifier = Modifier.testTag("download_btn")
@@ -741,39 +734,51 @@ private fun EventScreenHeader(
     val isOffline = appMode.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
     Row(Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
 
-            AsyncImage(
-                model = if (isOffline.value == OfflineModeManager.AppModes.ONLINE) {
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(cover)
-                        .httpHeaders(headers = headers.value)
-                        .networkCachePolicy(CachePolicy.ENABLED)
-                        .memoryCachePolicy(CachePolicy.ENABLED)
-                        .build()
-                } else {
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(File(context.filesDir, cover))
-                        .crossfade(true)
-                        .build()
-                },
-                contentDescription = eventName.value,
-                placeholder = BrushPainter(
-                    Brush.linearGradient(listOf(colorScheme.primary, colorScheme.secondary, colorScheme.tertiary))
-                ),
-                error = BrushPainter(
-                    Brush.linearGradient(listOf(colorScheme.primary, colorScheme.secondary, colorScheme.tertiary))
-                ),
-                modifier = Modifier
-                    .width(130.dp)
-                    .height(130.dp)
-                    .weight(0.35f)
-                    .testTag("event_image")
+        AsyncImage(
+            model = if (isOffline.value == OfflineModeManager.AppModes.ONLINE) {
+                ImageRequest.Builder(LocalContext.current)
+                    .data(cover)
+                    .httpHeaders(headers = headers.value)
+                    .networkCachePolicy(CachePolicy.ENABLED)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .build()
+            } else {
+                ImageRequest.Builder(LocalContext.current)
+                    .data(File(context.filesDir, cover))
+                    .crossfade(true)
+                    .build()
+            },
+            contentDescription = eventName.value,
+            placeholder = BrushPainter(
+                Brush.linearGradient(
+                    listOf(
+                        colorScheme.primary,
+                        colorScheme.secondary,
+                        colorScheme.tertiary
+                    )
+                )
+            ),
+            error = BrushPainter(
+                Brush.linearGradient(
+                    listOf(
+                        colorScheme.primary,
+                        colorScheme.secondary,
+                        colorScheme.tertiary
+                    )
+                )
+            ),
+            modifier = Modifier
+                .width(130.dp)
+                .height(130.dp)
+                .weight(0.35f)
+                .testTag("event_image")
 
-            )
-        Column (
+        )
+        Column(
             verticalArrangement = Arrangement.Bottom, modifier = Modifier
-            .weight(0.6f)
-            .align(Alignment.Bottom)
-            .heightIn(min = 130.dp)
+                .weight(0.6f)
+                .align(Alignment.Bottom)
+                .heightIn(min = 130.dp)
         ) {
             Text(
                 eventName.value,
@@ -800,55 +805,55 @@ private fun EventScreenHeader(
             }
         }
     }
-    FlowRow (modifier = Modifier.padding(horizontal = 10.dp)) {
-            if (!eventCreatorMode.value && isCompleted.value) {
-                AssistChip(
-                    onClick = {}, //так и должно быть при нажатии ничего не происходит
-                    label = {
-                        Text(
-                            stringResource(R.string.completed),
-                            style = typography.labelSmall
-                                .copy(color = colorScheme.onBackground)
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            Icons.Filled.Check,
-                            contentDescription = stringResource(R.string.completed),
-                            Modifier.size(AssistChipDefaults.IconSize)
-                        )
-                    },
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .testTag("is_completed_chip")
-                        .padding(horizontal = 3.dp)
-                )
-            }
-
-            if (needsUpdate.value) {
-                AssistChip(
-                    onClick = onDownload,
-                    label = {
-                        Text(
-                            stringResource(R.string.update_event),
-                            style = typography.labelSmall
-                                .copy(color = colorScheme.onBackground)
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            ImageVector.vectorResource(R.drawable.download),
-                            contentDescription = stringResource(R.string.update_event),
-                            Modifier.size(AssistChipDefaults.IconSize)
-                        )
-                    },
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .testTag("hasUpdated_chip")
-                        .padding(horizontal = 3.dp)
-                )
-            }
+    FlowRow(modifier = Modifier.padding(horizontal = 10.dp)) {
+        if (!eventCreatorMode.value && isCompleted.value) {
+            AssistChip(
+                onClick = {}, //так и должно быть при нажатии ничего не происходит
+                label = {
+                    Text(
+                        stringResource(R.string.completed),
+                        style = typography.labelSmall
+                            .copy(color = colorScheme.onBackground)
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Filled.Check,
+                        contentDescription = stringResource(R.string.completed),
+                        Modifier.size(AssistChipDefaults.IconSize)
+                    )
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .testTag("is_completed_chip")
+                    .padding(horizontal = 3.dp)
+            )
         }
+
+        if (needsUpdate.value) {
+            AssistChip(
+                onClick = onDownload,
+                label = {
+                    Text(
+                        stringResource(R.string.update_event),
+                        style = typography.labelSmall
+                            .copy(color = colorScheme.onBackground)
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        ImageVector.vectorResource(R.drawable.download),
+                        contentDescription = stringResource(R.string.update_event),
+                        Modifier.size(AssistChipDefaults.IconSize)
+                    )
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .testTag("hasUpdated_chip")
+                    .padding(horizontal = 3.dp)
+            )
+        }
+    }
 
 }
 
@@ -1237,17 +1242,17 @@ fun EventScreenPreview() {
         isOpen = remember { mutableStateOf(true) },
         isContinuing = remember { mutableStateOf(false) },
         onAddToFavourite = {},
-        onComplain = {_->},
+        onComplain = { _ -> },
         startEvent = {},
         showResults = {},
-        onReturn = {true},
+        onReturn = { true },
         headers = remember { mutableStateOf(NetworkHeaders.EMPTY) },
         toggleBluetooth = {},
         isCompetitionMode = remember { mutableStateOf(false) },
         canShowConnectionList = false,
         password = remember { mutableStateOf("") },
         groups = remember { mutableStateListOf() },
-        eventId ="",
+        eventId = "",
         joinCode = remember { mutableStateOf("") },
         onDownload = {},
         canDownLoad = remember { mutableStateOf(true) },
