@@ -57,6 +57,7 @@ fun QuestListElement(
     questShortInfo: QuestShortInfo,
     onClick: () -> Unit,
     onFavouriteToggle: (Boolean) -> Unit,
+    showFavoriteBtn: Boolean = true,
     viewModel: ImageHeaderViewModel = hiltViewModel()
 ) {
 
@@ -90,10 +91,22 @@ fun QuestListElement(
             },
             contentDescription = questShortInfo.name,
             placeholder = BrushPainter(
-                Brush.linearGradient(listOf(colorScheme.primary, colorScheme.secondary, colorScheme.tertiary))
+                Brush.linearGradient(
+                    listOf(
+                        colorScheme.primary,
+                        colorScheme.secondary,
+                        colorScheme.tertiary
+                    )
+                )
             ),
             error = BrushPainter(
-                Brush.linearGradient(colors = listOf(colorScheme.primary, colorScheme.secondary,  colorScheme.tertiary))
+                Brush.linearGradient(
+                    colors = listOf(
+                        colorScheme.primary,
+                        colorScheme.secondary,
+                        colorScheme.tertiary
+                    )
+                )
             ),
             modifier = Modifier
                 .testTag("quest_element_image")
@@ -181,29 +194,31 @@ fun QuestListElement(
                 )
             }
         }
-        IconButton(
-            {
-                isFavourite.value = !isFavourite.value
-                onFavouriteToggle(isFavourite.value)
-            }, modifier = Modifier
-                .testTag("quest_element_favourite_btn")
-                .align(Alignment.CenterVertically)
+        if (showFavoriteBtn) {
+            IconButton(
+                {
+                    isFavourite.value = !isFavourite.value
+                    onFavouriteToggle(isFavourite.value)
+                }, modifier = Modifier
+                    .testTag("quest_element_favourite_btn")
+                    .align(Alignment.CenterVertically)
 
-        ) {
-            if (isFavourite.value) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.star_filled),
-                    contentDescription = stringResource(id = R.string.remove_from_favourite),
-                    tint = colorScheme.primary,
-                    modifier = Modifier.testTag("quest_element_is_favourite")
-                )
-            } else {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.star),
-                    contentDescription = stringResource(id = R.string.add_to_favourite),
-                    tint = colorScheme.onBackground,
-                    modifier = Modifier.testTag("quest_element_isNotFavourite")
-                )
+            ) {
+                if (isFavourite.value) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.star_filled),
+                        contentDescription = stringResource(id = R.string.remove_from_favourite),
+                        tint = colorScheme.primary,
+                        modifier = Modifier.testTag("quest_element_is_favourite")
+                    )
+                } else {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.star),
+                        contentDescription = stringResource(id = R.string.add_to_favourite),
+                        tint = colorScheme.onBackground,
+                        modifier = Modifier.testTag("quest_element_isNotFavourite")
+                    )
+                }
             }
         }
     }

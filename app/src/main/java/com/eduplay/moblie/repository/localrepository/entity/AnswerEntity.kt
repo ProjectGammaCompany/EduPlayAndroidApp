@@ -43,6 +43,8 @@ data class AnswerEntity(
     val points: Int,
     @ColumnInfo(name = "isFinal")
     val isFinal: Boolean,
+    @ColumnInfo(name = "isSynchronized")
+    val isSynchronized: Boolean = false,
     @PrimaryKey(autoGenerate = true)
     val answerId: Long = 0L
 ) {
@@ -53,7 +55,8 @@ data class AnswerEntity(
         startTime: String,
         endTime: String,
         points: Int,
-        isFinal: Boolean
+        isFinal: Boolean,
+        isSynchronized: Boolean = false
     ) : this(
         taskId,
         Gson().toJson(options),
@@ -61,6 +64,7 @@ data class AnswerEntity(
         startTime,
         endTime,
         points,
-        isFinal
+        isFinal,
+        isSynchronized
     )
 }

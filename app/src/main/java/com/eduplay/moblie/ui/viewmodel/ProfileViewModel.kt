@@ -46,6 +46,7 @@ class ProfileViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                val events = repository.updateDownloadedEventsStatuses()
                 canLogout.value = repository.logout()
             } catch (_: ConnectException) {
                 noInternet.value = true
