@@ -46,7 +46,6 @@ class ProfileViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val events = repository.updateDownloadedEventsStatuses()
                 canLogout.value = repository.logout()
             } catch (_: ConnectException) {
                 noInternet.value = true
@@ -91,7 +90,9 @@ class ProfileViewModel @Inject constructor(
     fun toggleAppMode(isOffline: Boolean) {
         viewModelScope.launch {
             if (isOffline) {
-                offlineModeManager.saveAppMode(OfflineModeManager.AppModes.OFFLINE)
+
+                //TODO(navigate)
+                //offlineModeManager.saveAppMode(OfflineModeManager.AppModes.OFFLINE)
             } else {
                 offlineModeManager.saveAppMode(OfflineModeManager.AppModes.ONLINE)
             }
