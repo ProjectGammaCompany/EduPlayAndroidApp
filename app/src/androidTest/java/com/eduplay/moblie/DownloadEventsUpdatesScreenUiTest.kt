@@ -10,7 +10,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.test.platform.app.InstrumentationRegistry
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.screens.DownloadedEventsUpdateScreen
@@ -30,12 +29,10 @@ import io.mockk.impl.annotations.SpyK
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.io.File
 
 
 @UninstallModules(ManagersProvider::class)
@@ -124,11 +121,6 @@ class DownloadEventsUpdatesScreenUiTest {
         MockKAnnotations.init(this)
     }
 
-    @After
-    fun tearDown() {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        File(context.filesDir, "datastore").deleteRecursively()
-    }
 
     @Composable
     fun FillScreen() {

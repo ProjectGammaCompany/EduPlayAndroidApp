@@ -35,6 +35,8 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -91,7 +93,7 @@ fun EventResultScreen(
 }
 
 @Composable
-private fun EventResultScreen(
+fun EventResultScreen(
     innerPaddingValues: PaddingValues,
     onExitScreen: () -> Boolean,
     users: SnapshotStateList<PlayerStats.StatUser>,
@@ -115,6 +117,7 @@ private fun EventResultScreen(
             modifier = Modifier
                 .background(color = colorScheme.surface)
                 .fillMaxSize()
+                .padding(horizontal = 8.dp)
                 .weight(1f)
         ) {
 
@@ -135,7 +138,8 @@ private fun EventResultScreen(
                     items(groups.toList()) { group ->
                         Text(
                             text = group.name,
-                            style = typography.titleLarge
+                            style = typography.titleLarge,
+                            modifier = Modifier.testTag("groupName${group.id}")
                         )
                         UserList(group.users)
                         HorizontalDivider(color = colorScheme.secondary)
@@ -178,10 +182,27 @@ private fun UserList(
                         .memoryCachePolicy(CachePolicy.ENABLED)
                         .build(),
                     contentDescription = it.username,
-                    placeholder = painterResource(R.drawable.eduplaylogo),
-                    error = painterResource(id = R.drawable.ic_launcher_background),
+                    placeholder = BrushPainter(
+                        Brush.linearGradient(
+                            listOf(
+                                colorScheme.primary,
+                                colorScheme.secondary,
+                                colorScheme.tertiary
+                            )
+                        )
+                    ),
+                    error = BrushPainter(
+                        Brush.linearGradient(
+                            listOf(
+                                colorScheme.primary,
+                                colorScheme.secondary,
+                                colorScheme.tertiary
+                            )
+                        )
+                    ),
                     modifier = Modifier
                         .testTag("quest_element_image")
+                        .padding(horizontal = 3.dp)
                         .height(30.dp)
                         .width(30.dp)
                         .clip(_root_ide_package_.androidx.compose.foundation.shape.CircleShape)
@@ -191,17 +212,14 @@ private fun UserList(
                     text = it.username + ":",
                     style = typography.titleLarge
                         .copy(color = colorScheme.onBackground, fontWeight = FontWeight.Medium),
+                    modifier = Modifier.testTag("user_${it.id}")
                 )
                 Text(
                     text = " ${it.points} ",
                     style = typography.titleLarge
-                        .copy(color = colorScheme.onBackground)
+                        .copy(color = colorScheme.onBackground),
+                    modifier = Modifier.testTag("points_${it.id}")
                 )
-//                Text(
-//                    text = stringResource(R.string.points),
-//                    style = typography.titleLarge
-//                        .copy(color = colorScheme.onBackground),
-//                )
             }
         }
     }
@@ -223,17 +241,4 @@ private fun ResultTopBar(onExitScreen: () -> Boolean) {
             }
         }
     )
-}
-
-@Preview
-@Composable
-private fun EventResultScreenPreview() {
-    EduPlayTheme {
-        EventResultScreen(
-            PaddingValues(),
-            { true },
-            remember { mutableStateListOf(PlayerStats.StatUser("1", "user", null, 10)) },
-            remember { mutableStateListOf() }
-        )
-    }
 }
