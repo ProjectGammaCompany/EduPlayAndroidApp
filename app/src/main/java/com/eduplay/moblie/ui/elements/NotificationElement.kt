@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -87,6 +88,7 @@ private fun FavoriteEventNotification(
             .fillMaxWidth()
             .padding(5.dp)
             .clickable(enabled = true, onClick = { onNavigate(notification.eventId) })
+            .testTag("favorite_${notification.notificationId}")
     ) {
         Row {
             Text(
@@ -99,7 +101,10 @@ private fun FavoriteEventNotification(
                 modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
             )
             if (showDeleteButton) {
-                IconButton(onClick = { onDelete(notification.notificationId) }) {
+                IconButton(
+                    onClick = { onDelete(notification.notificationId) },
+                    modifier = Modifier.testTag("fav_delete_${notification.notificationId}")
+                ) {
                     Icon(
                         ImageVector.vectorResource(R.drawable.cross),
                         stringResource(R.string.delete_notification)
@@ -146,6 +151,7 @@ private fun EndEventNotification(
             .fillMaxWidth()
             .padding(5.dp)
             .clickable(enabled = true, onClick = { onNavigate(notification.eventId) })
+            .testTag("ending_${notification.notificationId}")
     ) {
         Row {
             Text(
@@ -154,11 +160,17 @@ private fun EndEventNotification(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp
                 ),
-                modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically)
+                    .testTag("ending_title${notification.notificationId}")
 
             )
             if (showDeleteButton) {
-                IconButton(onClick = { onDelete(notification.notificationId) }) {
+                IconButton(
+                    onClick = { onDelete(notification.notificationId) },
+                    modifier = Modifier.testTag("ending_delete_${notification.notificationId}")
+                ) {
                     Icon(
                         ImageVector.vectorResource(R.drawable.cross),
                         stringResource(R.string.delete_notification)
@@ -169,72 +181,12 @@ private fun EndEventNotification(
         Text(
             body.toString(),
             style = typography.bodyLarge,
+            modifier = Modifier.testTag("ending_body${notification.notificationId}")
         )
         Text(
             DateConverter.convertForDisplay(notification.date),
             style = typography.bodyLarge,
             modifier = Modifier.align(Alignment.End)
-        )
-    }
-}
-
-
-@Composable
-@Preview
-private fun NotificationPreview() {
-    val favoriteEventStarted = NotificationData.FavoriteNotificationData(
-        "n1","eve1", "Event 1",
-        LocalDateTime.now().plusDays(10)
-    )
-
-    val endNotificationHour = EndEventNotificationData(
-        "n1","eve1", "Event 1",
-        LocalDateTime.now().plusDays(10),
-        timeLeft = TimeLeft.HOUR,
-        notStartedFavorite = false
-    )
-
-    val notStartedendNotificationHour = EndEventNotificationData(
-        "n1","eve1", "Event 1",
-        LocalDateTime.now().plusDays(10),
-        timeLeft = TimeLeft.HOUR,
-        notStartedFavorite = true
-    )
-
-    val endNotificationDay = EndEventNotificationData(
-        "n1","eve1", "Event 1",
-        LocalDateTime.now().plusDays(10),
-        timeLeft = TimeLeft.DAY,
-        notStartedFavorite = false
-    )
-
-    val notStartedendNotificationDay = EndEventNotificationData(
-        "n1", "eve1", "Event 1",
-        LocalDateTime.now().plusDays(10),
-        timeLeft = TimeLeft.DAY,
-        notStartedFavorite = true
-    )
-    Column {
-        NotificationElement(
-            favoriteEventStarted,
-            rememberNavController()
-        )
-        NotificationElement(
-            endNotificationHour,
-            rememberNavController()
-        )
-
-        NotificationElement(
-            notStartedendNotificationHour,
-            rememberNavController()
-        )
-        NotificationElement(
-            endNotificationDay,
-            rememberNavController()
-        )
-        NotificationElement(
-            notStartedendNotificationDay,
-            rememberNavController()
         )
     }
 }
