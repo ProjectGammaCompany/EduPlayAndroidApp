@@ -54,4 +54,10 @@ interface AnswerDao {
         """
     )
     suspend fun deleteAllAnswersInBlock(blockId: String, userId: String): Int
+
+    @Transaction
+    @Query("""
+        SELECT EXISTS(SELECT isSynchronized FROM answers WHERE isSynchronized = 0)
+    """)
+    suspend fun containsUnsynchronisedAnswers(): Boolean
 }

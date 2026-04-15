@@ -131,12 +131,19 @@ fun ProfileScreen(
         imageHeaderViewModel.headers,
         imageHeaderViewModel::getFullUrl,
         isOffline = viewModel.isOffline,
-        onToggleOffline = {isOffline -> viewModel.toggleAppMode(isOffline, navController)},
+        onToggleOffline = { isOffline: Boolean ->
+            viewModel.toggleAppMode(
+                isOffline,
+                navController
+            )
+        },
         theme = viewModel.theme.value.collectAsState(AppSettingsManager.Themes.SYSTEM),
         onChooseTheme = viewModel::changeTheme,
         notifications = viewModel.notifications,
         onAvatarPicked = { uri: Uri -> viewModel.updateAvatar(uri, contentResolver, context) },
-        navController = navController
+        navController = navController,
+        viewModel::sendAnswers,
+        viewModel.hasUnsentAnswers
     )
 }
 
@@ -156,7 +163,9 @@ private fun ProfileScreen(
     onChooseTheme: (AppSettingsManager.Themes) -> Unit,
     notifications: SnapshotStateList<NotificationData>,
     onAvatarPicked: (Uri) -> Unit,
-    navController: NavController
+    navController: NavController,
+    onSyncAnswers: () -> Unit,
+    hasUnsyncedAnswers: State<Boolean>
 ) {
     val currentMode = isOffline.value.collectAsState(AppModes.OFFLINE)
     Column(
@@ -322,7 +331,14 @@ private fun ProfileScreen(
                 }
             }
 
-            Settings(isOffline, onToggleOffline, theme, onChooseTheme)
+            Settings(
+                isOffline,
+                onToggleOffline,
+                theme,
+                onChooseTheme,
+                onSyncAnswers,
+                hasUnsyncedAnswers
+            )
             if (currentMode.value == AppModes.ONLINE) {
                 LatestNotifications(notifications, navController)
             }
@@ -416,7 +432,9 @@ private fun Settings(
     isOffline: State<Flow<OfflineModeManager.AppModes>>,
     onToggleOffline: (Boolean) -> Unit,
     theme: State<AppSettingsManager.Themes>,
-    onChooseTheme: (AppSettingsManager.Themes) -> Unit
+    onChooseTheme: (AppSettingsManager.Themes) -> Unit,
+    onSyncAnswers: () -> Unit,
+    hasUnsyncedAnswers: State<Boolean>
 ) {
     HorizontalDivider(
         color = colorScheme.primaryContainer,
@@ -508,6 +526,41 @@ private fun Settings(
                 }
             }
         }
+
+
+        if (offlineState.value == AppModes.ONLINE) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                if (hasUnsyncedAnswers.value) {
+                    TextButton(
+                        onClick = onSyncAnswers,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+
+                    ) {
+                        Text(
+                            text = stringResource(R.string.send_event_results),
+                            style = typography.bodyLarge
+                                .copy(color = colorScheme.primary)
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.need_to_send_results),
+                        style = typography.bodyMedium
+                            .copy(color = colorScheme.onBackground),
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.all_answers_sent),
+                        style = typography.bodyLarge
+                            .copy(color = colorScheme.onBackground),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(horizontal = 5.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -530,7 +583,9 @@ fun ProfilePreview() {
         { _ -> },
         remember { mutableStateListOf() },
         { _ -> },
-        rememberNavController()
+        rememberNavController(),
+        {},
+        remember { mutableStateOf(false) },
     )
     //}
 }

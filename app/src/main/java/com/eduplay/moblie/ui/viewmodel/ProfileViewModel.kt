@@ -35,6 +35,7 @@ class ProfileViewModel @Inject constructor(
     val avatar = mutableStateOf("")
     val password = mutableStateOf("")
     val canLogout = mutableStateOf(false)
+    val hasUnsentAnswers = mutableStateOf(false)
 
     val unauthorised = mutableStateOf(false)
     val noInternet = mutableStateOf(false)
@@ -77,7 +78,7 @@ class ProfileViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("fetch profile", e.message ?: "", e)
             }
-
+            hasUnsentAnswers.value = repository.containsUnsentAnswers()
         }
     }
 
@@ -95,6 +96,7 @@ class ProfileViewModel @Inject constructor(
         } else {
             viewModelScope.launch {
                 offlineModeManager.saveAppMode(OfflineModeManager.AppModes.ONLINE)
+                repository.postAllAnswers()
             }
         }
     }
@@ -126,6 +128,21 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 avatar.value = repository.updateAvatar(uri, contentResolver, context)
+            } catch (_: ConnectException) {
+                noInternet.value = true
+            } catch (_: NotAuthorisedException) {
+                unauthorised.value = true
+            } catch (e: Exception) {
+                Log.e("update_avatar", e.message ?: "", e)
+            }
+        }
+    }
+
+    fun sendAnswers() {
+        viewModelScope.launch {
+            try {
+                repository.postAllAnswers()
+                hasUnsentAnswers.value = repository.containsUnsentAnswers()
             } catch (_: ConnectException) {
                 noInternet.value = true
             } catch (_: NotAuthorisedException) {

@@ -950,5 +950,9 @@ class LocalRepository @Inject constructor(
         }
     }
 
+    suspend fun containsUnsentAnswers(): Boolean {
+        return eventDatabase.answerDao().containsUnsynchronisedAnswers()
+    }
+
 
 }

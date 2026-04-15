@@ -438,4 +438,17 @@ class EduRepository @Inject constructor(
             AppModes.OFFLINE -> localRepository
         }
     }
+
+    suspend fun postAllAnswers() {
+        val events = localRepository
+            .getEvents(null, false, "", Int.MAX_VALUE)
+        for (event in events) {
+            val success = postAnswerBatch(event.id)
+            if (!success) return
+        }
+    }
+
+    suspend fun containsUnsentAnswers(): Boolean {
+        return localRepository.containsUnsentAnswers()
+    }
 }
