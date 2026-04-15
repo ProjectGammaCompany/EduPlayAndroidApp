@@ -1,5 +1,6 @@
 package com.eduplay.moblie
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.assertIsDisplayed
@@ -12,9 +13,13 @@ import coil3.network.NetworkHeaders
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.viewmodel.ImageHeaderInterface
+import com.eduplay.moblie.useCases.OfflineModeManager
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.SpyK
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -31,6 +36,17 @@ class TaskElementTest {
     )
     val eventName = "Name"
     val eventRate = 3.00
+    val showFavoriteBtn = false
+    val viewModel = object : ImageHeaderInterface {
+        override fun getFullUrl(fileName: String): String {
+            return fileName
+        }
+
+        override val headers: MutableState<NetworkHeaders> = mutableStateOf(NetworkHeaders.EMPTY)
+        override val appMode: MutableState<Flow<OfflineModeManager.AppModes>> = mutableStateOf(
+            flowOf(OfflineModeManager.AppModes.ONLINE)
+        )
+    }
 
     @Before
     fun setUp() {
@@ -57,8 +73,9 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-                    {it}
+                    showFavoriteBtn,
+                    viewModel
+
                 )
             }
 
@@ -77,8 +94,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-                    {it}
+                    showFavoriteBtn,
+                    viewModel
                 )
             }
 
@@ -99,8 +116,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-                    {it}
+                    showFavoriteBtn,
+                    viewModel
                 )
             }
             for (tag in tags) {
@@ -121,8 +138,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-                    {it}
+                    showFavoriteBtn,
+                    viewModel
                 )
             }
             onNodeWithTag("quest_element_isDownloaded", useUnmergedTree = true).assertDoesNotExist()
@@ -139,8 +156,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-                    {it}
+                    showFavoriteBtn,
+                    viewModel
                 )
             }
             onNodeWithTag("quest_element_isDownloaded", useUnmergedTree = true).assertIsDisplayed()
@@ -159,8 +176,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-                    {it}
+                    showFavoriteBtn,
+                    viewModel
                 )
             }
 
@@ -184,8 +201,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-                    {it}
+                    showFavoriteBtn,
+                    viewModel
                 )
             }
 
@@ -210,8 +227,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-                    {it}
+                    showFavoriteBtn,
+                    viewModel
                 )
             }
 
@@ -236,8 +253,8 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-                    {it}
+                    showFavoriteBtn,
+                    viewModel
                 )
             }
 

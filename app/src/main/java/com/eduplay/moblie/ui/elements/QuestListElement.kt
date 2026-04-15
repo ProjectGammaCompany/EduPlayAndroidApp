@@ -48,6 +48,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.QuestShortInfo
+import com.eduplay.moblie.ui.viewmodel.ImageHeaderInterface
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
 import java.io.File
@@ -58,7 +59,7 @@ fun QuestListElement(
     onClick: () -> Unit,
     onFavouriteToggle: (Boolean) -> Unit,
     showFavoriteBtn: Boolean = true,
-    viewModel: ImageHeaderViewModel = hiltViewModel()
+    viewModel: ImageHeaderInterface = hiltViewModel<ImageHeaderViewModel>()
 ) {
 
     val isFavourite = remember { mutableStateOf(questShortInfo.isFavourite) }

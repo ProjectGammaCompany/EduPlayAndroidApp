@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
@@ -15,11 +17,15 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import coil3.network.NetworkHeaders
+import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.ui.screens.EventScreen
+import com.eduplay.moblie.useCases.OfflineModeManager
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.SpyK
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -48,6 +54,22 @@ class EventScreenUiTest {
         val onReturn: () -> Boolean = { false }
         val networkHeaders: State<NetworkHeaders> = mutableStateOf(NetworkHeaders.Builder().build())
         val isCompletionMode: State<Boolean> = mutableStateOf(false)
+        val password = mutableStateOf("")
+        val groups = mutableStateListOf<EventGroup>()
+        val eventId = ""
+        val joinCode = mutableStateOf("")
+        val onDownload = {}
+        val canDownLoad = mutableStateOf(false)
+        val isRated = mutableStateOf(false)
+        val onRate = {_:Int->}
+        val groupEvent = mutableStateOf(false)
+        val downloadingEvents = mutableStateMapOf<String, String>()
+        val downloadedEvents = mutableStateSetOf<String>()
+        val isDownloaded = mutableStateOf(false)
+        val onDeleteEvent = {}
+        val failedToSendAnswers = mutableStateOf(false)
+        val appMode:  State<Flow<OfflineModeManager.AppModes>> = mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE))
+        val needsUpdate = mutableStateOf(false)
     }
 
     @get:Rule
@@ -102,9 +124,25 @@ class EventScreenUiTest {
             showResults = eventData.showResults,
             onReturn = eventData.onReturn,
             headers = eventData.networkHeaders,
-            toggleBluetooth= {},
-        isCompetitionMode = eventData.isCompletionMode,
-        canShowConnectionList= false
+            toggleBluetooth = {},
+            isCompetitionMode = eventData.isCompletionMode,
+            canShowConnectionList = false,
+            password = eventData.password,
+            groups = eventData.groups,
+            eventId = eventData.eventId,
+            joinCode = eventData.joinCode,
+            onDownload = eventData.onDownload,
+            canDownLoad = eventData.canDownLoad,
+            isRated = eventData.isRated,
+            onRate = eventData.onRate,
+            groupEvent = eventData.groupEvent,
+            downloadingEvents = eventData.downloadingEvents,
+            downloadedEvents = eventData.downloadedEvents,
+            isDownloaded = eventData.isDownloaded,
+            onDeleteEvent = eventData.onDeleteEvent,
+            failedToSendAnswers = eventData.failedToSendAnswers,
+            appMode = eventData.appMode,
+            needsUpdate = eventData.needsUpdate
         )
     }
 
