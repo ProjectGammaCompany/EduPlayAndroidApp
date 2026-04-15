@@ -59,13 +59,14 @@ fun QuestListElement(
     onClick: () -> Unit,
     onFavouriteToggle: (Boolean) -> Unit,
     showFavoriteBtn: Boolean = true,
-    viewModel: ImageHeaderInterface = hiltViewModel<ImageHeaderViewModel>()
+    viewModel: ImageHeaderInterface = hiltViewModel<ImageHeaderViewModel>(),
+    modifier: Modifier = Modifier
 ) {
 
     val isFavourite = remember { mutableStateOf(questShortInfo.isFavourite) }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 3.dp, vertical = 5.dp)
             .fillMaxWidth()
             .border(1.dp, colorScheme.secondary, RoundedCornerShape(10.dp))

@@ -19,6 +19,12 @@
       <SelectionState runConfigName="BluetoothDeviceListScreenUiTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="DownloadEventsUpdatesScreenUiTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="when_network_error_is_false_error_text_is_not_displayed_update_section_is_displayed()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

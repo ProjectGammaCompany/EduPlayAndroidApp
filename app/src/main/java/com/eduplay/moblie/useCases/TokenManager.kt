@@ -6,10 +6,12 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class TokenManager(private val context: Context) {
+@Singleton
+class TokenManagerDataStore(private val context: Context): TokenManager {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
 
     companion object {
@@ -17,27 +19,37 @@ class TokenManager(private val context: Context) {
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_type")
     }
 
-    fun getAccessToken(): Flow<String> {
+    override fun getAccessToken(): Flow<String> {
         return context.dataStore.data.map { preferences ->
             preferences[ACCESS_TOKEN_KEY] ?: ""
         }
     }
 
-    suspend fun saveAccessToken(token: String) {
+    override suspend fun saveAccessToken(token: String) {
         context.dataStore.edit { preferences ->
             preferences[ACCESS_TOKEN_KEY] = token
         }
     }
 
-    fun getRefreshToken(): Flow<String> {
+    override fun getRefreshToken(): Flow<String> {
         return context.dataStore.data.map { preferences ->
             preferences[REFRESH_TOKEN_KEY] ?: ""
         }
     }
 
-    suspend fun saveRefreshToken(token: String) {
+    override suspend fun saveRefreshToken(token: String) {
         context.dataStore.edit { preferences ->
             preferences[REFRESH_TOKEN_KEY] = token
         }
     }
+}
+
+interface TokenManager {
+    fun getAccessToken(): Flow<String>
+
+    suspend fun saveAccessToken(token: String)
+
+    fun getRefreshToken(): Flow<String>
+
+    suspend fun saveRefreshToken(token: String)
 }

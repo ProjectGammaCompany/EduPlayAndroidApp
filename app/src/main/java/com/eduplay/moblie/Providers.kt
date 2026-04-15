@@ -8,8 +8,6 @@ import com.eduplay.moblie.repository.webrepository.AuthInterceptor
 import com.eduplay.moblie.repository.webrepository.EventFilesApi
 import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
-import com.eduplay.moblie.useCases.OfflineModeManager
-import com.eduplay.moblie.useCases.AppSettingsManager
 import com.eduplay.moblie.useCases.DownloadStatusObserver
 import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import com.eduplay.moblie.useCases.TokenManager
@@ -28,41 +26,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class Providers {
 
-    private var tokenManager: TokenManager? = null
-    private var offlineModeManager: OfflineModeManager? = null
-    private var settingsManager: AppSettingsManager? = null
-
-    @Provides
-    @Singleton
-    fun provideTokenManager(@ApplicationContext context: Context): TokenManager {
-        if (tokenManager == null) {
-            tokenManager = TokenManager(context)
-        }
-        return tokenManager!!
-    }
 
     @Provides
     fun provideFileDownloader(@ApplicationContext context: Context): TaskDownloadUseCase {
         return TaskDownloadUseCase(context)
     }
 
-    @Provides
-    @Singleton
-    fun provideOfflineManager(@ApplicationContext context: Context): OfflineModeManager {
-        if (offlineModeManager == null) {
-            offlineModeManager = OfflineModeManager(context)
-        }
-        return offlineModeManager!!
-    }
-
-    @Provides
-    @Singleton
-    fun provideSettingsManager(@ApplicationContext context: Context): AppSettingsManager {
-        if (settingsManager == null) {
-            settingsManager = AppSettingsManager(context)
-        }
-        return settingsManager!!
-    }
 
     @Provides
     @Singleton

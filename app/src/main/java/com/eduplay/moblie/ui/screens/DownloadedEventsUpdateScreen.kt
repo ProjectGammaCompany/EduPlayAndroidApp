@@ -26,6 +26,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -96,14 +97,21 @@ fun DownloadedEventsUpdateScreen(
     ) {
         UpdateTopBar(onGoBack)
         if (networkError.value) {
-            Text(stringResource(R.string.error_sync_answers))
+            Text(
+                stringResource(R.string.error_sync_answers),
+                modifier = Modifier.testTag("network_error_text")
+            )
         } else {
-            Text(stringResource(R.string.update_events_before_ofline))
-            LazyColumn(Modifier.weight(1f)) {
+            Text(
+                stringResource(R.string.update_events_before_ofline),
+                modifier = Modifier.testTag("need_update_text")
+            )
+            LazyColumn(Modifier.weight(1f).testTag("update_list")) {
                 items(events) {
                     Row(Modifier.fillMaxSize()) {
                         IconButton(
-                            onClick = { onChooseEvent(it.id) }
+                            onClick = { onChooseEvent(it.id) },
+                            modifier = Modifier.testTag("download_btn_${it.id}")
                         ) {
                             Icon(
                                 ImageVector.vectorResource(R.drawable.download),
@@ -111,7 +119,8 @@ fun DownloadedEventsUpdateScreen(
                             )
                         }
                         IconButton(
-                            onClick = { onDeleteEvent(it.id) }
+                            onClick = { onDeleteEvent(it.id) },
+                            modifier = Modifier.testTag("delete_btn_${it.id}")
                         ) {
                             Icon(
                                 ImageVector.vectorResource(R.drawable.delete),
@@ -122,7 +131,8 @@ fun DownloadedEventsUpdateScreen(
                             questShortInfo = it,
                             onClick = { onNavigateToEvent(it.id) },
                             onFavouriteToggle = {},
-                            showFavoriteBtn = false
+                            showFavoriteBtn = false,
+                            modifier = Modifier.testTag("element_${it.id}")
                         )
                     }
                 }
