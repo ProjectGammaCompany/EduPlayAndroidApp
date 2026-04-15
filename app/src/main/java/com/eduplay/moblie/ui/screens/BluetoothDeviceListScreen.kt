@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -135,7 +136,7 @@ fun BluetoothDeviceListScreen(
             )
         }
 
-        LazyColumn(Modifier.weight(4f)) {
+        LazyColumn(Modifier.weight(4f).testTag("bluetooth_device_list")) {
             items(foundDevices.entries.toList()) {
                 TextButton(
                     onClick = {
@@ -145,6 +146,7 @@ fun BluetoothDeviceListScreen(
                         .fillMaxWidth()
                         .padding(vertical = 2.dp)
                         .border(1.dp, colorScheme.primary, shape = RoundedCornerShape(5.dp))
+                        .testTag("device_button${it.key}")
                 ) {
                     Row {
                         Text(
@@ -152,11 +154,13 @@ fun BluetoothDeviceListScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .align(Alignment.CenterVertically)
+                                .testTag("device_name${it.key}")
                         )
-                        if (devicesConnectionStatus[it.value] ?: false) {
+                        if (devicesConnectionStatus[it.key] ?: false) {
                             Icon(
                                 ImageVector.vectorResource(R.drawable.bluetooth),
-                                contentDescription = stringResource(R.string.connected)
+                                contentDescription = stringResource(R.string.connected),
+                                modifier = Modifier.testTag("connected_icon${it.key}")
                             )
                         }
                     }

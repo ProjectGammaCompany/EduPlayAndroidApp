@@ -206,7 +206,7 @@ class BluetoothViewModel(
                     }
                     if (socket != null && !connectedDevices.keys.contains(socket.remoteDevice)) {
                         connectedDevices[socket.remoteDevice] = socket
-                        devicesConnectionStatus[socket.remoteDevice.name] = true
+                        devicesConnectionStatus[socket.remoteDevice.address] = true
                         listenToSocket(socket)
                     }
                 }
@@ -263,7 +263,7 @@ class BluetoothViewModel(
                 try {
                     bluetoothSocket.connect()
                     connectedDevices[device] = bluetoothSocket
-                    devicesConnectionStatus[device.name] = true
+                    devicesConnectionStatus[device.address] = true
                     listenToSocket(bluetoothSocket)
                 } catch (e: Exception) {
                     onCouldNotConnect()
