@@ -560,7 +560,7 @@ class LocalRepository @Inject constructor(
 
         answer = AnswerEntity(
             taskId = answer.taskId,
-            options = Gson().toJson(hashedAnswers),
+            options = Gson().toJson(answers),
             userId = answer.userId,
             startTime = answer.startTime,
             endTime = DateConverter.convertToServerFormat(endTime),
