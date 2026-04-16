@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -97,6 +98,7 @@ private fun TaskItem(name: String, time: Int, isEnabled: Boolean, onChooseTask: 
             .background(if (isEnabled) colorScheme.surface else colorScheme.secondaryContainer)
             .clickable(isEnabled, onClick = onChooseTask)
             .padding(5.dp)
+            .testTag("task_${name}")
     ) {
         Text(
             text = name,
@@ -110,15 +112,17 @@ private fun TaskItem(name: String, time: Int, isEnabled: Boolean, onChooseTask: 
                 .weight(1f)
                 .padding(vertical = 10.dp)
         )
-        Text(
-            text = (time / 60).toString() + ":" + (time % 60).toString(),
-            style = typography.bodySmall.copy(color = colorScheme.onBackground),
-            textAlign = TextAlign.End,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            color = if (isEnabled) colorScheme.onSurface else colorScheme.onSecondaryContainer,
-            modifier = Modifier.padding(vertical = 10.dp)
-        )
+        if (time != 0) {
+            Text(
+                text = (time / 60).toString() + ":" + (time % 60).toString(),
+                style = typography.bodySmall.copy(color = colorScheme.onBackground),
+                textAlign = TextAlign.End,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                color = if (isEnabled) colorScheme.onSurface else colorScheme.onSecondaryContainer,
+                modifier = Modifier.padding(vertical = 10.dp).testTag("time_${name}")
+            )
+        }
 
     }
 }
