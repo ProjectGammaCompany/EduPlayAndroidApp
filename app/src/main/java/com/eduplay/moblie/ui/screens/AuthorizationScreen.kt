@@ -287,16 +287,3 @@ private fun EmailPasswordForm(
     }
 
 }
-
-@Preview
-@Composable
-private fun auth() {
-    EduPlayTheme {
-        AuthorizationScreen(
-            { false },
-            { false },
-            { a, b -> },
-            { a, b -> }
-        )
-    }
-}
