@@ -7,7 +7,7 @@ data class UserEventStatus(
     val taskId: String?,
     val blockId: String?,
     val timeStamp: String?,
-    val groupName: String?,
+    val groupId: String?,
     val lastEditionDate: String,
     val pointsInBlock: Int,
     val completedTasksInBlock: List<String>

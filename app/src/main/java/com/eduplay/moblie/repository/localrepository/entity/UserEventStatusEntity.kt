@@ -1,5 +1,6 @@
 package com.eduplay.moblie.repository.localrepository.entity
 
+import androidx.annotation.Nullable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -47,9 +48,9 @@ data class UserEventStatusEntity(
     @ColumnInfo(name = "eventId")
     val eventId: String,
     @ColumnInfo(name = "blockId")
-    val blockId: String,
+    val blockId: String? = null,
     @ColumnInfo(name = "taskId")
-    val taskId: String,
+    val taskId: String? = null,
     @ColumnInfo(name = "isFinished")
     val isFinished: Boolean,
     @ColumnInfo(name = "choseTaskInBlock")

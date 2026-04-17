@@ -269,7 +269,11 @@ class LocalRepository @Inject constructor(
         }
 
         if (status == null) status = fillStarterStatus(eventId)
-        val currentBlock = eventDatabase.blockDao().getBlockById(status.blockId)
+        val currentBlock =
+            if (status.blockId != null)
+                eventDatabase.blockDao().getBlockById(status.blockId)
+            else
+                eventDatabase.blockDao().getBlockByEventIdAndBlockOrder(status.eventId, 1)
 
         if (currentBlock == null) {
             Log.e("NEXT_STAGE", "did not find block ${status.blockId}")
@@ -322,7 +326,7 @@ class LocalRepository @Inject constructor(
     ): EventStage {
         val user = getCurrentUser()
         if (currentBlock.isParallel) {
-            if (status.choseTaskInBlock) {
+            if (status.choseTaskInBlock && status.taskId != null) {
                 return displayTask(status.taskId, user, status)
             } else {
                 return displayParallelBlock(currentBlock, tasks)
@@ -834,8 +838,8 @@ class LocalRepository @Inject constructor(
             userId = user,
             answers = answers,
             totalPoints = points,
-            currentBlock = status.blockId,
-            currentTask = status.taskId,
+            currentBlock = status.blockId ?: "",
+            currentTask = status.taskId ?: "",
             isDone = status.isFinished
         )
     }
@@ -872,15 +876,15 @@ class LocalRepository @Inject constructor(
         for (event in okEvents) {
             val status =
                 eventDatabase.userEventStatus().getStatusByUserAndEvent(user, event.eventId)
-            val isFinished = StageType.stringValueOf(event.status) == StageType.END
+            val isFinished = EventStatus.statusOf(event.status) == EventStatus.ENDED
 
             // заполняем статусы
             if (status != null) {
                 val newStatus = UserEventStatusEntity(
                     userId = status.userId,
                     eventId = status.eventId,
-                    blockId = event.blockId ?: "",
-                    taskId = event.taskId ?: "",
+                    blockId = if (event.blockId?.isNotBlank() ?: false) event.blockId else null,
+                    taskId = if (event.taskId?.isNotBlank() ?: false) event.taskId else null,
                     isFinished = isFinished,
                     choseTaskInBlock = false,
                     id = status.id
@@ -890,8 +894,8 @@ class LocalRepository @Inject constructor(
                 val newStatus = UserEventStatusEntity(
                     userId = user,
                     eventId = event.eventId,
-                    blockId = event.blockId ?: "",
-                    taskId = event.taskId ?: "",
+                    blockId = if (event.blockId?.isNotBlank() ?: false) event.blockId else null,
+                    taskId = if (event.taskId?.isNotBlank() ?: false) event.taskId else null,
                     isFinished = isFinished,
                     choseTaskInBlock = false,
                 )
@@ -899,13 +903,13 @@ class LocalRepository @Inject constructor(
             }
 
             // обновили группу
-            if (event.groupName != null) {
+            if (event.groupId != null) {
                 val userGroup =
                     eventDatabase.userDao().getUserWithGroupsById(user)?.groups?.firstOrNull {
                         it.eventId == event.eventId
                     }
                 if (userGroup == null) {
-                    eventDatabase.groupDao().insertUserGroup(UserGroupEntity(user, event.eventId))
+                    eventDatabase.groupDao().insertUserGroup(UserGroupEntity(user, event.groupId))
                 }
             }
 
@@ -945,7 +949,12 @@ class LocalRepository @Inject constructor(
             }
 
             if (event.timeStamp != null && event.timeStamp.isNotBlank()) {
-                postTaskStartTime(event.eventId, event.blockId, event.taskId!!, DateConverter.convertFromServerFormat(event.timeStamp))
+                postTaskStartTime(
+                    event.eventId,
+                    event.blockId,
+                    event.taskId!!,
+                    DateConverter.convertFromServerFormat(event.timeStamp)
+                )
             }
         }
     }
