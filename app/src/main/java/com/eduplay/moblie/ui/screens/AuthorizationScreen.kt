@@ -112,6 +112,7 @@ fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel =
         isChangePasswordSafe = viewModel.changePasswordsCorrect,
         correctChangeEmail = viewModel.changePasswordEmailIsCorrect,
         correctCode = viewModel.changePasswordCodeIsCorrect,
+        onForgotPassword = viewModel::setForgotStatusToFirstStep
     )
 
 }
@@ -133,6 +134,7 @@ fun AuthorizationScreen(
     isChangePasswordSafe: State<Boolean>,
     correctChangeEmail: State<Boolean>,
     correctCode: State<Boolean>,
+    onForgotPassword: ()->Unit
 ) {
     var isLoginForm by remember { mutableStateOf(true) }
     val switchForms = {
@@ -141,6 +143,7 @@ fun AuthorizationScreen(
 
     var showForgotPasswordForm by remember { mutableStateOf(false) }
     val onForgotPassword = {
+        onForgotPassword()
         showForgotPasswordForm = true
     }
     if (forgotPasswordStatus.value == NONE) {

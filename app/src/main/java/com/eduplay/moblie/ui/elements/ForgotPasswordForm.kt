@@ -3,6 +3,7 @@ package com.eduplay.moblie.ui.elements
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -50,7 +51,7 @@ fun ForgotPasswordForm(
     onCheckCode: (String) -> Unit,
     onSendNewPassword: (String, String) -> Unit,
 ) {
-    Row {
+    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
         IconButton(onGoBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -82,7 +83,7 @@ private fun EmailForm(
     val email = rememberTextFieldState()
     OutlinedTextField(
         state = email,
-        isError = hasEmailErrors(email.text.toString()) || correctEmail.value,
+        isError = hasEmailErrors(email.text.toString()) || !correctEmail.value,
         label = { Text(stringResource(R.string.email)) },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Email
@@ -163,7 +164,7 @@ private fun ChangePasswordForm(
     OutlinedTextField(
         value = password,
         onValueChange = { it -> password = it },
-        isError = hasPasswordErrors(password) || arePasswordsIdentical.value,
+        isError = hasPasswordErrors(password) || !arePasswordsIdentical.value,
         label = { Text(text = stringResource(R.string.password)) },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password
@@ -185,7 +186,7 @@ private fun ChangePasswordForm(
         supportingText = {
             if (!isPasswordSafe.value) {
                 Text(stringResource(R.string.incorrect_password))
-            } else if (arePasswordsIdentical.value) {
+            } else if (!arePasswordsIdentical.value) {
                 Text(stringResource(R.string.passwords_not_same))
             }
         },
@@ -198,7 +199,7 @@ private fun ChangePasswordForm(
     OutlinedTextField(
         value = repeatPassword,
         onValueChange = { it -> repeatPassword = it },
-        isError = hasPasswordErrors(repeatPassword) || arePasswordsIdentical.value,
+        isError = hasPasswordErrors(repeatPassword) || !arePasswordsIdentical.value,
         label = { Text(text = stringResource(R.string.password)) },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password

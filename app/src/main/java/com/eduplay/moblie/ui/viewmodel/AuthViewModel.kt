@@ -186,5 +186,9 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
         }
     }
 
+    fun setForgotStatusToFirstStep() {
+        currentForgotStatusFormState.value = ForgotPasswordStatus.ENTER_EMAIL
+    }
+
 
 }
