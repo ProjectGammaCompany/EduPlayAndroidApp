@@ -139,4 +139,8 @@
     <string name="incorrect_reset_code">Invalid assword reset code</string>
     <string name="check_reset_code">Validate password reset code</string>
     <string name="update_password">Update password</string>
+    <string name="platform_agreement_part_1">I agree to</string>
+    <string name="platform_agreement_part_2_user_agreement">" User Agreement "</string>
+    <string name="platform_agreement_part_3">"and give my consent to process my personal data as stated in "</string>
+    <string name="platform_agreement_part_4">Privacy policy</string>
 </resources>

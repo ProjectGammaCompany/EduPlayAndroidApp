@@ -140,4 +140,8 @@
     <string name="incorrect_reset_code">Не действительный код восстановления пароля</string>
     <string name="check_reset_code">Проверить код восстановления пароля</string>
     <string name="update_password">Обновить пароль</string>
+    <string name="platform_agreement_part_1">Я принимаю условия</string>
+    <string name="platform_agreement_part_2_user_agreement">" Пользовательского соглашения "</string>
+    <string name="platform_agreement_part_3">"и даю согласие на обработку персональных данных в соответствии с "</string>
+    <string name="platform_agreement_part_4">Политикой конфиденциальности</string>
 </resources>

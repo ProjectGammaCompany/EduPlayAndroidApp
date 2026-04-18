@@ -34,6 +34,8 @@ android {
             buildConfigField("String", "BACKEND_FILE_URL", "\"https://files.hse-eduplay.ru/eduplay-bucket/uploads/\"")
             buildConfigField("String", "FRONTEND_URL", "\"https://hse-eduplay.ru/\"")
             buildConfigField("String", "BACKEND_EVENT_FILE_URL", "\"https://files.hse-eduplay.ru\"")
+            buildConfigField("String", "PLATFORM_TERMS_URL", "\"http://hse-eduplay.ru/terms\"")
+            buildConfigField("String", "PLATFORM_POLICY_URL", "\"http://hse-eduplay.ru/policy\"")
 
 
         }
@@ -44,6 +46,8 @@ android {
             buildConfigField("String", "BACKEND_FILE_URL", "\"http://files.hse-eduplay.ru/eduplay-bucket/uploads/\"")
             buildConfigField("String", "FRONTEND_URL", "\"http://hse-eduplay.ru/\"")
             buildConfigField("String", "BACKEND_EVENT_FILE_URL", "\"https://files.hse-eduplay.ru/eduplay-bucket/generated/\"")
+            buildConfigField("String", "PLATFORM_TERMS_URL", "\"http://hse-eduplay.ru/terms\"")
+            buildConfigField("String", "PLATFORM_POLICY_URL", "\"http://hse-eduplay.ru/policy\"")
         }
 
     }

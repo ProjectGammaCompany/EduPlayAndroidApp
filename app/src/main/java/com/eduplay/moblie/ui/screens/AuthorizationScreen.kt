@@ -1,11 +1,13 @@
 package com.eduplay.moblie.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -37,16 +40,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.eduplay.moblie.BuildConfig
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.ui.elements.ForgotPasswordForm
@@ -94,7 +105,7 @@ fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel =
         onSendCode = viewModel::requestCode,
         onCheckCode = viewModel::checkCode,
         onSendNewPassword = viewModel::updatePassword,
-        repeatPasswordError = viewModel.passwordEqualsRepeatPassword,
+        repeatPasswordError = viewModel.passwordsAreNotTheSame,
         gotToPrevChangePasswordStatus = viewModel::changePasswordGoBack,
         forgotPasswordStatus = viewModel.currentForgotStatusFormState,
         areChangePasswordsIdentical = viewModel.changePasswordsIdentical,
@@ -179,8 +190,8 @@ fun AuthorizationScreen(
                     if (showForgotPasswordForm) {
                         ForgotPasswordForm(
                             forgotPasswordStatus = forgotPasswordStatus,
-                            correctEmail = TODO(),
-                            correctCode = TODO(),
+                            correctEmail = correctChangeEmail,
+                            correctCode = correctCode,
                             hasEmailErrors = emailHasErrors,
                             hasPasswordErrors = passwordHasErrors,
                             arePasswordsIdentical = areChangePasswordsIdentical,
@@ -351,6 +362,7 @@ private fun LoginForm(
 
 }
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 private fun RegistrationForm(
     switchForms: () -> Unit,
@@ -389,7 +401,7 @@ private fun RegistrationForm(
         },
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .padding(bottom = 15.dp)
+            .padding(bottom = 10.dp)
             .testTag("email_field")
     )
 
@@ -425,7 +437,7 @@ private fun RegistrationForm(
         },
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .padding(bottom = 15.dp)
+            .padding(bottom = 10.dp)
             .testTag("password_field")
     )
 // repeat password field
@@ -458,13 +470,48 @@ private fun RegistrationForm(
         },
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .padding(bottom = 30.dp)
+            .padding(bottom = 5.dp)
             .testTag("password_field")
     )
+
+    var agreed by remember { mutableStateOf(false) }
+    val linkColor = colorScheme.primary
+    val context = LocalContext.current
+    val agreementText = remember {
+        buildAnnotatedString {
+            append(context.getText(R.string.platform_agreement_part_1))
+
+            withLink(
+                LinkAnnotation.Url(
+                    BuildConfig.PLATFORM_TERMS_URL,
+                    TextLinkStyles(style = SpanStyle(color = linkColor))
+                )
+            ) {
+                append(context.getText(R.string.platform_agreement_part_2_user_agreement))
+            }
+            append(context.getText(R.string.platform_agreement_part_3))
+            withLink(
+                LinkAnnotation.Url(
+                    BuildConfig.PLATFORM_POLICY_URL,
+                    TextLinkStyles(style = SpanStyle(color = linkColor))
+                )
+            ) {
+                append(context.getText(R.string.platform_agreement_part_4))
+            }
+        }
+    }
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Checkbox(agreed, onCheckedChange = { agreed = !agreed })
+        Text(
+            agreementText,
+            style = typography.labelSmall
+        )
+    }
 
     //submit btn
     Button(
         onClick = { onRegister(email.text.toString(), password, repeatPassword, true) },
+        enabled = agreed,
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .testTag("main_btn")

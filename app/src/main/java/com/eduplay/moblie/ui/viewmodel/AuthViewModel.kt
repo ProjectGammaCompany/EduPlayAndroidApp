@@ -27,7 +27,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
 
     val authResult = mutableStateOf<AuthResult?>(null)
     val noInternetConnection = mutableStateOf(false)
-    val passwordEqualsRepeatPassword = mutableStateOf(true)
+    val passwordsAreNotTheSame = mutableStateOf(false)
 
 
     fun passwordHasErrors(password: String): Boolean {
@@ -83,7 +83,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
                 }
             }
         } else if (password != repeatPassword) {
-            passwordEqualsRepeatPassword.value = false
+            passwordsAreNotTheSame.value = false
         } else if (emailHasErrors(email)) {
             authResult.value = AuthResult.INCORRECT_EMAIL
         } else if (passwordHasErrors(password)) {
