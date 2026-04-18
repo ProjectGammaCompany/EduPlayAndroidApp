@@ -27,6 +27,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
 
     val authResult = mutableStateOf<AuthResult?>(null)
     val noInternetConnection = mutableStateOf(false)
+    val passwordEqualsRepeatPassword = mutableStateOf(true)
 
 
     fun passwordHasErrors(password: String): Boolean {
@@ -44,8 +45,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
 
     fun submitLoginForm(
         email: String,
-        password: String,
-        callBack: () -> Unit
+        password: String
     ) {
         if (!emailHasErrors(email) && !passwordHasErrors(password)) {
             viewModelScope.launch {
@@ -55,35 +55,39 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
                     noInternetConnection.value = true
                 } catch (e: Exception) {
                     Log.e("login error", e.message ?: "", e)
-                    //callBack()
                 }
             }
-        } else {
-            callBack()
+        } else if (emailHasErrors(email)){
+            authResult.value = AuthResult.INCORRECT_EMAIL
+        } else if (passwordHasErrors(email)){
+            authResult.value = AuthResult.UNSAFE_PASSWORD
         }
     }
 
     fun submitRegisterForm(
         email: String,
         password: String,
-        callBack: () -> Unit
+        repeatPassword: String,
     ) {
         if (!emailHasErrors(email) && !passwordHasErrors(password)) {
             viewModelScope.launch(Dispatchers.IO) {
                 try {
                     authResult.value = repository
-                        .register(RegistrationData(email, password, password))
+                        .register(RegistrationData(email, password, repeatPassword))
                 } catch (e: ConnectException) {
                     Log.d("AUTHORISATION", e.message.toString())
                     noInternetConnection.value = true
                 } catch (e: Exception) {
                     Log.e("AUTHORISATION", e.message ?: "", e)
-                    callBack()
+                    noInternetConnection.value = true
                 }
-
             }
-        } else {
-            callBack()
+        } else if (password != repeatPassword)  {
+           passwordEqualsRepeatPassword.value = false
+        } else if (emailHasErrors(email)) {
+            authResult.value = AuthResult.INCORRECT_EMAIL
+        } else if (passwordHasErrors(password)) {
+            authResult.value = AuthResult.UNSAFE_PASSWORD
         }
     }
 }

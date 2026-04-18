@@ -130,4 +130,8 @@
     <string name="all_answers_sent">Все результаты прохождений были отправлены</string>
     <string name="need_to_send_results">Нужно отправить результаты прохождений</string>
     <string name="send_event_results">Отправиль результаты</string>
+    <string name="forgot_password">Забыли пароль?</string>
+    <string name="incorrect_email">Введите корректную почту</string>
+    <string name="repeat_password">Повторите пароль</string>
+    <string name="passwords_not_same">Пароли не совпадают</string>
 </resources>

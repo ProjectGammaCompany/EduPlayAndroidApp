@@ -129,4 +129,8 @@
     <string name="all_answers_sent">All results were sent</string>
     <string name="need_to_send_results">Some events\' results need to be sent</string>
     <string name="send_event_results">Send event results</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="incorrect_email">Enter correct email</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="passwords_not_same">Passwords are not the same</string>
 </resources>
