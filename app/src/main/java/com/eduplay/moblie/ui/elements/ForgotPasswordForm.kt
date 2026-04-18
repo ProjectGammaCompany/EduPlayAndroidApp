@@ -68,7 +68,7 @@ fun ForgotPasswordForm(
     when (forgotPasswordStatus.value) {
         ForgotPasswordStatus.ENTER_EMAIL -> EmailForm(onSendCode, correctEmail, hasEmailErrors)
         ForgotPasswordStatus.ENTER_CODE -> CodeForm(onCheckCode, correctCode)
-        ForgotPasswordStatus.CHANGE_PASSWORD -> ChangePasswordForm(hasPasswordErrors, arePasswordsIdentical, isPasswordSafe, onSendNewPassword)
+        ForgotPasswordStatus.CHANGE_PASSWORD -> ChangePasswordForm(hasPasswordErrors, arePasswordsIdentical, isPasswordSafe,  correctCode,onSendNewPassword)
         ForgotPasswordStatus.NONE -> {}
     }
 }
@@ -151,6 +151,7 @@ private fun ChangePasswordForm(
     hasPasswordErrors: (String) -> Boolean,
     arePasswordsIdentical: State<Boolean>,
     isPasswordSafe: State<Boolean>,
+    isCodeValid: State<Boolean>,
     onUpdatePassword: (String, String) -> Unit
 ) {
 
@@ -226,6 +227,9 @@ private fun ChangePasswordForm(
             .padding(bottom = 30.dp)
             .testTag("password_field")
     )
+    if (!isCodeValid.value) {
+        Text(stringResource(R.string.incorrect_reset_code))
+    }
     Button(
         onClick = { onUpdatePassword(password, repeatPassword) },
         modifier = Modifier

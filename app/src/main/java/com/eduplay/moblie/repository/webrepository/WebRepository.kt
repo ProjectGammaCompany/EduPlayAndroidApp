@@ -25,14 +25,15 @@ import com.eduplay.moblie.repository.responseTypes.RequiredJoinFields
 import com.eduplay.moblie.repository.responseTypes.TaskFromBlock
 import com.eduplay.moblie.repository.webrepository.requestTypes.AnswerBatch
 import com.eduplay.moblie.repository.webrepository.requestTypes.AvatarUpdate
+import com.eduplay.moblie.repository.webrepository.requestTypes.EmailForPasswordChange
 import com.eduplay.moblie.repository.webrepository.requestTypes.EventIdList
 import com.eduplay.moblie.repository.webrepository.requestTypes.EventRating
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Notification
+import com.eduplay.moblie.repository.webrepository.responseTypes.PasswordUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatus
-import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatusList
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.TokenManager
 import jakarta.inject.Inject
@@ -86,6 +87,38 @@ class WebRepository @Inject constructor(
         }
 
         return AuthResult.USER_EXISTS
+    }
+
+    suspend fun requestCodeByEmail(email: String): AuthResult {
+        val response = authApi.requestPasswordCodeByEmail(EmailForPasswordChange(email))
+        if (response.isSuccessful) {
+            return AuthResult.SUCCESSES
+        }
+        return AuthResult.USER_NOT_FOUND
+    }
+
+    suspend fun checkPasswordCodeValidity(code: String): Boolean {
+        val response = authApi.isPasswordCodeValid(code)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body.validity
+        }
+        return false
+    }
+
+    suspend fun updatePassword(
+        password: String,
+        repeatPassword: String,
+        code: String
+    ): AuthResult {
+        val response = authApi.updatePassword(PasswordUpdate(code, password, repeatPassword))
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            tokenManager.saveAccessToken(body.accessToken)
+            tokenManager.saveRefreshToken(body.refreshToken)
+            return AuthResult.SUCCESSES
+        }
+        return AuthResult.UNKNOWN_ERROR
     }
 
     suspend fun getEvents(

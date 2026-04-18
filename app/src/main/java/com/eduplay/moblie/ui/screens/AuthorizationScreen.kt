@@ -91,10 +91,16 @@ fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel =
             )
         },
         viewModel.authResult,
-        onSendCode = { true },
-        onCheckCode = { true },
-        onSendNewPassword = { _, _ -> },
-        repeatPasswordError = viewModel.passwordEqualsRepeatPassword
+        onSendCode = viewModel::requestCode,
+        onCheckCode = viewModel::checkCode,
+        onSendNewPassword = viewModel::updatePassword,
+        repeatPasswordError = viewModel.passwordEqualsRepeatPassword,
+        gotToPrevChangePasswordStatus = viewModel::changePasswordGoBack,
+        forgotPasswordStatus = viewModel.currentForgotStatusFormState,
+        areChangePasswordsIdentical = viewModel.changePasswordsIdentical,
+        isChangePasswordSafe = viewModel.changePasswordsCorrect,
+        correctChangeEmail = viewModel.changePasswordEmailIsCorrect,
+        correctCode = viewModel.changePasswordCodeIsCorrect,
     )
 
 }
@@ -110,7 +116,7 @@ fun AuthorizationScreen(
     onCheckCode: (String) -> Unit,
     onSendNewPassword: (String, String) -> Unit,
     repeatPasswordError: State<Boolean>,
-    gotToPrevChangePasswordStatus: ()-> Unit,
+    gotToPrevChangePasswordStatus: () -> Unit,
     forgotPasswordStatus: State<ForgotPasswordStatus>,
     areChangePasswordsIdentical: State<Boolean>,
     isChangePasswordSafe: State<Boolean>,

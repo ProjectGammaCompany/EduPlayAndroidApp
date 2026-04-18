@@ -37,7 +37,6 @@ import com.eduplay.moblie.repository.webrepository.pagingSources.FavoriteEventsP
 import com.eduplay.moblie.repository.webrepository.pagingSources.NotificationPagingSource
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
-import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatus
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
 import jakarta.inject.Inject
@@ -53,23 +52,15 @@ class EduRepository @Inject constructor(
     private val offlineModeManager: OfflineModeManager
 ) {
     suspend fun login(auth: Auth): AuthResult {
-        var authResult: AuthResult
-        try {
-            authResult = webRepository.login(auth)
-        } catch (e: Exception) {
-            throw e
-        }
+        val authResult = webRepository.login(auth)
+
         if (authResult == AuthResult.SUCCESSES) localRepository.saveUser()
         return authResult
     }
 
     suspend fun logout(): Boolean {
-        var result: Boolean
-        try {
-            result = webRepository.logout()
-        } catch (e: Exception) {
-            throw e
-        }
+        val result = webRepository.logout()
+
         localRepository.removeCurrentUser()
         return result
     }
@@ -83,6 +74,28 @@ class EduRepository @Inject constructor(
         }
         if (authResult == AuthResult.SUCCESSES) localRepository.saveUser()
         return authResult
+    }
+
+    suspend fun updatePassword(
+        password: String,
+        repeatPassword: String,
+        code: String
+    ): Boolean {
+        val authResult = webRepository.updatePassword(password, repeatPassword, code)
+
+        if (authResult == AuthResult.SUCCESSES) {
+            localRepository.saveUser()
+            return true
+        }
+        return false
+    }
+
+    suspend fun requestCodeByEmail(email: String): AuthResult {
+       return webRepository.requestCodeByEmail(email)
+    }
+
+    suspend fun checkPasswordCodeValidity(code: String): Boolean {
+        return webRepository.checkPasswordCodeValidity(code)
     }
 
     suspend fun getEvents(
