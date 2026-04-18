@@ -90,4 +90,13 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
             authResult.value = AuthResult.UNSAFE_PASSWORD
         }
     }
+
+    enum class ForgotPasswordStatus{
+        ENTER_EMAIL,
+        ENTER_CODE,
+        CHANGE_PASSWORD,
+        NONE
+    }
+
+
 }

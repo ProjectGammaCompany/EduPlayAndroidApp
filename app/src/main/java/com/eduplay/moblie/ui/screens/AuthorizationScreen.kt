@@ -49,8 +49,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.AuthResult
+import com.eduplay.moblie.ui.elements.ForgotPasswordForm
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.viewmodel.AuthViewModel
+import com.eduplay.moblie.ui.viewmodel.AuthViewModel.ForgotPasswordStatus
+import com.eduplay.moblie.ui.viewmodel.AuthViewModel.ForgotPasswordStatus.NONE
 
 @Composable
 fun AuthorizationScreen(navController: NavController, viewModel: AuthViewModel = hiltViewModel()) {
@@ -103,10 +106,16 @@ fun AuthorizationScreen(
     onLogin: (String, String) -> Unit,
     onRegister: (String, String, String, Boolean) -> Unit,
     authResult: State<AuthResult?>,
-    onSendCode: (String) -> Boolean,
-    onCheckCode: (String) -> Boolean,
+    onSendCode: (String) -> Unit,
+    onCheckCode: (String) -> Unit,
     onSendNewPassword: (String, String) -> Unit,
-    repeatPasswordError: State<Boolean>
+    repeatPasswordError: State<Boolean>,
+    gotToPrevChangePasswordStatus: ()-> Unit,
+    forgotPasswordStatus: State<ForgotPasswordStatus>,
+    areChangePasswordsIdentical: State<Boolean>,
+    isChangePasswordSafe: State<Boolean>,
+    correctChangeEmail: State<Boolean>,
+    correctCode: State<Boolean>,
 ) {
     var isLoginForm by remember { mutableStateOf(true) }
     val switchForms = {
@@ -116,6 +125,9 @@ fun AuthorizationScreen(
     var showForgotPasswordForm by remember { mutableStateOf(false) }
     val onForgotPassword = {
         showForgotPasswordForm = true
+    }
+    if (forgotPasswordStatus.value == NONE) {
+        showForgotPasswordForm = false
     }
 
     val minViewWidth = 0.5f
@@ -158,7 +170,21 @@ fun AuthorizationScreen(
                         .padding(1.dp)
                         .verticalScroll(formScrollState)
                 ) {
-                    if (isLoginForm) {
+                    if (showForgotPasswordForm) {
+                        ForgotPasswordForm(
+                            forgotPasswordStatus = forgotPasswordStatus,
+                            correctEmail = TODO(),
+                            correctCode = TODO(),
+                            hasEmailErrors = emailHasErrors,
+                            hasPasswordErrors = passwordHasErrors,
+                            arePasswordsIdentical = areChangePasswordsIdentical,
+                            isPasswordSafe = isChangePasswordSafe,
+                            onSendCode = onSendCode,
+                            onCheckCode = onCheckCode,
+                            onSendNewPassword = onSendNewPassword,
+                            onGoBack = gotToPrevChangePasswordStatus
+                        )
+                    } else if (isLoginForm) {
                         LoginForm(
                             switchForms,
                             isEmailError = emailHasErrors,
@@ -400,7 +426,7 @@ private fun RegistrationForm(
     OutlinedTextField(
         value = repeatPassword,
         onValueChange = { it -> repeatPassword = it },
-        isError = isPasswordError(repeatPassword),
+        isError = isPasswordError(repeatPassword) || repeatPasswordIsWrong.value,
         label = { Text(text = stringResource(R.string.password)) },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password

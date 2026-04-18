@@ -134,4 +134,10 @@
     <string name="incorrect_email">Введите корректную почту</string>
     <string name="repeat_password">Повторите пароль</string>
     <string name="passwords_not_same">Пароли не совпадают</string>
+    <string name="password_reset">Восстановление пароля</string>
+    <string name="recieve_reset_code">Получить код восстановления</string>
+    <string name="reset_code">Код восстановления пораоля</string>
+    <string name="incorrect_reset_code">Не действительный код восстановления пароля</string>
+    <string name="check_reset_code">Проверить код восстановления пароля</string>
+    <string name="update_password">Обновить пароль</string>
 </resources>

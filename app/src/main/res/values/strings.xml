@@ -133,4 +133,10 @@
     <string name="incorrect_email">Enter correct email</string>
     <string name="repeat_password">Repeat password</string>
     <string name="passwords_not_same">Passwords are not the same</string>
+    <string name="password_reset">Password reset</string>
+    <string name="recieve_reset_code">Recieve reset code</string>
+    <string name="reset_code">Password reset code</string>
+    <string name="incorrect_reset_code">Invalid assword reset code</string>
+    <string name="check_reset_code">Validate password reset code</string>
+    <string name="update_password">Update password</string>
 </resources>
