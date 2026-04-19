@@ -148,4 +148,5 @@
     <string name="correct_answer_cnt">Correct answer cnt.</string>
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
+    <string name="no_results_yet">There are no results yet.</string>
 </resources>

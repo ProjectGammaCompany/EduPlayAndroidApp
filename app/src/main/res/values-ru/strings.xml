@@ -149,4 +149,5 @@
     <string name="correct_answer_cnt">Кол-во правльных ответов</string>
     <string name="ascending">По возрастанию</string>
     <string name="descending">По убыванию</string>
+    <string name="no_results_yet">Результатов пока нет.</string>
 </resources>

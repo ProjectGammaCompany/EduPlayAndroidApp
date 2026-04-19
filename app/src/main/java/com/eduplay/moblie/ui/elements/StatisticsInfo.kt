@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -64,6 +65,7 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStat
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserEditorStat
 import com.eduplay.moblie.ui.theme.EduPlayTheme
+import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel.EditorStatColumns
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderInterface
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
@@ -156,9 +158,20 @@ private fun TableOfUserResults(
 ) {
     var descendingSorting by remember { mutableStateOf(false) }
     var currentSortingColumn by remember { mutableStateOf(EditorStatColumns.USERNAME) }
+    val onSort = {
+        sortEventStatsByColumn(currentSortingColumn, descendingSorting)
+    }
+    val onClickSorDirBtn = {
+        descendingSorting = !descendingSorting
+        onSort()
+    }
+    val onHeaderClick = { column: EditorStatColumns ->
+        currentSortingColumn = column
+        onSort()
+    }
     Box(modifier = Modifier.fillMaxWidth()) {
         IconButton(
-            onClick = { descendingSorting = !descendingSorting },
+            onClick = onClickSorDirBtn,
             modifier = Modifier.align(Alignment.CenterEnd)
         ) {
             Icon(
@@ -171,7 +184,6 @@ private fun TableOfUserResults(
             )
         }
     }
-    sortEventStatsByColumn(currentSortingColumn, descendingSorting)
     LazyRow(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -189,7 +201,7 @@ private fun TableOfUserResults(
         }
         item {
             Column(Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
-                HeaderTableCell(stringResource(R.string.players), { currentSortingColumn = EditorStatColumns.USERNAME })
+                HeaderTableCell(stringResource(R.string.players), { onHeaderClick(EditorStatColumns.USERNAME) })
                 for (idx in users.indices) {
                     TableCell(users[idx].username, image = users[idx].avatar)
                 }
@@ -200,7 +212,7 @@ private fun TableOfUserResults(
             Column(Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
                 HeaderTableCell(
                     stringResource(R.string.correct_answer_cnt),
-                    { currentSortingColumn = EditorStatColumns.CORRECT_ANSWERS })
+                    { onHeaderClick(EditorStatColumns.CORRECT_ANSWERS) })
                 val answerCountText = StringBuilder()
                 for (idx in users.indices) {
                     answerCountText.clear()
@@ -214,12 +226,18 @@ private fun TableOfUserResults(
 
         item {
             Column(Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
-                HeaderTableCell(stringResource(R.string.points), { currentSortingColumn = EditorStatColumns.POINTS })
+                HeaderTableCell(stringResource(R.string.points), { onHeaderClick(EditorStatColumns.POINTS) })
                 for (idx in users.indices) {
                     TableCell(users[idx].points.toString())
                 }
             }
         }
+    }
+    if (users.isEmpty()) {
+        Text(
+            text = stringResource(R.string.no_results_yet),
+            style = Typography.labelLarge.copy(color = colorScheme.secondary)
+        )
     }
 }
 

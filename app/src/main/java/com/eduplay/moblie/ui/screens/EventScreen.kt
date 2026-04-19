@@ -108,6 +108,7 @@ import com.eduplay.moblie.ui.elements.StatisticsInfo
 import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
+import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel.EditorStatColumns
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.useCases.BluetoothConnectionFragment
 import com.eduplay.moblie.useCases.OfflineModeManager
@@ -362,7 +363,8 @@ fun EventScreen(
             viewModel.failedToSendAnswers,
             imageHeaderViewModel.appMode,
             viewModel.needsUpdate,
-            viewModel.editorEventStats
+            viewModel.editorEventStats,
+            viewModel::sortEventStatsByColumn
         )
     }
 }
@@ -407,7 +409,8 @@ fun EventScreen(
     failedToSendAnswers: State<Boolean>,
     appMode: State<Flow<OfflineModeManager.AppModes>>,
     needsUpdate: State<Boolean>,
-    groupEditorStats: State<ResultStats>
+    groupEditorStats: State<ResultStats>,
+    sortEventsByColumn: (EditorStatColumns, Boolean) -> Unit
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -484,7 +487,8 @@ fun EventScreen(
                     groups,
                     joinCode,
                     groupEvent,
-                    groupEditorStats
+                    groupEditorStats,
+                    sortEventsByColumn
                 )
             } else {
                 GeneralUserBody(
@@ -1106,7 +1110,8 @@ private fun EventCreatorBody(
     groups: SnapshotStateList<EventGroup>,
     joinCode: State<String>,
     groupEvent: State<Boolean>,
-    groupEditorStats: State<ResultStats>
+    groupEditorStats: State<ResultStats>,
+    sortEventsByColumn: (EditorStatColumns, Boolean) -> Unit
 ) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
@@ -1140,7 +1145,7 @@ private fun EventCreatorBody(
 
     when (selectedTabIdx) {
         0 -> GeneralInfo(tags, info, description)
-        1 -> {} //StatisticsInfo(groupEditorStats)
+        1 -> StatisticsInfo(groupEditorStats, sortEventsByColumn)
         2 -> PrivacySettings(password, groups, joinCode, privateEvent, groupEvent)
         else -> Box {}
     }
