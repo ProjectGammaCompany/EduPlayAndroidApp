@@ -472,7 +472,7 @@ private fun Settings(
                     .weight(1f)
             )
             Switch(
-                checked = offlineState.value == OfflineModeManager.AppModes.OFFLINE,
+                checked = offlineState.value == AppModes.OFFLINE,
                 onCheckedChange = {
                     onToggleOffline(it)
                 },
