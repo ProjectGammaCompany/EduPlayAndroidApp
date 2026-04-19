@@ -7,8 +7,12 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
 @HiltViewModel
-class AppThemeViewModel @Inject constructor(private val appSettingsManager: AppSettingsManager): ViewModel() {
-    fun getTheme(): Flow<AppSettingsManager.Themes> {
+class AppThemeViewModel @Inject constructor(private val appSettingsManager: AppSettingsManager): ViewModel(), ThemeViewModel {
+    override fun getTheme(): Flow<AppSettingsManager.Themes> {
         return appSettingsManager.getTheme()
     }
+}
+
+interface ThemeViewModel {
+    fun getTheme(): Flow<AppSettingsManager.Themes>
 }

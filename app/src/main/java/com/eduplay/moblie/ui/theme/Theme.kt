@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.eduplay.moblie.ui.viewmodel.AppThemeViewModel
+import com.eduplay.moblie.ui.viewmodel.ThemeViewModel
 import com.eduplay.moblie.useCases.AppSettingsManager
 
 private val DarkColorScheme = darkColorScheme(
@@ -36,13 +37,14 @@ private val LightColorScheme = lightColorScheme(
     onTertiary = Color.White,
     primaryContainer = LightBlue500,
     onPrimaryContainer = Blue500,
-    onPrimaryFixed = Color.White
+    onPrimaryFixed = Color.White,
+    outline = LightBlue100
 
 )
 
 @Composable
 fun EduPlayTheme(
-    appThemeViewModel: AppThemeViewModel = hiltViewModel(),
+    appThemeViewModel: ThemeViewModel = hiltViewModel<AppThemeViewModel>(),
     content: @Composable () -> Unit
 ) {
     val darkTheme = isSystemInDarkTheme()

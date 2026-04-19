@@ -14,6 +14,7 @@ val Blue20 = Color(0xFF111752)
 
 val Blue500 = Color(0xFF5C30FF)
 val LightBlue500 = Color(0xFFD1C8FF)
+val LightBlue100 = Color(0xFFEEE9FF)
 val Purpule400 = Color(0xFFA689FF)
 val Purpule200 = Color(0xFFD39DFF)
 

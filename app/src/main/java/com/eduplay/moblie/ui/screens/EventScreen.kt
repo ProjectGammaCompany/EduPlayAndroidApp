@@ -100,6 +100,7 @@ import com.eduplay.moblie.BuildConfig
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.models.EventTag
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinGroupDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
@@ -360,7 +361,8 @@ fun EventScreen(
             { viewModel.deleteEventFromDevice(eventId) },
             viewModel.failedToSendAnswers,
             imageHeaderViewModel.appMode,
-            viewModel.needsUpdate
+            viewModel.needsUpdate,
+            viewModel.editorEventStats
         )
     }
 }
@@ -404,7 +406,8 @@ fun EventScreen(
     onDeleteEvent: () -> Unit,
     failedToSendAnswers: State<Boolean>,
     appMode: State<Flow<OfflineModeManager.AppModes>>,
-    needsUpdate: State<Boolean>
+    needsUpdate: State<Boolean>,
+    groupEditorStats: State<ResultStats>
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -480,7 +483,8 @@ fun EventScreen(
                     password,
                     groups,
                     joinCode,
-                    groupEvent
+                    groupEvent,
+                    groupEditorStats
                 )
             } else {
                 GeneralUserBody(
@@ -1101,7 +1105,8 @@ private fun EventCreatorBody(
     password: State<String>,
     groups: SnapshotStateList<EventGroup>,
     joinCode: State<String>,
-    groupEvent: State<Boolean>
+    groupEvent: State<Boolean>,
+    groupEditorStats: State<ResultStats>
 ) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
@@ -1135,7 +1140,7 @@ private fun EventCreatorBody(
 
     when (selectedTabIdx) {
         0 -> GeneralInfo(tags, info, description)
-        1 -> StatisticsInfo()
+        1 -> StatisticsInfo(groupEditorStats)
         2 -> PrivacySettings(password, groups, joinCode, privateEvent, groupEvent)
         else -> Box {}
     }
@@ -1222,47 +1227,48 @@ fun PrivacySettings(
 }
 
 
-@Composable
-@Preview
-fun EventScreenPreview() {
-    EventScreen(
-        innerPaddingValues = PaddingValues(0.dp),
-        eventCreatorMode = remember { mutableStateOf(false) },
-        isEventFavourite = remember { mutableStateOf(false) },
-        eventName = remember { mutableStateOf("EVENT") },
-        tags = remember { mutableStateListOf() },
-        author = remember { mutableStateOf("EVENT") },
-        isCompleted = remember { mutableStateOf(true) },
-        cover = "EVENT",
-        info = remember { mutableStateListOf() },
-        description = remember { mutableStateOf("EVENT") },
-        privateEvent = remember { mutableStateOf(false) },
-        isOpen = remember { mutableStateOf(true) },
-        isContinuing = remember { mutableStateOf(false) },
-        onAddToFavourite = {},
-        onComplain = { _ -> },
-        startEvent = {},
-        showResults = {},
-        onReturn = { true },
-        headers = remember { mutableStateOf(NetworkHeaders.EMPTY) },
-        toggleBluetooth = {},
-        isCompetitionMode = remember { mutableStateOf(false) },
-        canShowConnectionList = false,
-        password = remember { mutableStateOf("") },
-        groups = remember { mutableStateListOf() },
-        eventId = "",
-        joinCode = remember { mutableStateOf("") },
-        onDownload = {},
-        canDownLoad = remember { mutableStateOf(true) },
-        isRated = remember { mutableStateOf(true) },
-        onRate = {},
-        groupEvent = remember { mutableStateOf(true) },
-        downloadingEvents = remember { mutableStateMapOf() },
-        downloadedEvents = remember { mutableStateSetOf() },
-        isDownloaded = remember { mutableStateOf(true) },
-        onDeleteEvent = {},
-        failedToSendAnswers = remember { mutableStateOf(false) },
-        appMode = remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) },
-        needsUpdate = remember { mutableStateOf(true) },
-    )
-}
+//@Composable
+//@Preview
+//fun EventScreenPreview() {
+//    EventScreen(
+//        innerPaddingValues = PaddingValues(0.dp),
+//        eventCreatorMode = remember { mutableStateOf(false) },
+//        isEventFavourite = remember { mutableStateOf(false) },
+//        eventName = remember { mutableStateOf("EVENT") },
+//        tags = remember { mutableStateListOf() },
+//        author = remember { mutableStateOf("EVENT") },
+//        isCompleted = remember { mutableStateOf(true) },
+//        cover = "EVENT",
+//        info = remember { mutableStateListOf() },
+//        description = remember { mutableStateOf("EVENT") },
+//        privateEvent = remember { mutableStateOf(false) },
+//        isOpen = remember { mutableStateOf(true) },
+//        isContinuing = remember { mutableStateOf(false) },
+//        onAddToFavourite = {},
+//        onComplain = { _ -> },
+//        startEvent = {},
+//        showResults = {},
+//        onReturn = { true },
+//        headers = remember { mutableStateOf(NetworkHeaders.EMPTY) },
+//        toggleBluetooth = {},
+//        isCompetitionMode = remember { mutableStateOf(false) },
+//        canShowConnectionList = false,
+//        password = remember { mutableStateOf("") },
+//        groups = remember { mutableStateListOf() },
+//        eventId = "",
+//        joinCode = remember { mutableStateOf("") },
+//        onDownload = {},
+//        canDownLoad = remember { mutableStateOf(true) },
+//        isRated = remember { mutableStateOf(true) },
+//        onRate = {},
+//        groupEvent = remember { mutableStateOf(true) },
+//        downloadingEvents = remember { mutableStateMapOf() },
+//        downloadedEvents = remember { mutableStateSetOf() },
+//        isDownloaded = remember { mutableStateOf(true) },
+//        onDeleteEvent = {},
+//        failedToSendAnswers = remember { mutableStateOf(false) },
+//        appMode = remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) },
+//        needsUpdate = remember { mutableStateOf(true) },
+//        groupEditorStats = remember { mutableStateOf(ResultStats(false, null, null)) }
+//    )
+//}
