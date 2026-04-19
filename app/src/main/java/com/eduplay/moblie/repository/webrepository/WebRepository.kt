@@ -30,6 +30,7 @@ import com.eduplay.moblie.repository.webrepository.requestTypes.EventIdList
 import com.eduplay.moblie.repository.webrepository.requestTypes.EventRating
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Notification
 import com.eduplay.moblie.repository.webrepository.responseTypes.PasswordUpdate
@@ -479,6 +480,16 @@ class WebRepository @Inject constructor(
             return body.events
         }
         return null
+    }
+
+    suspend fun getEventEditorStats(eventId: String): ResultStats {
+        val response = api.getEditorStats(eventId)
+        val body = response.body()
+        Log.d("Requests editor stats", response.code().toString() + response.raw())
+        if (response.isSuccessful && body != null) {
+            return body
+        }
+        throw IllegalAccessException("failed to get event editor stats")
     }
 
 }

@@ -103,6 +103,7 @@ import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinGroupDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
+import com.eduplay.moblie.ui.elements.StatisticsInfo
 import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
@@ -1220,11 +1221,6 @@ fun PrivacySettings(
     }
 }
 
-@Composable
-private fun StatisticsInfo() {
-    Text("Coming soon")
-    //TODO("статистики на экране статистик")
-}
 
 @Composable
 @Preview

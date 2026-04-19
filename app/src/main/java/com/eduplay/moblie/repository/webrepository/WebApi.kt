@@ -24,6 +24,7 @@ import com.eduplay.moblie.repository.webrepository.requestTypes.EventRating
 import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.DownloadPath
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.NotificationList
 import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatusList
@@ -207,4 +208,8 @@ interface WebApi {
     @POST("/user/eventStatus")
     @InjectAuth
     suspend fun getUserEventsStatuses(@Body eventIds: EventIdList): Response<UserEventStatusList>
+
+    @GET("/event/{eventId}/editorStats")
+    @InjectAuth
+    suspend fun getEditorStats(@Path("eventId") eventId: String): Response<ResultStats>
 }

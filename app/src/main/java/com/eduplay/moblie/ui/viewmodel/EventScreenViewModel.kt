@@ -15,6 +15,7 @@ import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventStatus
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.repository.EduRepository
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.DownloadStatusObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,6 +51,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
     val isDownloaded = mutableStateOf(false)
     val failedToSendAnswers = mutableStateOf(false)
     val needsUpdate = mutableStateOf(false)
+    val editorEventStats = mutableStateOf(ResultStats(false, null, null))
 
     val noInternetConnection = mutableStateOf(false)
 
@@ -179,6 +181,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
             )
         )
 
+        editorEventStats.value = repository.getEventEditorStats(eventId)
         if (privateEvent.value) {
             try {
                 joinCode.value = repository.getJoinCode(eventId).joinCode

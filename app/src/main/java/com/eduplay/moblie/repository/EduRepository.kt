@@ -35,6 +35,7 @@ import com.eduplay.moblie.repository.webrepository.pagingSources.CompletedEvents
 import com.eduplay.moblie.repository.webrepository.pagingSources.CreatedEventsPagingSource
 import com.eduplay.moblie.repository.webrepository.pagingSources.FavoriteEventsPagingSource
 import com.eduplay.moblie.repository.webrepository.pagingSources.NotificationPagingSource
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.OfflineModeManager
@@ -463,5 +464,12 @@ class EduRepository @Inject constructor(
 
     suspend fun containsUnsentAnswers(): Boolean {
         return localRepository.containsUnsentAnswers()
+    }
+
+    suspend fun getEventEditorStats(eventId: String): ResultStats {
+        if (offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
+            return webRepository.getEventEditorStats(eventId)
+        }
+        return ResultStats(false, null, null)
     }
 }
