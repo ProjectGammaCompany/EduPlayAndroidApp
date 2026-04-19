@@ -145,4 +145,8 @@
     <string name="platform_agreement_part_3">"и даю согласие на обработку персональных данных в соответствии с "</string>
     <string name="platform_agreement_part_4">Политикой конфиденциальности</string>
     <string name="username">Имя пользователя</string>
+    <string name="players">Игроки</string>
+    <string name="correct_answer_cnt">Кол-во правльных ответов</string>
+    <string name="ascending">По возрастанию</string>
+    <string name="descending">По убыванию</string>
 </resources>

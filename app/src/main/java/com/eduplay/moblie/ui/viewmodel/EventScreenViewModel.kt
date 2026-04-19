@@ -15,7 +15,9 @@ import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventStatus
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.repository.EduRepository
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.GroupEditorStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserEditorStat
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.DownloadStatusObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +29,10 @@ import java.time.LocalDateTime
 
 
 @HiltViewModel
-class EventScreenViewModel @Inject constructor(val repository: EduRepository, val downloadStatusObserver: DownloadStatusObserver) : ViewModel() {
+class EventScreenViewModel @Inject constructor(
+    val repository: EduRepository,
+    val downloadStatusObserver: DownloadStatusObserver
+) : ViewModel() {
     val eventCreatorMode = mutableStateOf(false)
     val isEventFavourite = mutableStateOf(false)
     val isCompleted = mutableStateOf(false)
@@ -114,7 +119,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
         var startTime = LocalDateTime.MAX
         if (data.startDate?.isNotBlank() ?: false) {
             startTime = DateConverter.convertFromServerFormat(data.startDate)
-            info.add(Pair(R.string.opens, DateConverter.convertForDisplay(startTime) ))
+            info.add(Pair(R.string.opens, DateConverter.convertForDisplay(startTime)))
         }
         var endTime = LocalDateTime.MIN
         if (data.endDate?.isNotBlank() ?: false) {
@@ -209,7 +214,7 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 repository.complain(eventId, reason)
-            }  catch (e: ConnectException) {
+            } catch (e: ConnectException) {
                 Log.e("complain", e.message ?: e.toString(), e)
                 noInternetConnection.value = true
             } catch (e: NotAuthorisedException) {
@@ -258,6 +263,52 @@ class EventScreenViewModel @Inject constructor(val repository: EduRepository, va
             if (isDownloaded.value == false) {
                 downloadStatusObserver.deletedFile(eventId)
             }
+        }
+    }
+
+    enum class EditorStatColumns {
+        USERNAME,
+        CORRECT_ANSWERS,
+        POINTS
+    }
+
+    fun sortEventStatsByColumn(
+        column: EditorStatColumns,
+        descending: Boolean
+    ) {
+        viewModelScope.launch {
+            val users: List<UserEditorStat>? =
+                when (column) {
+                    EditorStatColumns.USERNAME -> editorEventStats.value.users?.sortedBy { it.username }
+                    EditorStatColumns.CORRECT_ANSWERS -> editorEventStats.value.users?.sortedBy { it.answers.correct }
+                    EditorStatColumns.POINTS -> editorEventStats.value.users?.sortedBy { it.points }
+                }
+
+            val groups: List<GroupEditorStats>? = editorEventStats.value.groups?.map {
+                GroupEditorStats(
+                    id = it.id,
+                    name = it.name,
+                    users = if (descending) {
+                        when (column) {
+                            EditorStatColumns.USERNAME -> it.users.sortedByDescending { group -> group.username }
+                            EditorStatColumns.CORRECT_ANSWERS -> it.users.sortedByDescending { group -> group.answers.correct }
+                            EditorStatColumns.POINTS -> it.users.sortedByDescending { group -> group.points }
+                        }
+                    } else {
+                        when (column) {
+                            EditorStatColumns.USERNAME -> it.users.sortedBy { group -> group.username }
+                            EditorStatColumns.CORRECT_ANSWERS -> it.users.sortedBy { group -> group.answers.correct }
+                            EditorStatColumns.POINTS -> it.users.sortedBy { group -> group.points }
+                        }
+                    }
+                )
+            }
+
+            editorEventStats.value = ResultStats(
+                groupEvent = editorEventStats.value.groupEvent,
+                users = if (descending) users?.reversed() else users,
+                groups = groups
+            )
         }
     }
 }

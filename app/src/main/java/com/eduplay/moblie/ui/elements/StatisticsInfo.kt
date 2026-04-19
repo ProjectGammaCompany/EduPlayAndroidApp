@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.MenuDefaults
@@ -40,26 +41,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.painter.BrushPainter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import com.eduplay.moblie.R
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.GroupEditorStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserEditorStat
 import com.eduplay.moblie.ui.theme.EduPlayTheme
+import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel.EditorStatColumns
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderInterface
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.ThemeViewModel
@@ -71,7 +76,7 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun StatisticsInfo(
     stats: State<ResultStats>,
-    imageHeaderViewModel: ImageHeaderInterface = hiltViewModel<ImageHeaderViewModel>()
+    sortEventStatsByColumn: (EditorStatColumns, Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -133,10 +138,13 @@ fun StatisticsInfo(
 
             TableOfUserResults(
                 stats.value.groups?.get(currentGroupIdx)?.users ?: listOf(),
-                imageHeaderViewModel
+                sortEventStatsByColumn
             )
         } else {
-            TableOfUserResults(stats.value.users ?: listOf(), imageHeaderViewModel)
+            TableOfUserResults(
+                stats.value.users ?: listOf(),
+                sortEventStatsByColumn
+            )
         }
     }
 }
@@ -144,8 +152,26 @@ fun StatisticsInfo(
 @Composable
 private fun TableOfUserResults(
     users: List<UserEditorStat>,
-    imageHeaderViewModel: ImageHeaderInterface
+    sortEventStatsByColumn: (EditorStatColumns, Boolean) -> Unit
 ) {
+    var descendingSorting by remember { mutableStateOf(false) }
+    var currentSortingColumn by remember { mutableStateOf(EditorStatColumns.USERNAME) }
+    Box(modifier = Modifier.fillMaxWidth()) {
+        IconButton(
+            onClick = { descendingSorting = !descendingSorting },
+            modifier = Modifier.align(Alignment.CenterEnd)
+        ) {
+            Icon(
+                ImageVector.vectorResource(R.drawable.list_arrow),
+                contentDescription = if (descendingSorting) stringResource(R.string.descending) else stringResource(
+                    R.string.ascending
+                ),
+                modifier = Modifier
+                    .rotate(if (descendingSorting) 180f else 0f)
+            )
+        }
+    }
+    sortEventStatsByColumn(currentSortingColumn, descendingSorting)
     LazyRow(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -155,40 +181,42 @@ private fun TableOfUserResults(
         // header
         item {
             Column(Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
-                HeaderTableCell("№")
+                HeaderTableCell("")
                 for (idx in users.indices) {
-                    TableCell((idx + 1).toString(), imageHeaderViewModel)
+                    TableCell((idx + 1).toString())
                 }
             }
         }
         item {
             Column(Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
-                HeaderTableCell("user")
+                HeaderTableCell(stringResource(R.string.players), { currentSortingColumn = EditorStatColumns.USERNAME })
                 for (idx in users.indices) {
-                    TableCell(users[idx].username, imageHeaderViewModel, image = users[idx].avatar)
+                    TableCell(users[idx].username, image = users[idx].avatar)
                 }
             }
         }
 
         item {
             Column(Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
-                HeaderTableCell("answers")
+                HeaderTableCell(
+                    stringResource(R.string.correct_answer_cnt),
+                    { currentSortingColumn = EditorStatColumns.CORRECT_ANSWERS })
                 val answerCountText = StringBuilder()
                 for (idx in users.indices) {
                     answerCountText.clear()
                         .append(users[idx].answers.correct)
                         .append("/")
                         .append(users[idx].answers.total)
-                    TableCell(answerCountText.toString(), imageHeaderViewModel)
+                    TableCell(answerCountText.toString())
                 }
             }
         }
 
         item {
             Column(Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
-                HeaderTableCell("points")
+                HeaderTableCell(stringResource(R.string.points), { currentSortingColumn = EditorStatColumns.POINTS })
                 for (idx in users.indices) {
-                    TableCell(users[idx].points.toString(), imageHeaderViewModel)
+                    TableCell(users[idx].points.toString())
                 }
             }
         }
@@ -198,8 +226,8 @@ private fun TableOfUserResults(
 @Composable
 private fun TableCell(
     text: String,
-    imageHeaderViewModel: ImageHeaderInterface,
     image: String? = null,
+    imageHeaderViewModel: ImageHeaderInterface = hiltViewModel<ImageHeaderViewModel>()
 ) {
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -261,11 +289,15 @@ private fun TableCell(
 }
 
 @Composable
-private fun HeaderTableCell(text: String) {
+private fun HeaderTableCell(
+    text: String,
+    onClick: () -> Unit = {}
+) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(true, onClick = onClick)
             .border(1.dp, color = colorScheme.outline)
             .background(colorScheme.primary)
             .padding(vertical = 5.dp)
@@ -280,80 +312,6 @@ private fun HeaderTableCell(text: String) {
             modifier = Modifier
                 .padding(start = 3.dp)
                 .align(Alignment.CenterVertically)
-        )
-    }
-}
-
-@Composable
-@Preview
-fun TableOfUserResultsPreview() {
-    val users = mutableListOf<UserEditorStat>(
-        UserEditorStat(
-            id = "user1",
-            username = "user",
-            answers = UserEditorStat.Answer(
-                correct = 10,
-                total = 100
-            ),
-            points = 450,
-            avatar = ""
-        )
-    )
-    for (i in 0..10) {
-        users.add(
-            UserEditorStat(
-                id = "user1",
-                username = "user",
-                answers = UserEditorStat.Answer(
-                    correct = 10,
-                    total = 100
-                ),
-                points = 450,
-                avatar = ""
-            )
-        )
-    }
-    val stat = ResultStats(
-        true,
-        null,
-        groups = listOf(
-            GroupEditorStats(
-                id = "g1",
-                name = "group 1",
-                users = users
-            ),
-            GroupEditorStats(
-                id = "g2",
-                name = "group 2",
-                users = users
-            ),
-            GroupEditorStats(
-                id = "g3",
-                name = "group 3",
-                users = users
-            )
-        )
-    )
-    EduPlayTheme(
-        object : ThemeViewModel {
-            override fun getTheme(): Flow<AppSettingsManager.Themes> {
-                return flowOf(AppSettingsManager.Themes.LIGHT)
-            }
-        }
-    ) {
-        StatisticsInfo(
-            remember { mutableStateOf(stat) },
-            object : ImageHeaderInterface {
-                override fun getFullUrl(fileName: String): String {
-                    return fileName
-                }
-
-                override val headers: MutableState<NetworkHeaders> =
-                    remember { mutableStateOf(NetworkHeaders.EMPTY) }
-                override val appMode: MutableState<Flow<OfflineModeManager.AppModes>> =
-                    remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) }
-
-            }
         )
     }
 }

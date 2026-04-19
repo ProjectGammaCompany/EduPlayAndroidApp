@@ -144,4 +144,8 @@
     <string name="platform_agreement_part_3">"and give my consent to process my personal data as stated in "</string>
     <string name="platform_agreement_part_4">Privacy policy</string>
     <string name="username">Username</string>
+    <string name="players">Players</string>
+    <string name="correct_answer_cnt">Correct answer cnt.</string>
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
 </resources>

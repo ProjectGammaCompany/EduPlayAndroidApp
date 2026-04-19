@@ -1140,7 +1140,7 @@ private fun EventCreatorBody(
 
     when (selectedTabIdx) {
         0 -> GeneralInfo(tags, info, description)
-        1 -> StatisticsInfo(groupEditorStats)
+        1 -> {} //StatisticsInfo(groupEditorStats)
         2 -> PrivacySettings(password, groups, joinCode, privateEvent, groupEvent)
         else -> Box {}
     }
