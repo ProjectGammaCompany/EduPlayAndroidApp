@@ -76,6 +76,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -767,6 +768,7 @@ private fun EventScreenHeader(
                     )
                 )
             ),
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .width(130.dp)
                 .height(130.dp)

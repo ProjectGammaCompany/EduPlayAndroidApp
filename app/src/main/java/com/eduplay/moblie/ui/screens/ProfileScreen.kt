@@ -63,6 +63,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -204,7 +205,7 @@ private fun ProfileScreen(
                     .networkCachePolicy(CachePolicy.ENABLED)
                     .memoryCachePolicy(CachePolicy.ENABLED)
                     .build(),
-                contentDescription = email.value,
+                contentDescription = stringResource(R.string.change_avatar),
                 placeholder = BrushPainter(
                     Brush.linearGradient(
                         listOf(
@@ -223,25 +224,17 @@ private fun ProfileScreen(
                         )
                     )
                 ),
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(10.dp)
                     .width(130.dp)
                     .height(130.dp)
                     .clip(CircleShape)
+                    .clickable(enabled = true, onClick = {
+                        if (currentMode.value == AppModes.ONLINE) pickImage.value = true
+                    })
             )
-            if (currentMode.value == AppModes.ONLINE) {
-                IconButton(
-                    onClick = { pickImage.value = true },
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                    Icon(
-                        Icons.Default.ImageSearch,
-                        stringResource(R.string.change_avatar)
-                    )
-                }
-            }
 
             // email
             Text(

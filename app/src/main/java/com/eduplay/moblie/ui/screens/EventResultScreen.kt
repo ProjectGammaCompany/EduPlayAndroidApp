@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.painter.BrushPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -200,6 +201,7 @@ private fun UserList(
                             )
                         )
                     ),
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .testTag("quest_element_image")
                         .padding(horizontal = 3.dp)

@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -110,6 +111,7 @@ fun QuestListElement(
                     )
                 )
             ),
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .testTag("quest_element_image")
                 .height(60.dp)
