@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
@@ -68,7 +67,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -110,9 +108,9 @@ fun ProfileScreen(
     }
 
     val updateEmail: (String) -> Unit = { newEmail: String ->
-        viewModel.updateEmail(newEmail)
+        viewModel.updateUsername(newEmail)
     }
-    val hasEmailErrors = { email: String -> viewModel.checkEmail(email) }
+    val hasEmailErrors = { email: String -> viewModel.checkUsername(email) }
     val onLogout = {
         viewModel.logout()
     }
@@ -125,6 +123,7 @@ fun ProfileScreen(
         innerPaddingValues,
         updateEmail,
         viewModel.email,
+        viewModel.username,
         hasEmailErrors,
         onLogout,
         viewModel.avatar.value,
@@ -152,7 +151,8 @@ private fun ProfileScreen(
     innerPaddingValues: PaddingValues,
     updateEmail: (String) -> Unit,
     email: State<String>,
-    hasEmailErrors: (String) -> Boolean,
+    username: State<String>,
+    hasUserNameErrors: (String) -> Boolean,
     onLogout: () -> Unit,
     avatar: String,
     headers: State<NetworkHeaders>,
@@ -250,20 +250,35 @@ private fun ProfileScreen(
                 modifier = Modifier.padding(bottom = 5.dp, top = 10.dp)
             )
 
-            val showEditEmailField = remember { mutableStateOf(false) }
-            if (showEditEmailField.value && currentMode.value == AppModes.ONLINE) {
-                val newEmail = rememberTextFieldState(email.value)
+            Row {
+                Text(
+                    text = stringResource(R.string.email),
+                    style = typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                        .copy(color = colorScheme.onBackground),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 5.dp)
+                )
+                Text(
+                    text = email.value,
+                    style = typography.bodyLarge.copy(color = colorScheme.onBackground),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 5.dp)
+                )
+            }
+
+            val showEditUsernameField = remember { mutableStateOf(false) }
+            if (showEditUsernameField.value && currentMode.value == AppModes.ONLINE) {
+                val newUsername = rememberTextFieldState(username.value)
                 Row {
                     OutlinedTextField(
-                        state = newEmail,
-                        label = { Text(stringResource(R.string.email)) },
+                        state = newUsername,
+                        label = { Text(stringResource(R.string.username)) },
                         lineLimits = TextFieldLineLimits.SingleLine,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email
-                        ),
-                        isError = hasEmailErrors(newEmail.text.toString()),
+                        isError = hasUserNameErrors(newUsername.text.toString()),
                         trailingIcon = {
-                            IconButton({ showEditEmailField.value = false })
+                            IconButton({ showEditUsernameField.value = false })
                             {
                                 Icon(
                                     Icons.Default.Cancel,
@@ -277,7 +292,10 @@ private fun ProfileScreen(
                             .weight(1f)
                     )
                     TextButton(
-                        onClick = { updateEmail(newEmail.text.toString()) },
+                        onClick = {
+                            updateEmail(newUsername.text.toString())
+                            showEditUsernameField.value = false
+                                  },
                         colors = ButtonDefaults.buttonColors().copy(
                             containerColor = colorScheme.primaryContainer,
                             contentColor = colorScheme.onPrimaryContainer
@@ -295,7 +313,7 @@ private fun ProfileScreen(
                             .background(color = colorScheme.primaryContainer)
                     ) {
                         Text(
-                            stringResource(R.string.edit_email),
+                            stringResource(R.string.edit_username),
                             style = typography.labelMedium, //.copy(colorScheme.secondary),
                             modifier = Modifier.align(Alignment.CenterVertically)
                         )
@@ -304,7 +322,7 @@ private fun ProfileScreen(
             } else {
                 Row {
                     Text(
-                        text = stringResource(R.string.email),
+                        text = stringResource(R.string.username),
                         style = typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
                             .copy(color = colorScheme.onBackground),
                         modifier = Modifier
@@ -312,7 +330,7 @@ private fun ProfileScreen(
                             .padding(end = 5.dp)
                     )
                     Text(
-                        text = email.value,
+                        text = username.value,
                         style = typography.bodyLarge.copy(color = colorScheme.onBackground),
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
@@ -320,11 +338,11 @@ private fun ProfileScreen(
                     )
                     if (currentMode.value == AppModes.ONLINE) {
                         IconButton(
-                            onClick = { showEditEmailField.value = true }
+                            onClick = { showEditUsernameField.value = true }
                         ) {
                             Icon(
                                 ImageVector.vectorResource(R.drawable.edit),
-                                stringResource(R.string.edit_email)
+                                stringResource(R.string.edit_username)
                             )
                         }
                     }
@@ -572,6 +590,7 @@ fun ProfilePreview() {
         PaddingValues(),
         {},
         remember { mutableStateOf("email") },
+        remember { mutableStateOf("username") },
         { false },
         {},
         "",

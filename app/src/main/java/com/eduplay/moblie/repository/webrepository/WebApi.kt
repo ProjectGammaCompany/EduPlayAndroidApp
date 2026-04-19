@@ -99,8 +99,6 @@ interface WebApi {
     @InjectAuth
     suspend fun getProfile(): Response<ProfileInfo>
 
-    @POST("")
-
     @PUT("/profile/username")
     @InjectAuth
     suspend fun putUserName(@Body update: ProfileUpdate): Response<Unit>

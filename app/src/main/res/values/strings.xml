@@ -41,7 +41,7 @@
     <string name="my_created">Created</string>
     <string name="next_page">Next page</string>
     <string name="previous_page">Previous page</string>
-    <string name="edit_email">Edit email</string>
+    <string name="edit_username">Edit username</string>
     <string name="profile_info">Profile information</string>
     <string name="logout">Logout</string>
     <string name="answer">Submit answer</string>
@@ -143,4 +143,5 @@
     <string name="platform_agreement_part_2_user_agreement">" User Agreement "</string>
     <string name="platform_agreement_part_3">"and give my consent to process my personal data as stated in "</string>
     <string name="platform_agreement_part_4">Privacy policy</string>
+    <string name="username">Username</string>
 </resources>

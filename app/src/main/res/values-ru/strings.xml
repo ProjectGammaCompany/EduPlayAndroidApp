@@ -42,7 +42,7 @@
     <string name="my_created">Созданые мной</string>
     <string name="next_page">Следующая страница</string>
     <string name="previous_page">Предыдущая страница</string>
-    <string name="edit_email">Редактировать почту</string>
+    <string name="edit_username">Редактировать имя пользователя</string>
     <string name="profile_info">Информация о профиле</string>
     <string name="logout">Выйти</string>
     <string name="answer">Ответить</string>
@@ -144,4 +144,5 @@
     <string name="platform_agreement_part_2_user_agreement">" Пользовательского соглашения "</string>
     <string name="platform_agreement_part_3">"и даю согласие на обработку персональных данных в соответствии с "</string>
     <string name="platform_agreement_part_4">Политикой конфиденциальности</string>
+    <string name="username">Имя пользователя</string>
 </resources>

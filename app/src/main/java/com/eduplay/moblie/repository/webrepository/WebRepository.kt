@@ -226,7 +226,7 @@ class WebRepository @Inject constructor(
         if (response.isSuccessful && body != null) {
             return body
         }
-        return ProfileInfo("", "")
+        return ProfileInfo("", "", "")
     }
 
     override suspend fun getNextStage(eventId: String): EventStage {

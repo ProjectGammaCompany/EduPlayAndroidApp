@@ -253,11 +253,10 @@ class LocalRepository @Inject constructor(
     }
 
     override suspend fun getProfile(): ProfileInfo {
-        val userId = offlineModeManager.getCurrentUserId().first()
-        val user = eventDatabase.userDao().getUserById(userId)
         return ProfileInfo(
-            username = user?.email ?: "",
-            avatar = user?.avatar ?: ""
+            username = "",
+            avatar = "",
+            email = ""
         )
     }
 
@@ -721,7 +720,7 @@ class LocalRepository @Inject constructor(
                 Log.i("PARSE_ACCESS_TOKEN", "failed to get user email from access token")
                 return
             }
-            eventDatabase.userDao().insertUser(UserEntity(email, "", userId))
+            eventDatabase.userDao().insertUser(UserEntity(userId))
         }
 
         if (getCurrentUser() != userId) {

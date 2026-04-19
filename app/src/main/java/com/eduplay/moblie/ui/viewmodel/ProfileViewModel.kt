@@ -20,6 +20,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.net.ConnectException
@@ -32,10 +33,12 @@ class ProfileViewModel @Inject constructor(
 ) : ViewModel() {
 
     val email = mutableStateOf("")
+    val username = mutableStateOf("")
     val avatar = mutableStateOf("")
     val password = mutableStateOf("")
     val canLogout = mutableStateOf(false)
     val hasUnsentAnswers = mutableStateOf(false)
+    val showEditUsername = mutableStateOf(false)
 
     val unauthorised = mutableStateOf(false)
     val noInternet = mutableStateOf(false)
@@ -65,11 +68,13 @@ class ProfileViewModel @Inject constructor(
         isOffline.value = offlineModeManager.getAppMode()
         theme.value = appSettingsManager.getTheme()
         viewModelScope.launch() {
-            var result: ProfileInfo = ProfileInfo("", "")
+            var result: ProfileInfo = ProfileInfo("", "", "")
             try {
                 result = repository.getProfile()
-                email.value = result.username
+                email.value = result.email
                 avatar.value = result.avatar
+                username.value = result.username
+                showEditUsername.value = isOffline.value.first() == OfflineModeManager.AppModes.ONLINE
                 notifications.addAll(repository.getLatestNotifications())
             } catch (_: ConnectException) {
                 noInternet.value = true
@@ -82,12 +87,8 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun checkEmail(email: String): Boolean {
-        if (email.isNotEmpty()) {
-            return !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-        } else {
-            return false
-        }
+    fun checkUsername(username: String): Boolean {
+        return username.isEmpty()
     }
 
     fun toggleAppMode(isOffline: Boolean, navController: NavController) {
@@ -107,13 +108,13 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateEmail(newEmail: String) {
-        if (checkEmail(newEmail)) return
+    fun updateUsername(newUsername: String) {
+        if (checkUsername(newUsername)) return
 
         viewModelScope.launch {
             try {
-                repository.updateUserName(newEmail)
-                email.value = newEmail
+                repository.updateUserName(newUsername)
+                username.value = newUsername
             } catch (_: ConnectException) {
                 noInternet.value = true
             } catch (_: NotAuthorisedException) {
