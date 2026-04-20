@@ -248,7 +248,7 @@ private fun LoginForm(
         style = typography.headlineLarge,
         modifier = Modifier
             .padding(vertical = 30.dp)
-            .testTag("form_header")
+            .testTag("login_form_header")
     )
 
     // email field
@@ -268,7 +268,7 @@ private fun LoginForm(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 10.dp)
-            .testTag("email_field")
+            .testTag("login_email_field")
     )
 
     // password field
@@ -301,7 +301,7 @@ private fun LoginForm(
         },
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .testTag("password_field")
+            .testTag("login_password_field")
     )
     // forgot password btn
     Column(Modifier.fillMaxWidth()) {
@@ -331,12 +331,11 @@ private fun LoginForm(
         onClick = { onSubmitForm(email.text.toString(), password) },
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .testTag("main_btn")
+            .testTag("login_btn")
     ) {
         Text(
             text = stringResource(R.string.login),
             style = TextStyle(color = colorScheme.onPrimary),
-            modifier = Modifier.testTag("main_btn_text")
         )
     }
 
@@ -353,13 +352,11 @@ private fun LoginForm(
             .fillMaxWidth(0.9f)
             .background(colorScheme.background)
             .padding(bottom = 20.dp)
-            .testTag("secondary_btn")
+            .testTag("switch_to_registration_btn")
     ) {
         Text(
             text = stringResource(R.string.register),
             style = TextStyle(color = colorScheme.onBackground),
-            modifier = Modifier.testTag("secondary_btn_text")
-
         )
     }
 
@@ -385,7 +382,7 @@ private fun RegistrationForm(
         style = typography.headlineLarge,
         modifier = Modifier
             .padding(vertical = 30.dp)
-            .testTag("form_header")
+            .testTag("registration_form_header")
     )
 
     // email field
@@ -405,7 +402,7 @@ private fun RegistrationForm(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 10.dp)
-            .testTag("email_field")
+            .testTag("registration_email_field")
     )
 
     // password field
@@ -441,7 +438,7 @@ private fun RegistrationForm(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 10.dp)
-            .testTag("password_field")
+            .testTag("registration_password_field")
     )
 // repeat password field
     OutlinedTextField(
@@ -474,7 +471,7 @@ private fun RegistrationForm(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 5.dp)
-            .testTag("password_field")
+            .testTag("registration_repeat_password_field")
     )
 
     var agreed by remember { mutableStateOf(false) }
@@ -504,7 +501,11 @@ private fun RegistrationForm(
         }
     }
     Row(modifier = Modifier.fillMaxWidth()) {
-        Checkbox(agreed, onCheckedChange = { agreed = !agreed })
+        Checkbox(
+            checked = agreed,
+            onCheckedChange = { agreed = !agreed },
+            modifier = Modifier.testTag("agree_to_terms_checkBox")
+        )
         Text(
             agreementText,
             style = typography.labelSmall
@@ -517,12 +518,11 @@ private fun RegistrationForm(
         enabled = agreed,
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .testTag("main_btn")
+            .testTag("register_btn")
     ) {
         Text(
             text = stringResource(R.string.register),
             style = TextStyle(color = colorScheme.onPrimary),
-            modifier = Modifier.testTag("main_btn_text")
         )
     }
 
@@ -539,12 +539,11 @@ private fun RegistrationForm(
             .fillMaxWidth(0.9f)
             .background(colorScheme.background)
             .padding(bottom = 20.dp)
-            .testTag("secondary_btn")
+            .testTag("switch_to_login_form_btn")
     ) {
         Text(
             text = stringResource(R.string.login),
-            style = TextStyle(color = colorScheme.onBackground),
-            modifier = Modifier.testTag("secondary_btn_text")
+            style = TextStyle(color = colorScheme.onBackground)
 
         )
     }

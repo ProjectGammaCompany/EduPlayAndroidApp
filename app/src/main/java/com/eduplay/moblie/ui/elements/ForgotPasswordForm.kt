@@ -97,14 +97,14 @@ private fun EmailForm(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 15.dp)
-            .testTag("email_field")
+            .testTag("forgot_password_email_field")
     )
 
     Button(
         onClick = { onSendCode(email.text.toString()) },
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .testTag("get_code_btn")
+            .testTag("forgot_password_get_code_btn")
     ) {
         Text(
             text = stringResource(R.string.recieve_reset_code),
@@ -138,7 +138,7 @@ private fun CodeForm(
         onClick = { onCheckCode(code.text.toString()) },
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .testTag("get_code_btn")
+            .testTag("reset_password_btn")
     ) {
         Text(
             text = stringResource(R.string.check_reset_code),
@@ -193,7 +193,7 @@ private fun ChangePasswordForm(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 15.dp)
-            .testTag("password_field")
+            .testTag("reset_password_field")
     )
 // repeat password field
     OutlinedTextField(
@@ -226,7 +226,7 @@ private fun ChangePasswordForm(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 30.dp)
-            .testTag("password_field")
+            .testTag("reset_repeat_password_field")
     )
     if (!isCodeValid.value) {
         Text(stringResource(R.string.incorrect_reset_code))
@@ -235,7 +235,7 @@ private fun ChangePasswordForm(
         onClick = { onUpdatePassword(password, repeatPassword) },
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .testTag("get_code_btn")
+            .testTag("update_password_btn")
     ) {
         Text(
             text = stringResource(R.string.update_password),
