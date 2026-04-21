@@ -146,4 +146,8 @@ dependencies {
     implementation(libs.androidx.room.paging)
 
     implementation(libs.jwtdecode)
+
+    // tests
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.core.testing)
 }
