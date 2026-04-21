@@ -72,13 +72,11 @@ fun EventResultScreen(
         navController.popBackStack()
     }
     var gotResults by remember { mutableStateOf(false) }
-    var noInternet by remember { mutableStateOf(false) }
-    val onNoInternet = { noInternet = true }
     if (!gotResults) {
-        viewModel.fetchResults(eventId, onNoInternet)
+        viewModel.fetchResults(eventId)
         gotResults = true
     }
-    if (noInternet) {
+    if (viewModel.noInternetConnection.value) {
         NoInternetConnectionToast()
     }
     if (viewModel.unauthorised.value) {
