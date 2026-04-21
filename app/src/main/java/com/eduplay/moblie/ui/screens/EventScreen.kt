@@ -881,6 +881,7 @@ private fun GeneralInfo(
             .padding(horizontal = 10.dp, vertical = 10.dp)
             .fillMaxHeight()
             .verticalScroll(rememberScrollState())
+            .testTag("general_info")
     ) {
         if (needToRate != null && needToRate && onRate != null) {
             RateBar(onRate)
@@ -1028,6 +1029,7 @@ private fun RateBar(onRate: (Int) -> Unit) {
             .padding(horizontal = 15.dp)
             //.border(width = 1.dp, shape = RoundedCornerShape(10.dp), color = colorScheme.secondary)
             .fillMaxWidth()
+            .testTag("rate_bar")
     ) {
         Text(
             text = stringResource(R.string.rate_event),
@@ -1137,7 +1139,8 @@ private fun EventCreatorBody(
                     },
                     selectedContentColor = colorScheme.primary,
                     unselectedContentColor = colorScheme.onSurface,
-                    modifier = Modifier.testTag(stringResource(title))
+                    modifier = Modifier
+                        .testTag(stringResource(title))
                 )
             }
         }
@@ -1165,6 +1168,7 @@ fun PrivacySettings(
             .padding(horizontal = 10.dp, vertical = 10.dp)
             .fillMaxHeight()
             .verticalScroll(rememberScrollState())
+            .testTag("privacy_settings_section")
     ) {
         if (privateEvent.value) {
             Row {
@@ -1230,50 +1234,3 @@ fun PrivacySettings(
         }
     }
 }
-
-
-//@Composable
-//@Preview
-//fun EventScreenPreview() {
-//    EventScreen(
-//        innerPaddingValues = PaddingValues(0.dp),
-//        eventCreatorMode = remember { mutableStateOf(false) },
-//        isEventFavourite = remember { mutableStateOf(false) },
-//        eventName = remember { mutableStateOf("EVENT") },
-//        tags = remember { mutableStateListOf() },
-//        author = remember { mutableStateOf("EVENT") },
-//        isCompleted = remember { mutableStateOf(true) },
-//        cover = "EVENT",
-//        info = remember { mutableStateListOf() },
-//        description = remember { mutableStateOf("EVENT") },
-//        privateEvent = remember { mutableStateOf(false) },
-//        isOpen = remember { mutableStateOf(true) },
-//        isContinuing = remember { mutableStateOf(false) },
-//        onAddToFavourite = {},
-//        onComplain = { _ -> },
-//        startEvent = {},
-//        showResults = {},
-//        onReturn = { true },
-//        headers = remember { mutableStateOf(NetworkHeaders.EMPTY) },
-//        toggleBluetooth = {},
-//        isCompetitionMode = remember { mutableStateOf(false) },
-//        canShowConnectionList = false,
-//        password = remember { mutableStateOf("") },
-//        groups = remember { mutableStateListOf() },
-//        eventId = "",
-//        joinCode = remember { mutableStateOf("") },
-//        onDownload = {},
-//        canDownLoad = remember { mutableStateOf(true) },
-//        isRated = remember { mutableStateOf(true) },
-//        onRate = {},
-//        groupEvent = remember { mutableStateOf(true) },
-//        downloadingEvents = remember { mutableStateMapOf() },
-//        downloadedEvents = remember { mutableStateSetOf() },
-//        isDownloaded = remember { mutableStateOf(true) },
-//        onDeleteEvent = {},
-//        failedToSendAnswers = remember { mutableStateOf(false) },
-//        appMode = remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) },
-//        needsUpdate = remember { mutableStateOf(true) },
-//        groupEditorStats = remember { mutableStateOf(ResultStats(false, null, null)) }
-//    )
-//}

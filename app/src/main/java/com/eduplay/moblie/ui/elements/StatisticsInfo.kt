@@ -84,6 +84,7 @@ fun StatisticsInfo(
         modifier = Modifier
             .fillMaxSize()
             .padding(5.dp)
+            .testTag("statistics_section")
     ) {
         if (stats.value.groupEvent) {
             var currentGroupIdx by remember { mutableIntStateOf(0) }
