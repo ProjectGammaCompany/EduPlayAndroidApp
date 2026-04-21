@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.eduplay.moblie.models.TaskType
+import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.downloadTaskTypes.DownloadTask
 import com.google.gson.Gson
 
@@ -68,7 +69,7 @@ data class TaskEntity(
         taskOrder
     )
 
-    constructor(task: DownloadTask, files: List<String>) : this(
+    constructor(task: DownloadTask, files: List<Task.TaskFile>) : this(
         task.taskId,
         task.blockId,
         task.name,

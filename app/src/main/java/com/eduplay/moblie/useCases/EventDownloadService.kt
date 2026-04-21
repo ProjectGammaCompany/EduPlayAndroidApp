@@ -21,6 +21,7 @@ import com.eduplay.moblie.repository.localrepository.entity.GroupEntity
 import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
 import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
 import com.eduplay.moblie.repository.webrepository.EventFilesApi
+import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.downloadTaskTypes.FullEventData
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -120,18 +121,18 @@ class EventDownloadService : Service() {
     override fun onDestroy() {
     }
 
-    private fun parseFile(file: File) {
-        val json = file.readText()
+    private fun parseFile(eventFile: File) {
+        val json = eventFile.readText()
         val event = Gson().fromJson<FullEventData>(json, FullEventData::class.java)
         val fileLocations = mutableMapOf<String, String>()
         // downloading external files
         for (file in event.files) {
             val location = fileDownloader.downloadToAppStorage(
-                fileUri = file,
-                fileName = file,
+                fileUri = file.url,
+                fileName = file.name,
                 directory = this.filesDir.absolutePath
             )
-            fileLocations[file] = file
+            fileLocations[file.url] = location
         }
         runBlocking {
             // add event
@@ -155,7 +156,13 @@ class EventDownloadService : Service() {
 
             //add tasks
             for (task in event.tasks) {
-                val files = task.files.map { fileLocations[it] ?: "" }.toList()
+                val files = task.files.map {
+                    Task.TaskFile(
+                        url = fileLocations[it.url] ?: "",
+                        name = it.name
+                    )
+
+                }.toList()
                 repository.addTask(TaskEntity(task, files))
             }
 

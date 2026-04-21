@@ -5,6 +5,7 @@ import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
 import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
 data class Task(
     @SerializedName("taskId")
@@ -36,6 +37,7 @@ data class Task(
         timeStamp = startTime
     )
 
+    @Serializable
     data class TaskFile(
         val url: String,
         val name: String,
