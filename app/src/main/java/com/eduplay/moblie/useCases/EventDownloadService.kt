@@ -157,13 +157,13 @@ class EventDownloadService : Service() {
 
             //add tasks
             for (task in event.tasks) {
-                val files: List<Task.TaskFile> = task.files
+                val files: List<String> = task.files
                     .filter {
                         fileLocations[it] != null
                     }.map {
-                        fileLocations[it]!!
+                        fileLocations[it]!!.name
                     }.toList()
-                repository.addTask(TaskEntity(task, files))
+                repository.addTask(TaskEntity(task), files, event.event.eventId)
             }
 
             for (option in event.options) {

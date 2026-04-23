@@ -7,6 +7,7 @@ import com.eduplay.moblie.repository.localrepository.dao.BlockDao
 import com.eduplay.moblie.repository.localrepository.dao.ConditionDao
 import com.eduplay.moblie.repository.localrepository.dao.CorrectAnswerDao
 import com.eduplay.moblie.repository.localrepository.dao.EventDao
+import com.eduplay.moblie.repository.localrepository.dao.FileDao
 import com.eduplay.moblie.repository.localrepository.dao.GroupDao
 import com.eduplay.moblie.repository.localrepository.dao.OptionDao
 import com.eduplay.moblie.repository.localrepository.dao.TaskDao
@@ -17,6 +18,7 @@ import com.eduplay.moblie.repository.localrepository.entity.BlockEntity
 import com.eduplay.moblie.repository.localrepository.entity.ConditionEntity
 import com.eduplay.moblie.repository.localrepository.entity.CorrectAnswerEntity
 import com.eduplay.moblie.repository.localrepository.entity.EventEntity
+import com.eduplay.moblie.repository.localrepository.entity.FileEntity
 import com.eduplay.moblie.repository.localrepository.entity.GroupEntity
 import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
 import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
@@ -31,6 +33,7 @@ import com.eduplay.moblie.repository.localrepository.entity.UserGroupEntity
         ConditionEntity::class,
         CorrectAnswerEntity::class,
         EventEntity::class,
+        FileEntity::class,
         GroupEntity::class,
         OptionEntity::class,
         TaskEntity::class,
@@ -51,4 +54,5 @@ abstract class Database : RoomDatabase(), EventDatabase {
     abstract override fun taskDao(): TaskDao
     abstract override fun userEventStatus(): UserEventStatusDao
     abstract override fun correctAnswerDao(): CorrectAnswerDao
+    abstract override fun fileDao(): FileDao
 }
