@@ -8,7 +8,7 @@ data class DownloadTask(
     val name: String,
     val description: String,
     val type: Int,
-    val files: List<Task.TaskFile>,
+    val files: List<String>,
     val time: Int,
     val points: Int,
     val partialPoints: Boolean,

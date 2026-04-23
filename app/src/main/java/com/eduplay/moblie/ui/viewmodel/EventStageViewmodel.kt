@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -15,6 +16,7 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.FileDownloadStatus
+import com.eduplay.moblie.useCases.LocalFileOpener
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.net.ConnectException
 import java.time.LocalDateTime
 
@@ -200,7 +203,13 @@ class EventStageViewmodel @Inject constructor(
         }
     }
 
-    override fun onOpenFile(fileUri: String) {
-        taskDownloader.openFile(fileUri)
+    override fun onOpenFile(fileUri: String, context: Context) {
+        viewModelScope.launch {
+            if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+                taskDownloader.openFile(fileUri)
+            } else {
+                LocalFileOpener.openFile(fileUri, context)
+            }
+        }
     }
 }

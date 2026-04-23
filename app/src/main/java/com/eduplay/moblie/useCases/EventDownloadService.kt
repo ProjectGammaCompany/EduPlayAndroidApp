@@ -38,11 +38,12 @@ class EventDownloadService : Service() {
 
     @Inject
     lateinit var repository: LocalRepository
+
     @Inject
     lateinit var fileDownloader: TaskDownloadUseCase
+
     @Inject
     lateinit var downloadStatusKeeper: DownloadStatusObserver
-
 
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -124,7 +125,7 @@ class EventDownloadService : Service() {
     private fun parseFile(eventFile: File) {
         val json = eventFile.readText()
         val event = Gson().fromJson<FullEventData>(json, FullEventData::class.java)
-        val fileLocations = mutableMapOf<String, String>()
+        val fileLocations = mutableMapOf<String, Task.TaskFile>()
         // downloading external files
         for (file in event.files) {
             val location = fileDownloader.downloadToAppStorage(
@@ -132,11 +133,11 @@ class EventDownloadService : Service() {
                 fileName = file.name,
                 directory = this.filesDir.absolutePath
             )
-            fileLocations[file.url] = location
+            fileLocations[file.url] = Task.TaskFile(url = location, name = file.name)
         }
         runBlocking {
             // add event
-            val eventEntity = EventEntity(event.event, fileLocations[event.event.cover] ?: "")
+            val eventEntity = EventEntity(event.event, fileLocations[event.event.cover]?.name ?: "")
             repository.addEvent(eventEntity)
 
             // add eventBlocks
@@ -156,13 +157,12 @@ class EventDownloadService : Service() {
 
             //add tasks
             for (task in event.tasks) {
-                val files = task.files.map {
-                    Task.TaskFile(
-                        url = fileLocations[it.url] ?: "",
-                        name = it.name
-                    )
-
-                }.toList()
+                val files: List<Task.TaskFile> = task.files
+                    .filter {
+                        fileLocations[it] != null
+                    }.map {
+                        fileLocations[it]!!
+                    }.toList()
                 repository.addTask(TaskEntity(task, files))
             }
 

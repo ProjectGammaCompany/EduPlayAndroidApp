@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
@@ -32,6 +33,6 @@ interface EventStageViewModelInterface {
 
     //fun getNextStage(eventId: String, onNoInternet: () -> Unit)
     fun onDownloadFile(fileName: String, fileUri: String)
-    fun onOpenFile(fileUri: String)
     fun getNextStage(eventId: String, onNoInternet: () -> Unit, retry: Boolean = false)
+    fun onOpenFile(fileUri: String, context: Context)
 }
