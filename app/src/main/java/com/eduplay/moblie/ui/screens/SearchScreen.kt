@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
@@ -284,7 +285,12 @@ private fun SwitchFilter(
             checked = state.value,
             onCheckedChange = {
                 onCheckedChange(it)
-            }
+            },
+            colors = SwitchDefaults.colors(
+                uncheckedBorderColor = colorScheme.secondary,
+                uncheckedThumbColor = colorScheme.secondary,
+                uncheckedTrackColor = colorScheme.background
+            )
         )
         Text(
             text = text,

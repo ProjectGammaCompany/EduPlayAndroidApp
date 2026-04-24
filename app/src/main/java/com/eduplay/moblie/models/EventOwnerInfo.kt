@@ -1,9 +1,11 @@
 package com.eduplay.moblie.models
 
+import com.google.gson.annotations.SerializedName
+
 data class EventOwnerInfo(
     val title: String,
     val description: String,
-    val tags: List<EventTag>,
+    val tags: List<String>,
     val cover: String?,
     val startDate: String?,
     val endDate: String?,
@@ -11,10 +13,9 @@ data class EventOwnerInfo(
     val password: String?,
     val lastEditionDate: String,
     val groupEvent: Boolean,
-    val groupNames: List<String>,
     val groups: List<EventGroup>?,
     val eventRating: Float?,
-    val collaboratos: List<String>,
+    val collaborators : List<String>,
     val allowDownloading: Boolean
 )
 

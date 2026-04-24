@@ -188,7 +188,6 @@ class LocalRepository @Inject constructor(
         }
         val tags = Gson()
             .fromJson<List<String>>(event.tags, List::class.java)
-            .mapIndexed { idx, it -> EventTag(idx.toString(), it) }
 
         return EventOwnerInfo(
             title = event.title,
@@ -201,10 +200,9 @@ class LocalRepository @Inject constructor(
             password = "",
             lastEditionDate = event.lastEditionDate,
             groupEvent = false,
-            groupNames = listOf(),
             groups = listOf(),
             eventRating = 0.0f,
-            collaboratos = listOf(),
+            collaborators = listOf(),
             allowDownloading = true
         )
     }

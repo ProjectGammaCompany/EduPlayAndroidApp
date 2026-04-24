@@ -62,9 +62,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -84,7 +82,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.fragment.compose.AndroidFragment
@@ -99,7 +96,6 @@ import coil3.request.crossfade
 import com.eduplay.moblie.BuildConfig
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventGroup
-import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinGroupDialog
@@ -114,7 +110,6 @@ import com.eduplay.moblie.useCases.BluetoothConnectionFragment
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -354,7 +349,7 @@ fun EventScreen(
             onDownload,
             viewModel.canDownload,
             viewModel.isRated,
-            viewModel::rateEvent,
+            { rating -> viewModel.rateEvent(rating, eventId) },
             viewModel.groupEvent,
             viewModel.downloadStatusObserver.downloading,
             viewModel.downloadStatusObserver.downloaded,
@@ -375,7 +370,7 @@ fun EventScreen(
     eventCreatorMode: State<Boolean>,
     isEventFavourite: State<Boolean>,
     eventName: State<String>,
-    tags: SnapshotStateList<EventTag>,
+    tags: SnapshotStateList<String>,
     author: State<String>,
     isCompleted: State<Boolean>,
     cover: String,
@@ -754,7 +749,7 @@ private fun EventScreenHeader(
                     .build()
             } else {
                 ImageRequest.Builder(LocalContext.current)
-                    .data(File(context.filesDir, cover))
+                    .data(File(context.filesDir, cover ?: ""))
                     .crossfade(true)
                     .build()
             },
@@ -870,7 +865,7 @@ private fun EventScreenHeader(
 
 @Composable
 private fun GeneralInfo(
-    tags: SnapshotStateList<EventTag>,
+    tags: SnapshotStateList<String>,
     info: SnapshotStateList<Pair<Int, String?>>,
     description: State<String>,
     needToRate: Boolean? = null,
@@ -892,7 +887,7 @@ private fun GeneralInfo(
                 .testTag("tags")
         ) {
             tags.forEach { tagName ->
-                EventTag(tagName.name)
+                EventTag(tagName)
             }
         }
         Column(
@@ -940,7 +935,7 @@ private fun GeneralInfo(
 
 @Composable
 private fun GeneralUserBody(
-    tags: SnapshotStateList<EventTag>,
+    tags: SnapshotStateList<String>,
     info: SnapshotStateList<Pair<Int, String?>>,
     description: State<String>,
     isOpen: State<Boolean>,
@@ -1104,7 +1099,7 @@ private fun EventTag(tagName: String) {
 
 @Composable
 private fun EventCreatorBody(
-    tags: SnapshotStateList<EventTag>,
+    tags: SnapshotStateList<String>,
     info: SnapshotStateList<Pair<Int, String?>>,
     description: State<String>,
     privateEvent: State<Boolean>,

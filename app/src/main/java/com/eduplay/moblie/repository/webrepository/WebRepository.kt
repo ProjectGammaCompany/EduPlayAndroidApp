@@ -1,6 +1,7 @@
 package com.eduplay.moblie.repository.webrepository
 
 import android.util.Log
+import androidx.compose.ui.util.fastMap
 import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.models.EventOwnerInfo
 import com.eduplay.moblie.models.EventPlayerInfo
@@ -171,9 +172,27 @@ class WebRepository @Inject constructor(
     override suspend fun getOwnerEventInfo(eventId: String): EventOwnerInfo {
         val response = api.getEventInfoCreator(eventId)
         val body = response.body()
+        val tagsResponse = api.getTags()
+        val tags: Map<String, String> =
+            tagsResponse.body()?.tags?.fastMap { Pair(it.id, it.name) }?.toMap() ?: mapOf()
         Log.d("Requests owner event", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
-            return body
+            return EventOwnerInfo(
+                title = body.title,
+                description = body.description,
+                tags = body.tags.map { tags[it] ?: "" },
+                cover = body.cover,
+                startDate = body.startDate,
+                endDate = body.endDate,
+                private = body.private,
+                password = body.password,
+                lastEditionDate = body.lastEditionDate,
+                groupEvent = body.groupEvent,
+                groups = body.groups,
+                eventRating = body.eventRating,
+                collaborators = body.collaborators,
+                allowDownloading = body.allowDownloading
+            )
         }
         throw IllegalAccessException("No info for this event")
     }
@@ -345,6 +364,7 @@ class WebRepository @Inject constructor(
 
     suspend fun getJoinCode(eventId: String): JoinCodeInfo {
         val response = api.getJoinCode(eventId)
+        Log.d("get join code", response.code().toString() + response.raw())
         val body = response.body()
         if (response.isSuccessful && body != null) {
             return body
@@ -450,8 +470,9 @@ class WebRepository @Inject constructor(
         return serverImageUrlBody
     }
 
-    suspend fun postRating(rating: Int) {
-        val response = api.postRating(EventRating(rating))
+    suspend fun postRating(eventId: String, rating: Int) {
+        val response = api.postRating(eventId, EventRating(rating))
+        Log.d("postRating", response.code().toString() + response.raw())
         if (response.isSuccessful) {
             return
         }

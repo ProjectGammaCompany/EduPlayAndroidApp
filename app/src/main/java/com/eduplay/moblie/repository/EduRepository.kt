@@ -400,10 +400,10 @@ class EduRepository @Inject constructor(
         return webRepository.updateAvatar(file)
     }
 
-    suspend fun postEventRating(rating: Int): Boolean {
+    suspend fun postEventRating(eventId: String, rating: Int): Boolean {
         if (offlineModeManager.getAppMode().first() == AppModes.OFFLINE) return false
 
-        webRepository.postRating(rating)
+        webRepository.postRating(eventId, rating)
         return true
     }
 

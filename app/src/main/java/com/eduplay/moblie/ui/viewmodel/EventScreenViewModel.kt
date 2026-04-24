@@ -40,7 +40,7 @@ class EventScreenViewModel @Inject constructor(
     val isContinuing = mutableStateOf(false)
     val eventName = mutableStateOf("")
     val author = mutableStateOf("")
-    var tags = mutableStateListOf<EventTag>()
+    var tags = mutableStateListOf<String>()
     val info = mutableStateListOf<Pair<Int, String?>>()
     val description = mutableStateOf("")
     val privateEvent = mutableStateOf(true)
@@ -103,7 +103,7 @@ class EventScreenViewModel @Inject constructor(
         author.value = data.authors.joinToString(", ") { it.email }
         cover.value = data.cover
         tags.clear()
-        tags.addAll(data.tags ?: listOf())
+        tags.addAll(data.tags.map{it.name} ?: listOf())
         canDownload.value = data.canBeDownloaded
         needGroup.value = data.needGroup
         isRated.value = data.rated
@@ -149,8 +149,9 @@ class EventScreenViewModel @Inject constructor(
         tags = data.tags?.toMutableStateList() ?: mutableStateListOf()
         description.value = data.description
         privateEvent.value = data.private
-        author.value = data.collaboratos?.joinToString(", ") ?: ""
+        author.value = data.collaborators?.joinToString(", ") ?: ""
         groupEvent.value = data.groupEvent
+        cover.value = data.cover ?: ""
 
         info.clear()
 
@@ -161,6 +162,7 @@ class EventScreenViewModel @Inject constructor(
             Pair(R.string.closes, DateConverter.convertForDisplay(data.endDate))
         }
         password.value = data.password ?: ""
+        groups.clear()
         groups.addAll(data.groups ?: listOf())
 
         info.addAll(
@@ -238,10 +240,10 @@ class EventScreenViewModel @Inject constructor(
         }
     }
 
-    fun rateEvent(rating: Int) {
+    fun rateEvent(rating: Int, eventId:String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                isRated.value = repository.postEventRating(rating)
+                isRated.value = repository.postEventRating(eventId, rating)
             } catch (e: ConnectException) {
                 Log.e("Fetch_event_screen", e.message ?: e.toString(), e)
                 noInternetConnection.value = true
