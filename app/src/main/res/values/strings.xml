@@ -149,4 +149,6 @@
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
     <string name="no_results_yet">There are no results yet.</string>
+    <string name="expires_at">Expires at:</string>
+    <string name="copy_join_code">Copy join code</string>
 </resources>

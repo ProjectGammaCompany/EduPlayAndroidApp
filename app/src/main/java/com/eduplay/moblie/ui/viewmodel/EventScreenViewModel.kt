@@ -15,6 +15,7 @@ import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventStatus
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.repository.EduRepository
+import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.GroupEditorStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserEditorStat
@@ -48,7 +49,7 @@ class EventScreenViewModel @Inject constructor(
     val unauthorised = mutableStateOf(false)
     val password = mutableStateOf("")
     val groups = mutableStateListOf<EventGroup>()
-    val joinCode = mutableStateOf("")
+    val joinCode = mutableStateOf(JoinCodeInfo("", ""))
     val canDownload = mutableStateOf(false)
     val needGroup = mutableStateOf(false)
     val isRated = mutableStateOf(false)
@@ -152,6 +153,9 @@ class EventScreenViewModel @Inject constructor(
         author.value = data.collaborators?.joinToString(", ") ?: ""
         groupEvent.value = data.groupEvent
         cover.value = data.cover ?: ""
+        password.value = data.password ?: ""
+        groups.clear()
+        groups.addAll(data.groups ?: listOf())
 
         info.clear()
 
@@ -161,9 +165,7 @@ class EventScreenViewModel @Inject constructor(
         if (data.endDate?.isNotBlank() ?: false) {
             Pair(R.string.closes, DateConverter.convertForDisplay(data.endDate))
         }
-        password.value = data.password ?: ""
-        groups.clear()
-        groups.addAll(data.groups ?: listOf())
+
 
         info.addAll(
             listOf(
@@ -191,7 +193,7 @@ class EventScreenViewModel @Inject constructor(
         editorEventStats.value = repository.getEventEditorStats(eventId)
         if (privateEvent.value) {
             try {
-                joinCode.value = repository.getJoinCode(eventId).joinCode
+                joinCode.value = repository.getJoinCode(eventId)
             } catch (e: Exception) {
                 Log.e("JOIN_CODE", e.message ?: "", e)
             }

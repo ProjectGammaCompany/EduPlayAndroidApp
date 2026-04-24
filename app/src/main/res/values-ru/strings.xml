@@ -150,4 +150,6 @@
     <string name="ascending">По возрастанию</string>
     <string name="descending">По убыванию</string>
     <string name="no_results_yet">Результатов пока нет.</string>
+    <string name="expires_at">"Истекает в: "</string>
+    <string name="copy_join_code">Скопировать код события</string>
 </resources>
