@@ -18,12 +18,14 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -51,8 +53,11 @@ fun ForgotPasswordForm(
     onCheckCode: (String) -> Unit,
     onSendNewPassword: (String, String) -> Unit,
 ) {
-    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-        IconButton(onGoBack) {
+    Row(modifier = Modifier.padding(top=15.dp).fillMaxWidth().wrapContentHeight()) {
+        IconButton(
+            onClick = onGoBack,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = stringResource(R.string.go_back)
@@ -60,9 +65,9 @@ fun ForgotPasswordForm(
         }
         Text(
             text = stringResource(R.string.password_reset),
-            style = typography.headlineLarge,
+            style = typography.headlineMedium,
             modifier = Modifier
-                .padding(vertical = 30.dp)
+                .align(Alignment.CenterVertically)
                 .testTag("form_header")
         )
     }
@@ -94,6 +99,13 @@ private fun EmailForm(
                 Text(stringResource(R.string.incorrect_email))
             }
         },
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = colorScheme.secondary,
+            unfocusedContainerColor = colorScheme.background,
+            focusedContainerColor = colorScheme.background,
+            disabledContainerColor = colorScheme.tertiary,
+            errorContainerColor = colorScheme.background
+        ),
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 15.dp)
@@ -128,6 +140,13 @@ private fun CodeForm(
                 Text(stringResource(R.string.incorrect_reset_code))
             }
         },
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = colorScheme.secondary,
+            unfocusedContainerColor = colorScheme.background,
+            focusedContainerColor = colorScheme.background,
+            disabledContainerColor = colorScheme.tertiary,
+            errorContainerColor = colorScheme.background
+        ),
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 15.dp)
@@ -190,6 +209,13 @@ private fun ChangePasswordForm(
                 Text(stringResource(R.string.passwords_not_same))
             }
         },
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = colorScheme.secondary,
+            unfocusedContainerColor = colorScheme.background,
+            focusedContainerColor = colorScheme.background,
+            disabledContainerColor = colorScheme.tertiary,
+            errorContainerColor = colorScheme.background
+        ),
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 15.dp)
@@ -223,6 +249,13 @@ private fun ChangePasswordForm(
                 Text(stringResource(R.string.passwords_not_same))
             }
         },
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = colorScheme.secondary,
+            unfocusedContainerColor = colorScheme.background,
+            focusedContainerColor = colorScheme.background,
+            disabledContainerColor = colorScheme.tertiary,
+            errorContainerColor = colorScheme.background
+        ),
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 30.dp)
