@@ -582,29 +582,29 @@ private fun Settings(
     }
 }
 
-@Composable
-@Preview
-fun ProfilePreview() {
-    //EduPlayTheme {
-    ProfileScreen(
-        PaddingValues(),
-        {},
-        remember { mutableStateOf("email") },
-        remember { mutableStateOf("username") },
-        { false },
-        {},
-        "",
-        remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-        { it },
-        remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) },
-        {},
-        remember { mutableStateOf(AppSettingsManager.Themes.SYSTEM) },
-        { _ -> },
-        remember { mutableStateListOf() },
-        { _ -> },
-        rememberNavController(),
-        {},
-        remember { mutableStateOf(false) },
-    )
-    //}
-}
+//@Composable
+//@Preview
+//fun ProfilePreview() {
+//    //EduPlayTheme {
+//    ProfileScreen(
+//        PaddingValues(),
+//        {},
+//        remember { mutableStateOf("email") },
+//        remember { mutableStateOf("username") },
+//        { false },
+//        {},
+//        "",
+//        remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+//        { it },
+//        remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) },
+//        {},
+//        remember { mutableStateOf(AppSettingsManager.Themes.SYSTEM) },
+//        { _ -> },
+//        remember { mutableStateListOf() },
+//        { _ -> },
+//        rememberNavController(),
+//        {},
+//        remember { mutableStateOf(false) },
+//    )
+//    //}
+//}

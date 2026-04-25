@@ -342,31 +342,31 @@ private fun TagList(
     }
 }
 
-@Preview
-@Composable
-private fun SearchPrev() {
-    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
-    val nothingB = { string: String, bool: Boolean -> }
-    EduPlayTheme {
-        SearchScreen(
-            innerPaddingValues = PaddingValues(),
-            onSearch = { _, _, _, _, _ -> },
-            searchResults = remember { mutableStateOf(flowOf()) },
-            onEventClick = {},
-            onFavourite = nothingB,
-            headers = headers,
-            imageUrl = { it },
-            tags = remember {
-                mutableStateListOf(
-                    "математика",
-                    "информатика",
-                    "алгебра",
-                    "тест",
-                    "инфо",
-                    "ии"
-                )
-            },
-            noEventsFound = remember { mutableStateOf(false) }
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun SearchPrev() {
+//    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+//    val nothingB = { string: String, bool: Boolean -> }
+//    EduPlayTheme {
+//        SearchScreen(
+//            innerPaddingValues = PaddingValues(),
+//            onSearch = { _, _, _, _, _ -> },
+//            searchResults = remember { mutableStateOf(flowOf()) },
+//            onEventClick = {},
+//            onFavourite = nothingB,
+//            headers = headers,
+//            imageUrl = { it },
+//            tags = remember {
+//                mutableStateListOf(
+//                    "математика",
+//                    "информатика",
+//                    "алгебра",
+//                    "тест",
+//                    "инфо",
+//                    "ии"
+//                )
+//            },
+//            noEventsFound = remember { mutableStateOf(false) }
+//        )
+//    }
+//}
