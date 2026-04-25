@@ -12,6 +12,8 @@ import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.utils.CoroutineContextProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.net.ConnectException
@@ -25,10 +27,17 @@ class MainScreenViewModel @Inject constructor(
     val unauthorised = mutableStateOf(false)
     val events = mutableStateOf(flowOf<PagingData<QuestShortInfo>>())
     val noInternetConnection = mutableStateOf(false)
+    private val refreshing = MutableStateFlow(false)
+    val isRefreshing = refreshing.asStateFlow()
 
     init {
-        viewModelScope.launch(coroutineContext.Main) {
+        refreshFeed()
+    }
+
+    fun refreshFeed() {
+        viewModelScope.launch {
             try {
+                refreshing.value = true
                 events.value = repository.getEvents().cachedIn(viewModelScope)
             } catch (_: ConnectException) {
                 noInternetConnection.value = true
@@ -40,6 +49,7 @@ class MainScreenViewModel @Inject constructor(
                 Log.e("All events", e.message ?: "", e)
                 events.value = flowOf()
             }
+            refreshing.value = false
         }
     }
 }

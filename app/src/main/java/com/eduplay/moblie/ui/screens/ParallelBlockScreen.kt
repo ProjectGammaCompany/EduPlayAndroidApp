@@ -145,22 +145,22 @@ private fun BlockTopBar(onGoBack: () -> Unit) {
     )
 }
 
-@Composable
-@Preview
-private fun b() {
-    EduPlayTheme {
-        ParallelBlockScreen(
-            Block(
-                "",
-                "Block name",
-                listOf(
-                    ShortTask("", "task", 30, false),
-                    ShortTask("", "task 2", 30, false),
-                    ShortTask("", "task 3", 30, false),
-
-                    ),
-
-                ), {}, PaddingValues()
-        ) { }
-    }
-}
+//@Composable
+//@Preview
+//private fun b() {
+//    EduPlayTheme {
+//        ParallelBlockScreen(
+//            Block(
+//                "",
+//                "Block name",
+//                listOf(
+//                    ShortTask("", "task", 30, false),
+//                    ShortTask("", "task 2", 30, false),
+//                    ShortTask("", "task 3", 30, false),
+//
+//                    ),
+//
+//                ), {}, PaddingValues()
+//        ) { }
+//    }
+//}

@@ -176,7 +176,7 @@ interface WebApi {
         @Body groupPassword: GroupCredentials
     ): Response<Unit>
 
-    @GET("/events/{eventId}/joinCode")
+    @GET("/event/{eventId}/joinCode")
     @InjectAuth
     suspend fun getJoinCode(
         @Path("eventId") eventId: String,
@@ -195,7 +195,7 @@ interface WebApi {
 
     @POST("/event/{eventId}/rate")
     @InjectAuth
-    suspend fun postRating(@Body rating: EventRating): Response<Unit>
+    suspend fun postRating(@Path("eventId") eventId: String, @Body rating: EventRating): Response<Unit>
 
     @GET("event/{eventId}/download")
     @InjectAuth
@@ -203,7 +203,7 @@ interface WebApi {
 
     @POST("/event/{eventId}/answerBatch")
     @InjectAuth
-    suspend fun postAnswerBatch(@Body answerBatch: AnswerBatch): Response<Unit>
+    suspend fun postAnswerBatch(@Path("eventId") eventId: String, @Body answerBatch: AnswerBatch): Response<Unit>
 
     @POST("/user/eventStatus")
     @InjectAuth

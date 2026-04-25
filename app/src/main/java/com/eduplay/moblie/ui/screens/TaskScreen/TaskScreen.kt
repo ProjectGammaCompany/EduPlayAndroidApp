@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.screens.TaskScreen
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -53,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -94,6 +96,7 @@ fun TaskScreen(
     val onSubmit = {
         viewModel.sendAnswer(eventId, onNoInternet)
     }
+    val context = LocalContext.current
     if (taskType == TaskType.QR.optionNumber && showQr) {
 
         QRCameraPreview(
@@ -139,7 +142,7 @@ fun TaskScreen(
                             fileUri
                         )
                     },
-                    onOpen = { fileUri -> viewModel.onOpenFile(fileUri) },
+                    onOpen = { fileUri -> viewModel.onOpenFile(fileUri, context) },
                     downloadStatus = viewModel.fileStatusFlows
                 )
 
@@ -352,7 +355,7 @@ fun FileView(
     onOpen: (String) -> Unit,
     downloadStatus: SnapshotStateMap<String, Flow<FileDownloadStatus>>
 ) {
-
+    
     Column {
         files.forEach { file ->
             val fileStatus = (downloadStatus[file.url]

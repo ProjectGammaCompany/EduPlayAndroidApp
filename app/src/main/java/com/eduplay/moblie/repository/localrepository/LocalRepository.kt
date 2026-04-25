@@ -1,5 +1,6 @@
 package com.eduplay.moblie.repository.localrepository
 
+import android.content.Context
 import android.util.Log
 import androidx.room.RoomRawQuery
 import androidx.sqlite.SQLiteStatement
@@ -19,6 +20,7 @@ import com.eduplay.moblie.repository.localrepository.entity.BlockEntity
 import com.eduplay.moblie.repository.localrepository.entity.ConditionEntity
 import com.eduplay.moblie.repository.localrepository.entity.CorrectAnswerEntity
 import com.eduplay.moblie.repository.localrepository.entity.EventEntity
+import com.eduplay.moblie.repository.localrepository.entity.FileEntity
 import com.eduplay.moblie.repository.localrepository.entity.GroupEntity
 import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
 import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
@@ -40,8 +42,10 @@ import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.TokenManager
 import com.google.gson.Gson
+import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.first
+import java.io.File
 import java.security.MessageDigest
 import java.time.LocalDateTime
 import java.util.Base64
@@ -49,9 +53,14 @@ import java.util.Base64
 class LocalRepository @Inject constructor(
     private val eventDatabase: Database,
     private val tokenManager: TokenManager,
-    private val offlineModeManager: OfflineModeManager
-
+    private val offlineModeManager: OfflineModeManager,
+    @ApplicationContext context: Context
 ) : Repository {
+    private val context: Context
+
+    init {
+        this.context = context
+    }
 
     private var choseTaskInParallelBlock = false
 
@@ -179,7 +188,6 @@ class LocalRepository @Inject constructor(
         }
         val tags = Gson()
             .fromJson<List<String>>(event.tags, List::class.java)
-            .mapIndexed { idx, it -> EventTag(idx.toString(), it) }
 
         return EventOwnerInfo(
             title = event.title,
@@ -192,10 +200,9 @@ class LocalRepository @Inject constructor(
             password = "",
             lastEditionDate = event.lastEditionDate,
             groupEvent = false,
-            groupNames = listOf(),
             groups = listOf(),
             eventRating = 0.0f,
-            collaboratos = listOf(),
+            collaborators = listOf(),
             allowDownloading = true
         )
     }
@@ -366,9 +373,10 @@ class LocalRepository @Inject constructor(
 
         val options = eventDatabase.optionDao().getOptionsByTaskId(taskId)
         val startTime = eventDatabase.answerDao().getAnswerByTaskAndUserId(taskId, userId)
+        val files = eventDatabase.fileDao().getFilesByTaskId(taskId)
         return EventStage(
             type = StageType.TASK.stageName,
-            task = Task(task, options, startTime?.startTime),
+            task = Task(task, options, startTime?.startTime, files),
             block = null
         )
     }
@@ -784,13 +792,23 @@ class LocalRepository @Inject constructor(
         }
     }
 
-    suspend fun addTask(taskEntity: TaskEntity) {
+    suspend fun addTask(taskEntity: TaskEntity, files: List<String>, eventId: String) {
         val event = eventDatabase.taskDao().getTaskById(taskEntity.id)
         if (event == null) {
             eventDatabase.taskDao().insertTask(taskEntity)
         } else {
             eventDatabase.taskDao().updateTask(taskEntity)
         }
+        for (file in files) {
+            eventDatabase.fileDao().insertFile(
+                FileEntity(
+                    eventId = eventId,
+                    taskId = taskEntity.id,
+                    fileName = file
+                )
+            )
+        }
+
     }
 
     suspend fun addOption(optionEntity: OptionEntity) {
@@ -813,10 +831,15 @@ class LocalRepository @Inject constructor(
 
     suspend fun deleteEvent(eventId: String): Boolean {
         val event = eventDatabase.eventDao().getEventById(eventId)
+        val files = eventDatabase.fileDao().getFilesByEventId(eventId)
         if (event != null) {
+            for (file in files) {
+                File(this.context.filesDir, file).delete()
+            }
             eventDatabase.eventDao().deleteEvent(event)
             return true
         }
+        eventDatabase.userEventStatus().deleteStatusesByEvent(eventId)
         return false
     }
 
@@ -848,18 +871,19 @@ class LocalRepository @Inject constructor(
         for (answer in answers) {
             val entity = eventDatabase.answerDao().getAnswerByTaskAndUserId(answer.taskId, user)
             if (entity == null) continue
+            val answer =  AnswerEntity(
+                taskId = entity.taskId,
+                options = entity.options,
+                userId = entity.userId,
+                startTime = entity.startTime,
+                endTime = entity.endTime,
+                points = entity.points,
+                isFinal = entity.isFinal,
+                isSynchronized = true,
+                answerId = entity.answerId
+            )
             eventDatabase.answerDao().updateAnswer(
-                AnswerEntity(
-                    taskId = entity.taskId,
-                    options = entity.options,
-                    userId = entity.userId,
-                    startTime = entity.startTime,
-                    endTime = entity.endTime,
-                    points = entity.points,
-                    isFinal = entity.isFinal,
-                    isSynchronized = true,
-                    answerId = entity.answerId
-                )
+                answer
             )
         }
     }
@@ -918,7 +942,7 @@ class LocalRepository @Inject constructor(
             eventDatabase.answerDao().deleteAllAnswersInBlock(event.blockId, user)
 
             val date = DateConverter.convertToServerFormat(LocalDateTime.MIN)
-            val fakeAnswers = event.completedTasksInBlock.mapIndexed { idx, task ->
+            val fakeAnswers = event.completedTasksInBlock?.mapIndexed { idx, task ->
                 if (idx == 0 && event.pointsInBlock != 0) {
                     AnswerEntity(
                         taskId = task,
@@ -942,7 +966,7 @@ class LocalRepository @Inject constructor(
                         isSynchronized = true
                     )
                 }
-            }
+            } ?: listOf()
             for (answer in fakeAnswers) {
                 eventDatabase.answerDao().insertAnswer(answer)
             }
@@ -959,7 +983,7 @@ class LocalRepository @Inject constructor(
     }
 
     suspend fun containsUnsentAnswers(): Boolean {
-        return eventDatabase.answerDao().containsUnsynchronisedAnswers()
+        return eventDatabase.answerDao().containsUnsynchronisedAnswers() != 0
     }
 
 

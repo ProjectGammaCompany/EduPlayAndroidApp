@@ -3,8 +3,10 @@ package com.eduplay.moblie.repository.webrepository.responseTypes
 import com.eduplay.moblie.models.AnswerOption
 import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
 import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
+import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
 data class Task(
     @SerializedName("taskId")
@@ -19,7 +21,7 @@ data class Task(
     @SerializedName("timestamp")
     val timeStamp: String?
 ) {
-    constructor(task: TaskEntity, taskOptions: List<OptionEntity>, startTime: String?) : this(
+    constructor(task: TaskEntity, taskOptions: List<OptionEntity>, startTime: String?, files: List<String>) : this(
         id = task.id,
         blockId = task.blockId,
         name = task.name,
@@ -31,11 +33,12 @@ data class Task(
                 value = it.value
             )
         },
-        files = Gson().fromJson<List<TaskFile>>(task.files, List::class.java),
+        files = files.map { TaskFile(it, it) },
         time = task.time,
         timeStamp = startTime
     )
 
+    @Serializable
     data class TaskFile(
         val url: String,
         val name: String,

@@ -400,10 +400,10 @@ class EduRepository @Inject constructor(
         return webRepository.updateAvatar(file)
     }
 
-    suspend fun postEventRating(rating: Int): Boolean {
+    suspend fun postEventRating(eventId: String, rating: Int): Boolean {
         if (offlineModeManager.getAppMode().first() == AppModes.OFFLINE) return false
 
-        webRepository.postRating(rating)
+        webRepository.postRating(eventId, rating)
         return true
     }
 
@@ -422,7 +422,7 @@ class EduRepository @Inject constructor(
         if (offlineModeManager.getAppMode().first() == AppModes.OFFLINE) return true
         val answerBatch = localRepository.getCurrentPlayerStatus(eventId)
         if (answerBatch == null) return true
-        val success = webRepository.postAnswerBatch(answerBatch)
+        val success = webRepository.postAnswerBatch(answerBatch, eventId)
         if (success) {
             localRepository.markAnswersAsSynchronised(answerBatch.answers)
         }
@@ -432,6 +432,7 @@ class EduRepository @Inject constructor(
     suspend fun updateDownloadedEventsStatuses(): List<QuestShortInfo>? {
         val downloadedEvents: Map<String, EventEntity> =
             localRepository.getEvents(null, false, "", Int.MAX_VALUE).associateBy { it.id }
+        if (downloadedEvents.isEmpty()) return listOf()
         val eventStatuses = webRepository.getDownloadedEventsStatus(
             downloadedEvents.keys.toList()
         )

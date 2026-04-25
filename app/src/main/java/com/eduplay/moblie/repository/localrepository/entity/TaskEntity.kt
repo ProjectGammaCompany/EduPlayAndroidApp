@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.eduplay.moblie.models.TaskType
+import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.downloadTaskTypes.DownloadTask
 import com.google.gson.Gson
 
@@ -33,8 +34,6 @@ data class TaskEntity(
     val description: String,
     @ColumnInfo(name = "type")
     val type: Int,
-    @ColumnInfo(name = "files")
-    val files: String,
     @ColumnInfo(name = "time")
     val time: Int,
     @ColumnInfo(name = "points")
@@ -50,7 +49,6 @@ data class TaskEntity(
         name: String,
         description: String,
         type: TaskType,
-        files: List<String>,
         time: Int,
         points: Int,
         partialPoints: Boolean,
@@ -61,20 +59,18 @@ data class TaskEntity(
         name,
         description,
         type.optionNumber,
-        Gson().toJson(files),
         time,
         points,
         partialPoints,
         taskOrder
     )
 
-    constructor(task: DownloadTask, files: List<String>) : this(
+    constructor(task: DownloadTask) : this(
         task.taskId,
         task.blockId,
         task.name,
         task.description,
         task.type,
-        Gson().toJson(files),
         task.time,
         task.points,
         task.partialPoints,

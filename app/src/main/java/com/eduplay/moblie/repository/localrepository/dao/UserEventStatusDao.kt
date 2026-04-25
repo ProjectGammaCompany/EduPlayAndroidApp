@@ -29,4 +29,8 @@ interface UserEventStatusDao {
     suspend fun getStatusByUserAndEvent(
         userId: String, eventId: String
     ): UserEventStatusEntity?
+
+    @Transaction
+    @Query("DELETE FROM user_status WHERE eventId = :eventId")
+    suspend fun deleteStatusesByEvent(eventId: String)
 }

@@ -47,6 +47,8 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -476,6 +478,11 @@ private fun Settings(
                 onCheckedChange = {
                     onToggleOffline(it)
                 },
+                colors = SwitchDefaults.colors(
+                    uncheckedBorderColor = colorScheme.secondary,
+                    uncheckedThumbColor = colorScheme.secondary,
+                    uncheckedTrackColor = colorScheme.background
+                ),
                 modifier = Modifier
             )
         }
@@ -575,29 +582,29 @@ private fun Settings(
     }
 }
 
-@Composable
-@Preview
-fun ProfilePreview() {
-    //EduPlayTheme {
-    ProfileScreen(
-        PaddingValues(),
-        {},
-        remember { mutableStateOf("email") },
-        remember { mutableStateOf("username") },
-        { false },
-        {},
-        "",
-        remember { mutableStateOf(NetworkHeaders.Builder().build()) },
-        { it },
-        remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) },
-        {},
-        remember { mutableStateOf(AppSettingsManager.Themes.SYSTEM) },
-        { _ -> },
-        remember { mutableStateListOf() },
-        { _ -> },
-        rememberNavController(),
-        {},
-        remember { mutableStateOf(false) },
-    )
-    //}
-}
+//@Composable
+//@Preview
+//fun ProfilePreview() {
+//    //EduPlayTheme {
+//    ProfileScreen(
+//        PaddingValues(),
+//        {},
+//        remember { mutableStateOf("email") },
+//        remember { mutableStateOf("username") },
+//        { false },
+//        {},
+//        "",
+//        remember { mutableStateOf(NetworkHeaders.Builder().build()) },
+//        { it },
+//        remember { mutableStateOf(flowOf(OfflineModeManager.AppModes.ONLINE)) },
+//        {},
+//        remember { mutableStateOf(AppSettingsManager.Themes.SYSTEM) },
+//        { _ -> },
+//        remember { mutableStateListOf() },
+//        { _ -> },
+//        rememberNavController(),
+//        {},
+//        remember { mutableStateOf(false) },
+//    )
+//    //}
+//}

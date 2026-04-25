@@ -1,5 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -15,18 +16,24 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.FileDownloadStatus
+import com.eduplay.moblie.useCases.LocalFileOpener
+import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.TaskDownloadUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.net.ConnectException
 import java.time.LocalDateTime
 
 @HiltViewModel
 class EventStageViewmodel @Inject constructor(
     private val repository: EduRepository,
-    private val taskDownloader: TaskDownloadUseCase
+    private val taskDownloader: TaskDownloadUseCase,
+    private val offlineModeManager: OfflineModeManager
 ) : ViewModel(), EventStageViewModelInterface {
     override val currentStageType = mutableStateOf(StageType.NONE)
 
@@ -64,6 +71,16 @@ class EventStageViewmodel @Inject constructor(
                     } else {
                         DateConverter.convertFromServerFormat(result.task.timeStamp)
                     }
+                if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE) {
+                    val files = currentTask.value?.files ?: listOf()
+                    fileStatusFlows.clear()
+                    for (file in files) {
+                        fileStatusFlows.put(
+                            file.url,
+                            flowOf(FileDownloadStatus.SUCCESS)
+                        )
+                    }
+                }
 
             } catch (_: ConnectException) {
                 onNoInternet()
@@ -174,10 +191,25 @@ class EventStageViewmodel @Inject constructor(
     }
 
     override fun onDownloadFile(fileName: String, fileUri: String) {
-        fileStatusFlows.put(fileUri, taskDownloader.download(fileUri, fileName))
+        viewModelScope.launch {
+            when (offlineModeManager.getAppMode().first()) {
+                OfflineModeManager.AppModes.ONLINE -> fileStatusFlows.put(
+                    fileUri,
+                    taskDownloader.download(fileUri, fileName)
+                )
+
+                OfflineModeManager.AppModes.OFFLINE -> {}
+            }
+        }
     }
 
-    override fun onOpenFile(fileUri: String) {
-        taskDownloader.openFile(fileUri)
+    override fun onOpenFile(fileUri: String, context: Context) {
+        viewModelScope.launch {
+            if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
+                taskDownloader.openFile(fileUri)
+            } else {
+                LocalFileOpener.openFile(fileUri, context)
+            }
+        }
     }
 }

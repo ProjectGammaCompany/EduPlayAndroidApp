@@ -185,23 +185,3 @@ fun BluetoothDeviceListScreen(
         }
     }
 }
-
-@Preview
-@Composable
-fun DeviceListPrew() {
-    EduPlayTheme {
-        BluetoothDeviceListScreen(
-            foundDevices = remember {
-                mutableStateMapOf(
-                    Pair("qq", "Device 1"),
-                    Pair("", "Device 2"),
-                )
-            },
-            connect = { it, func -> },
-            devicesConnectionStatus = remember { mutableStateMapOf(Pair("Device 1", true)) },
-            onProceed = {},
-            innerPaddingValues = PaddingValues(),
-            onReturn = {}
-        )
-    }
-}

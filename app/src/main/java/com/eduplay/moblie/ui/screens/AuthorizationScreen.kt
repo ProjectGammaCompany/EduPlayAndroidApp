@@ -32,6 +32,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -265,6 +267,13 @@ private fun LoginForm(
                 Text(stringResource(R.string.incorrect_email))
             }
         },
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = colorScheme.secondary,
+            unfocusedContainerColor = colorScheme.background,
+            focusedContainerColor = colorScheme.background,
+            disabledContainerColor = colorScheme.tertiary,
+            errorContainerColor = colorScheme.background
+        ),
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 10.dp)
@@ -299,6 +308,13 @@ private fun LoginForm(
                 Text(stringResource(R.string.incorrect_password))
             }
         },
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = colorScheme.secondary,
+            unfocusedContainerColor = colorScheme.background,
+            focusedContainerColor = colorScheme.background,
+            disabledContainerColor = colorScheme.tertiary,
+            errorContainerColor = colorScheme.background
+        ),
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .testTag("login_password_field")
@@ -399,6 +415,13 @@ private fun RegistrationForm(
                 Text(stringResource(R.string.incorrect_email))
             }
         },
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = colorScheme.secondary,
+            unfocusedContainerColor = colorScheme.background,
+            focusedContainerColor = colorScheme.background,
+            disabledContainerColor = colorScheme.tertiary,
+            errorContainerColor = colorScheme.background
+        ),
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 10.dp)
@@ -435,6 +458,13 @@ private fun RegistrationForm(
                 Text(stringResource(R.string.passwords_not_same))
             }
         },
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = colorScheme.secondary,
+            unfocusedContainerColor = colorScheme.background,
+            focusedContainerColor = colorScheme.background,
+            disabledContainerColor = colorScheme.tertiary,
+            errorContainerColor = colorScheme.background
+        ),
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 10.dp)
@@ -445,7 +475,7 @@ private fun RegistrationForm(
         value = repeatPassword,
         onValueChange = { it -> repeatPassword = it },
         isError = isPasswordError(repeatPassword) || repeatPasswordIsWrong.value,
-        label = { Text(text = stringResource(R.string.password)) },
+        label = { Text(text = stringResource(R.string.repeat_password)) },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password
         ),
@@ -468,6 +498,13 @@ private fun RegistrationForm(
                 Text(stringResource(R.string.passwords_not_same))
             }
         },
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = colorScheme.secondary,
+            unfocusedContainerColor = colorScheme.background,
+            focusedContainerColor = colorScheme.background,
+            disabledContainerColor = colorScheme.tertiary,
+            errorContainerColor = colorScheme.background
+        ),
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(bottom = 5.dp)

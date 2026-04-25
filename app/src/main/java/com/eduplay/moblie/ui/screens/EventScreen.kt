@@ -1,7 +1,9 @@
 package com.eduplay.moblie.ui.screens
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.content.ClipData
 import android.content.ComponentName
 import android.util.Log
 import android.widget.Toast
@@ -62,9 +64,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -77,6 +77,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -84,7 +86,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.fragment.compose.AndroidFragment
@@ -99,7 +100,7 @@ import coil3.request.crossfade
 import com.eduplay.moblie.BuildConfig
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventGroup
-import com.eduplay.moblie.models.EventTag
+import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinGroupDialog
@@ -111,10 +112,10 @@ import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel.EditorStatColumns
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.useCases.BluetoothConnectionFragment
+import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -354,7 +355,7 @@ fun EventScreen(
             onDownload,
             viewModel.canDownload,
             viewModel.isRated,
-            viewModel::rateEvent,
+            { rating -> viewModel.rateEvent(rating, eventId) },
             viewModel.groupEvent,
             viewModel.downloadStatusObserver.downloading,
             viewModel.downloadStatusObserver.downloaded,
@@ -375,7 +376,7 @@ fun EventScreen(
     eventCreatorMode: State<Boolean>,
     isEventFavourite: State<Boolean>,
     eventName: State<String>,
-    tags: SnapshotStateList<EventTag>,
+    tags: SnapshotStateList<String>,
     author: State<String>,
     isCompleted: State<Boolean>,
     cover: String,
@@ -396,7 +397,7 @@ fun EventScreen(
     password: State<String>,
     groups: SnapshotStateList<EventGroup>,
     eventId: String,
-    joinCode: State<String>,
+    joinCode: State<JoinCodeInfo>,
     onDownload: () -> Unit,
     canDownLoad: State<Boolean>,
     isRated: State<Boolean>,
@@ -754,7 +755,7 @@ private fun EventScreenHeader(
                     .build()
             } else {
                 ImageRequest.Builder(LocalContext.current)
-                    .data(File(context.filesDir, cover))
+                    .data(File(context.filesDir, cover ?: ""))
                     .crossfade(true)
                     .build()
             },
@@ -870,7 +871,7 @@ private fun EventScreenHeader(
 
 @Composable
 private fun GeneralInfo(
-    tags: SnapshotStateList<EventTag>,
+    tags: SnapshotStateList<String>,
     info: SnapshotStateList<Pair<Int, String?>>,
     description: State<String>,
     needToRate: Boolean? = null,
@@ -892,7 +893,7 @@ private fun GeneralInfo(
                 .testTag("tags")
         ) {
             tags.forEach { tagName ->
-                EventTag(tagName.name)
+                EventTag(tagName)
             }
         }
         Column(
@@ -940,7 +941,7 @@ private fun GeneralInfo(
 
 @Composable
 private fun GeneralUserBody(
-    tags: SnapshotStateList<EventTag>,
+    tags: SnapshotStateList<String>,
     info: SnapshotStateList<Pair<Int, String?>>,
     description: State<String>,
     isOpen: State<Boolean>,
@@ -1104,13 +1105,13 @@ private fun EventTag(tagName: String) {
 
 @Composable
 private fun EventCreatorBody(
-    tags: SnapshotStateList<EventTag>,
+    tags: SnapshotStateList<String>,
     info: SnapshotStateList<Pair<Int, String?>>,
     description: State<String>,
     privateEvent: State<Boolean>,
     password: State<String>,
     groups: SnapshotStateList<EventGroup>,
-    joinCode: State<String>,
+    joinCode: State<JoinCodeInfo>,
     groupEvent: State<Boolean>,
     groupEditorStats: State<ResultStats>,
     sortEventsByColumn: (EditorStatColumns, Boolean) -> Unit
@@ -1155,14 +1156,23 @@ private fun EventCreatorBody(
 
 }
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun PrivacySettings(
     password: State<String>,
     groups: SnapshotStateList<EventGroup>,
-    joinCode: State<String>,
+    joinCode: State<JoinCodeInfo>,
     privateEvent: State<Boolean>,
     groupEvent: State<Boolean>
 ) {
+    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
+    val onCopy = { str: String ->
+        val clipData =
+            ClipData.newPlainText(context.getString(R.string.join_code), str)
+        val clipEntry = ClipEntry(clipData)
+        clipboardManager.setClip(clipEntry)
+    }
     Column(
         modifier = Modifier
             .padding(horizontal = 10.dp, vertical = 10.dp)
@@ -1171,7 +1181,7 @@ fun PrivacySettings(
             .testTag("privacy_settings_section")
     ) {
         if (privateEvent.value) {
-            Row {
+            Column {
 
                 Text(
                     text = stringResource(R.string.join_code),
@@ -1181,8 +1191,32 @@ fun PrivacySettings(
                     ),
                     modifier = Modifier.padding(end = 5.dp)
                 )
+                Row {
+                    Text(
+                        text = joinCode.value.joinCode,
+                        style = typography.bodyLarge.copy(
+                            color = colorScheme.onBackground
+                        ),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 5.dp)
+                    )
+                    IconButton(
+                        onClick = { onCopy(joinCode.value.joinCode) },
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.copy),
+                            contentDescription = stringResource(R.string.copy_join_code)
+                        )
+                    }
+                }
+                val stringBuilder = StringBuilder()
+                stringBuilder.append(context.getString(R.string.expires_at))
+                stringBuilder.append(DateConverter.convertForDisplay(joinCode.value.expiresAt))
+
                 Text(
-                    text = joinCode.value,
+                    text = stringBuilder.toString(),
                     style = typography.bodyLarge.copy(
                         color = colorScheme.onBackground
                     ),
@@ -1191,10 +1225,10 @@ fun PrivacySettings(
             }
 
 
-            Row {
+            Row(modifier = Modifier.padding(top = 5.dp)) {
                 Text(
                     text = stringResource(R.string.event_password),
-                    style = typography.bodyMedium.copy(
+                    style = typography.bodyLarge.copy(
                         fontWeight = FontWeight.Medium,
                         color = colorScheme.onBackground
                     ),
@@ -1202,7 +1236,7 @@ fun PrivacySettings(
                 )
                 Text(
                     text = password.value,
-                    style = typography.bodyMedium.copy(color = colorScheme.onBackground)
+                    style = typography.bodyLarge.copy(color = colorScheme.onBackground)
                 )
             }
         }
@@ -1214,22 +1248,38 @@ fun PrivacySettings(
                     fontWeight = FontWeight.Medium,
                     color = colorScheme.onBackground
                 ),
-                modifier = Modifier.padding(end = 5.dp)
+                modifier = Modifier
+                    .padding(end = 5.dp)
+                    .padding(top = 3.dp)
             )
 
             groups.forEach { group ->
-                Text(
-                    text = group.login,
-                    style = typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Medium,
-                        color = colorScheme.onBackground
-                    ),
-                    modifier = Modifier.padding(end = 5.dp)
-                )
-                Text(
-                    text = stringResource(R.string.password) + ": " + group.password,
-                    style = typography.bodyMedium.copy(color = colorScheme.onBackground)
-                )
+                FlowRow {
+                    Text(
+                        text = group.login,
+                        style = typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = colorScheme.onBackground
+                        ),
+                        modifier = Modifier.align(Alignment.CenterVertically).padding(end = 5.dp)
+                    )
+
+                    Text(
+                        text = stringResource(R.string.password) + ": " + group.password,
+                        style = typography.bodyLarge.copy(color = colorScheme.onBackground),
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                    IconButton(
+                        onClick = { onCopy(group.password) },
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.copy),
+                            contentDescription = stringResource(R.string.copy_join_code)
+                        )
+
+                    }
+                }
             }
         }
     }

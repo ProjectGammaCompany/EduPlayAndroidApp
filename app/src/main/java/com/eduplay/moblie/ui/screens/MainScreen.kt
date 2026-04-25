@@ -20,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -30,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,7 +67,6 @@ fun MainScreen(
     onStopCompetition: () -> Unit,
     viewModel: MainScreenViewModel = hiltViewModel(),
     eventListViewModel: EventListViewModel = hiltViewModel(),
-    imageHeaderViewModel: ImageHeaderViewModel = hiltViewModel(),
     currentModeViewModel: CurrentModeViewModel = hiltViewModel()
 ) {
     val onEventClick = { eventId: String ->
@@ -106,19 +107,24 @@ fun MainScreen(
 
     val currentMode = currentModeViewModel.currentMode.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
 
-    MainScreen(
-        innerPaddingValues,
-        events,
-        onEventClick,
-        onFavourite,
-        imageHeaderViewModel.headers,
-        { image: String -> imageHeaderViewModel.getFullUrl(image) },
-        isCompetitionMode,
-        onStopCompetition,
-        onSearch,
-        onJoinByCode,
-        currentMode
-    )
+    val isRefreshing = viewModel.isRefreshing.collectAsState()
+    PullToRefreshBox(
+        isRefreshing = isRefreshing.value,
+        onRefresh = viewModel::refreshFeed,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        MainScreen(
+            innerPaddingValues,
+            events,
+            onEventClick,
+            onFavourite,
+            isCompetitionMode,
+            onStopCompetition,
+            onSearch,
+            onJoinByCode,
+            currentMode
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,14 +134,13 @@ private fun MainScreen(
     events: State<Flow<PagingData<QuestShortInfo>>>,
     onEventClick: (String) -> Unit,
     onFavourite: (String, Boolean) -> Unit,
-    headers: State<NetworkHeaders>,
-    imageUrl: (String) -> String,
     isCompetitionMode: State<Boolean>,
     onStopCompetition: () -> Unit,
     onSearch: () -> Unit,
     onJoinByCode: () -> Unit,
     currentMode: State<OfflineModeManager.AppModes>
 ) {
+
     Column(
         modifier = Modifier
             .background(color = colorScheme.background)
@@ -205,59 +210,5 @@ private fun MainScreen(
         }
 
     }
-}
-
-
-@Preview
-@Composable
-fun MainScreenPreview() {
-    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
-    val events = flowOf<PagingData<QuestShortInfo>>(
-        PagingData.from(
-            listOf<QuestShortInfo>(
-                QuestShortInfo(
-                    "1",
-                    "test",
-                    "",
-                    "",
-                    1.0,
-                    false,
-                    listOf(),
-                    false
-                ),
-                QuestShortInfo(
-                    "2",
-                    "test",
-                    "",
-                    "",
-                    1.0,
-                    true,
-                    listOf(EventTag("id", "tag 1"), EventTag("id", "tag 2")),
-                    true
-                )
-            )
-        )
-    )
-
-
-    val nothing = { string: String -> }
-    val nothingB = { string: String, bool: Boolean -> }
-    EduPlayTheme {
-        MainScreen(
-            PaddingValues(0.dp),
-            remember { mutableStateOf(events) },
-            nothing,
-            nothingB,
-            headers,
-            { it },
-            remember { mutableStateOf(false) },
-            {},
-            {},
-            {},
-            remember { mutableStateOf(OfflineModeManager.AppModes.OFFLINE) }
-        )
-    }
-
-
 }
 

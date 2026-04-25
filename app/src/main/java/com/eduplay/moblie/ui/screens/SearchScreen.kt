@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
@@ -284,7 +285,12 @@ private fun SwitchFilter(
             checked = state.value,
             onCheckedChange = {
                 onCheckedChange(it)
-            }
+            },
+            colors = SwitchDefaults.colors(
+                uncheckedBorderColor = colorScheme.secondary,
+                uncheckedThumbColor = colorScheme.secondary,
+                uncheckedTrackColor = colorScheme.background
+            )
         )
         Text(
             text = text,
@@ -336,31 +342,31 @@ private fun TagList(
     }
 }
 
-@Preview
-@Composable
-private fun SearchPrev() {
-    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
-    val nothingB = { string: String, bool: Boolean -> }
-    EduPlayTheme {
-        SearchScreen(
-            innerPaddingValues = PaddingValues(),
-            onSearch = { _, _, _, _, _ -> },
-            searchResults = remember { mutableStateOf(flowOf()) },
-            onEventClick = {},
-            onFavourite = nothingB,
-            headers = headers,
-            imageUrl = { it },
-            tags = remember {
-                mutableStateListOf(
-                    "математика",
-                    "информатика",
-                    "алгебра",
-                    "тест",
-                    "инфо",
-                    "ии"
-                )
-            },
-            noEventsFound = remember { mutableStateOf(false) }
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun SearchPrev() {
+//    val headers = remember { mutableStateOf(NetworkHeaders.Builder().build()) }
+//    val nothingB = { string: String, bool: Boolean -> }
+//    EduPlayTheme {
+//        SearchScreen(
+//            innerPaddingValues = PaddingValues(),
+//            onSearch = { _, _, _, _, _ -> },
+//            searchResults = remember { mutableStateOf(flowOf()) },
+//            onEventClick = {},
+//            onFavourite = nothingB,
+//            headers = headers,
+//            imageUrl = { it },
+//            tags = remember {
+//                mutableStateListOf(
+//                    "математика",
+//                    "информатика",
+//                    "алгебра",
+//                    "тест",
+//                    "инфо",
+//                    "ии"
+//                )
+//            },
+//            noEventsFound = remember { mutableStateOf(false) }
+//        )
+//    }
+//}
