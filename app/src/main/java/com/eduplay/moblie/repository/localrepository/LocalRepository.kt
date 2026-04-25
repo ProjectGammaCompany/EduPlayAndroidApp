@@ -839,6 +839,7 @@ class LocalRepository @Inject constructor(
             eventDatabase.eventDao().deleteEvent(event)
             return true
         }
+        eventDatabase.userEventStatus().deleteStatusesByEvent(eventId)
         return false
     }
 
@@ -870,18 +871,19 @@ class LocalRepository @Inject constructor(
         for (answer in answers) {
             val entity = eventDatabase.answerDao().getAnswerByTaskAndUserId(answer.taskId, user)
             if (entity == null) continue
+            val answer =  AnswerEntity(
+                taskId = entity.taskId,
+                options = entity.options,
+                userId = entity.userId,
+                startTime = entity.startTime,
+                endTime = entity.endTime,
+                points = entity.points,
+                isFinal = entity.isFinal,
+                isSynchronized = true,
+                answerId = entity.answerId
+            )
             eventDatabase.answerDao().updateAnswer(
-                AnswerEntity(
-                    taskId = entity.taskId,
-                    options = entity.options,
-                    userId = entity.userId,
-                    startTime = entity.startTime,
-                    endTime = entity.endTime,
-                    points = entity.points,
-                    isFinal = entity.isFinal,
-                    isSynchronized = true,
-                    answerId = entity.answerId
-                )
+                answer
             )
         }
     }
@@ -940,7 +942,7 @@ class LocalRepository @Inject constructor(
             eventDatabase.answerDao().deleteAllAnswersInBlock(event.blockId, user)
 
             val date = DateConverter.convertToServerFormat(LocalDateTime.MIN)
-            val fakeAnswers = event.completedTasksInBlock.mapIndexed { idx, task ->
+            val fakeAnswers = event.completedTasksInBlock?.mapIndexed { idx, task ->
                 if (idx == 0 && event.pointsInBlock != 0) {
                     AnswerEntity(
                         taskId = task,
@@ -964,7 +966,7 @@ class LocalRepository @Inject constructor(
                         isSynchronized = true
                     )
                 }
-            }
+            } ?: listOf()
             for (answer in fakeAnswers) {
                 eventDatabase.answerDao().insertAnswer(answer)
             }
@@ -981,7 +983,7 @@ class LocalRepository @Inject constructor(
     }
 
     suspend fun containsUnsentAnswers(): Boolean {
-        return eventDatabase.answerDao().containsUnsynchronisedAnswers()
+        return eventDatabase.answerDao().containsUnsynchronisedAnswers() != 0
     }
 
 

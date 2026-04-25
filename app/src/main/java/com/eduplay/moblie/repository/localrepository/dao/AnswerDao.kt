@@ -57,7 +57,7 @@ interface AnswerDao {
 
     @Transaction
     @Query("""
-        SELECT EXISTS(SELECT isSynchronized FROM answers WHERE isSynchronized = 0)
+        SELECT COUNT(isSynchronized) FROM answers WHERE isSynchronized = 0 AND isFinal = 1
     """)
-    suspend fun containsUnsynchronisedAnswers(): Boolean
+    suspend fun containsUnsynchronisedAnswers(): Int
 }
