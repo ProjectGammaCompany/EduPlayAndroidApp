@@ -1,6 +1,5 @@
 package com.eduplay.moblie.ui.screens.TaskScreen
 
-import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -76,8 +75,6 @@ import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.math.abs
 import kotlin.math.max
-
-//TODO("optional scroll bar для column")
 
 @Composable
 fun TaskScreen(
@@ -355,7 +352,7 @@ fun FileView(
     onOpen: (String) -> Unit,
     downloadStatus: SnapshotStateMap<String, Flow<FileDownloadStatus>>
 ) {
-    
+
     Column {
         files.forEach { file ->
             val fileStatus = (downloadStatus[file.url]

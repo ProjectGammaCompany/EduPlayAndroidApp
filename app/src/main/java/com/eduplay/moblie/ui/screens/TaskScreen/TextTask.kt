@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
@@ -31,6 +32,7 @@ fun TextTask(viewModel: EventStageViewModelInterface) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .testTag("text_task")
     ) {
         TextField(
             value = answer,

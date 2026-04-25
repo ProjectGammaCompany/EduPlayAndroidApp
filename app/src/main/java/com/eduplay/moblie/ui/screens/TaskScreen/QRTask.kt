@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
@@ -67,6 +68,7 @@ fun QRTask(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .testTag("qr_task")
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
@@ -111,6 +113,7 @@ fun QRTask(
                         .fillMaxWidth()
                         .padding(top = 20.dp)
                         .heightIn(100.dp, 150.dp)
+                        .testTag("scan_code_btn")
 
                 ) {
                     Text(
@@ -126,6 +129,7 @@ fun QRTask(
                     modifier = Modifier
                         .padding(top = 15.dp)
                         .fillMaxWidth()
+                        .testTag("cant_scan_btn")
                 ) {
                     Text(
                         text = stringResource(R.string.cant_scan),
@@ -171,6 +175,7 @@ fun QRTask(
                             color = colorScheme.primary,
                             shape = RoundedCornerShape(8.dp)
                         )
+                        .testTag("code_field")
                 )
                 TextButton(
                     onClick = {
@@ -180,6 +185,7 @@ fun QRTask(
                     modifier = Modifier
                         .padding(top = 15.dp)
                         .fillMaxWidth()
+                        .testTag("can_scan_btn")
                 ) {
                     Text(
                         text = stringResource(R.string.scan_qr),

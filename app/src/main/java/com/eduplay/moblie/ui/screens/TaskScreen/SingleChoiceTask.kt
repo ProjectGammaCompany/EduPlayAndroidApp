@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 
@@ -33,6 +34,7 @@ fun SingleChoiceTask(viewModel: EventStageViewModelInterface) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .testTag("single_choice_task")
         //.heightIn(50.dp, max(50, maxHeight.value.toInt()/3).dp)
     ) {
         Column(

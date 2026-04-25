@@ -19,6 +19,7 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import coil3.network.NetworkHeaders
 import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.models.EventTag
+import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.ui.screens.EventScreen
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
@@ -40,7 +41,7 @@ class EventScreenUiTest {
         val eventCreatorMode = mutableStateOf(false)
         val isEventFavourite = mutableStateOf(false)
         val eventName = mutableStateOf("")
-        val tags: SnapshotStateList<EventTag> = mutableStateListOf()
+        val tags: SnapshotStateList<String> = mutableStateListOf()
         val author = mutableStateOf("")
         val isCompleted = mutableStateOf(false)
         val cover: String = ""
@@ -59,7 +60,7 @@ class EventScreenUiTest {
         val password = mutableStateOf("")
         val groups = mutableStateListOf<EventGroup>()
         val eventId = ""
-        val joinCode = mutableStateOf("")
+        val joinCode = mutableStateOf(JoinCodeInfo("", ""))
         val onDownload = {}
         val canDownLoad = mutableStateOf(false)
         val isRated = mutableStateOf(false)
@@ -325,9 +326,7 @@ class EventScreenUiTest {
     @Test
     fun check_contains_general_info_for_player() {
         composeTestRule.apply {
-            val tags = mutableStateListOf(
-                EventTag("id", "tag 1"), EventTag("id", "tag 2"), EventTag("id", "tag 3")
-            )
+            val tags = mutableStateListOf("tag 1",  "tag 2",  "tag 3")
             val info = mutableStateListOf<Pair<Int, String?>>(
                 Pair(R.string.rating, 3.54.toString()),
                 Pair(R.string.opens, LocalDateTime.now().toString()),
@@ -342,7 +341,7 @@ class EventScreenUiTest {
             }
 
             for (tag in tags) {
-                onNodeWithText(tag.name, useUnmergedTree = true).assertIsDisplayed()
+                onNodeWithText(tag, useUnmergedTree = true).assertIsDisplayed()
             }
 
             for (item in info) {
@@ -358,9 +357,7 @@ class EventScreenUiTest {
     @Test
     fun check_contains_general_info_for_creator() {
         composeTestRule.apply {
-            val tags = mutableStateListOf(
-                EventTag("id", "tag 1"), EventTag("id", "tag 2"), EventTag("id", "tag 3")
-            )
+            val tags = mutableStateListOf("tag 1", "tag 2", "tag 3")
 
             val info = mutableStateListOf<Pair<Int, String?>>(
                 Pair(R.string.rating, 3.54.toString()),
@@ -376,7 +373,7 @@ class EventScreenUiTest {
             }
 
             for (tag in tags) {
-                onNodeWithText(tag.name, useUnmergedTree = true).assertIsDisplayed()
+                onNodeWithText(tag, useUnmergedTree = true).assertIsDisplayed()
             }
 
             for (item in info) {

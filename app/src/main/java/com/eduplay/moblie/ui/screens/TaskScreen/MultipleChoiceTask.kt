@@ -23,6 +23,7 @@ import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 
@@ -35,6 +36,7 @@ fun MultipleChoiceTask(viewModel: EventStageViewModelInterface) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .testTag("multiple_choice_task")
     ) {
         Column(
             modifier = Modifier
