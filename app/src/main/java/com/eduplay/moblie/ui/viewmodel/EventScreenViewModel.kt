@@ -21,9 +21,11 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStat
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserEditorStat
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.DownloadStatusObserver
+import com.eduplay.moblie.useCases.OfflineModeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.net.ConnectException
 import java.time.LocalDateTime
@@ -32,7 +34,8 @@ import java.time.LocalDateTime
 @HiltViewModel
 class EventScreenViewModel @Inject constructor(
     val repository: EduRepository,
-    val downloadStatusObserver: DownloadStatusObserver
+    val downloadStatusObserver: DownloadStatusObserver,
+    private val offlineModeManager: OfflineModeManager
 ) : ViewModel() {
     val eventCreatorMode = mutableStateOf(false)
     val isEventFavourite = mutableStateOf(false)
@@ -136,7 +139,8 @@ class EventScreenViewModel @Inject constructor(
         isCompleted.value = EventStatus.statusOf(data.status) == EventStatus.ENDED
 
         // заранее отправляем ответы
-        if (isDownloaded.value) {
+        val mode = offlineModeManager.getAppMode().first()
+        if (isDownloaded.value && mode == OfflineModeManager.AppModes.ONLINE) {
             val result = repository.postAnswerBatch(eventId)
             if (!result) isOpen.value = false
         }

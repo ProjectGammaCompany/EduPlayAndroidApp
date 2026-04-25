@@ -203,7 +203,7 @@ interface WebApi {
 
     @POST("/event/{eventId}/answerBatch")
     @InjectAuth
-    suspend fun postAnswerBatch(@Body answerBatch: AnswerBatch): Response<Unit>
+    suspend fun postAnswerBatch(@Path("eventId") eventId: String, @Body answerBatch: AnswerBatch): Response<Unit>
 
     @POST("/user/eventStatus")
     @InjectAuth
