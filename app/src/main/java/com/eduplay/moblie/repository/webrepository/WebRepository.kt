@@ -489,8 +489,8 @@ class WebRepository @Inject constructor(
         throw IllegalAccessException("failed to get file path")
     }
 
-    suspend fun postAnswerBatch(answerBatch: AnswerBatch): Boolean {
-        val response = api.postAnswerBatch(answerBatch)
+    suspend fun postAnswerBatch(answerBatch: AnswerBatch, eventId: String): Boolean {
+        val response = api.postAnswerBatch(eventId, answerBatch)
         Log.d("post_answer_batch", response.code().toString() + response.raw())
         return response.isSuccessful
     }
