@@ -81,8 +81,7 @@ fun TaskScreen(
     innerPaddingValues: PaddingValues,
     eventId: String,
     viewModel: EventStageViewModelInterface,
-    onGoBack: () -> Unit,
-    onNoInternet: () -> Unit
+    onGoBack: () -> Unit
 ) {
     val taskType = viewModel.currentTask.value!!.type
     var isSubmitBtnShown by remember { mutableStateOf(true) }
@@ -91,7 +90,7 @@ fun TaskScreen(
     var showQr by remember { mutableStateOf(false) }
     val onScanQr = { showQr = true }
     val onSubmit = {
-        viewModel.sendAnswer(eventId, onNoInternet)
+        viewModel.sendAnswer(eventId)
     }
     val context = LocalContext.current
     if (taskType == TaskType.QR.optionNumber && showQr) {
@@ -101,7 +100,7 @@ fun TaskScreen(
             { answer ->
                 showQr = false
                 viewModel.answers.add(answer)
-                viewModel.sendAnswer(eventId, onNoInternet)
+                viewModel.sendAnswer(eventId)
             },
             { showQr = false },
         )
@@ -159,7 +158,7 @@ fun TaskScreen(
                 if (isSubmitBtnShown) {
                     SubmitBtn(
                         TaskType.valueOf(taskType),
-                        { viewModel.sendAnswer(eventId, onNoInternet) })
+                        { viewModel.sendAnswer(eventId) })
                 }
             }
         }

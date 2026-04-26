@@ -39,7 +39,6 @@ class TaskScreenUiTest {
     val innerPaddingValues = PaddingValues()
     val eventId = ""
     val onGoBack = {}
-    val onNoInternet = {}
 
     @SpyK
     var viewModel: EventStageViewModelInterface = object : EventStageViewModelInterface {
@@ -50,28 +49,32 @@ class TaskScreenUiTest {
         override var currentTask: MutableState<Task?> = mutableStateOf(null)
         override var currentBlock: MutableState<Block?> = mutableStateOf(null)
         override var taskStartTime: LocalDateTime = LocalDateTime.now()
-        override val answers: SnapshotStateList<String> = mutableStateListOf("option 1", "option 2", "option 3")
+        override val answers: SnapshotStateList<String> =
+            mutableStateListOf("option 1", "option 2", "option 3")
         override val disableTask: MutableState<Boolean> = mutableStateOf(false)
         override val showResults: MutableState<Boolean> = mutableStateOf(false)
-        override val correctAnswer: MutableList<String> = mutableStateListOf("option 1", "option 2", "option 3")
+        override val correctAnswer: MutableList<String> =
+            mutableStateListOf("option 1", "option 2", "option 3")
         override var points: Int? = null
         override var isAnswerCorrect: TaskAnswerStatus? = TaskAnswerStatus.CORRECT
-
+        override val unauthorised: MutableState<Boolean> = mutableStateOf(false)
+        override var bluetoothCallBack: (Int) -> Unit = {}
+        override val noInternet: MutableState<Boolean> = mutableStateOf(false)
         override fun chooseTask(
             eventId: String,
-            taskId: String,
-            onNoInternet: () -> Unit
-        ) {}
+            taskId: String
+        ) {
+        }
 
-        override fun sendAnswer(eventId: String, onNoInternet: () -> Unit) {}
+        override fun sendAnswer(eventId: String) {}
 
         override fun onDownloadFile(fileName: String, fileUri: String) {}
 
         override fun getNextStage(
             eventId: String,
-            onNoInternet: () -> Unit,
             retry: Boolean
-        ) {}
+        ) {
+        }
 
         override fun onOpenFile(fileUri: String, context: Context) {}
     }
@@ -88,7 +91,6 @@ class TaskScreenUiTest {
             eventId = eventId,
             viewModel = viewModel,
             onGoBack = onGoBack,
-            onNoInternet = onNoInternet
         )
     }
 

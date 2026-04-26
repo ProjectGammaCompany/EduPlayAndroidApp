@@ -70,14 +70,14 @@ fun EventStageScreen(
     val goBack = {
         navController.popBackStack()
     }
-    var noInternet by remember { mutableStateOf(false) }
+
     var cantShowData by remember { mutableStateOf(false) }
     BackHandler {
         onGoBack()
     }
     when (viewModel.currentStageType.value) {
         StageType.NONE -> {
-            viewModel.getNextStage(eventId, { noInternet = true; cantShowData = true })
+            viewModel.getNextStage(eventId)
         }
 
         StageType.TASK -> {
@@ -85,8 +85,7 @@ fun EventStageScreen(
                 innerPadding,
                 eventId,
                 onGoBack = onGoBack,
-                viewModel = viewModel,
-                onNoInternet = { noInternet = true },
+                viewModel = viewModel
             )
         }
 
@@ -94,7 +93,7 @@ fun EventStageScreen(
             ParallelBlockScreen(
                 block = viewModel.currentBlock.value!!,
                 onChooseTask = { taskId: String ->
-                    viewModel.chooseTask(eventId, taskId, { noInternet = true })
+                    viewModel.chooseTask(eventId, taskId)
                 },
                 onGoBack = onGoBack,
                 innerPaddingValues = innerPadding
@@ -118,8 +117,9 @@ fun EventStageScreen(
 
         )
     }
-    if (noInternet) {
+    if (viewModel.noInternet.value) {
         NoInternetConnectionToast()
+        viewModel.noInternet.value = false
     }
     if (viewModel.unauthorised.value) {
         AuthScreenNavigator(navController)

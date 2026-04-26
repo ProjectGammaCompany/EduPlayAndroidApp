@@ -28,11 +28,12 @@ interface EventStageViewModelInterface {
     val correctAnswer: MutableList<String>
     var points: Int?
     var isAnswerCorrect: TaskAnswerStatus?
-    fun chooseTask(eventId: String, taskId: String, onNoInternet: () -> Unit)
-    fun sendAnswer(eventId: String, onNoInternet: () -> Unit)
-
-    //fun getNextStage(eventId: String, onNoInternet: () -> Unit)
+    val unauthorised: MutableState<Boolean>
+    var bluetoothCallBack: (Int) -> Unit
+    val noInternet: MutableState<Boolean>
+    fun chooseTask(eventId: String, taskId: String)
+    fun sendAnswer(eventId: String)
     fun onDownloadFile(fileName: String, fileUri: String)
-    fun getNextStage(eventId: String, onNoInternet: () -> Unit, retry: Boolean = false)
+    fun getNextStage(eventId: String, retry: Boolean = false)
     fun onOpenFile(fileUri: String, context: Context)
 }

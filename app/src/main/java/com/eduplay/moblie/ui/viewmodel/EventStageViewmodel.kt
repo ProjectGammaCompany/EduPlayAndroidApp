@@ -2,6 +2,7 @@ package com.eduplay.moblie.ui.viewmodel
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -12,20 +13,20 @@ import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.StageType
-import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
+import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.FileDownloadStatus
 import com.eduplay.moblie.useCases.LocalFileOpener
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.TaskDownloadUseCase
+import com.eduplay.moblie.utils.CoroutineContextProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.net.ConnectException
 import java.time.LocalDateTime
 
@@ -33,7 +34,8 @@ import java.time.LocalDateTime
 class EventStageViewmodel @Inject constructor(
     private val repository: EduRepository,
     private val taskDownloader: TaskDownloadUseCase,
-    private val offlineModeManager: OfflineModeManager
+    private val offlineModeManager: OfflineModeManager,
+    private final val coroutineContext: CoroutineContextProvider = CoroutineContextProvider()
 ) : ViewModel(), EventStageViewModelInterface {
     override val currentStageType = mutableStateOf(StageType.NONE)
 
@@ -50,15 +52,15 @@ class EventStageViewmodel @Inject constructor(
     override var points: Int? = null
 
     override var isAnswerCorrect: TaskAnswerStatus? = null
-    val unauthorised = mutableStateOf(false)
+    override val unauthorised = mutableStateOf(false)
 
     override val fileStatusFlows = mutableStateMapOf<String, Flow<FileDownloadStatus>>()
 
-    var bluetoothCallBack: (Int) -> Unit = {}
+    override var bluetoothCallBack: (Int) -> Unit = {}
+    override val noInternet: MutableState<Boolean> = mutableStateOf(false)
 
-
-    override fun getNextStage(eventId: String, onNoInternet: () -> Unit, retry: Boolean) {
-        viewModelScope.launch {
+    override fun getNextStage(eventId: String, retry: Boolean) {
+        viewModelScope.launch(coroutineContext.Main) {
             try {
                 val result = repository.getNextStage(eventId)
                 clear()
@@ -71,7 +73,9 @@ class EventStageViewmodel @Inject constructor(
                     } else {
                         DateConverter.convertFromServerFormat(result.task.timeStamp)
                     }
-                if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.OFFLINE) {
+                if (offlineModeManager.getAppMode()
+                        .first() == OfflineModeManager.AppModes.OFFLINE
+                ) {
                     val files = currentTask.value?.files ?: listOf()
                     fileStatusFlows.clear()
                     for (file in files) {
@@ -83,18 +87,18 @@ class EventStageViewmodel @Inject constructor(
                 }
 
             } catch (_: ConnectException) {
-                onNoInternet()
+                noInternet.value = true
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
             } catch (e: Exception) {
                 if (!retry) {
-                    getNextStage(eventId, onNoInternet, true)
+                    getNextStage(eventId, true)
                 }
                 Log.e("EventStage", e.message ?: "", e)
             }
         }.invokeOnCompletion {
             if (currentStageType.value == StageType.TASK && currentTask.value?.timeStamp == null) {
-                sendStartTime(eventId, onNoInternet)
+                sendStartTime(eventId)
             }
         }
     }
@@ -108,13 +112,12 @@ class EventStageViewmodel @Inject constructor(
         isAnswerCorrect = null
     }
 
-    override fun sendAnswer(eventId: String, onNoInternet: () -> Unit) {
+    override fun sendAnswer(eventId: String) {
         disableTask.value = true
         if (currentStageType.value == StageType.TASK) {
-            viewModelScope.launch {
+            viewModelScope.launch(coroutineContext.Main) {
                 val resultingAnswer =
                     if (answers.isEmpty()) {
-                        //answers.add("")
                         answers.toList()
                     } else if (TaskType.valueOf(currentTask.value!!.type) == TaskType.MULTIPLE_CHOICE) {
                         answers.toList()
@@ -134,13 +137,13 @@ class EventStageViewmodel @Inject constructor(
                     }
                     isAnswerCorrect = stageResult.isCorrect
                     correctAnswer.addAll(stageResult.rightAnswer ?: listOf())
-                    if (stageResult.rightAnswer == null || stageResult.points == null || correctAnswer.isEmpty()) {
+                    if (isAnswerCorrect == null && stageResult.points == null && correctAnswer.isEmpty()) {
                         currentStageType.value = StageType.NONE
                     } else {
                         showResults.value = true
                     }
                 } catch (_: ConnectException) {
-                    onNoInternet()
+                    noInternet.value = true
                 } catch (_: NotAuthorisedException) {
                     unauthorised.value = true
                 } catch (e: Exception) {
@@ -150,8 +153,8 @@ class EventStageViewmodel @Inject constructor(
         }
     }
 
-    private fun sendStartTime(eventId: String, onNoInternet: () -> Unit) {
-        viewModelScope.launch {
+    private fun sendStartTime(eventId: String) {
+        viewModelScope.launch(coroutineContext.Main) {
             try {
                 repository.postTaskStartTime(
                     eventId,
@@ -160,7 +163,7 @@ class EventStageViewmodel @Inject constructor(
                     taskStartTime
                 )
             } catch (_: ConnectException) {
-                onNoInternet()
+                noInternet.value = true
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
             } catch (e: Exception) {
@@ -169,8 +172,8 @@ class EventStageViewmodel @Inject constructor(
         }
     }
 
-    override fun chooseTask(eventId: String, taskId: String, onNoInternet: () -> Unit) {
-        viewModelScope.launch {
+    override fun chooseTask(eventId: String, taskId: String) {
+        viewModelScope.launch(coroutineContext.Main) {
             try {
                 repository.postTaskChoice(
                     eventId,
@@ -181,7 +184,7 @@ class EventStageViewmodel @Inject constructor(
             } catch (e: IllegalAccessException) {
                 Log.e("send_stage_answer", e.message ?: e.toString(), e)
             } catch (_: ConnectException) {
-                onNoInternet()
+                noInternet.value = true
             } catch (_: NotAuthorisedException) {
                 unauthorised.value = true
             } catch (e: Exception) {
@@ -191,7 +194,7 @@ class EventStageViewmodel @Inject constructor(
     }
 
     override fun onDownloadFile(fileName: String, fileUri: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext.Main) {
             when (offlineModeManager.getAppMode().first()) {
                 OfflineModeManager.AppModes.ONLINE -> fileStatusFlows.put(
                     fileUri,
@@ -204,7 +207,7 @@ class EventStageViewmodel @Inject constructor(
     }
 
     override fun onOpenFile(fileUri: String, context: Context) {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext.Main) {
             if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
                 taskDownloader.openFile(fileUri)
             } else {
