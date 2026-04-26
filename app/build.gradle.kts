@@ -36,6 +36,7 @@ android {
             buildConfigField("String", "BACKEND_EVENT_FILE_URL", "\"https://files.hse-eduplay.ru\"")
             buildConfigField("String", "PLATFORM_TERMS_URL", "\"http://hse-eduplay.ru/terms\"")
             buildConfigField("String", "PLATFORM_POLICY_URL", "\"http://hse-eduplay.ru/policy\"")
+            signingConfig = signingConfigs.getByName("debug")
 
 
         }

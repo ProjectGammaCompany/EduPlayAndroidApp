@@ -12,6 +12,7 @@ import android.util.Log
 import android.widget.Toast
 import com.eduplay.moblie.BuildConfig
 import com.eduplay.moblie.R
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.repository.localrepository.LocalRepository
 import com.eduplay.moblie.repository.localrepository.entity.BlockEntity
 import com.eduplay.moblie.repository.localrepository.entity.ConditionEntity
@@ -21,6 +22,7 @@ import com.eduplay.moblie.repository.localrepository.entity.GroupEntity
 import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
 import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
 import com.eduplay.moblie.repository.webrepository.EventFilesApi
+import com.eduplay.moblie.repository.webrepository.WebRepository
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.downloadTaskTypes.FullEventData
 import com.google.gson.Gson
@@ -38,6 +40,9 @@ class EventDownloadService : Service() {
 
     @Inject
     lateinit var repository: LocalRepository
+
+    @Inject
+    lateinit var webRepository: WebRepository
 
     @Inject
     lateinit var fileDownloader: TaskDownloadUseCase
@@ -136,8 +141,19 @@ class EventDownloadService : Service() {
             fileLocations[file.url] = Task.TaskFile(url = location, name = file.name)
         }
         runBlocking {
+            val allTags = try {
+                webRepository.getTags().tags.associateBy { it.id }
+            } catch (e: Exception) {
+                Log.e("failed_get_tags", e.message ?: "", e)
+                mapOf<String, EventTag>()
+            }
             // add event
-            val eventEntity = EventEntity(event.event, fileLocations[event.event.cover]?.name ?: "")
+            val tags = event.event.tags.filter { allTags[it] != null }.map { allTags[it]!!.name }
+            val eventEntity = EventEntity(
+                event.event,
+                fileLocations[event.event.cover]?.name ?: "",
+                tags
+            )
             repository.addEvent(eventEntity)
 
             // add eventBlocks
