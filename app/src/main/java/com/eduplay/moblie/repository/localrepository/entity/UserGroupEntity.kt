@@ -1,7 +1,5 @@
 package com.eduplay.moblie.repository.localrepository.entity
 
-import androidx.compose.ui.tooling.data.Group
-import androidx.compose.ui.tooling.data.UiToolingDataApi
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -16,7 +14,7 @@ data class UserGroupEntity(
     val groupId: String
 )
 
-data class UserWithGroups @OptIn(UiToolingDataApi::class) constructor(
+data class UserWithGroups constructor(
     @Embedded val user: UserEntity,
     @Relation(
         parentColumn = "userId",

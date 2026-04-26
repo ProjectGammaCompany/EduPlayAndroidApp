@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.useCases.downloadTaskTypes.DownloadEvent
 import com.google.gson.Gson
 
@@ -65,12 +66,13 @@ data class EventEntity(
 
     constructor(
         event: DownloadEvent,
-        coverPath: String
+        coverPath: String,
+        tagNames: List<String> = listOf()
     ) : this(
         event.eventId,
         event.title,
         event.description,
-        Gson().toJson(event.tags ?: listOf<String>()),
+        Gson().toJson(tagNames),
         coverPath,
         event.startDate.ifBlank { null },
         event.endDate.ifBlank { null },
