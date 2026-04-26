@@ -177,7 +177,7 @@ class LocalRepository @Inject constructor(
             authors = listOf(),
             needGroup = needGroup,
             canBeDownloaded = false,
-            rated = false,
+            rated = true,
         )
     }
 
