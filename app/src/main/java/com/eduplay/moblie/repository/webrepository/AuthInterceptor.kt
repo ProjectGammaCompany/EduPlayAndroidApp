@@ -21,7 +21,6 @@ class AuthInterceptor @Inject constructor(private val tokenManager: TokenManager
             val token = runBlocking {
                 tokenManager.getAccessToken().firstOrNull()
             }
-            Log.d("Authorisation Token", token ?: "")
             if (!token.isNullOrEmpty()) {
                 val newRequest = request.newBuilder()
                     .removeHeader("Authorization")
