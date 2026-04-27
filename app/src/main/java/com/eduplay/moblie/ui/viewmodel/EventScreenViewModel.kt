@@ -202,6 +202,7 @@ class EventScreenViewModel @Inject constructor(
                 Log.e("JOIN_CODE", e.message ?: "", e)
             }
         }
+        sortEventStatsByColumn(EditorStatColumns.POINTS, true)
     }
 
     fun addToFavourite(eventId: String) {

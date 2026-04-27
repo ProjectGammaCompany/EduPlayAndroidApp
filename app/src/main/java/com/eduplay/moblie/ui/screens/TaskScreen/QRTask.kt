@@ -39,7 +39,6 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 
-//TODO("qr сделать так чтобы после согласия открывалась камера")
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -57,7 +56,6 @@ fun QRTask(
     var canScan by remember { mutableStateOf(true) }
     var answer by remember { mutableStateOf("") }
 
-    //TODO(check what is going on here)
     LaunchedEffect(cameraPermissionState.status) {
         // Check if the permission state has changed after the request
         if (hasRequestedPermission) {

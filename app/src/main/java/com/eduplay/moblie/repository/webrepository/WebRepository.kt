@@ -144,7 +144,7 @@ class WebRepository @Inject constructor(
         Log.d("Requests events", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body.events.map { QuestShortInfo(it, isDownloaded(it.id)) }
-        } // TODO(оделать проверку на причины отказа)
+        }
         return listOf()
     }
 
@@ -285,7 +285,7 @@ class WebRepository @Inject constructor(
         Log.d("Requests_answer", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
-        } // TODO(оделать проверку на причины отказа)
+        }
         throw IllegalAccessException("cant send answer $eventId")
     }
 
@@ -330,7 +330,7 @@ class WebRepository @Inject constructor(
         val body = response.body()
         if (response.isSuccessful && body != null) {
             return body
-        } // TODO(оделать проверку на причины отказа)
+        }
         throw IllegalAccessException("cant get tags")
     }
 

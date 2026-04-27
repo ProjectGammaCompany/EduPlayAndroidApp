@@ -64,7 +64,6 @@ class LocalRepository @Inject constructor(
 
     private var choseTaskInParallelBlock = false
 
-    // TODO("make fts search virtual table to search by name https://habr.com/ru/companies/simbirsoft/articles/534656/")
     suspend fun getEvents(
         tags: List<String>?,
         active: Boolean,

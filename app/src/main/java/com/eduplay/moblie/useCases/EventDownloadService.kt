@@ -90,7 +90,6 @@ class EventDownloadService : Service() {
             eventFile.delete()
             downloadStatusKeeper.updateDownloaded(eventUrl)
 
-            // TODO("сделать уведу про скачивание с обновлением состояния") // https://stackoverflow.com/questions/73725629/how-to-legally-prevent-notification-get-removed-in-android
             stopSelf(msg.arg1)
         }
     }

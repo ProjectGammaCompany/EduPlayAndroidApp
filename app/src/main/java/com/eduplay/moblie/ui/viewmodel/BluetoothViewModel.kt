@@ -244,7 +244,6 @@ class BluetoothViewModel(
             return
         }
 
-        //TODO("pair devices")
         connectSockets(address, onCouldNotConnect)
     }
 

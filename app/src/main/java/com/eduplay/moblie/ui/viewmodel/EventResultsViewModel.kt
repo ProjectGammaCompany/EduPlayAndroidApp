@@ -31,10 +31,14 @@ class EventResultsViewModel @Inject constructor(private val repository: EduRepos
                 users.addAll(
                     result.users ?: listOf()
                 )
+                users.sortByDescending { it.points }
                 groups.clear()
                 groups.addAll(
                     result.groups ?: listOf()
                 )
+                for (i in groups.indices) {
+                    groups[i].users.sortedByDescending { it.points }
+                }
             } catch (_: ConnectException) {
                 noInternetConnection.value = true
             } catch (_: NotAuthorisedException) {
