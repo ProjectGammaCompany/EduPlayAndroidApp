@@ -1,6 +1,7 @@
 package com.eduplay.moblie.ui.elements
 
 import android.util.Log
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
@@ -116,39 +117,44 @@ fun PasswordDialog(
             Text(text = stringResource(R.string.password))
         },
         text = {
-            TextField(
-                eventPassword,
-                placeholder = { Text(stringResource(R.string.event_password)) },
-                label = {
-                    if (badPasswords.value)
-                        Text(stringResource(R.string.incorrect_password))
-                    else
-                        Text(stringResource(R.string.event_password))
-                },
-                isError = badPasswords.value
-            )
-            if (showGroupFields.value) {
+            Column {
                 TextField(
-                    group,
-                    placeholder = { Text(stringResource(R.string.group)) },
-                    label = {
-                        if (badPasswords.value) Text(stringResource(R.string.incorrect_password)) else Text(
-                            stringResource(R.string.group)
-                        )
-                    },
-                    isError = badPasswords.value
-                )
-                TextField(
-                    groupPassword,
-                    placeholder = { Text(stringResource(R.string.group_password)) },
+                    eventPassword,
+                    placeholder = { Text(stringResource(R.string.event_password)) },
                     label = {
                         if (badPasswords.value)
                             Text(stringResource(R.string.incorrect_password))
                         else
-                            Text(stringResource(R.string.group_password))
+                            Text(stringResource(R.string.event_password))
                     },
-                    isError = badPasswords.value
+                    isError = badPasswords.value,
+                    modifier = Modifier.padding(vertical = 2.dp)
                 )
+                if (showGroupFields.value) {
+                    TextField(
+                        group,
+                        placeholder = { Text(stringResource(R.string.group)) },
+                        label = {
+                            if (badPasswords.value) Text(stringResource(R.string.incorrect_password)) else Text(
+                                stringResource(R.string.group)
+                            )
+                        },
+                        isError = badPasswords.value,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
+                    TextField(
+                        groupPassword,
+                        placeholder = { Text(stringResource(R.string.group_password)) },
+                        label = {
+                            if (badPasswords.value)
+                                Text(stringResource(R.string.incorrect_password))
+                            else
+                                Text(stringResource(R.string.group_password))
+                        },
+                        isError = badPasswords.value,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
+                }
             }
         },
         onDismissRequest = {

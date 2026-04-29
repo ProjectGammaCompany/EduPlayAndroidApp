@@ -66,7 +66,7 @@ class TaskDownloadUseCase(private val context: Context) {
         }
     }
 
-    fun openFile(fileUri: String) {
+    fun openFile(fileUri: String, fileName: String) {
         if (!downloadingFiles.contains(fileUri)) throw IllegalAccessException("this file is not being downloaded")
         val fileId = downloadingFiles[fileUri]!!
         if (isDownloaded(fileId)) {
@@ -75,7 +75,7 @@ class TaskDownloadUseCase(private val context: Context) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
-            val file: Uri = getFileUrl(fileId)
+            val file: Uri = getFileUrl(fileId, fileName)
             intent.setDataAndType(file, context.contentResolver.getType(file))
             context.startActivity(intent)
         }
@@ -102,7 +102,7 @@ class TaskDownloadUseCase(private val context: Context) {
         return eventFile.absolutePath
     }
 
-    private fun getFileUrl(fileId: Long): Uri {
+    private fun getFileUrl(fileId: Long, fileName: String): Uri {
         val query = DownloadManager.Query()
             .setFilterById(fileId)
 
@@ -114,7 +114,6 @@ class TaskDownloadUseCase(private val context: Context) {
             if (status == null) {
                 throw IllegalAccessException("no such file $fileId")
             }
-            val fileName = File(status).name
             val file = File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                 fileName

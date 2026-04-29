@@ -158,11 +158,11 @@ interface WebApi {
     @InjectAuth
     suspend fun getTags(): Response<EventTagList>
 
-    @GET("/events/joinRequiredFields/{joinCode}")
+    @GET("/event/joinRequiredFields/{joinCode}")
     @InjectAuth
     suspend fun getFieldsToJoinEvent(@Path("joinCode") joinCode: String): Response<RequiredJoinFields>
 
-    @POST("/events/join/{joinCode}")
+    @POST("/event/join/{joinCode}")
     @InjectAuth
     suspend fun postPasswords(
         @Path("joinCode") joinCode: String,

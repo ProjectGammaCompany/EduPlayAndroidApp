@@ -27,7 +27,8 @@ interface BlockDao {
 
     @Transaction
     @Query("""
-        SELECT SUM(points) FROM tasks
+        SELECT * FROM answers
+        JOIN tasks ON tasks.taskId = answers.taskId
         JOIN blocks ON tasks.blockId = blocks.blockId 
         WHERE blocks.blockId = :blockId
     """)

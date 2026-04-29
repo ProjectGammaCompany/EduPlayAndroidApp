@@ -337,6 +337,7 @@ class WebRepository @Inject constructor(
     suspend fun getRequiredJoinFields(joinCode: String): RequiredJoinFields {
         val response = api.getFieldsToJoinEvent(joinCode)
         val body = response.body()
+        Log.d("postRating", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         }
@@ -352,6 +353,7 @@ class WebRepository @Inject constructor(
     ): EventIdResponse {
         val response = api.postPasswords(joinCode, eventPasswords)
         val body = response.body()
+        Log.d("postRating", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         }

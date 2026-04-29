@@ -206,12 +206,16 @@ class EventStageViewmodel @Inject constructor(
         }
     }
 
-    override fun onOpenFile(fileUri: String, context: Context) {
+    override fun onOpenFile(fileUri: String, fileName: String, context: Context) {
         viewModelScope.launch(coroutineContext.Main) {
             if (offlineModeManager.getAppMode().first() == OfflineModeManager.AppModes.ONLINE) {
-                taskDownloader.openFile(fileUri)
+                try {
+                    taskDownloader.openFile(fileUri, fileName)
+                } catch (_: IllegalAccessException) {
+                    Log.d("download", "not downloaded yet")
+                }
             } else {
-                LocalFileOpener.openFile(fileUri, context)
+                LocalFileOpener.openFile(fileName, context)
             }
         }
     }

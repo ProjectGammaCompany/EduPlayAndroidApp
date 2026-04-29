@@ -137,7 +137,7 @@ class EventDownloadService : Service() {
                 fileName = file.name,
                 directory = this.filesDir.absolutePath
             )
-            fileLocations[file.url] = Task.TaskFile(url = location, name = file.name)
+            fileLocations[file.url] = Task.TaskFile(url = file.name, name = file.name)
         }
         runBlocking {
             val allTags = try {

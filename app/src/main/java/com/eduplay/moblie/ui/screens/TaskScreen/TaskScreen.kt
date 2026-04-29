@@ -138,7 +138,7 @@ fun TaskScreen(
                             fileUri
                         )
                     },
-                    onOpen = { fileUri -> viewModel.onOpenFile(fileUri, context) },
+                    onOpen = { fileUri:String, fileName:String -> viewModel.onOpenFile(fileUri, fileName, context) },
                     downloadStatus = viewModel.fileStatusFlows
                 )
 
@@ -195,7 +195,7 @@ private fun TaskHeader(
     files: List<Task.TaskFile>,
     invokeEndOnTime: () -> Unit,
     onDownload: (String, String) -> Unit,
-    onOpen: (String) -> Unit,
+    onOpen: (String, String) -> Unit,
     downloadStatus: SnapshotStateMap<String, Flow<FileDownloadStatus>>
 ) {
     val scope = rememberCoroutineScope()
@@ -348,7 +348,7 @@ private fun SubmitBtn(taskType: TaskType, onSubmit: () -> Unit) {
 fun FileView(
     files: List<Task.TaskFile>,
     onDownload: (String, String) -> Unit,
-    onOpen: (String) -> Unit,
+    onOpen: (String, String) -> Unit,
     downloadStatus: SnapshotStateMap<String, Flow<FileDownloadStatus>>
 ) {
 
@@ -369,7 +369,7 @@ fun FileView(
                             file.url
                         )
                     } else if (fileStatus.value == FileDownloadStatus.SUCCESS) {
-                        onOpen(file.name)
+                        onOpen(file.url, file.name)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(

@@ -35,5 +35,5 @@ interface EventStageViewModelInterface {
     fun sendAnswer(eventId: String)
     fun onDownloadFile(fileName: String, fileUri: String)
     fun getNextStage(eventId: String, retry: Boolean = false)
-    fun onOpenFile(fileUri: String, context: Context)
+    fun onOpenFile(fileUri: String, fileName: String, context: Context)
 }

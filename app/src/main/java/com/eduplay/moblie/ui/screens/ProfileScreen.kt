@@ -296,7 +296,7 @@ private fun ProfileScreen(
                             contentColor = colorScheme.onPrimaryContainer
                         ),
                         modifier = Modifier
-                            //.weight(1f)
+                            .weight(0.3f)
                             .align(Alignment.CenterVertically)
                             .padding(horizontal = 5.dp)
                             .border(
