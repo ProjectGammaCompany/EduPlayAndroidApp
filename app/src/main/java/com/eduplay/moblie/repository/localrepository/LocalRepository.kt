@@ -751,8 +751,8 @@ class LocalRepository @Inject constructor(
     private fun hashString(s: String): String {
         val md = MessageDigest.getInstance("SHA-256")
         val input = s.toByteArray()
-        val bytes = md.digest(input)
-        return Base64.getEncoder().encodeToString(bytes)
+        return md.digest(input)
+            .fold("", { str, it -> str + "%02x".format(it) })
     }
 
     suspend fun addEvent(eventEntity: EventEntity) {
