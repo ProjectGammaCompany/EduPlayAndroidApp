@@ -27,10 +27,10 @@ interface BlockDao {
 
     @Transaction
     @Query("""
-        SELECT * FROM answers
+        SELECT SUM(answers.points) FROM answers
         JOIN tasks ON tasks.taskId = answers.taskId
         JOIN blocks ON tasks.blockId = blocks.blockId 
-        WHERE blocks.blockId = :blockId
+        WHERE blocks.blockId = :blockId AND answers.userId == :userId
     """)
-    suspend fun getPointsInBlockById(blockId: String): Int
+    suspend fun getPointsInBlockById(blockId: String, userId: String): Int
 }

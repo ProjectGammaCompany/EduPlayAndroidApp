@@ -398,7 +398,7 @@ class LocalRepository @Inject constructor(
     ): EventStage {
         val user = getCurrentUser()
         val conditions = eventDatabase.conditionDao().getConditionsByBlockId(currentBlock.id)
-        val points = eventDatabase.blockDao().getPointsInBlockById(currentBlock.id)
+        val points = eventDatabase.blockDao().getPointsInBlockById(currentBlock.id, user)
         val groups: List<GroupEntity> =
             eventDatabase.userDao().getUserWithGroupsById(user)?.groups ?: listOf()
 
