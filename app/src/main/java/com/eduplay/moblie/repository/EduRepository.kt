@@ -62,17 +62,15 @@ class EduRepository @Inject constructor(
     suspend fun logout(): Boolean {
         val result = webRepository.logout()
 
-        localRepository.removeCurrentUser()
+        if (result) {
+            localRepository.removeCurrentUser()
+        }
         return result
     }
 
     suspend fun register(auth: RegistrationData): AuthResult {
-        var authResult: AuthResult
-        try {
-            authResult = webRepository.register(auth)
-        } catch (e: Exception) {
-            throw e
-        }
+        val authResult: AuthResult = webRepository.register(auth)
+
         if (authResult == AuthResult.SUCCESSES) localRepository.saveUser()
         return authResult
     }
@@ -420,7 +418,7 @@ class EduRepository @Inject constructor(
 
     suspend fun postAnswerBatch(eventId: String): Boolean {
         if (offlineModeManager.getAppMode().first() == AppModes.OFFLINE) return true
-        val answerBatch = localRepository.getCurrentPlayerStatus(eventId)
+        val answerBatch = localRepository.getCurrentPlayerAnswers(eventId)
         if (answerBatch == null) return true
         val success = webRepository.postAnswerBatch(answerBatch, eventId)
         if (success) {
@@ -430,6 +428,7 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun updateDownloadedEventsStatuses(): List<QuestShortInfo>? {
+        if (offlineModeManager.getAppMode().first() == AppModes.OFFLINE) return null
         val downloadedEvents: Map<String, EventEntity> =
             localRepository.getEvents(null, false, "", Int.MAX_VALUE).associateBy { it.id }
         if (downloadedEvents.isEmpty()) return listOf()

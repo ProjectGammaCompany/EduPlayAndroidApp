@@ -48,7 +48,6 @@ import kotlinx.coroutines.flow.first
 import java.io.File
 import java.security.MessageDigest
 import java.time.LocalDateTime
-import java.util.Base64
 
 class LocalRepository @Inject constructor(
     private val eventDatabase: Database,
@@ -842,7 +841,7 @@ class LocalRepository @Inject constructor(
         return false
     }
 
-    suspend fun getCurrentPlayerStatus(eventId: String): AnswerBatch? {
+    suspend fun getCurrentPlayerAnswers(eventId: String): AnswerBatch? {
         val user = getCurrentUser()
         val status = eventDatabase.userEventStatus().getStatusByUserAndEvent(user, eventId)
         if (status == null) return null
@@ -855,6 +854,7 @@ class LocalRepository @Inject constructor(
                     options = Gson().fromJson<List<String>>(it.options, List::class.java)
                 )
             }
+        if (answers.isEmpty()) return null
         return AnswerBatch(
             userId = user,
             answers = answers,
