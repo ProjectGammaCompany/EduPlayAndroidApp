@@ -45,6 +45,7 @@ import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.first
+import java.io.Console
 import java.io.File
 import java.security.MessageDigest
 import java.time.LocalDateTime
@@ -315,7 +316,7 @@ class LocalRepository @Inject constructor(
             blockId = block?.id
                 ?: throw IllegalAccessException("no block downloaded for event $eventId"),
             taskId = task?.id
-                ?: throw IllegalAccessException("no block downloaded for event $eventId"),
+                ?: throw IllegalAccessException("no task in block ${block.id} downloaded for event $eventId"),
             isFinished = false,
             choseTaskInBlock = false
         )
@@ -555,15 +556,15 @@ class LocalRepository @Inject constructor(
 
             }
             val intersection = correctAnswers.intersect(hashedAnswers)
-            if (intersection.isEmpty()) {
-                isCorrect = TaskAnswerStatus.INCORRECT
-                points = 0
-            } else if (intersection.size == correctAnswers.size) {
+            if (intersection.size == correctAnswers.size) {
                 isCorrect = TaskAnswerStatus.CORRECT
                 points = task.points
             } else if (block.partialPoints || task.partialPoints) {
                 isCorrect = TaskAnswerStatus.PARTIALLY
-                points = (intersection.size / correctAnswers.size) * task.points
+                points = ((intersection.size.toFloat() / correctAnswers.size) * task.points).toInt()
+            } else {
+                isCorrect = TaskAnswerStatus.INCORRECT
+                points = 0
             }
         }
 

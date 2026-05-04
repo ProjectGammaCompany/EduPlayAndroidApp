@@ -76,7 +76,7 @@ class TaskScreenUiTest {
         ) {
         }
 
-        override fun onOpenFile(fileUri: String, context: Context) {}
+        override fun onOpenFile(fileUri: String, fileName: String, context: Context) {}
     }
 
     @Before
