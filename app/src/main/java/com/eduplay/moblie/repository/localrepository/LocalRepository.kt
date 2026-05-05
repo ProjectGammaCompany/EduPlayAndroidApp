@@ -49,6 +49,7 @@ import java.io.Console
 import java.io.File
 import java.security.MessageDigest
 import java.time.LocalDateTime
+import kotlin.math.max
 
 class LocalRepository @Inject constructor(
     private val eventDatabase: Database,
@@ -561,7 +562,9 @@ class LocalRepository @Inject constructor(
                 points = task.points
             } else if (block.partialPoints || task.partialPoints) {
                 isCorrect = TaskAnswerStatus.PARTIALLY
-                points = ((intersection.size.toFloat() / correctAnswers.size) * task.points).toInt()
+                val incorrectAnswerCnt =  answers.size - intersection.size
+                val correctAnswerCnt = intersection.size
+                points = ((max(0, correctAnswerCnt-incorrectAnswerCnt).toDouble() / correctAnswers.size) * task.points).toInt()
             } else {
                 isCorrect = TaskAnswerStatus.INCORRECT
                 points = 0
