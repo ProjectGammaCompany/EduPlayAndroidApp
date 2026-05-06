@@ -936,6 +936,8 @@ class LocalRepository @Inject constructor(
                     }
                 if (userGroup == null) {
                     eventDatabase.groupDao().insertUserGroup(UserGroupEntity(user, event.groupId))
+                } else if (userGroup.groupId != event.groupId) {
+                    eventDatabase.groupDao().updateUserGroup(UserGroupEntity(user, event.groupId))
                 }
             }
 

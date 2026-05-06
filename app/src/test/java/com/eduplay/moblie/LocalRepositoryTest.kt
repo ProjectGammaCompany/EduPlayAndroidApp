@@ -32,6 +32,7 @@ import com.eduplay.moblie.repository.localrepository.entity.OptionEntity
 import com.eduplay.moblie.repository.localrepository.entity.TaskEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserEventStatusEntity
+import com.eduplay.moblie.repository.localrepository.entity.UserGroupEntity
 import com.eduplay.moblie.repository.localrepository.entity.UserWithGroups
 import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.ShortTask
@@ -39,6 +40,8 @@ import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
+import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatus
+import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.TokenManager
 import io.mockk.MockKAnnotations
@@ -2108,7 +2111,7 @@ class LocalRepositoryTest {
                 }
                 assertEquals(TaskAnswerStatus.PARTIALLY, result.isCorrect)
                 assertEquals(
-                     (max(i - j, 0).toDouble() / numOfCorrectAnswers * points).toInt(),
+                    (max(i - j, 0).toDouble() / numOfCorrectAnswers * points).toInt(),
                     savedAnswer?.points
                 )
             }
@@ -2376,6 +2379,266 @@ class LocalRepositoryTest {
 
 
         assertEquals(false, savedStatus?.choseTaskInBlock)
+    }
+
+    @Test
+    fun `updateUserStatuses when no status for current user ans event exists a new status is saved`() {
+        val user = "user"
+        var statusInserted = false
+        coEvery { offlineModeManager.getCurrentUserId() }.returns(flowOf(user))
+        coEvery { userEventStatusDao.getStatusByUserAndEvent(user, any()) }.returns(null)
+        coEvery { userEventStatusDao.updateStatus(any()) }.returns(Unit)
+        coEvery { userEventStatusDao.insertStatus(any()) }.answers { statusInserted = true }
+        val status = UserEventStatus(
+            eventId = "1",
+            status = EventStatus.ENDED.status,
+            type = null,
+            taskId = null,
+            blockId = null,
+            timeStamp = null,
+            groupId = null,
+            lastEditionDate = LocalDateTime.now().toString(),
+            pointsInBlock = 0,
+            completedTasksInBlock = listOf()
+        )
+
+
+        runBlocking {
+            repository.updateUserStatuses(listOf(status))
+        }
+
+        assertEquals(true, statusInserted)
+
+    }
+
+    @Test
+    fun `updateUserStatuses when status for current user ans event exists a status is updated`() {
+        val user = "user"
+        val eventId = "event"
+        var statusInserted = false
+        val initialStatus = UserEventStatusEntity(
+            userId = user,
+            eventId = eventId,
+            blockId = null,
+            taskId = null,
+            isFinished = false,
+            choseTaskInBlock = false,
+            id = 1
+        )
+        coEvery { offlineModeManager.getCurrentUserId() }.returns(flowOf(user))
+        coEvery { userEventStatusDao.getStatusByUserAndEvent(user, any()) }.returns(initialStatus)
+        coEvery { userEventStatusDao.insertStatus(any()) }.returns(Unit)
+        coEvery { userEventStatusDao.updateStatus(any()) }.answers { statusInserted = true }
+        val status = UserEventStatus(
+            eventId = eventId,
+            status = EventStatus.ENDED.status,
+            type = null,
+            taskId = null,
+            blockId = null,
+            timeStamp = null,
+            groupId = null,
+            lastEditionDate = LocalDateTime.now().toString(),
+            pointsInBlock = 0,
+            completedTasksInBlock = listOf()
+        )
+
+
+        runBlocking {
+            repository.updateUserStatuses(listOf(status))
+        }
+
+        assertEquals(true, statusInserted)
+    }
+
+    @Test
+    fun `updateUserStatuses when event group is not null and group is not stored for current user and event, new usergroup is inserted`() {
+        val user = "user"
+        val eventId = "event"
+        val groupId = "group"
+        val userWithGroups = UserWithGroups(
+            user = UserEntity(user),
+            groups = listOf(GroupEntity("false group", "false event", "1", "1"))
+        )
+        var newUserGroupEntity: UserGroupEntity? = null
+        coEvery { offlineModeManager.getCurrentUserId() }.returns(flowOf(user))
+        coEvery { userEventStatusDao.getStatusByUserAndEvent(user, any()) }.returns(null)
+        coEvery { userEventStatusDao.insertStatus(any()) }.returns(Unit)
+        coEvery { userDao.getUserWithGroupsById(user) }.returns(userWithGroups)
+        coEvery { groupDao.insertUserGroup(any()) }.answers {
+            newUserGroupEntity = arg(0)
+        }
+        val status = UserEventStatus(
+            eventId = eventId,
+            status = EventStatus.ENDED.status,
+            type = null,
+            taskId = null,
+            blockId = null,
+            timeStamp = null,
+            groupId = groupId,
+            lastEditionDate = LocalDateTime.now().toString(),
+            pointsInBlock = 0,
+            completedTasksInBlock = listOf()
+        )
+
+        runBlocking {
+            repository.updateUserStatuses(listOf(status))
+        }
+
+        assertEquals(UserGroupEntity(user, groupId), newUserGroupEntity)
+    }
+
+    @Test
+    fun `updateUserStatuses when event group is not null and different group is stored for current user and event, usergroup is updated`() {
+        val user = "user"
+        val eventId = "event"
+        val groupId = "group"
+        val userWithGroups = UserWithGroups(
+            user = UserEntity(user),
+            groups = listOf(GroupEntity("false group", eventId, "1", "1"))
+        )
+        var newUserGroupEntity: UserGroupEntity? = null
+        coEvery { offlineModeManager.getCurrentUserId() }.returns(flowOf(user))
+        coEvery { userEventStatusDao.getStatusByUserAndEvent(user, any()) }.returns(null)
+        coEvery { userEventStatusDao.insertStatus(any()) }.returns(Unit)
+        coEvery { userDao.getUserWithGroupsById(user) }.returns(userWithGroups)
+        coEvery { groupDao.updateUserGroup(any()) }.answers {
+            newUserGroupEntity = arg(0)
+        }
+        val status = UserEventStatus(
+            eventId = eventId,
+            status = EventStatus.ENDED.status,
+            type = null,
+            taskId = null,
+            blockId = null,
+            timeStamp = null,
+            groupId = groupId,
+            lastEditionDate = LocalDateTime.now().toString(),
+            pointsInBlock = 0,
+            completedTasksInBlock = listOf()
+        )
+
+        runBlocking {
+            repository.updateUserStatuses(listOf(status))
+        }
+
+        assertEquals(UserGroupEntity(user, groupId), newUserGroupEntity)
+    }
+
+    @Test
+    fun `updateUserStatuses when points in block are not 0 first answer that is saved has full points for block`() {
+        val user = "user"
+        val eventId = "event"
+        val blockId = "block"
+        val taskId = "task"
+        var answersDeleted = false
+        val savedAnswers = mutableListOf<AnswerEntity>()
+        coEvery { offlineModeManager.getCurrentUserId() }.returns(flowOf(user))
+        coEvery { userEventStatusDao.getStatusByUserAndEvent(user, any()) }.returns(null)
+        coEvery { userEventStatusDao.insertStatus(any()) }.returns(Unit)
+        coEvery { answerDao.deleteAllAnswersInBlock(blockId, user) }.answers {
+            answersDeleted = true; 1
+        }
+        coEvery { answerDao.insertAnswer(any()) }.answers {
+            savedAnswers.add(arg(0))
+        }
+        val completedTasks = listOf("task1", "task2", "task3")
+        val pointsInBlock = 10
+        val status = UserEventStatus(
+            eventId = eventId,
+            status = EventStatus.STARTED.status,
+            type = null,
+            taskId = taskId,
+            blockId = blockId,
+            timeStamp = null,
+            groupId = null,
+            lastEditionDate = LocalDateTime.now().toString(),
+            pointsInBlock = pointsInBlock,
+            completedTasksInBlock = completedTasks
+        )
+
+
+        runBlocking {
+            repository.updateUserStatuses(listOf(status))
+        }
+
+
+        assertEquals(true, answersDeleted)
+        assertEquals(completedTasks.size,savedAnswers.size)
+        for (i in savedAnswers.indices) {
+            val checkPoints = if (i == 0) pointsInBlock else 0
+
+            assertEquals(
+                AnswerEntity(
+                    taskId = completedTasks[i],
+                    options = listOf(),
+                    userId = user,
+                    startTime = DateConverter.convertToServerFormat(LocalDateTime.MIN),
+                    endTime = DateConverter.convertToServerFormat(LocalDateTime.MIN),
+                    points = checkPoints,
+                    isFinal = true,
+                    isSynchronized = true
+                ), savedAnswers[i]
+            )
+        }
+    }
+
+    @Test
+    fun `updateUserStatuses when timestamp is not blank, answer with startTime is saved`() {
+        val user = "user"
+        val eventId = "event"
+        val blockId = "block"
+        val taskId = "task"
+        val task = TaskEntity(
+            id = taskId,
+            blockId = blockId,
+            name = "",
+            description = "",
+            type = 0,
+            time = 0,
+            points = 0,
+            partialPoints = false,
+            taskOrder = 0
+        )
+        var savedAnswers: AnswerEntity? = null
+        coEvery { offlineModeManager.getCurrentUserId() }.returns(flowOf(user))
+        coEvery { userEventStatusDao.getStatusByUserAndEvent(user, any()) }.returns(null)
+        coEvery { userEventStatusDao.insertStatus(any()) }.returns(Unit)
+        coEvery { answerDao.deleteAllAnswersInBlock(blockId, user) }.returns(1)
+        coEvery { answerDao.insertAnswer(any()) }.answers {
+            savedAnswers = arg(0)
+        }
+        coEvery { taskDao.getTaskById(taskId) }.returns(task)
+        val startTime = DateConverter.convertToServerFormat(LocalDateTime.now())
+        val status = UserEventStatus(
+            eventId = eventId,
+            status = EventStatus.STARTED.status,
+            type = null,
+            taskId = taskId,
+            blockId = blockId,
+            timeStamp = startTime,
+            groupId = null,
+            lastEditionDate = LocalDateTime.now().toString(),
+            pointsInBlock = 0,
+            completedTasksInBlock = listOf()
+        )
+
+
+        runBlocking {
+            repository.updateUserStatuses(listOf(status))
+        }
+
+
+        val expectedAnswer = AnswerEntity(
+            taskId = taskId,
+            options = listOf<String>(),
+            userId = user,
+            startTime = startTime,
+            endTime = DateConverter.convertToServerFormat(LocalDateTime.MIN),
+            points = -1,
+            isFinal = false,
+            isSynchronized = false
+        )
+        assertEquals(expectedAnswer, savedAnswers)
     }
 
 }

@@ -33,4 +33,8 @@ interface GroupDao {
     @Transaction
     @Query("SELECT * FROM `groups` WHERE login = :login AND eventId = :eventId")
     suspend fun getGroupByEventIdAndLogin(eventId: String, login: String): GroupEntity?
+
+    @Transaction
+    @Update
+    fun updateUserGroup(userGroupEntity: UserGroupEntity)
 }
