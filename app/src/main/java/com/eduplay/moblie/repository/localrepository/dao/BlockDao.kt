@@ -26,11 +26,13 @@ interface BlockDao {
     suspend fun getBlockByEventIdAndBlockOrder(eventId: String, blockOrder: Int): BlockEntity?
 
     @Transaction
-    @Query("""
+    @Query(
+        """
         SELECT SUM(answers.points) FROM answers
         JOIN tasks ON tasks.taskId = answers.taskId
         JOIN blocks ON tasks.blockId = blocks.blockId 
         WHERE blocks.blockId = :blockId AND answers.userId == :userId
-    """)
+    """
+    )
     suspend fun getPointsInBlockById(blockId: String, userId: String): Int
 }

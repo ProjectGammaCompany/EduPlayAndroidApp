@@ -5,8 +5,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.eduplay.moblie.useCases.downloadTaskTypes.DownloadCorrectAnswer
-import com.google.gson.Gson
 
 @Entity(
     tableName = "correct_answers",

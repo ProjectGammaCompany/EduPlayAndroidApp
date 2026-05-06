@@ -12,9 +12,6 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -22,19 +19,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.NotificationData
+import com.eduplay.moblie.models.NotificationData.EmptyNotification
 import com.eduplay.moblie.models.NotificationData.EndEventNotificationData
 import com.eduplay.moblie.models.NotificationData.EndEventNotificationData.TimeLeft
 import com.eduplay.moblie.models.NotificationData.FavoriteNotificationData
-import com.eduplay.moblie.models.NotificationData.EmptyNotification
 import com.eduplay.moblie.useCases.DateConverter
-import java.time.LocalDateTime
 
 @Composable
 fun NotificationElement(
@@ -42,7 +36,7 @@ fun NotificationElement(
     navController: NavController,
     showNotification: Boolean = true,
     showDeleteButton: Boolean = false,
-    onDelete: (String) -> Unit = {_->}
+    onDelete: (String) -> Unit = { _ -> }
 ) {
     if (showNotification) {
         val onNavigate = { eventId: String ->
@@ -98,7 +92,9 @@ private fun FavoriteEventNotification(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp
                 ),
-                modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically)
             )
             if (showDeleteButton) {
                 IconButton(
@@ -141,7 +137,7 @@ private fun EndEventNotification(
     body.append("\"${notification.eventName}\" ")
     body.append(stringResource(R.string.is_ending))
     body.append(" ")
-    when(notification.timeLeft) {
+    when (notification.timeLeft) {
         TimeLeft.HOUR -> body.append(stringResource(R.string.in_hour) + ".")
         TimeLeft.DAY -> body.append(stringResource(R.string.tomorrow) + ".")
     }

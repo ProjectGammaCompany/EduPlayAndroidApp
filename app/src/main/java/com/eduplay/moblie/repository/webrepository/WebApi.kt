@@ -195,7 +195,10 @@ interface WebApi {
 
     @POST("/event/{eventId}/rate")
     @InjectAuth
-    suspend fun postRating(@Path("eventId") eventId: String, @Body rating: EventRating): Response<Unit>
+    suspend fun postRating(
+        @Path("eventId") eventId: String,
+        @Body rating: EventRating
+    ): Response<Unit>
 
     @GET("event/{eventId}/download")
     @InjectAuth
@@ -203,7 +206,10 @@ interface WebApi {
 
     @POST("/event/{eventId}/answerBatch")
     @InjectAuth
-    suspend fun postAnswerBatch(@Path("eventId") eventId: String, @Body answerBatch: AnswerBatch): Response<Unit>
+    suspend fun postAnswerBatch(
+        @Path("eventId") eventId: String,
+        @Body answerBatch: AnswerBatch
+    ): Response<Unit>
 
     @POST("/user/eventStatus")
     @InjectAuth

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -20,9 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +34,6 @@ import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.ui.elements.NotificationElement
 import com.eduplay.moblie.ui.viewmodel.NotificationViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 
 @Composable
@@ -49,7 +44,7 @@ fun NotificationScreen(
 ) {
     NotificationScreen(
         innerPaddingValues,
-        {navController.popBackStack()},
+        { navController.popBackStack() },
         navController,
         viewModel.notifications,
         viewModel::deleteNotification,
@@ -63,7 +58,7 @@ fun NotificationScreen(
     onReturn: () -> Unit,
     navController: NavController,
     notifications: State<Flow<PagingData<NotificationData>>>,
-    onDelete: (String)->Unit,
+    onDelete: (String) -> Unit,
     deletedNotifications: SnapshotStateSet<String>
 ) {
 
@@ -120,6 +115,6 @@ private fun NotificationsTopBar(onReturn: () -> Unit) {
             }
         },
         actions = {},
-        title = {Text(stringResource(R.string.notifications))}
+        title = { Text(stringResource(R.string.notifications)) }
     )
 }

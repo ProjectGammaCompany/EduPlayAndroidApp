@@ -20,11 +20,12 @@ class DownloadedEventsUpdateScreenViewModel @Inject constructor(
     private val repository: EduRepository,
     private val observer: DownloadStatusObserver,
     private val offlineModeManager: OfflineModeManager
-): ViewModel() {
+) : ViewModel() {
     val events = mutableStateListOf<QuestShortInfo>()
     val noInternet = mutableStateOf(false)
     val isOfflineOn = mutableStateOf(false)
     val gotUpdates = mutableStateOf(false)
+
     init {
         viewModelScope.launch {
             var temEvents: List<QuestShortInfo>? = listOf<QuestShortInfo>()

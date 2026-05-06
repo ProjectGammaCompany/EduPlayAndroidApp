@@ -31,33 +31,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
-import coil3.network.NetworkHeaders
 import com.eduplay.moblie.R
-import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
-import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinByCodeDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.QuestListElement
 import com.eduplay.moblie.ui.elements.TryAgainLaterToast
-import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.CurrentModeViewModel
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
-import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
+import com.eduplay.moblie.useCases.OfflineModeManager
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun MainScreen(
@@ -105,7 +98,8 @@ fun MainScreen(
         JoinByCodeDialog({ joinByCode = false }, navController)
     }
 
-    val currentMode = currentModeViewModel.currentMode.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
+    val currentMode =
+        currentModeViewModel.currentMode.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
 
     val isRefreshing = viewModel.isRefreshing.collectAsState()
     PullToRefreshBox(

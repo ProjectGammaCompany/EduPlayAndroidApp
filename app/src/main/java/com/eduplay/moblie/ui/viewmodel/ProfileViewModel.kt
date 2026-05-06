@@ -67,14 +67,15 @@ class ProfileViewModel @Inject constructor(
     init {
         isOffline.value = offlineModeManager.getAppMode()
         theme.value = appSettingsManager.getTheme()
-        viewModelScope.launch() {
+        viewModelScope.launch {
             var result: ProfileInfo = ProfileInfo("", "", "")
             try {
                 result = repository.getProfile()
                 email.value = result.email
                 avatar.value = result.avatar
                 username.value = result.username
-                showEditUsername.value = isOffline.value.first() == OfflineModeManager.AppModes.ONLINE
+                showEditUsername.value =
+                    isOffline.value.first() == OfflineModeManager.AppModes.ONLINE
                 notifications.addAll(repository.getLatestNotifications())
             } catch (_: ConnectException) {
                 noInternet.value = true

@@ -28,7 +28,7 @@ data class OptionEntity(
     @ColumnInfo(name = "value")
     val value: String,
 ) {
-    constructor(option: DownloadOption): this(
+    constructor(option: DownloadOption) : this(
         option.optionId,
         option.taskId,
         option.value

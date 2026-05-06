@@ -1269,7 +1269,9 @@ fun PrivacySettings(
                             fontWeight = FontWeight.Medium,
                             color = colorScheme.onBackground
                         ),
-                        modifier = Modifier.align(Alignment.CenterVertically).padding(end = 5.dp)
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 5.dp)
                     )
 
                     Text(

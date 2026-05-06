@@ -29,6 +29,7 @@ class ManagersProvider {
         }
         return tokenManager!!
     }
+
     @Provides
     @Singleton
     fun provideOfflineManager(@ApplicationContext context: Context): OfflineModeManager {

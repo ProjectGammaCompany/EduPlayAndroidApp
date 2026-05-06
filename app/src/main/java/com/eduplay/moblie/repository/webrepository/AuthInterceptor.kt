@@ -1,11 +1,9 @@
 package com.eduplay.moblie.repository.webrepository
 
-import android.util.Log
 import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.useCases.TokenManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Request

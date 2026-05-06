@@ -2,11 +2,8 @@ package com.eduplay.moblie.repository.localrepository.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.useCases.downloadTaskTypes.DownloadEvent
 import com.google.gson.Gson
 
@@ -42,15 +39,15 @@ data class EventEntity(
 ) {
     constructor(
         id: String,
-         title: String,
-         description: String,
-         tags: List<String>,
-         cover: String,
-         startDate: String?,
-         endDate: String?,
-         lastEditionDate: String,
-         groupEvent: Boolean,
-         authorId: List<String>
+        title: String,
+        description: String,
+        tags: List<String>,
+        cover: String,
+        startDate: String?,
+        endDate: String?,
+        lastEditionDate: String,
+        groupEvent: Boolean,
+        authorId: List<String>
     ) : this(
         id,
         title,

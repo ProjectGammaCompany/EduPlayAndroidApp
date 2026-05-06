@@ -2,8 +2,6 @@ package com.eduplay.moblie.repository.localrepository.pagingSources
 
 import android.util.Log
 import androidx.paging.PagingSource
-import androidx.paging.PagingSource.LoadParams
-import androidx.paging.PagingSource.LoadResult
 import androidx.paging.PagingState
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.localrepository.LocalRepository
@@ -24,7 +22,7 @@ class LocalCompletedEventsPagingSource(private val repository: LocalRepository) 
 
             LoadResult.Page(
                 data = data,
-                prevKey = if (page == 0) null else page-1,
+                prevKey = if (page == 0) null else page - 1,
                 nextKey = if (data.isEmpty()) null else page + 1
             )
         } catch (e: Exception) {

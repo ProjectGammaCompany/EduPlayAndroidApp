@@ -14,7 +14,7 @@ data class UserGroupEntity(
     val groupId: String
 )
 
-data class UserWithGroups constructor(
+data class UserWithGroups(
     @Embedded val user: UserEntity,
     @Relation(
         parentColumn = "userId",

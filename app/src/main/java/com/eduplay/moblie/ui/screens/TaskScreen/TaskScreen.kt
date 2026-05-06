@@ -138,7 +138,13 @@ fun TaskScreen(
                             fileUri
                         )
                     },
-                    onOpen = { fileUri:String, fileName:String -> viewModel.onOpenFile(fileUri, fileName, context) },
+                    onOpen = { fileUri: String, fileName: String ->
+                        viewModel.onOpenFile(
+                            fileUri,
+                            fileName,
+                            context
+                        )
+                    },
                     downloadStatus = viewModel.fileStatusFlows
                 )
 

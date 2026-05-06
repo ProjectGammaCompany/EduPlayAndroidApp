@@ -13,7 +13,6 @@ import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.models.EventRole
 import com.eduplay.moblie.models.EventStatus
-import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.GroupEditorStats
@@ -107,7 +106,7 @@ class EventScreenViewModel @Inject constructor(
         author.value = data.authors.joinToString(", ") { it.email }
         cover.value = data.cover
         tags.clear()
-        tags.addAll(data.tags.map{it.name} ?: listOf())
+        tags.addAll(data.tags.map { it.name } ?: listOf())
         canDownload.value = data.canBeDownloaded
         needGroup.value = data.needGroup
         isRated.value = data.rated
@@ -247,7 +246,7 @@ class EventScreenViewModel @Inject constructor(
         }
     }
 
-    fun rateEvent(rating: Int, eventId:String) {
+    fun rateEvent(rating: Int, eventId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 isRated.value = repository.postEventRating(eventId, rating)

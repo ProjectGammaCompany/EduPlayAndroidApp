@@ -14,7 +14,7 @@ data class QuestShortInfo(
     val tags: List<EventTag>,
     val isDownloaded: Boolean
 ) {
-    constructor(event: EventEntity): this(
+    constructor(event: EventEntity) : this(
         event.id,
         event.title,
         event.description,
@@ -26,7 +26,7 @@ data class QuestShortInfo(
         true
     )
 
-    constructor(eventResponse: EventResponse, isDownloaded: Boolean): this(
+    constructor(eventResponse: EventResponse, isDownloaded: Boolean) : this(
         id = eventResponse.id,
         name = eventResponse.title,
         description = eventResponse.description,

@@ -11,7 +11,8 @@ import kotlinx.coroutines.launch
 import java.net.ConnectException
 
 @HiltViewModel
-class JoinByGroupViewModel @Inject constructor(private val repository: EduRepository): ViewModel() {
+class JoinByGroupViewModel @Inject constructor(private val repository: EduRepository) :
+    ViewModel() {
     val badPassword = mutableStateOf(false)
     val noInternet = mutableStateOf(false)
     val canProceedToEvent = mutableStateOf(false)
@@ -24,7 +25,7 @@ class JoinByGroupViewModel @Inject constructor(private val repository: EduReposi
             } catch (e: IllegalAccessException) {
                 Log.i("goroup_access", e.message ?: "", e)
                 badPassword.value = true
-            }  catch (_: ConnectException) {
+            } catch (_: ConnectException) {
                 noInternet.value = true
                 Log.i("goroup_access", "no internet")
             } catch (e: Exception) {

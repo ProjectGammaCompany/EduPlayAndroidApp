@@ -27,7 +27,7 @@ import androidx.room.PrimaryKey
     ]
 )
 
-data class FileEntity (
+data class FileEntity(
     @ColumnInfo(name = "eventId")
     val eventId: String,
     @ColumnInfo(name = "taskId")

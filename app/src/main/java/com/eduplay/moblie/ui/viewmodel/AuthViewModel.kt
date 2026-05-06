@@ -178,7 +178,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
     }
 
     fun changePasswordGoBack() {
-        currentForgotStatusFormState.value = when(currentForgotStatusFormState.value) {
+        currentForgotStatusFormState.value = when (currentForgotStatusFormState.value) {
             ForgotPasswordStatus.ENTER_EMAIL -> ForgotPasswordStatus.NONE
             ForgotPasswordStatus.ENTER_CODE -> ForgotPasswordStatus.ENTER_EMAIL
             ForgotPasswordStatus.CHANGE_PASSWORD -> ForgotPasswordStatus.ENTER_CODE

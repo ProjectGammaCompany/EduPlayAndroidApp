@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 @Singleton
-class OfflineModeManagerDataStore(private val context: Context): OfflineModeManager {
+class OfflineModeManagerDataStore(private val context: Context) : OfflineModeManager {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "offline")
     private val appMode = intPreferencesKey("mode")
     private val currentUserId = stringPreferencesKey("currentUser")

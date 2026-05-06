@@ -13,7 +13,7 @@ class AllEventsPagingWebSource(
     private val active: Boolean = false,
     private val favorites: Boolean = false,
     private val title: String = "",
-    private val isDownloaded: suspend (String)-> Boolean
+    private val isDownloaded: suspend (String) -> Boolean
 ) :
     PagingSource<Int, QuestShortInfo>() {
     private val numOfOffScreenPage: Int = 4

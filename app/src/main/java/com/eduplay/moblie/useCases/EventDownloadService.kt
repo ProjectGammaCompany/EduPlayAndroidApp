@@ -132,7 +132,7 @@ class EventDownloadService : Service() {
         val fileLocations = mutableMapOf<String, Task.TaskFile>()
         // downloading external files
         for (file in event.files) {
-            val location = fileDownloader.downloadToAppStorage(
+            fileDownloader.downloadToAppStorage(
                 fileUri = file.url,
                 fileName = file.name,
                 directory = this.filesDir.absolutePath

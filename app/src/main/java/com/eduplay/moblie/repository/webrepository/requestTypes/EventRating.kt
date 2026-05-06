@@ -1,3 +1,3 @@
 package com.eduplay.moblie.repository.webrepository.requestTypes
 
-data class EventRating (val rate: Int)
+data class EventRating(val rate: Int)

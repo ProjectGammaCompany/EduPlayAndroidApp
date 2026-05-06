@@ -21,7 +21,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.eduplay.moblie.useCases.EventDownloadService
 import com.eduplay.moblie.ui.elements.BluetoothPermissionElement
 import com.eduplay.moblie.ui.elements.BottomNavBar
 import com.eduplay.moblie.ui.screens.AuthorizationScreen
@@ -40,6 +39,7 @@ import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.SplashViewModel
 import com.eduplay.moblie.ui.viewmodel.factories.BluetoothViewModelFactory
 import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
+import com.eduplay.moblie.useCases.EventDownloadService
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -47,7 +47,7 @@ class MainActivity : FragmentActivity() {
     private val hideBottomBarScreens = listOf("auth_screen", "play_event", "fake_splash")
     private val viewModel: SplashViewModel by viewModels()
 
-    private val startDownloadService = { eventUrl: String, eventId:String ->
+    private val startDownloadService = { eventUrl: String, eventId: String ->
         val intent = Intent(this, EventDownloadService::class.java)
         intent.putExtra("eventUrl", eventUrl)
         intent.putExtra("eventId", eventId)
@@ -175,8 +175,12 @@ class MainActivity : FragmentActivity() {
                             NotificationScreen(innerPadding, navController)
                         }
 
-                        composable("updateEvents"){
-                            DownloadedEventsUpdateScreen(innerPadding, startDownloadService, navController)
+                        composable("updateEvents") {
+                            DownloadedEventsUpdateScreen(
+                                innerPadding,
+                                startDownloadService,
+                                navController
+                            )
                         }
                     }
                 }

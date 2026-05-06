@@ -35,7 +35,7 @@ class EventStageViewmodel @Inject constructor(
     private val repository: EduRepository,
     private val taskDownloader: TaskDownloadUseCase,
     private val offlineModeManager: OfflineModeManager,
-    private final val coroutineContext: CoroutineContextProvider = CoroutineContextProvider()
+    private val coroutineContext: CoroutineContextProvider = CoroutineContextProvider()
 ) : ViewModel(), EventStageViewModelInterface {
     override val currentStageType = mutableStateOf(StageType.NONE)
 

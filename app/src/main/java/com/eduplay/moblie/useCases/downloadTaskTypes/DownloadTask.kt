@@ -1,7 +1,5 @@
 package com.eduplay.moblie.useCases.downloadTaskTypes
 
-import com.eduplay.moblie.repository.webrepository.responseTypes.Task
-
 data class DownloadTask(
     val taskId: String,
     val blockId: String,

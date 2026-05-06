@@ -32,13 +32,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
 import com.eduplay.moblie.repository.responseTypes.Block
-import com.eduplay.moblie.repository.responseTypes.ShortTask
-import com.eduplay.moblie.ui.theme.EduPlayTheme
 
 @Composable
 fun ParallelBlockScreen(
@@ -120,7 +117,9 @@ private fun TaskItem(name: String, time: Int, isEnabled: Boolean, onChooseTask: 
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 color = if (isEnabled) colorScheme.onSurface else colorScheme.onSecondaryContainer,
-                modifier = Modifier.padding(vertical = 10.dp).testTag("time_${name}")
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .testTag("time_${name}")
             )
         }
 

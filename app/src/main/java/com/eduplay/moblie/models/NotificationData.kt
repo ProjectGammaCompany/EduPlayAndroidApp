@@ -2,16 +2,16 @@ package com.eduplay.moblie.models
 
 import java.time.LocalDateTime
 
-sealed class NotificationData (val notificationId: String,) {
+sealed class NotificationData(val notificationId: String) {
 
-    class EmptyNotification():NotificationData("")
+    class EmptyNotification() : NotificationData("")
 
     class FavoriteNotificationData(
         notificationId: String,
         val eventId: String,
         val eventName: String,
         val date: LocalDateTime
-    ) :NotificationData(notificationId)
+    ) : NotificationData(notificationId)
 
     class EndEventNotificationData(
         notificationId: String,

@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.eduplay.moblie.repository.localrepository.entity.BlockEntity
 import com.eduplay.moblie.repository.localrepository.entity.CorrectAnswerEntity
 
 @Dao
@@ -20,9 +19,9 @@ interface CorrectAnswerDao {
 
     @Transaction
     @Query("SELECT * FROM correct_answers WHERE taskId = :taskId")
-    suspend fun getAnswersByTask(taskId: String,): List<CorrectAnswerEntity>
+    suspend fun getAnswersByTask(taskId: String): List<CorrectAnswerEntity>
 
     @Transaction
     @Query("SELECT * FROM correct_answers WHERE value = :value")
-    suspend fun getAnswerByValue(value: String,): CorrectAnswerEntity?
+    suspend fun getAnswerByValue(value: String): CorrectAnswerEntity?
 }

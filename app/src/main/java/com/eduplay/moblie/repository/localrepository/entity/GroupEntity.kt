@@ -32,7 +32,7 @@ data class GroupEntity(
     @ColumnInfo(name = "password")
     val password: String
 ) {
-    constructor(group: DownloadGroup): this(
+    constructor(group: DownloadGroup) : this(
         groupId = group.groupId,
         eventId = group.eventId,
         login = group.login,

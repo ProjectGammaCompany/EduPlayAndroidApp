@@ -16,8 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.room.util.TableInfo
 import com.eduplay.moblie.R
 import com.eduplay.moblie.ui.viewmodel.JoinByGroupViewModel
 
@@ -33,7 +31,7 @@ fun JoinGroupDialog(
     }
     JoinGroupDialog(
         onDismissRequest,
-        {group: String, password: String -> viewModel.joinByGroup(eventId, group, password)},
+        { group: String, password: String -> viewModel.joinByGroup(eventId, group, password) },
         viewModel.badPassword
     )
 }
@@ -45,7 +43,7 @@ fun JoinGroupDialog(
     badPassword: State<Boolean>
 ) {
     val groupName = rememberTextFieldState()
-    val groupPassword= rememberTextFieldState()
+    val groupPassword = rememberTextFieldState()
     AlertDialog(
         title = {
             Text(text = stringResource(R.string.join_group))
@@ -83,7 +81,12 @@ fun JoinGroupDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onProceedRequest(groupName.text.toString(), groupPassword.text.toString()) },
+                onClick = {
+                    onProceedRequest(
+                        groupName.text.toString(),
+                        groupPassword.text.toString()
+                    )
+                },
                 modifier = Modifier.padding(8.dp),
             ) {
                 Text(stringResource(R.string.proceed))
@@ -106,7 +109,7 @@ fun JoinGroupDialog(
 fun PreviewJoinGroup() {
     JoinGroupDialog(
         {},
-        {_, _->},
+        { _, _ -> },
         remember { mutableStateOf(false) }
     )
 }

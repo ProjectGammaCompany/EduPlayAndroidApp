@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 @Singleton
-class TokenManagerDataStore(private val context: Context): TokenManager {
+class TokenManagerDataStore(private val context: Context) : TokenManager {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
 
     companion object {

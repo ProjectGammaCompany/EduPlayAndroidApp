@@ -45,7 +45,6 @@ import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.first
-import java.io.Console
 import java.io.File
 import java.security.MessageDigest
 import java.time.LocalDateTime
@@ -557,14 +556,17 @@ class LocalRepository @Inject constructor(
 
             }
             val intersection = correctAnswers.intersect(hashedAnswers)
-            val incorrectAnswerCnt =  answers.size - intersection.size
+            val incorrectAnswerCnt = answers.size - intersection.size
             val correctAnswerCnt = intersection.size
             if (correctAnswerCnt - incorrectAnswerCnt == correctAnswers.size) {
                 isCorrect = TaskAnswerStatus.CORRECT
                 points = task.points
             } else if (block.partialPoints || task.partialPoints) {
                 isCorrect = TaskAnswerStatus.PARTIALLY
-                points = ((max(0, correctAnswerCnt-incorrectAnswerCnt).toDouble() / correctAnswers.size) * task.points).toInt()
+                points = ((max(
+                    0,
+                    correctAnswerCnt - incorrectAnswerCnt
+                ).toDouble() / correctAnswers.size) * task.points).toInt()
             } else {
                 isCorrect = TaskAnswerStatus.INCORRECT
                 points = 0
@@ -874,7 +876,7 @@ class LocalRepository @Inject constructor(
         for (answer in answers) {
             val entity = eventDatabase.answerDao().getAnswerByTaskAndUserId(answer.taskId, user)
             if (entity == null) continue
-            val answer =  AnswerEntity(
+            val answer = AnswerEntity(
                 taskId = entity.taskId,
                 options = entity.options,
                 userId = entity.userId,

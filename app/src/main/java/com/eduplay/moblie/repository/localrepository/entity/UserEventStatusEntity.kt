@@ -1,6 +1,5 @@
 package com.eduplay.moblie.repository.localrepository.entity
 
-import androidx.annotation.Nullable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey

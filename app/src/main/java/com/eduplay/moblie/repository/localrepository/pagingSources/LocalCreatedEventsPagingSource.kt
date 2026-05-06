@@ -2,8 +2,6 @@ package com.eduplay.moblie.repository.localrepository.pagingSources
 
 import android.util.Log
 import androidx.paging.PagingSource
-import androidx.paging.PagingSource.LoadParams
-import androidx.paging.PagingSource.LoadResult
 import androidx.paging.PagingState
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.localrepository.LocalRepository
@@ -13,7 +11,7 @@ class LocalCreatedEventsPagingSource(private val repository: LocalRepository) :
     private val numOfOffScreenPage: Int = 4
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, QuestShortInfo> {
-        val page = params.key?: 0
+        val page = params.key ?: 0
         val offset = page * params.loadSize
         return try {
             val data = repository
@@ -24,7 +22,7 @@ class LocalCreatedEventsPagingSource(private val repository: LocalRepository) :
 
             LoadResult.Page(
                 data = data,
-                prevKey = if (page == 0) null else page-1,
+                prevKey = if (page == 0) null else page - 1,
                 nextKey = if (data.isEmpty()) null else page + 1
             )
         } catch (e: Exception) {

@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 
 @HiltViewModel
-class CurrentModeViewModel @Inject constructor(private val offlineModeManager: OfflineModeManager): ViewModel() {
-    val currentMode = mutableStateOf( offlineModeManager.getAppMode())
+class CurrentModeViewModel @Inject constructor(private val offlineModeManager: OfflineModeManager) :
+    ViewModel() {
+    val currentMode = mutableStateOf(offlineModeManager.getAppMode())
 }

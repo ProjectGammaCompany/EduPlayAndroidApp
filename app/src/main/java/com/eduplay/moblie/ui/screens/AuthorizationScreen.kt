@@ -32,7 +32,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -55,7 +54,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withLink
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -136,7 +134,7 @@ fun AuthorizationScreen(
     isChangePasswordSafe: State<Boolean>,
     correctChangeEmail: State<Boolean>,
     correctCode: State<Boolean>,
-    onForgotPassword: ()->Unit
+    onForgotPassword: () -> Unit
 ) {
     var isLoginForm by remember { mutableStateOf(true) }
     val switchForms = {

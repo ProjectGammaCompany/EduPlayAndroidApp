@@ -1,7 +1,6 @@
 package com.eduplay.moblie.ui.viewmodel
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,7 +12,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
@@ -51,6 +49,7 @@ class ImageHeaderViewModel @Inject constructor(
 
 
 }
+
 interface ImageHeaderInterface {
     fun getFullUrl(fileName: String): String
     val headers: MutableState<NetworkHeaders>

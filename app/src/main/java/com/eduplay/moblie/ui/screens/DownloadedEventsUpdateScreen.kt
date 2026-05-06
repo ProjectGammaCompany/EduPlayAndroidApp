@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,7 +48,7 @@ fun DownloadedEventsUpdateScreen(
     if (viewModel.isOfflineOn.value) {
         navController.popBackStack()
     }
-    val turnOnOffline: ()->Unit = {
+    val turnOnOffline: () -> Unit = {
         viewModel.turnOnOfflineMode()
         navController.popBackStack()
     }
@@ -106,7 +105,9 @@ fun DownloadedEventsUpdateScreen(
                 stringResource(R.string.update_events_before_ofline),
                 modifier = Modifier.testTag("need_update_text")
             )
-            LazyColumn(Modifier.weight(1f).testTag("update_list")) {
+            LazyColumn(Modifier
+                .weight(1f)
+                .testTag("update_list")) {
                 items(events) {
                     Row(Modifier.fillMaxSize()) {
                         IconButton(

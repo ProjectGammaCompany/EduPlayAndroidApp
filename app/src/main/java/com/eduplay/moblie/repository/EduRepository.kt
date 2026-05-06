@@ -90,7 +90,7 @@ class EduRepository @Inject constructor(
     }
 
     suspend fun requestCodeByEmail(email: String): AuthResult {
-       return webRepository.requestCodeByEmail(email)
+        return webRepository.requestCodeByEmail(email)
     }
 
     suspend fun checkPasswordCodeValidity(code: String): Boolean {

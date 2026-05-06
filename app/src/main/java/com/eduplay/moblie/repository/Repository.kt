@@ -7,8 +7,8 @@ import com.eduplay.moblie.models.EventTagList
 import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.responseTypes.AnswerResult
-import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.responseTypes.PlayerStats
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import java.time.LocalDateTime
 
 interface Repository {

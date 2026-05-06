@@ -31,7 +31,6 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -46,34 +45,24 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
-import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
-import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.GroupEditorStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserEditorStat
-import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel.EditorStatColumns
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderInterface
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
-import com.eduplay.moblie.ui.viewmodel.ThemeViewModel
-import com.eduplay.moblie.useCases.AppSettingsManager
-import com.eduplay.moblie.useCases.OfflineModeManager
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun StatisticsInfo(
@@ -202,7 +191,9 @@ private fun TableOfUserResults(
         }
         item {
             Column(Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
-                HeaderTableCell(stringResource(R.string.players), { onHeaderClick(EditorStatColumns.USERNAME) })
+                HeaderTableCell(
+                    stringResource(R.string.players),
+                    { onHeaderClick(EditorStatColumns.USERNAME) })
                 for (idx in users.indices) {
                     TableCell(users[idx].username, image = users[idx].avatar)
                 }
@@ -227,7 +218,9 @@ private fun TableOfUserResults(
 
         item {
             Column(Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
-                HeaderTableCell(stringResource(R.string.points), { onHeaderClick(EditorStatColumns.POINTS) })
+                HeaderTableCell(
+                    stringResource(R.string.points),
+                    { onHeaderClick(EditorStatColumns.POINTS) })
                 for (idx in users.indices) {
                     TableCell(users[idx].points.toString())
                 }

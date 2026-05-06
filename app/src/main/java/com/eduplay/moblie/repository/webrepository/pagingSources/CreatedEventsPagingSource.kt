@@ -6,7 +6,10 @@ import androidx.paging.PagingState
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.webrepository.WebRepository
 
-class CreatedEventsPagingSource(private val repository: WebRepository, private val isDownloaded: suspend (String)-> Boolean) :
+class CreatedEventsPagingSource(
+    private val repository: WebRepository,
+    private val isDownloaded: suspend (String) -> Boolean
+) :
     PagingSource<Int, QuestShortInfo>() {
     private val numOfOffScreenPage: Int = 4
 

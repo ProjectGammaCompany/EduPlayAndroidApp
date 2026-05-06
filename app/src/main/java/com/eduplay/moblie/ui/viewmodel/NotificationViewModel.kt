@@ -13,12 +13,12 @@ import com.eduplay.moblie.repository.EduRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.reduce
 import kotlinx.coroutines.launch
 import java.net.ConnectException
 
 @HiltViewModel
-class NotificationViewModel @Inject constructor(private val repository: EduRepository): ViewModel() {
+class NotificationViewModel @Inject constructor(private val repository: EduRepository) :
+    ViewModel() {
     val unauthorised = mutableStateOf(false)
     val notifications = mutableStateOf(flowOf<PagingData<NotificationData>>())
     val noInternetConnection = mutableStateOf(false)

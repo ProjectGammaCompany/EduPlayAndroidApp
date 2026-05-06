@@ -43,7 +43,7 @@ data class ConditionEntity(
     @ColumnInfo(name = "max")
     val max: Int?
 ) {
-    constructor(condition: DownloadCondition): this(
+    constructor(condition: DownloadCondition) : this(
         conditionId = condition.conditionId,
         prevBlockId = condition.prevBlockId,
         nextBlockId = condition.nextBlockId,

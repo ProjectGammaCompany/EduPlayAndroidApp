@@ -11,12 +11,14 @@ import com.eduplay.moblie.repository.responseTypes.PlayerStats
 import com.eduplay.moblie.utils.CoroutineContextProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.ConnectException
 
 @HiltViewModel
-class EventResultsViewModel @Inject constructor(private val repository: EduRepository,  private val coroutineContext: CoroutineContextProvider) :
+class EventResultsViewModel @Inject constructor(
+    private val repository: EduRepository,
+    private val coroutineContext: CoroutineContextProvider
+) :
     ViewModel() {
     val users = mutableStateListOf<PlayerStats.StatUser>()
     val groups = mutableStateListOf<PlayerStats.StatGroup>()

@@ -31,7 +31,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -47,7 +46,6 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,7 +53,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -70,12 +67,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
@@ -92,7 +87,6 @@ import com.eduplay.moblie.useCases.AppSettingsManager
 import com.eduplay.moblie.useCases.OfflineModeManager
 import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun ProfileScreen(
@@ -290,7 +284,7 @@ private fun ProfileScreen(
                         onClick = {
                             updateEmail(newUsername.text.toString())
                             showEditUsernameField.value = false
-                                  },
+                        },
                         colors = ButtonDefaults.buttonColors().copy(
                             containerColor = colorScheme.primaryContainer,
                             contentColor = colorScheme.onPrimaryContainer
@@ -442,7 +436,7 @@ private fun LatestNotifications(
 
 @Composable
 private fun Settings(
-    isOffline: State<Flow<OfflineModeManager.AppModes>>,
+    isOffline: State<Flow<AppModes>>,
     onToggleOffline: (Boolean) -> Unit,
     theme: State<AppSettingsManager.Themes>,
     onChooseTheme: (AppSettingsManager.Themes) -> Unit,
@@ -462,7 +456,7 @@ private fun Settings(
             text = stringResource(R.string.settings),
             style = typography.titleMedium.copy(color = colorScheme.onBackground),
         )
-        val offlineState = isOffline.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
+        val offlineState = isOffline.value.collectAsState(AppModes.ONLINE)
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = stringResource(R.string.trun_offline),

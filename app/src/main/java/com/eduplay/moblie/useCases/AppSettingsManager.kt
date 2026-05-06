@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 @Singleton
-class AppSettingsManagerDataStore(private val context: Context): AppSettingsManager {
+class AppSettingsManagerDataStore(private val context: Context) : AppSettingsManager {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_settings")
     private val screenMode = intPreferencesKey("screenMode")
 

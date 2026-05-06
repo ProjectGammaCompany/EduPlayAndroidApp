@@ -27,10 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -41,7 +39,7 @@ import com.eduplay.moblie.ui.viewmodel.AuthViewModel.ForgotPasswordStatus
 
 @Composable
 fun ForgotPasswordForm(
-    onGoBack:()->Unit,
+    onGoBack: () -> Unit,
     forgotPasswordStatus: State<ForgotPasswordStatus>,
     correctEmail: State<Boolean>,
     correctCode: State<Boolean>,
@@ -53,7 +51,10 @@ fun ForgotPasswordForm(
     onCheckCode: (String) -> Unit,
     onSendNewPassword: (String, String) -> Unit,
 ) {
-    Row(modifier = Modifier.padding(top=15.dp).fillMaxWidth().wrapContentHeight()) {
+    Row(modifier = Modifier
+        .padding(top = 15.dp)
+        .fillMaxWidth()
+        .wrapContentHeight()) {
         IconButton(
             onClick = onGoBack,
             modifier = Modifier.align(Alignment.CenterVertically)
@@ -74,7 +75,14 @@ fun ForgotPasswordForm(
     when (forgotPasswordStatus.value) {
         ForgotPasswordStatus.ENTER_EMAIL -> EmailForm(onSendCode, correctEmail, hasEmailErrors)
         ForgotPasswordStatus.ENTER_CODE -> CodeForm(onCheckCode, correctCode)
-        ForgotPasswordStatus.CHANGE_PASSWORD -> ChangePasswordForm(hasPasswordErrors, arePasswordsIdentical, isPasswordSafe,  correctCode,onSendNewPassword)
+        ForgotPasswordStatus.CHANGE_PASSWORD -> ChangePasswordForm(
+            hasPasswordErrors,
+            arePasswordsIdentical,
+            isPasswordSafe,
+            correctCode,
+            onSendNewPassword
+        )
+
         ForgotPasswordStatus.NONE -> {}
     }
 }

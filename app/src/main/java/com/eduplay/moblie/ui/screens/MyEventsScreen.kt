@@ -121,8 +121,8 @@ private fun MyEventsScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-                    selectedContentColor = MaterialTheme.colorScheme.primary,
-                    unselectedContentColor = MaterialTheme.colorScheme.onSurface,
+                    selectedContentColor = colorScheme.primary,
+                    unselectedContentColor = colorScheme.onSurface,
                 )
             }
         }
