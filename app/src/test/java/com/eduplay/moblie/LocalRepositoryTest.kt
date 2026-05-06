@@ -51,7 +51,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
+import java.security.MessageDigest
 import java.time.LocalDateTime
+import kotlin.math.max
 
 class LocalRepositoryTest {
     lateinit var repository: LocalRepository
@@ -1913,6 +1915,204 @@ class LocalRepositoryTest {
 
         assertEquals(TaskAnswerStatus.PARTIALLY, result.isCorrect)
         assertEquals(5, savedAnswer?.points)
+    }
+
+    @Test
+    fun `postTaskAnswer partial points are calculated correctly when only correct answers are chosen`() {
+        val taskId = "task1"
+        val points = 100
+        val task = TaskEntity(
+            id = taskId,
+            blockId = "block1",
+            name = "task",
+            description = "",
+            type = TaskType.MULTIPLE_CHOICE,
+            time = 0,
+            points = points,
+            partialPoints = true,
+            taskOrder = 1
+        )
+        val block = BlockEntity(
+            id = "block1",
+            name = "block",
+            blockOrder = 1,
+            isParallel = false,
+            showPoints = false,
+            showAnswers = true,
+            partialPoints = true,
+            eventId = "event"
+        )
+        val options = mutableListOf<OptionEntity>()
+
+        val numOfAnswers = 5
+        for (i in 0..<numOfAnswers) {
+            options.add(
+                OptionEntity(
+                    id = i.toString(),
+                    taskId = taskId,
+                    value = i.toString()
+                )
+            )
+        }
+        val numOfCorrectAnswers = 4
+        val md = MessageDigest.getInstance("SHA-256")
+        val correctOptions = mutableListOf<CorrectAnswerEntity>()
+        for (i in 0..<numOfCorrectAnswers) {
+            val input = i.toString().toByteArray()
+            val hashedAnswer = md.digest(input).fold("", { str, it -> str + "%02x".format(it) })
+            correctOptions.add(
+                CorrectAnswerEntity(
+                    taskId = taskId,
+                    value = hashedAnswer,
+                    id = i
+                )
+            )
+        }
+
+        val user = "user"
+        val startTime = LocalDateTime.now().minusMinutes(1)
+        val answer = AnswerEntity(
+            taskId = taskId,
+            options = listOf(),
+            userId = user,
+            startTime = startTime.toString(),
+            endTime = "",
+            points = 0,
+            isFinal = false,
+            isSynchronized = false
+        )
+
+        var savedAnswer: AnswerEntity? = null
+        coEvery { offlineModeManager.getCurrentUserId() }.returns(flowOf(user))
+        coEvery { taskDao.getTaskById(taskId) }.returns(task)
+        coEvery { blockDao.getBlockById("block1") }.returns(block)
+        coEvery { optionDao.getOptionsByTaskId(taskId) }.returns(options)
+        coEvery { correctAnswerDao.getAnswersByTask(taskId) }.returns(correctOptions)
+        coEvery { answerDao.getAnswerByTaskAndUserId(taskId, user) }.returns(answer)
+        coEvery { answerDao.updateAnswer(any()) }.answers {
+            savedAnswer = arg(0)
+        }
+
+
+        for (i in 0..<numOfCorrectAnswers - 1) {
+            val result = runBlocking {
+                repository.postTaskAnswer(
+                    "1",
+                    "block1",
+                    "task1",
+                    options.filterIndexed { idx, it -> idx <= i }.map { it.value }
+                )
+            }
+            println(i)
+            assertEquals(TaskAnswerStatus.PARTIALLY, result.isCorrect)
+            assertEquals(
+                ((i + 1).toDouble() / numOfCorrectAnswers * points).toInt(),
+                savedAnswer?.points
+            )
+        }
+    }
+
+    @Test
+    fun `postTaskAnswer partial points are calculated correctly when incorrect answers are chosen`() {
+        val taskId = "task1"
+        val points = 100
+        val task = TaskEntity(
+            id = taskId,
+            blockId = "block1",
+            name = "task",
+            description = "",
+            type = TaskType.MULTIPLE_CHOICE,
+            time = 0,
+            points = points,
+            partialPoints = true,
+            taskOrder = 1
+        )
+        val block = BlockEntity(
+            id = "block1",
+            name = "block",
+            blockOrder = 1,
+            isParallel = false,
+            showPoints = false,
+            showAnswers = true,
+            partialPoints = true,
+            eventId = "event"
+        )
+        val options = mutableListOf<OptionEntity>()
+
+        val numOfAnswers = 10
+        for (i in 0..<numOfAnswers) {
+            options.add(
+                OptionEntity(
+                    id = i.toString(),
+                    taskId = taskId,
+                    value = i.toString()
+                )
+            )
+        }
+        val numOfCorrectAnswers = 5
+        val md = MessageDigest.getInstance("SHA-256")
+        val correctOptions = mutableListOf<CorrectAnswerEntity>()
+        for (i in 0..<numOfCorrectAnswers) {
+            val input = i.toString().toByteArray()
+            val hashedAnswer = md.digest(input).fold("", { str, it -> str + "%02x".format(it) })
+            correctOptions.add(
+                CorrectAnswerEntity(
+                    taskId = taskId,
+                    value = hashedAnswer,
+                    id = i
+                )
+            )
+        }
+
+        val user = "user"
+        val startTime = LocalDateTime.now().minusMinutes(1)
+        val answer = AnswerEntity(
+            taskId = taskId,
+            options = listOf(),
+            userId = user,
+            startTime = startTime.toString(),
+            endTime = "",
+            points = 0,
+            isFinal = false,
+            isSynchronized = false
+        )
+
+        var savedAnswer: AnswerEntity? = null
+        coEvery { offlineModeManager.getCurrentUserId() }.returns(flowOf(user))
+        coEvery { taskDao.getTaskById(taskId) }.returns(task)
+        coEvery { blockDao.getBlockById("block1") }.returns(block)
+        coEvery { optionDao.getOptionsByTaskId(taskId) }.returns(options)
+        coEvery { correctAnswerDao.getAnswersByTask(taskId) }.returns(correctOptions)
+        coEvery { answerDao.getAnswerByTaskAndUserId(taskId, user) }.returns(answer)
+        coEvery { answerDao.updateAnswer(any()) }.answers {
+            savedAnswer = arg(0)
+        }
+
+
+        for (i in 0..<numOfCorrectAnswers) {
+            for (j in 0..<numOfCorrectAnswers) {
+                val chosenOptions = mutableListOf<String>()
+                for (correct in 0..i) {
+                    chosenOptions.add(correct.toString())
+                }
+                for (incorrect in 0..j) {
+                    chosenOptions.add((incorrect + numOfCorrectAnswers).toString())
+                }
+                val result = runBlocking {
+                    repository.postTaskAnswer(
+                        "1",
+                        "block1",
+                        "task1",
+                        chosenOptions
+                    )
+                }
+                assertEquals(TaskAnswerStatus.PARTIALLY, result.isCorrect)
+                assertEquals(
+                     (max(i - j, 0).toDouble() / numOfCorrectAnswers * points).toInt(),
+                    savedAnswer?.points
+                )
+            }
+        }
     }
 
     @Test

@@ -557,13 +557,13 @@ class LocalRepository @Inject constructor(
 
             }
             val intersection = correctAnswers.intersect(hashedAnswers)
-            if (intersection.size == correctAnswers.size) {
+            val incorrectAnswerCnt =  answers.size - intersection.size
+            val correctAnswerCnt = intersection.size
+            if (correctAnswerCnt - incorrectAnswerCnt == correctAnswers.size) {
                 isCorrect = TaskAnswerStatus.CORRECT
                 points = task.points
             } else if (block.partialPoints || task.partialPoints) {
                 isCorrect = TaskAnswerStatus.PARTIALLY
-                val incorrectAnswerCnt =  answers.size - intersection.size
-                val correctAnswerCnt = intersection.size
                 points = ((max(0, correctAnswerCnt-incorrectAnswerCnt).toDouble() / correctAnswers.size) * task.points).toInt()
             } else {
                 isCorrect = TaskAnswerStatus.INCORRECT
