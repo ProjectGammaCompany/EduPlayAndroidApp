@@ -176,7 +176,7 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    showFavoriteBtn,
+                    true,
                     viewModel
                 )
             }
@@ -201,7 +201,7 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    showFavoriteBtn,
+                    true,
                     viewModel
                 )
             }
@@ -227,7 +227,7 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    showFavoriteBtn,
+                    true,
                     viewModel
                 )
             }
@@ -253,7 +253,7 @@ class TaskElementTest {
                     shortInfo,
                     {},
                     { _: Boolean -> },
-                    showFavoriteBtn,
+                    true,
                     viewModel
                 )
             }

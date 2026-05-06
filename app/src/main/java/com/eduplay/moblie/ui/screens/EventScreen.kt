@@ -1211,17 +1211,25 @@ fun PrivacySettings(
                         )
                     }
                 }
-                val stringBuilder = StringBuilder()
-                stringBuilder.append(context.getString(R.string.expires_at))
-                stringBuilder.append(DateConverter.convertForDisplay(joinCode.value.expiresAt))
+                val time = try {
+                    DateConverter.convertForDisplay(joinCode.value.expiresAt)
+                } catch (e: Exception) {
+                    null
+                }
+                if (time != null) {
+                    val stringBuilder = StringBuilder()
+                    stringBuilder.append(context.getString(R.string.expires_at))
+                    stringBuilder.append(time)
 
-                Text(
-                    text = stringBuilder.toString(),
-                    style = typography.bodyLarge.copy(
-                        color = colorScheme.onBackground
-                    ),
-                    modifier = Modifier.padding(end = 5.dp)
-                )
+
+                    Text(
+                        text = stringBuilder.toString(),
+                        style = typography.bodyLarge.copy(
+                            color = colorScheme.onBackground
+                        ),
+                        modifier = Modifier.padding(end = 5.dp)
+                    )
+                }
             }
 
 

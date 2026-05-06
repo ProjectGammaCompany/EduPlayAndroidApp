@@ -12,6 +12,7 @@ import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.utils.CoroutineContextProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -35,7 +36,7 @@ class MainScreenViewModel @Inject constructor(
     }
 
     fun refreshFeed() {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext.Main) {
             try {
                 refreshing.value = true
                 events.value = repository.getEvents().cachedIn(viewModelScope)
