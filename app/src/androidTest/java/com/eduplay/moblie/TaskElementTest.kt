@@ -2,7 +2,6 @@ package com.eduplay.moblie
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -12,7 +11,7 @@ import androidx.compose.ui.test.performClick
 import coil3.network.NetworkHeaders
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
-import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.elements.EventElement
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderInterface
 import com.eduplay.moblie.useCases.OfflineModeManager
 import io.mockk.MockKAnnotations
@@ -24,7 +23,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class TaskElementTest {
+class EventElementTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -69,7 +68,7 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(
+                EventElement(
                     shortInfo,
                     {},
                     { _: Boolean -> },
@@ -90,7 +89,7 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(
+                EventElement(
                     shortInfo,
                     {},
                     { _: Boolean -> },
@@ -112,7 +111,7 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(
+                EventElement(
                     shortInfo,
                     {},
                     { _: Boolean -> },
@@ -134,7 +133,7 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(
+                EventElement(
                     shortInfo,
                     {},
                     { _: Boolean -> },
@@ -152,7 +151,7 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(
+                EventElement(
                     shortInfo,
                     {},
                     { _: Boolean -> },
@@ -172,7 +171,7 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(
+                EventElement(
                     shortInfo,
                     {},
                     { _: Boolean -> },
@@ -197,7 +196,7 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(
+                EventElement(
                     shortInfo,
                     {},
                     { _: Boolean -> },
@@ -223,7 +222,7 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(
+                EventElement(
                     shortInfo,
                     {},
                     { _: Boolean -> },
@@ -249,7 +248,7 @@ class TaskElementTest {
 
         composeTestRule.apply {
             setContent {
-                QuestListElement(
+                EventElement(
                     shortInfo,
                     {},
                     { _: Boolean -> },

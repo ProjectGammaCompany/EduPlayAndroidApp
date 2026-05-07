@@ -44,7 +44,7 @@ import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinByCodeDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
-import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.elements.EventElement
 import com.eduplay.moblie.ui.elements.TryAgainLaterToast
 import com.eduplay.moblie.ui.viewmodel.CurrentModeViewModel
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
@@ -194,7 +194,7 @@ private fun MainScreen(
                 val itemValue = eventsInfo[position]
                 if (itemValue != null) {
                     val onEventClick = { onEventClick(itemValue.id) }
-                    QuestListElement(
+                    EventElement(
                         itemValue,
                         onEventClick,
                         { isFavourite -> onFavourite(itemValue.id, isFavourite) }

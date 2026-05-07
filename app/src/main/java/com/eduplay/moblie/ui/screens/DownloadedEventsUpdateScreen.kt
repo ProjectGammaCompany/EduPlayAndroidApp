@@ -35,7 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.QuestShortInfo
-import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.elements.EventElement
 import com.eduplay.moblie.ui.viewmodel.DownloadedEventsUpdateScreenViewModel
 
 @Composable
@@ -128,7 +128,7 @@ fun DownloadedEventsUpdateScreen(
                                 stringResource(R.string.delete_event)
                             )
                         }
-                        QuestListElement(
+                        EventElement(
                             questShortInfo = it,
                             onClick = { onNavigateToEvent(it.id) },
                             onFavouriteToggle = {},

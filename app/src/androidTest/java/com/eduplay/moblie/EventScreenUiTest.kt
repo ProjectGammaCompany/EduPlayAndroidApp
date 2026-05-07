@@ -194,6 +194,7 @@ class EventScreenUiTest {
         }
     }
 
+    @Test
     fun check_top_bar_player_mode_download_btn_is_displayed_when_can_download_is_true() {
         composeTestRule.apply {
             every { eventData.eventCreatorMode } returns mutableStateOf(false)
@@ -206,6 +207,7 @@ class EventScreenUiTest {
         }
     }
 
+    @Test
     fun check_top_bar_player_mode_download_btn_is_not_displayed_when_can_download_is_false() {
         composeTestRule.apply {
             every { eventData.eventCreatorMode } returns mutableStateOf(false)

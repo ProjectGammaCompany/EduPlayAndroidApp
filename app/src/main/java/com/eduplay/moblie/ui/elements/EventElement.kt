@@ -49,7 +49,7 @@ import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
 import java.io.File
 
 @Composable
-fun QuestListElement(
+fun EventElement(
     questShortInfo: QuestShortInfo,
     onClick: () -> Unit,
     onFavouriteToggle: (Boolean) -> Unit,

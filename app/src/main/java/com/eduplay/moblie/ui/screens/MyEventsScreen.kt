@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -37,7 +36,7 @@ import com.eduplay.moblie.R
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
-import com.eduplay.moblie.ui.elements.QuestListElement
+import com.eduplay.moblie.ui.elements.EventElement
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.MyEventsViewModel
@@ -173,7 +172,7 @@ private fun ListOfEvents(
             items(eventsInfo.itemCount) { position ->
                 val itemValue = eventsInfo[position]
                 if (itemValue != null) {
-                    QuestListElement(
+                    EventElement(
                         itemValue,
                         { onEventClick(itemValue.id) },
                         { onFavouriteToggle(itemValue.id, itemValue.isFavourite) }
