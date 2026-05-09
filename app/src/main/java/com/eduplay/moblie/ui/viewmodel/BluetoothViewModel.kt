@@ -30,9 +30,12 @@ import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.R
 import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.net.ConnectException
 import java.util.UUID
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -265,19 +268,31 @@ class BluetoothViewModel(
                 return@launch
             }
 
-            if (!connectedDevices.keys.contains(device)) {
-                val bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid)
-                try {
-                    Log.d("CONNECT", "$address ${device.address}")
-                    bluetoothSocket.connect()
-                    connectedDevices[device] = bluetoothSocket
-                    devicesConnectionStatus[device.address] = true
-                    listenToSocket(bluetoothSocket)
-                } catch (e: Exception) {
-                    onCouldNotConnect()
-                    Log.e("CONNECT", "can't connect to device as client", e)
-                }
 
+            if (!connectedDevices.keys.contains(device)) {
+                var connectionTries = 0
+                var connected = false
+                while (!connected && connectionTries < 3) {
+                    val bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid)
+                    try {
+                        Log.d("CONNECT", "$address ${device.address}")
+                        bluetoothSocket.connect()
+                        connectedDevices[device] = bluetoothSocket
+                        devicesConnectionStatus[device.address] = true
+                        listenToSocket(bluetoothSocket)
+                        connected = true
+                    } catch (e: IOException) {
+                        if (device.bondState != BluetoothDevice.BOND_BONDED) {
+                            device.createBond()
+                            delay(3000)
+                        }
+                        Log.e("CONNECT", "bonding", e)
+                    } catch (e: Exception) {
+                        onCouldNotConnect()
+                        Log.e("CONNECT", "can't connect to device as client", e)
+                    }
+                    connectionTries++
+                }
             }
         }
     }
