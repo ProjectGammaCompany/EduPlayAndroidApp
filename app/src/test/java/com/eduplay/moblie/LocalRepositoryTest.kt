@@ -373,7 +373,7 @@ class LocalRepositoryTest {
     }
 
     @Test
-    fun `getOwnerEventInfo event is parces correctly when repository returns event`() {
+    fun `getOwnerEventInfo event is parses correctly when repository returns event`() {
         val startTime = LocalDateTime.now().minusDays(3)
         val endTime = LocalDateTime.now().plusDays(3)
         val lastEditionDate = LocalDateTime.now()

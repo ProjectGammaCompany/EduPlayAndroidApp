@@ -77,7 +77,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `login_ user is saved to local repo when AuthResponse from web repo is Success test`() {
+    fun `login user is saved to local repo when AuthResponse from web repo is Success test`() {
         var userSaved = false
         coEvery { webRepository.login(any<Auth>()) }.returns(AuthResult.SUCCESSES)
         coEvery { localRepository.saveUser() }.answers {
@@ -95,7 +95,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `login_ user is not saved to local repo when AuthResponse from web repo is not Success test`() {
+    fun `login user is not saved to local repo when AuthResponse from web repo is not Success test`() {
         var userSaved = false
 
         val notSuccessResponses = AuthResult.entries.filter { it != AuthResult.SUCCESSES }.toList()
@@ -117,7 +117,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `register_ user is saved to local repo when AuthResponse from web repo is Success test`() {
+    fun `register user is saved to local repo when AuthResponse from web repo is Success test`() {
         var userSaved = false
         coEvery { webRepository.register(any<RegistrationData>()) }.returns(AuthResult.SUCCESSES)
         coEvery { localRepository.saveUser() }.answers {
@@ -135,7 +135,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `register_ user is not saved to local repo when AuthResponse from web repo is not Success test`() {
+    fun `register user is not saved to local repo when AuthResponse from web repo is not Success test`() {
         var userSaved = false
         val notSuccessResponses = AuthResult.entries.filter { it != AuthResult.SUCCESSES }.toList()
         coEvery { localRepository.saveUser() }.answers {
@@ -156,7 +156,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `updatePassword_ user is saved to local repo when AuthResponse from web repo is Success test`() {
+    fun `updatePassword user is saved to local repo when AuthResponse from web repo is Success test`() {
         var userSaved = false
         coEvery {
             webRepository.updatePassword(
@@ -179,7 +179,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `updatePassword_ user is not saved to local repo when AuthResponse from web repo is not Success test`() {
+    fun `updatePassword user is not saved to local repo when AuthResponse from web repo is not Success test`() {
         var userSaved = false
         val notSuccessResponses = AuthResult.entries.filter { it != AuthResult.SUCCESSES }.toList()
         coEvery { localRepository.saveUser() }.answers {
@@ -206,7 +206,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `logout_ user is removed from local repo when web repo returns true on logout test`() {
+    fun `logout user is removed from local repo when web repo returns true on logout test`() {
         var userRemoved = false
         coEvery { webRepository.logout() }.returns(true)
         coEvery { localRepository.removeCurrentUser() }.answers {
@@ -223,7 +223,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `logout_ user is not removed from local repo when  web repo returns false on logout test`() {
+    fun `logout user is not removed from local repo when  web repo returns false on logout test`() {
         var userRemoved = false
         coEvery { webRepository.logout() }.returns(false)
         coEvery { localRepository.removeCurrentUser() }.answers {
@@ -240,7 +240,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `getEventInfoPlayer_ there is no check for updates when event is not downloaded and app is in online mode test`() {
+    fun `getEventInfoPlayer there is no check for updates when event is not downloaded and app is in online mode test`() {
         var checked = false
         coEvery { webRepository.getPlayerEventInfo(any()) }.returns(playerInfo)
         coEvery { localRepository.isEventDownloaded(any()) }.returns(false)
@@ -260,7 +260,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `getEventInfoPlayer_ there is no check for updates when app is in offline mode test`() {
+    fun `getEventInfoPlayer there is no check for updates when app is in offline mode test`() {
         var checked = false
         coEvery { localRepository.getPlayerEventInfo(any()) }.returns(playerInfo)
         coEvery { offlineModeManager.getAppMode() }.returns(flowOf(AppModes.OFFLINE))
@@ -283,7 +283,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `getEventInfoPlayer_ playerInfo needsUpdate is false when event is downloaded, app mode is online and event last edition date is equal to the date in local repo test`() {
+    fun `getEventInfoPlayer playerInfo needsUpdate is false when event is downloaded, app mode is online and event last edition date is equal to the date in local repo test`() {
         var checked = false
         val time = LocalDateTime.now().toString()
         coEvery { webRepository.getPlayerEventInfo(any()) }.returns(playerInfo)
@@ -304,7 +304,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `getEventInfoPlayer_ playerInfo needsUpdate is true when event is downloaded, app mode is online and event last edition date is not equal to the date in local repo test`() {
+    fun `getEventInfoPlayer playerInfo needsUpdate is true when event is downloaded, app mode is online and event last edition date is not equal to the date in local repo test`() {
         var checked = false
         coEvery { webRepository.getPlayerEventInfo(any()) }.returns(playerInfo)
         coEvery { offlineModeManager.getAppMode() }.returns(flowOf(AppModes.ONLINE))
@@ -323,7 +323,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `getNextStage_ options in task are shuffled when task is not null test`() {
+    fun `getNextStage options in task are shuffled when task is not null test`() {
         val options = mutableListOf<AnswerOption>()
         for (i in 0..100) {
             options.add(AnswerOption(i.toString(), i.toString()))
@@ -354,7 +354,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `getNextStage_ tasks in block are shuffled when block is not null test`() {
+    fun `getNextStage tasks in block are shuffled when block is not null test`() {
         val tasks = mutableListOf<ShortTask>()
         for (i in 0..100) {
             tasks.add(ShortTask(i.toString(), i.toString(), 0, false))
@@ -379,7 +379,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `postEventRating_ rating is not sent when app mode is offline`() {
+    fun `postEventRating rating is not sent when app mode is offline`() {
         var ratingSent = false
         coEvery { offlineModeManager.getAppMode() }.returns(flowOf(AppModes.OFFLINE))
         coEvery { webRepository.postRating(any(), any()) }.answers {
@@ -395,7 +395,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `postEventRating_ rating is sent when app mode is online`() {
+    fun `postEventRating rating is sent when app mode is online`() {
         var ratingSent = false
         coEvery { offlineModeManager.getAppMode() }.returns(flowOf(AppModes.ONLINE))
         coEvery { webRepository.postRating(any(), any()) }.answers {
@@ -411,7 +411,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `postAnswerBatch_ answers are not sent when app mode is offline`() {
+    fun `postAnswerBatch answers are not sent when app mode is offline`() {
         var answersSent = false
         coEvery { offlineModeManager.getAppMode() }.returns(flowOf(AppModes.OFFLINE))
         coEvery { webRepository.postAnswerBatch(any(), any()) }.answers {
@@ -428,7 +428,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `postAnswerBatch_ answers are not sent when localRepository returns null`() {
+    fun `postAnswerBatch answers are not sent when localRepository returns null`() {
         var answersSent = false
         coEvery { offlineModeManager.getAppMode() }.returns(flowOf(AppModes.ONLINE))
         coEvery { webRepository.postAnswerBatch(any(), any()) }.answers {
@@ -446,7 +446,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `postAnswerBatch_ when answers are not successfully sent they are not marked in local repo`() {
+    fun `postAnswerBatch when answers are not successfully sent they are not marked in local repo`() {
         var answersSent = false
         var answersMarkedAsSent = false
         val answerBatch = AnswerBatch(
@@ -478,7 +478,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `postAnswerBatch_ when answers are successfully sent they are marked in local repo`() {
+    fun `postAnswerBatch when answers are successfully sent they are marked in local repo`() {
         var answersSent = false
         var answersMarkedAsSent = false
         val answerBatch = AnswerBatch(
@@ -510,7 +510,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `updateDownloadedEventsStatuses_ when appMode is offline null is returned`() {
+    fun `updateDownloadedEventsStatuses when appMode is offline null is returned`() {
         var gotEventsFromLocalRepo = false
         coEvery { localRepository.getEvents(any(), any(), any()) }.answers {
             gotEventsFromLocalRepo = true
@@ -527,7 +527,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `updateDownloadedEventsStatuses_ when no events are downloaded an empty list is returned`() {
+    fun `updateDownloadedEventsStatuses when no events are downloaded an empty list is returned`() {
         var gotEventsFromLocalRepo = false
         coEvery { localRepository.getEvents(any(), any(), any(), any(), any()) }.answers {
             gotEventsFromLocalRepo = true
@@ -544,7 +544,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `updateDownloadedEventsStatuses_ when there are downloaded events and web repo failed to get updates null is returned`() {
+    fun `updateDownloadedEventsStatuses when there are downloaded events and web repo failed to get updates null is returned`() {
         val events = listOf<EventEntity>(
             EventEntity(
                 id = "",
@@ -571,7 +571,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `updateDownloadedEventsStatuses_ when downloaded events are up to date empty list is returned`() {
+    fun `updateDownloadedEventsStatuses when downloaded events are up to date empty list is returned`() {
         val date = LocalDateTime.now().toString()
         val events = listOf<EventEntity>(
             EventEntity(
@@ -616,7 +616,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `updateDownloadedEventsStatuses_ when downloaded events are not up to date list with events is returned`() {
+    fun `updateDownloadedEventsStatuses when downloaded events are not up to date list with events is returned`() {
         val date = LocalDateTime.now().toString()
         val events = listOf<EventEntity>(
             EventEntity(
@@ -657,7 +657,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `getEventEditorStats_ when app mode is offline returns empty stats`() {
+    fun `getEventEditorStats when app mode is offline returns empty stats`() {
         coEvery { offlineModeManager.getAppMode() }.returns(flowOf(AppModes.OFFLINE))
         val expectedResult = ResultStats(false, null, null)
 
@@ -669,7 +669,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `getEventEditorStats_ when app mode is online returns expectedStats from web repo`() {
+    fun `getEventEditorStats when app mode is online returns expectedStats from web repo`() {
         coEvery { offlineModeManager.getAppMode() }.returns(flowOf(AppModes.ONLINE))
         val users = mutableListOf<UserEditorStat>()
         for (i in 0..10) {
@@ -694,7 +694,7 @@ class EduRepositoryTest {
     }
 
     @Test
-    fun `postAllAnswers_ when failed to send answer batch sending is stopped`() {
+    fun `postAllAnswers when failed to send answer batch sending is stopped`() {
         val events = mutableListOf<EventEntity>()
         for (i in 0..10) {
             events.add(
