@@ -540,10 +540,12 @@ private fun RegistrationForm(
             checked = agreed,
             onCheckedChange = { agreed = !agreed },
             modifier = Modifier.testTag("agree_to_terms_checkBox")
+                .align(Alignment.CenterVertically)
         )
         Text(
             agreementText,
-            style = typography.labelSmall
+            style = typography.labelSmall,
+            modifier = Modifier.align(Alignment.CenterVertically)
         )
     }
 

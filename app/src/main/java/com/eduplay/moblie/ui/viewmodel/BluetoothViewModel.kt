@@ -14,6 +14,7 @@ import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -36,7 +37,8 @@ import java.util.UUID
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
-
+//TODO("слишком длинное название устройства")
+//TODO("отображение для включите локацию")
 @OptIn(ExperimentalAtomicApi::class, ExperimentalPermissionsApi::class)
 class BluetoothViewModel(
     private val adapter: State<BluetoothAdapter?>,
@@ -44,7 +46,7 @@ class BluetoothViewModel(
 
 ) : ViewModel() {
 
-    private val uuid = UUID.fromString("00004ba8-0000-1000-8000-00805f9b34fb")
+    private val uuid = UUID.fromString("eac368b1-ab18-4804-91fe-ab823227d8da")
     private val connectedDevices = mutableMapOf<BluetoothDevice, BluetoothSocket>()
 
     // all devices bound and scanned; key - mac address; value - name
@@ -54,11 +56,14 @@ class BluetoothViewModel(
     val isReceivingConnections = AtomicBoolean(false)
     val devicesScore = mutableStateMapOf<String, Int>()
     var askForPermissions = mutableStateOf(false)
+    val needLocation = mutableStateOf(false)
 
     fun discoverDevices(
         context: Context,
         onScanFailed: () -> Unit
     ) {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        needLocation.value = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         if (adapter.value == null) {
             onScanFailed()
             return
@@ -79,11 +84,11 @@ class BluetoothViewModel(
             askForPermissions.value = true
             return
         }
-        foundDevices.putAll(
-            adapter.value?.bondedDevices
-                ?.filter { device -> device != null }
-                ?.map { device -> Pair(device.address, device.name) } ?: listOf()
-        )
+//        foundDevices.putAll(
+//            adapter.value?.bondedDevices
+//                ?.filter { device -> device != null }
+//                ?.map { device -> Pair(device.address, device.name) } ?: listOf()
+//        )
 
 
         if (scanner == null) {
@@ -104,10 +109,10 @@ class BluetoothViewModel(
         filters.add(filter)
 
         val scanSettings = ScanSettings.Builder()
-            .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
             .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
-            .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
-            .setNumOfMatches(ScanSettings.MATCH_NUM_FEW_ADVERTISEMENT)
+            //.setMatchMode(ScanSettings.MATCH_MODE_STICKY)
+            //.setNumOfMatches(ScanSettings.MATCH_NUM_FEW_ADVERTISEMENT)
             .setReportDelay(0L)
             .build()
 
@@ -116,9 +121,9 @@ class BluetoothViewModel(
             override fun onScanResult(callbackType: Int, result: ScanResult) {
                 super.onScanResult(callbackType, result)
                 val device: BluetoothDevice? = result.device
-
-                if (device != null && device.address != null && device.name != null)
-                    foundDevices.put(device.address!!, device.name ?: result.scanRecord?.deviceName)
+                val deviceName = device?.name ?: result.scanRecord?.deviceName
+                if (device != null && device.address != null && deviceName != null)
+                    foundDevices.put(device.address!!, deviceName)
             }
         }
         startServerSocket()
@@ -150,20 +155,23 @@ class BluetoothViewModel(
         val advertiser =
             adapter.value?.bluetoothLeAdvertiser
         val settings = AdvertiseSettings.Builder()
-            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
-            .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
+            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+            .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM)
             .setConnectable(true)
             .build()
 
         val data = AdvertiseData.Builder()
-            .setIncludeDeviceName(true)
+            .setIncludeDeviceName(false)
             .addServiceUuid(ParcelUuid(uuid))
+            .build()
+        val scanResponse = AdvertiseData.Builder()
+            .setIncludeDeviceName(true)
             .build()
 
         val callback: AdvertiseCallback = object : AdvertiseCallback() {
             override fun onStartFailure(errorCode: Int) {
                 super.onStartFailure(errorCode)
-                Log.e("advert", "cant start")
+                Log.e("advert", "cant start $errorCode")
             }
 
             override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
@@ -172,7 +180,7 @@ class BluetoothViewModel(
             }
         }
 
-        advertiser?.startAdvertising(settings, data, callback)
+        advertiser?.startAdvertising(settings, data, scanResponse, callback)
     }
 
     private var serverSocket: BluetoothServerSocket? = null
@@ -260,6 +268,7 @@ class BluetoothViewModel(
             if (!connectedDevices.keys.contains(device)) {
                 val bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid)
                 try {
+                    Log.d("CONNECT", "$address ${device.address}")
                     bluetoothSocket.connect()
                     connectedDevices[device] = bluetoothSocket
                     devicesConnectionStatus[device.address] = true
