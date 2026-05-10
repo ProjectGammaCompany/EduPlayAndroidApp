@@ -36,6 +36,7 @@ import com.eduplay.moblie.repository.webrepository.pagingSources.CreatedEventsPa
 import com.eduplay.moblie.repository.webrepository.pagingSources.FavoriteEventsPagingSource
 import com.eduplay.moblie.repository.webrepository.pagingSources.NotificationPagingSource
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.SingleUserStat
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.managers.OfflineModeManager
@@ -471,5 +472,12 @@ class EduRepository @Inject constructor(
             return webRepository.getEventEditorStats(eventId)
         }
         return ResultStats(false, null, null)
+    }
+
+    suspend fun getEventEditorStatsPerUser(eventId: String, userId: String): SingleUserStat {
+        if (offlineModeManager.getAppMode().first() == AppModes.ONLINE) {
+            return webRepository.getEventEditorStatsPerUser(eventId, userId)
+        }
+        return SingleUserStat(listOf())
     }
 }

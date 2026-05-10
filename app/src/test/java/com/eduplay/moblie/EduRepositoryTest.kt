@@ -15,7 +15,7 @@ import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.webrepository.WebRepository
 import com.eduplay.moblie.repository.webrepository.requestTypes.AnswerBatch
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
-import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserEditorStat
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserFullEditorStat
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatus
@@ -671,13 +671,13 @@ class EduRepositoryTest {
     @Test
     fun `getEventEditorStats when app mode is online returns expectedStats from web repo`() {
         coEvery { offlineModeManager.getAppMode() }.returns(flowOf(AppModes.ONLINE))
-        val users = mutableListOf<UserEditorStat>()
+        val users = mutableListOf<UserFullEditorStat>()
         for (i in 0..10) {
             users.add(
-                UserEditorStat(
+                UserFullEditorStat(
                     id = i.toString(),
                     username = i.toString(),
-                    answers = UserEditorStat.Answer(i, 10),
+                    answers = UserFullEditorStat.Answer(i, 10),
                     points = i,
                     avatar = "TODO()"
                 )

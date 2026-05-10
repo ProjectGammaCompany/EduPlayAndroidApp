@@ -58,7 +58,7 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.eduplay.moblie.R
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
-import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserEditorStat
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserFullEditorStat
 import com.eduplay.moblie.ui.theme.Typography
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel.EditorStatColumns
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderInterface
@@ -143,7 +143,7 @@ fun StatisticsInfo(
 
 @Composable
 private fun TableOfUserResults(
-    users: List<UserEditorStat>,
+    users: List<UserFullEditorStat>,
     sortEventStatsByColumn: (EditorStatColumns, Boolean) -> Unit
 ) {
     var descendingSorting by remember { mutableStateOf(false) }

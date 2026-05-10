@@ -1,6 +1,6 @@
 package com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats
 
-data class UserEditorStat(
+data class UserFullEditorStat(
     val id: String,
     val username: String,
     val answers: Answer,

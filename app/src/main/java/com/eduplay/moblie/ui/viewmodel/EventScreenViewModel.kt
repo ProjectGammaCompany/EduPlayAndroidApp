@@ -17,7 +17,7 @@ import com.eduplay.moblie.repository.EduRepository
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.GroupEditorStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
-import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserEditorStat
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserFullEditorStat
 import com.eduplay.moblie.useCases.DateConverter
 import com.eduplay.moblie.useCases.downloadUsecases.DownloadStatusObserver
 import com.eduplay.moblie.useCases.managers.OfflineModeManager
@@ -285,7 +285,7 @@ class EventScreenViewModel @Inject constructor(
         descending: Boolean
     ) {
         viewModelScope.launch {
-            val users: List<UserEditorStat>? =
+            val users: List<UserFullEditorStat>? =
                 when (column) {
                     EditorStatColumns.USERNAME -> editorEventStats.value.users?.sortedBy { it.username }
                     EditorStatColumns.CORRECT_ANSWERS -> editorEventStats.value.users?.sortedBy { it.answers.correct }

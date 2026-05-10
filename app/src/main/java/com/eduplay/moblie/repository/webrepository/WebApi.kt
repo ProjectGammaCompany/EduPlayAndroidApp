@@ -25,6 +25,7 @@ import com.eduplay.moblie.repository.webrepository.requestTypes.GroupCredentials
 import com.eduplay.moblie.repository.webrepository.requestTypes.ProfileUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.DownloadPath
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.SingleUserStat
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.NotificationList
 import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatusList
@@ -218,4 +219,11 @@ interface WebApi {
     @GET("/event/{eventId}/editorStats")
     @InjectAuth
     suspend fun getEditorStats(@Path("eventId") eventId: String): Response<ResultStats>
+
+    @GET("/event/{eventId}/editorStats/{userId}")
+    @InjectAuth
+    suspend fun getEditorStatsForUser(
+        @Path("eventId") eventId: String,
+        @Path("userId") userId: String
+    ): Response<SingleUserStat>
 }

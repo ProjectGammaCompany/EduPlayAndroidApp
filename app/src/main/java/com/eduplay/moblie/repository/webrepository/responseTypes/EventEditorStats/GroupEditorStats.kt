@@ -3,5 +3,5 @@ package com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorSta
 data class GroupEditorStats(
     val id: String,
     val name: String,
-    val users: List<UserEditorStat>
+    val users: List<UserFullEditorStat>
 )

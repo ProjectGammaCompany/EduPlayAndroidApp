@@ -2,6 +2,6 @@ package com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorSta
 
 data class ResultStats(
     val groupEvent: Boolean,
-    val users: List<UserEditorStat>?,
+    val users: List<UserFullEditorStat>?,
     val groups: List<GroupEditorStats>?
 )
