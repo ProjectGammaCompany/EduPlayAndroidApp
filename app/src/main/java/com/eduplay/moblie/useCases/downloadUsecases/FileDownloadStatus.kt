@@ -1,4 +1,4 @@
-package com.eduplay.moblie.useCases
+package com.eduplay.moblie.useCases.downloadUsecases
 
 enum class FileDownloadStatus {
     NOT_STARTED,

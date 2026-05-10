@@ -1,7 +1,7 @@
 package com.eduplay.moblie.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.eduplay.moblie.useCases.AppSettingsManager
+import com.eduplay.moblie.useCases.managers.AppSettingsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow

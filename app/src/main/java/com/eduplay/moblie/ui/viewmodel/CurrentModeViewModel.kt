@@ -2,7 +2,7 @@ package com.eduplay.moblie.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 

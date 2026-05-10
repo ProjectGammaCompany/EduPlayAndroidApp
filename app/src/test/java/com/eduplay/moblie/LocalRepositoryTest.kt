@@ -42,8 +42,8 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatus
 import com.eduplay.moblie.useCases.DateConverter
-import com.eduplay.moblie.useCases.OfflineModeManager
-import com.eduplay.moblie.useCases.TokenManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.TokenManager
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every

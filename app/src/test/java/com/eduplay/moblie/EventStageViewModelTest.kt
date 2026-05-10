@@ -12,9 +12,9 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.ui.viewmodel.EventStageViewmodel
 import com.eduplay.moblie.useCases.DateConverter
-import com.eduplay.moblie.useCases.FileDownloadStatus
-import com.eduplay.moblie.useCases.OfflineModeManager
-import com.eduplay.moblie.useCases.TaskDownloadUseCase
+import com.eduplay.moblie.useCases.downloadUsecases.FileDownloadStatus
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
+import com.eduplay.moblie.useCases.downloadUsecases.TaskDownloadUseCase
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every

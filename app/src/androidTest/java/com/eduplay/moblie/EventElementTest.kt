@@ -13,7 +13,7 @@ import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.EventElement
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderInterface
-import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.SpyK

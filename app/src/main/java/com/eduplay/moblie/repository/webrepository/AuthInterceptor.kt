@@ -1,7 +1,7 @@
 package com.eduplay.moblie.repository.webrepository
 
 import com.eduplay.moblie.exceptions.NotAuthorisedException
-import com.eduplay.moblie.useCases.TokenManager
+import com.eduplay.moblie.useCases.managers.TokenManager
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking

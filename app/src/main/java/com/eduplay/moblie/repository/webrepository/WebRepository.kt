@@ -37,7 +37,7 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.Notification
 import com.eduplay.moblie.repository.webrepository.responseTypes.PasswordUpdate
 import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatus
 import com.eduplay.moblie.useCases.DateConverter
-import com.eduplay.moblie.useCases.TokenManager
+import com.eduplay.moblie.useCases.managers.TokenManager
 import jakarta.inject.Inject
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody

@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil3.network.NetworkHeaders
 import com.eduplay.moblie.BuildConfig
-import com.eduplay.moblie.useCases.OfflineModeManager
-import com.eduplay.moblie.useCases.TokenManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.TokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers

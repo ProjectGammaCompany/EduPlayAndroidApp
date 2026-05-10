@@ -19,8 +19,8 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStat
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.UserEditorStat
 import com.eduplay.moblie.useCases.DateConverter
-import com.eduplay.moblie.useCases.DownloadStatusObserver
-import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.downloadUsecases.DownloadStatusObserver
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers

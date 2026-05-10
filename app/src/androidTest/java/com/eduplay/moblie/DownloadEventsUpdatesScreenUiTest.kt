@@ -13,9 +13,9 @@ import androidx.compose.ui.test.performClick
 import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.screens.DownloadedEventsUpdateScreen
-import com.eduplay.moblie.useCases.AppSettingsManager
-import com.eduplay.moblie.useCases.OfflineModeManager
-import com.eduplay.moblie.useCases.TokenManager
+import com.eduplay.moblie.useCases.managers.AppSettingsManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.TokenManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

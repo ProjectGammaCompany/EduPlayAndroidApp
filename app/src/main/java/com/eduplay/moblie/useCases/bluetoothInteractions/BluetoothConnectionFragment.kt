@@ -1,4 +1,4 @@
-package com.eduplay.moblie.useCases
+package com.eduplay.moblie.useCases.bluetoothInteractions
 
 import android.app.Activity.RESULT_OK
 import android.bluetooth.BluetoothAdapter

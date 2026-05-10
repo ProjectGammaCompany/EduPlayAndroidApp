@@ -18,12 +18,11 @@ import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import coil3.network.NetworkHeaders
 import com.eduplay.moblie.models.EventGroup
-import com.eduplay.moblie.models.EventTag
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.ui.screens.EventScreen
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
-import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.SpyK

@@ -16,10 +16,10 @@ import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.useCases.DateConverter
-import com.eduplay.moblie.useCases.FileDownloadStatus
-import com.eduplay.moblie.useCases.LocalFileOpener
-import com.eduplay.moblie.useCases.OfflineModeManager
-import com.eduplay.moblie.useCases.TaskDownloadUseCase
+import com.eduplay.moblie.useCases.downloadUsecases.FileDownloadStatus
+import com.eduplay.moblie.useCases.downloadUsecases.LocalFileOpener
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
+import com.eduplay.moblie.useCases.downloadUsecases.TaskDownloadUseCase
 import com.eduplay.moblie.utils.CoroutineContextProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject

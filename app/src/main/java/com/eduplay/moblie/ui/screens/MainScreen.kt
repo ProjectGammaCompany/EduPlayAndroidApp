@@ -49,7 +49,7 @@ import com.eduplay.moblie.ui.elements.TryAgainLaterToast
 import com.eduplay.moblie.ui.viewmodel.CurrentModeViewModel
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.MainScreenViewModel
-import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
 import kotlinx.coroutines.flow.Flow
 
 @Composable

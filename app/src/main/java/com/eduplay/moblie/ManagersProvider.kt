@@ -1,12 +1,12 @@
 package com.eduplay.moblie
 
 import android.content.Context
-import com.eduplay.moblie.useCases.AppSettingsManager
-import com.eduplay.moblie.useCases.AppSettingsManagerDataStore
-import com.eduplay.moblie.useCases.OfflineModeManager
-import com.eduplay.moblie.useCases.OfflineModeManagerDataStore
-import com.eduplay.moblie.useCases.TokenManager
-import com.eduplay.moblie.useCases.TokenManagerDataStore
+import com.eduplay.moblie.useCases.managers.AppSettingsManager
+import com.eduplay.moblie.useCases.managers.AppSettingsManagerDataStore
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManagerDataStore
+import com.eduplay.moblie.useCases.managers.TokenManager
+import com.eduplay.moblie.useCases.managers.TokenManagerDataStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

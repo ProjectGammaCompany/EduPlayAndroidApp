@@ -111,9 +111,9 @@ import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel.EditorStatColumns
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
-import com.eduplay.moblie.useCases.BluetoothConnectionFragment
+import com.eduplay.moblie.useCases.bluetoothInteractions.BluetoothConnectionFragment
 import com.eduplay.moblie.useCases.DateConverter
-import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.flow.Flow
 import java.io.File

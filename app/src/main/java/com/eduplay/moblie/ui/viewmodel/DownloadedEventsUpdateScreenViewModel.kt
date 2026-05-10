@@ -8,8 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.repository.EduRepository
-import com.eduplay.moblie.useCases.DownloadStatusObserver
-import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.downloadUsecases.DownloadStatusObserver
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch

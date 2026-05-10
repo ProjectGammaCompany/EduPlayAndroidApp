@@ -1,4 +1,4 @@
-package com.eduplay.moblie.useCases
+package com.eduplay.moblie.useCases.downloadUsecases
 
 import android.content.Context
 import android.content.Intent

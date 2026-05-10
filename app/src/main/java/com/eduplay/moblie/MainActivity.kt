@@ -38,8 +38,8 @@ import com.eduplay.moblie.ui.theme.EduPlayTheme
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.SplashViewModel
 import com.eduplay.moblie.ui.viewmodel.factories.BluetoothViewModelFactory
-import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
-import com.eduplay.moblie.useCases.EventDownloadService
+import com.eduplay.moblie.useCases.bluetoothInteractions.BluetoothDataExchangeUseCase
+import com.eduplay.moblie.useCases.downloadUsecases.EventDownloadService
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

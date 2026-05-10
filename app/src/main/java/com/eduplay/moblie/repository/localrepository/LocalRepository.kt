@@ -39,8 +39,8 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.repository.webrepository.responseTypes.UserEventStatus
 import com.eduplay.moblie.services.JwtDecoder
 import com.eduplay.moblie.useCases.DateConverter
-import com.eduplay.moblie.useCases.OfflineModeManager
-import com.eduplay.moblie.useCases.TokenManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.TokenManager
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject

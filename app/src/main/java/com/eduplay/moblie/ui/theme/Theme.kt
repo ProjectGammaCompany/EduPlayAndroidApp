@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.eduplay.moblie.ui.viewmodel.AppThemeViewModel
 import com.eduplay.moblie.ui.viewmodel.ThemeViewModel
-import com.eduplay.moblie.useCases.AppSettingsManager
+import com.eduplay.moblie.useCases.managers.AppSettingsManager
 
 private val DarkColorScheme = darkColorScheme(
     primary = Blue200,

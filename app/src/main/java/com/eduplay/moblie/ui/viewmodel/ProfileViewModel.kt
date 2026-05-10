@@ -14,8 +14,8 @@ import com.eduplay.moblie.exceptions.NotAuthorisedException
 import com.eduplay.moblie.models.NotificationData
 import com.eduplay.moblie.models.ProfileInfo
 import com.eduplay.moblie.repository.EduRepository
-import com.eduplay.moblie.useCases.AppSettingsManager
-import com.eduplay.moblie.useCases.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.AppSettingsManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers

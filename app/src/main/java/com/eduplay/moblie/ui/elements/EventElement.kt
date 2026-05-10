@@ -45,7 +45,7 @@ import com.eduplay.moblie.R
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderInterface
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
-import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
+import com.eduplay.moblie.useCases.managers.OfflineModeManager.AppModes
 import java.io.File
 
 @Composable

@@ -83,9 +83,8 @@ import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.NotificationElement
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
 import com.eduplay.moblie.ui.viewmodel.ProfileViewModel
-import com.eduplay.moblie.useCases.AppSettingsManager
-import com.eduplay.moblie.useCases.OfflineModeManager
-import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
+import com.eduplay.moblie.useCases.managers.AppSettingsManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager.AppModes
 import kotlinx.coroutines.flow.Flow
 
 @Composable

@@ -38,8 +38,8 @@ import com.eduplay.moblie.repository.webrepository.pagingSources.NotificationPag
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventStage
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
-import com.eduplay.moblie.useCases.OfflineModeManager
-import com.eduplay.moblie.useCases.OfflineModeManager.AppModes
+import com.eduplay.moblie.useCases.managers.OfflineModeManager
+import com.eduplay.moblie.useCases.managers.OfflineModeManager.AppModes
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

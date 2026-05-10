@@ -1,4 +1,4 @@
-package com.eduplay.moblie.useCases
+package com.eduplay.moblie.useCases.managers
 
 import android.content.Context
 import androidx.datastore.core.DataStore

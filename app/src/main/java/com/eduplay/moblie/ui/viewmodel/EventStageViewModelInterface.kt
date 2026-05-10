@@ -8,7 +8,7 @@ import com.eduplay.moblie.repository.responseTypes.Block
 import com.eduplay.moblie.repository.responseTypes.StageType
 import com.eduplay.moblie.repository.responseTypes.TaskAnswerStatus
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
-import com.eduplay.moblie.useCases.FileDownloadStatus
+import com.eduplay.moblie.useCases.downloadUsecases.FileDownloadStatus
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 

@@ -28,14 +28,12 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduplay.moblie.R
-import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
+import com.eduplay.moblie.useCases.bluetoothInteractions.BluetoothDataExchangeUseCase
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.net.ConnectException
 import java.util.UUID
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi

@@ -8,9 +8,9 @@ import com.eduplay.moblie.repository.webrepository.AuthInterceptor
 import com.eduplay.moblie.repository.webrepository.EventFilesApi
 import com.eduplay.moblie.repository.webrepository.RefreshInterceptor
 import com.eduplay.moblie.repository.webrepository.WebApi
-import com.eduplay.moblie.useCases.DownloadStatusObserver
-import com.eduplay.moblie.useCases.TaskDownloadUseCase
-import com.eduplay.moblie.useCases.TokenManager
+import com.eduplay.moblie.useCases.downloadUsecases.DownloadStatusObserver
+import com.eduplay.moblie.useCases.downloadUsecases.TaskDownloadUseCase
+import com.eduplay.moblie.useCases.managers.TokenManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

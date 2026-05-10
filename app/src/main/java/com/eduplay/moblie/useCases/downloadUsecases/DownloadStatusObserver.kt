@@ -1,4 +1,4 @@
-package com.eduplay.moblie.useCases
+package com.eduplay.moblie.useCases.downloadUsecases
 
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateSetOf

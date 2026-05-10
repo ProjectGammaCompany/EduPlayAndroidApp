@@ -21,7 +21,7 @@ import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.ui.screens.TaskScreen.TaskScreen
 import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
 import com.eduplay.moblie.useCases.DateConverter
-import com.eduplay.moblie.useCases.FileDownloadStatus
+import com.eduplay.moblie.useCases.downloadUsecases.FileDownloadStatus
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.SpyK

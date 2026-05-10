@@ -5,7 +5,7 @@ import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
-import com.eduplay.moblie.useCases.BluetoothDataExchangeUseCase
+import com.eduplay.moblie.useCases.bluetoothInteractions.BluetoothDataExchangeUseCase
 
 class BluetoothViewModelFactory(
     val adapter: State<BluetoothAdapter?>,

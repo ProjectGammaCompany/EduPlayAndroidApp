@@ -66,7 +66,7 @@ import com.eduplay.moblie.R
 import com.eduplay.moblie.models.TaskType
 import com.eduplay.moblie.repository.webrepository.responseTypes.Task
 import com.eduplay.moblie.ui.viewmodel.EventStageViewModelInterface
-import com.eduplay.moblie.useCases.FileDownloadStatus
+import com.eduplay.moblie.useCases.downloadUsecases.FileDownloadStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
