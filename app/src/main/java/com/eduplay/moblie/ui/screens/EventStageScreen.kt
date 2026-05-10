@@ -214,9 +214,9 @@ private fun ResultDialog(
                         }
                     }
                 } else {
-                    val points = playersResults.toList().sortedByDescending { it.second }
+                    // val points = playersResults.toList().sortedByDescending { it.second }
                     LazyColumn(Modifier.height(100.dp)) {
-                        items(points) {
+                        items(playersResults.toList().sortedByDescending { it.second }) {
                             Row(Modifier.padding(1.dp)) {
                                 Text(
                                     it.first,

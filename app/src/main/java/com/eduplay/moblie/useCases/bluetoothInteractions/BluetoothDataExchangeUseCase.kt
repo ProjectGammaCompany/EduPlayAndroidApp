@@ -11,11 +11,15 @@ import java.util.concurrent.ConcurrentMap
 
 class BluetoothDataExchangeUseCase() {
     private val RECIEVED_SCORE = 1001
+    private val handlers: ConcurrentMap<ConnectedThread, Handler> = ConcurrentHashMap()
+    private val sockets: ConcurrentMap<ConnectedThread, BluetoothSocket> = ConcurrentHashMap()
 
-    private inner class ConnectedThread(private val mmSocket: BluetoothSocket) : Thread() {
+    private inner class ConnectedThread(private val socket: BluetoothSocket) : Thread() {
 
-        private val mmInStream: InputStream = mmSocket.inputStream
-        private val mmBuffer: ByteArray = ByteArray(1024)
+        private val inStream: InputStream = socket.inputStream
+        private val buffer: ByteArray = ByteArray(1024)
+
+
 
         override fun run() {
             Log.e("SEND_TO_BLUETOOTH_SOCKET", "listening")
@@ -23,7 +27,7 @@ class BluetoothDataExchangeUseCase() {
 
             while (true) {
                 numBytes = try {
-                    mmInStream.read(mmBuffer)
+                    inStream.read(buffer)
                     Log.e("SEND_TO_BLUETOOTH_SOCKET", "read smth")
                 } catch (e: IOException) {
                     Log.i("SOCKET", "Input stream was disconnected", e)
@@ -36,10 +40,10 @@ class BluetoothDataExchangeUseCase() {
                         Log.e("SEND_TO_BLUETOOTH_SOCKET", "no callback")
                         return
                     }
-                    Log.e("SEND_TO_BLUETOOTH_SOCKET", "${byteArrayToInt(mmBuffer)}")
+                    Log.e("SEND_TO_BLUETOOTH_SOCKET", "${byteArrayToInt(buffer)}")
                     val message = callBack.obtainMessage()
                     message.what = RECIEVED_SCORE
-                    message.arg1 = byteArrayToInt(mmBuffer)
+                    message.arg1 = byteArrayToInt(buffer)
                     message.arg2 = 0
                     message.obj = sockets[this]
                     callBack.sendMessage(message)
@@ -55,9 +59,6 @@ class BluetoothDataExchangeUseCase() {
                 (buffer[1].toInt() and 0xff shl 8) or
                 (buffer[0].toInt() and 0xff)
     }
-
-    private val handlers: ConcurrentMap<ConnectedThread, Handler> = ConcurrentHashMap()
-    private val sockets: ConcurrentMap<ConnectedThread, BluetoothSocket> = ConcurrentHashMap()
 
 
     fun listenToSocket(socket: BluetoothSocket, handler: Handler) {

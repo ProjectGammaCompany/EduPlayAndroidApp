@@ -64,7 +64,7 @@ class BluetoothViewModel(
         onScanFailed: () -> Unit
     ) {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        needLocation.value = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        needLocation.value = !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         if (adapter.value == null) {
             onScanFailed()
             return
@@ -127,6 +127,7 @@ class BluetoothViewModel(
                     foundDevices.put(device.address!!, deviceName)
             }
         }
+        devicesScore[context.getString(R.string.you)] = 0
         startServerSocket()
         scanner.startScan(filters, scanSettings, scanCallback)
         advertise()
@@ -277,6 +278,7 @@ class BluetoothViewModel(
                         bluetoothSocket.connect()
                         connectedDevices[device] = bluetoothSocket
                         devicesConnectionStatus[device.address] = true
+                        devicesScore[device.name] = 0
                         listenToSocket(bluetoothSocket)
                         connected = true
                     } catch (e: IOException) {
@@ -306,8 +308,8 @@ class BluetoothViewModel(
                 when (msg.what) {
                     RECIEVED_SCORE -> {
                         try {
-                            devicesScore[(msg.obj as BluetoothSocket).remoteDevice.name] =
-                                msg.arg1
+                            Log.d("SCORES", "${(msg.obj as BluetoothSocket).remoteDevice.name} ${msg.arg1} ${devicesScore[(msg.obj as BluetoothSocket).remoteDevice.name]}")
+                            devicesScore[(msg.obj as BluetoothSocket).remoteDevice.name] = msg.arg1
                         } catch (e: SecurityException) {
                             Log.e("SCORES", "cant display scores without permissions", e)
                         }
@@ -323,13 +325,22 @@ class BluetoothViewModel(
 
 
     fun sendResultsToSockets(points: Int, context: Context) {
-        devicesScore[context.getString(R.string.you)] = points
+        devicesScore[context.getString(R.string.you)] = points +
+                (devicesScore[context.getString(R.string.you)] ?: 0)
         for (socket in connectedDevices.values)
-            exchangeUseCase.writePointsToSocket(points, socket)
+            exchangeUseCase.writePointsToSocket(devicesScore[context.getString(R.string.you)] ?: 0, socket)
+    }
+
+    fun clearResults() {
+        devicesScore.keys.forEach {
+            devicesScore[it] = 0
+        }
     }
 
     fun stopAllSocketConnections() {
         devicesConnectionStatus.clear()
+        foundDevices.clear()
+        devicesScore.clear()
         for (socket in connectedDevices.values) {
             exchangeUseCase.cancel(socket)
         }

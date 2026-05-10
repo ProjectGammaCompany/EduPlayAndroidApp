@@ -107,7 +107,7 @@ fun EventResultScreen(
     ) {
         ResultTopBar(onExitScreen)
 
-        Column(
+        LazyColumn (
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .background(color = colorScheme.surface)
@@ -116,28 +116,32 @@ fun EventResultScreen(
                 .weight(1f)
         ) {
 
-
-            Text(
-                text = stringResource(R.string.congratulation),
-                style = typography.headlineMedium
-                    .copy(color = colorScheme.onBackground),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxWidth()
-            )
-            if (users.isNotEmpty()) {
-                UserList(users)
-            } else if (groups.isNotEmpty()) {
-                LazyColumn {
-                    items(groups.toList()) { group ->
-                        Text(
-                            text = group.name,
-                            style = typography.titleLarge,
-                            modifier = Modifier.testTag("groupName${group.id}")
-                        )
-                        UserList(group.users)
-                        HorizontalDivider(color = colorScheme.secondary)
+            item {
+                Text(
+                    text = stringResource(R.string.congratulation),
+                    style = typography.headlineMedium
+                        .copy(color = colorScheme.onBackground),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                )
+            }
+            item {
+                if (users.isNotEmpty()) {
+                    UserList(users)
+                } else if (groups.isNotEmpty()) {
+                    Column {
+                        groups.forEach { group ->
+                        //items(groups.toList()) { group ->
+                            Text(
+                                text = group.name,
+                                style = typography.titleLarge,
+                                modifier = Modifier.testTag("groupName${group.id}")
+                            )
+                            UserList(group.users)
+                            HorizontalDivider(color = colorScheme.secondary)
+                        }
                     }
                 }
             }

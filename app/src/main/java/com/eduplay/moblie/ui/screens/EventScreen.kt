@@ -267,6 +267,7 @@ fun EventScreen(
         canShowConnectionList = false
     }
     val proceedWithBluetooth = {
+        bluetoothViewModel.clearResults()
         onStopShowingDeviceList()
         navController.navigate("play_event/${eventId}")
     }

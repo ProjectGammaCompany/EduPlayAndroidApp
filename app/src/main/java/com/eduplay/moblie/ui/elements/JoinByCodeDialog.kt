@@ -3,6 +3,7 @@ package com.eduplay.moblie.ui.elements
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -36,16 +37,20 @@ fun JoinByCodeDialog(
     }
 
     val onGetFields = { code: String -> viewModel.getFields(code) }
+    val resetDialog = {
+        viewModel.proceedToPassword.value = false
+        onDismissRequest()
+    }
 
     if (!viewModel.proceedToPassword.value) {
         CodeDialog(
-            onDismissRequest,
+            resetDialog,
             onGetFields,
             viewModel.badCode
         )
     } else {
         PasswordDialog(
-            onDismissRequest,
+            resetDialog,
             viewModel.showGroupFields,
             viewModel.badPasswords,
             viewModel::validatePasswords
@@ -80,6 +85,7 @@ fun CodeDialog(
             )
         },
         onDismissRequest = {
+            codeState.clearText()
             onDismissRequest()
         },
         confirmButton = {
@@ -87,6 +93,7 @@ fun CodeDialog(
                 onClick = { onGetFields(codeState.text.toString()) },
                 modifier = Modifier.padding(8.dp),
             ) {
+
                 Text(stringResource(R.string.proceed))
             }
         },
@@ -182,16 +189,5 @@ fun PasswordDialog(
                 Text(stringResource(R.string.close))
             }
         }
-    )
-}
-
-@Preview
-@Composable
-fun d() {
-    PasswordDialog(
-        {},
-        remember { mutableStateOf(false) },
-        remember { mutableStateOf(false) },
-        { _, _, _ -> }
     )
 }
