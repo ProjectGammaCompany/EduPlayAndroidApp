@@ -24,3 +24,12 @@ val Purpule10 = Color(0xFF9B79E7)
 val Purpul20 = Color(0xFFA38DBB)
 
 val transparent = Color(0x00FFFFFF)
+
+val green600 = Color(0xFF43A047)
+val green300 = Color(0xFF81C784)
+
+val orange600 = Color(0xFFFFB300)
+val orange300 = Color(0xFFFFD54F)
+
+val red600 = Color(0xFFF4511E)
+val red300 =Color(0xFFFF8A65)

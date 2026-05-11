@@ -98,6 +98,7 @@ fun MainScreen(
         JoinByCodeDialog({ joinByCode = false }, navController)
     }
 
+
     val currentMode =
         currentModeViewModel.currentMode.value.collectAsState(OfflineModeManager.AppModes.ONLINE)
 

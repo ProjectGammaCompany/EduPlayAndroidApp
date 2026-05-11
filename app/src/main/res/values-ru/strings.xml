@@ -152,4 +152,10 @@
     <string name="no_results_yet">Результатов пока нет.</string>
     <string name="expires_at">"Истекает в: "</string>
     <string name="copy_join_code">Скопировать код события</string>
+    <string name="expand">Раскрыть</string>
+    <string name="collapse">свернуть</string>
+    <string name="task_type">тип задания</string>
+    <string name="answer_status">Статус ответа</string>
+    <string name="correct_answer">"Правильный ответ: "</string>
+    <string name="player_answer">"Ответ игрока: "</string>
 </resources>

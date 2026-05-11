@@ -181,7 +181,7 @@ class WebRepository @Inject constructor(
             return EventOwnerInfo(
                 title = body.title,
                 description = body.description,
-                tags = body.tags.map { tags[it] ?: "" },
+                tags = body.tags?.map { tags[it] ?: "" } ?: listOf(),
                 cover = body.cover,
                 startDate = body.startDate,
                 endDate = body.endDate,
@@ -338,7 +338,7 @@ class WebRepository @Inject constructor(
     suspend fun getRequiredJoinFields(joinCode: String): RequiredJoinFields {
         val response = api.getFieldsToJoinEvent(joinCode)
         val body = response.body()
-        Log.d("postRating", response.code().toString() + response.raw())
+        Log.d("get join code", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         }
@@ -354,7 +354,7 @@ class WebRepository @Inject constructor(
     ): EventIdResponse {
         val response = api.postPasswords(joinCode, eventPasswords)
         val body = response.body()
-        Log.d("postRating", response.code().toString() + response.raw())
+        Log.d("postPasswords", response.code().toString() + response.raw())
         if (response.isSuccessful && body != null) {
             return body
         }

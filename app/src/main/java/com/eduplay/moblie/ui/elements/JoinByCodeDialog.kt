@@ -35,6 +35,9 @@ fun JoinByCodeDialog(
         Log.d("main_screen", "unauthorised")
         AuthScreenNavigator(navController)
     }
+    if (viewModel.eventId.value != null) {
+        navController.navigate("event_screen/${viewModel.eventId.value}")
+    }
 
     val onGetFields = { code: String -> viewModel.getFields(code) }
     val resetDialog = {

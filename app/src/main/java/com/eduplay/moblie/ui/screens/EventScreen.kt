@@ -490,7 +490,8 @@ fun EventScreen(
                     joinCode,
                     groupEvent,
                     groupEditorStats,
-                    sortEventsByColumn
+                    sortEventsByColumn,
+                    eventId
                 )
             } else {
                 GeneralUserBody(
@@ -1115,7 +1116,8 @@ private fun EventCreatorBody(
     joinCode: State<JoinCodeInfo>,
     groupEvent: State<Boolean>,
     groupEditorStats: State<ResultStats>,
-    sortEventsByColumn: (EditorStatColumns, Boolean) -> Unit
+    sortEventsByColumn: (EditorStatColumns, Boolean) -> Unit,
+    eventId: String
 ) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
@@ -1150,7 +1152,7 @@ private fun EventCreatorBody(
 
     when (selectedTabIdx) {
         0 -> GeneralInfo(tags, info, description)
-        1 -> StatisticsInfo(groupEditorStats, sortEventsByColumn)
+        1 -> StatisticsInfo(groupEditorStats, sortEventsByColumn, eventId)
         2 -> PrivacySettings(password, groups, joinCode, privateEvent, groupEvent)
         else -> Box {}
     }

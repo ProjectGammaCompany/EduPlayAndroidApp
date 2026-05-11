@@ -151,4 +151,10 @@
     <string name="no_results_yet">There are no results yet.</string>
     <string name="expires_at">Expires at:</string>
     <string name="copy_join_code">Copy join code</string>
+    <string name="expand">expand</string>
+    <string name="collapse">collapse</string>
+    <string name="task_type">Task type</string>
+    <string name="answer_status">Answer status</string>
+    <string name="correct_answer">"Correct answer: "</string>
+    <string name="player_answer">"Palyer's answer: "</string>
 </resources>
