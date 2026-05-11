@@ -507,35 +507,39 @@ private fun PersonalStats(
     val options = optionsFlow.collectAsState()
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
-            IconButton(onGoBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.go_back)
-                )
-            }
-        }
-        item {
-            Column {
+            Row {
+                IconButton(onGoBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.go_back)
+                    )
+                }
+
                 Text(
                     text = userName.value,
                     style = typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.primary,
                     ),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(vertical = 3.dp)
+                        .weight(1f)
+                )
+            }
+        }
+        item {
+            if (groupName.value != null) {
+                Text(
+                    text = "${stringResource(R.string.group)}: ${groupName.value}",
+                    style = typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary,
+                    ),
                     modifier = Modifier.padding(vertical = 3.dp)
                 )
-
-                if (groupName.value != null) {
-                    Text(
-                        text = "${stringResource(R.string.group)}: ${groupName.value}",
-                        style = typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                        ),
-                        modifier = Modifier.padding(vertical = 3.dp)
-                    )
-                }
             }
+
         }
         items(blocks.value.blocks) { block ->
             Column(
@@ -546,7 +550,7 @@ private fun PersonalStats(
                     .padding(3.dp)
             ) {
                 // block title
-                var blockExpanded by remember { mutableStateOf(true) }
+                var blockExpanded by remember { mutableStateOf(false) }
                 Row {
                     Text(
                         text = block.name,
@@ -594,48 +598,66 @@ private fun TaskAnswerStat(task: SingleUserStat.SingleUserTask, options: List<Di
         Pair(TaskAnswerStatus.PARTIALLY, colorScheme.warning),
         Pair(TaskAnswerStatus.INCORRECT, colorScheme.danger),
     )
+    var taskExpanded by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp)
-        //.border(1.dp, color = colorScheme.outline, RoundedCornerShape(10.dp))
+            .border(1.dp, color = colorScheme.outline, RoundedCornerShape(10.dp))
+            .padding(5.dp)
     ) {
 
-        Text(
-            task.name,
-            style = typography.bodyLarge.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = colorScheme.onBackground,
-            )
-        )
-        val textColor = colorScheme.onBackground
-        val statusText = buildAnnotatedString {
-            withStyle(
-                SpanStyle(
-                    color = textColor
+        Row {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    task.name,
+                    style = typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = colorScheme.onBackground,
+                    )
                 )
-            ) {
-                append(context.getText(R.string.answer_status))
-                append(": ")
-            }
+                val textColor = colorScheme.onBackground
+                val statusText = buildAnnotatedString {
+                    withStyle(
+                        SpanStyle(
+                            color = textColor
+                        )
+                    ) {
+                        append(context.getText(R.string.answer_status))
+                        append(": ")
+                    }
 
-            withStyle(
-                SpanStyle(
-                    color = statusColors[TaskAnswerStatus.valueByStatus(task.status)]!!
-                )
+                    withStyle(
+                        SpanStyle(
+                            color = statusColors[TaskAnswerStatus.valueByStatus(task.status)]!!
+                        )
+                    ) {
+                        append(context.getText(statusStrings[TaskAnswerStatus.valueByStatus(task.status)]!!))
+                    }
+                }
+
+                Text(statusText)
+            }
+            IconButton(
+                onClick = { taskExpanded = !taskExpanded },
+                modifier = Modifier.align(Alignment.CenterVertically)
             ) {
-                append(context.getText(statusStrings[TaskAnswerStatus.valueByStatus(task.status)]!!))
+                if (!taskExpanded) {
+                    Icon(Icons.Default.ArrowDropDown, stringResource(R.string.collapse))
+                } else {
+                    Icon(Icons.Default.ArrowDropUp, stringResource(R.string.expand))
+                }
             }
         }
 
-        Text(statusText)
-
-        when (TaskType.valueOf(task.type)) {
-            TaskType.INFO -> {}
-            TaskType.SINGLE_CHOICE -> OptionList(options)
-            TaskType.MULTIPLE_CHOICE -> OptionList(options)
-            TaskType.TEXT -> TextAnswer(task.options, task.userAnswers)
-            TaskType.QR -> TextAnswer(task.options, task.userAnswers)
+        if (taskExpanded) {
+            when (TaskType.valueOf(task.type)) {
+                TaskType.INFO -> {}
+                TaskType.SINGLE_CHOICE -> OptionList(options)
+                TaskType.MULTIPLE_CHOICE -> OptionList(options)
+                TaskType.TEXT -> TextAnswer(task.options, task.userAnswers)
+                TaskType.QR -> TextAnswer(task.options, task.userAnswers)
+            }
         }
     }
 }
