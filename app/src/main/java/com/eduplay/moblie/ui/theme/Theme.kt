@@ -25,7 +25,8 @@ private val DarkColorScheme = darkColorScheme(
     primaryContainer = LightBlue200,
     onBackground = LightBlue500,
     secondaryContainer = LightBlue500,
-    outline = LightBlue100
+    outline = LightBlue100,
+    onPrimaryContainer = LightBlue500
 )
 
 private val LightColorScheme = lightColorScheme(

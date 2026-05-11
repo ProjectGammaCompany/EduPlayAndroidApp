@@ -1,10 +1,12 @@
 package com.eduplay.moblie.ui.elements
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -57,7 +59,7 @@ fun BottomNavBar(
         NavigationBar(
             windowInsets = NavigationBarDefaults.windowInsets,
             containerColor = colorScheme.primaryContainer,
-            contentColor = colorScheme.onPrimaryContainer
+            contentColor = colorScheme.onPrimaryContainer,
         ) {
             Destination.entries.forEachIndexed { index, destination ->
                 NavigationBarItem(
@@ -80,10 +82,19 @@ fun BottomNavBar(
                                 else
                                     destination.icon
                             ),
-                            contentDescription = stringResource(destination.contentDescription)
+                            contentDescription = stringResource(destination.contentDescription),
                         )
                     },
-                    label = { Text(stringResource(destination.contentDescription)) }
+                    label = { Text(stringResource(destination.contentDescription)) },
+                    colors = NavigationBarItemColors(
+                        selectedIconColor = colorScheme.primary,
+                        selectedTextColor = colorScheme.primary,
+                        selectedIndicatorColor = colorScheme.secondaryContainer,
+                        unselectedIconColor = colorScheme.onPrimaryContainer,
+                        unselectedTextColor = colorScheme.onPrimaryContainer,
+                        disabledIconColor = colorScheme.onPrimaryContainer,
+                        disabledTextColor = colorScheme.onPrimaryContainer
+                    )
                 )
             }
         }
