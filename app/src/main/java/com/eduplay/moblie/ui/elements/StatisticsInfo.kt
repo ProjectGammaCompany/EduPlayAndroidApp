@@ -575,11 +575,33 @@ private fun PersonalStats(
                 }
                 if (blockExpanded) {
                     block.tasks.forEach { task ->
-                        TaskAnswerStat(task, options.value[task.id])
+                        if (task.id.isNotBlank()) {
+                            TaskAnswerStat(task, options.value[task.id])
+                        } else {
+                            EmptyTaskAnswerStat()
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun EmptyTaskAnswerStat() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)
+            .border(1.dp, color = colorScheme.outline, RoundedCornerShape(10.dp))
+            .padding(5.dp)
+    ) {
+        Text(
+            stringResource(R.string.no_results),
+            style = typography.bodyLarge.copy(
+                color = colorScheme.onBackground,
+            )
+        )
     }
 }
 

@@ -29,8 +29,9 @@ class SingleUserStatViewModel @Inject constructor(private val repository: EduRep
                 val taskOptions = mutableMapOf<String,  List<DisplayOption>>()
                 for (block in result.blocks) {
                     for (task in block.tasks) {
+                        if (task.id.isBlank()) continue
                         val answerOptions = mutableListOf<DisplayOption>()
-                        val userChoices = task.userAnswers.toSet()
+                        val userChoices = task.userAnswers?.toSet() ?: setOf()
                         for (option in task.options) {
                             answerOptions.add(
                                 DisplayOption(

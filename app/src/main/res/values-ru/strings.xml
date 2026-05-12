@@ -158,4 +158,5 @@
     <string name="answer_status">Статус ответа</string>
     <string name="correct_answer">"Правильный ответ: "</string>
     <string name="player_answer">"Ответ игрока: "</string>
+    <string name="no_results">Нет результатов</string>
 </resources>

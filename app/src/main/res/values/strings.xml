@@ -157,4 +157,5 @@
     <string name="answer_status">Answer status</string>
     <string name="correct_answer">"Correct answer: "</string>
     <string name="player_answer">"Palyer's answer: "</string>
+    <string name="no_results">No results recieved</string>
 </resources>
