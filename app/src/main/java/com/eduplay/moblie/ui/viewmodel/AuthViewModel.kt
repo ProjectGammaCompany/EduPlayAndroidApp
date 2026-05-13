@@ -37,7 +37,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
 //                    password.any { it.isLetter() } &&
 //                    password.any { it.isLowerCase() } &&
 //                    password.any { it.isUpperCase() }
-                    )
+                    ) && authResult.value == AuthResult.WRONG_PASSWORD
         } else {
             return false
         }
@@ -69,11 +69,13 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
         password: String,
         repeatPassword: String,
     ) {
-        if (!emailHasErrors(email) && !passwordHasErrors(password)) {
+        passwordsAreNotTheSame.value = false
+        if (!emailHasErrors(email) && !passwordHasErrors(password) && password == repeatPassword) {
             viewModelScope.launch(Dispatchers.IO) {
                 try {
                     authResult.value = repository
                         .register(RegistrationData(email, password, repeatPassword))
+
                 } catch (e: ConnectException) {
                     Log.d("AUTHORISATION", e.message.toString())
                     noInternetConnection.value = true
@@ -83,7 +85,7 @@ class AuthViewModel @Inject constructor(private val repository: EduRepository) :
                 }
             }
         } else if (password != repeatPassword) {
-            passwordsAreNotTheSame.value = false
+            passwordsAreNotTheSame.value = true
         } else if (emailHasErrors(email)) {
             authResult.value = AuthResult.INCORRECT_EMAIL
         } else if (passwordHasErrors(password)) {

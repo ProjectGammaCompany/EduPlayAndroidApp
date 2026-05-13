@@ -39,6 +39,7 @@ class JoinByCodeViewModel @Inject constructor(private val repository: EduReposit
                 badCode.value = true
             } catch (e: Exception) {
                 Log.e("JOIN_CODE", e.message ?: "", e)
+                badCode.value = true
             }
         }
     }

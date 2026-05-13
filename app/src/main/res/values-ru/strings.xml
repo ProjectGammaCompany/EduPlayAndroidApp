@@ -159,4 +159,6 @@
     <string name="correct_answer">"Правильный ответ: "</string>
     <string name="player_answer">"Ответ игрока: "</string>
     <string name="no_results">Нет результатов</string>
+    <string name="user_with_email_exists">Уже существует пользователь с такой электронной почтой</string>
+    <string name="password_len">Парольдолжен содержать минимум 5 символов</string>
 </resources>

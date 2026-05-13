@@ -158,4 +158,6 @@
     <string name="correct_answer">"Correct answer: "</string>
     <string name="player_answer">"Palyer's answer: "</string>
     <string name="no_results">No results recieved</string>
+    <string name="user_with_email_exists">There is already a user with such email</string>
+    <string name="password_len">Password must be at least 5 characters long</string>
 </resources>

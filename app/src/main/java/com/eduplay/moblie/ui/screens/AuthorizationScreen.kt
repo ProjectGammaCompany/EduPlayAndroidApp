@@ -62,6 +62,7 @@ import com.eduplay.moblie.R
 import com.eduplay.moblie.models.AuthResult
 import com.eduplay.moblie.ui.elements.ForgotPasswordForm
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
+import com.eduplay.moblie.ui.theme.danger
 import com.eduplay.moblie.ui.viewmodel.AuthViewModel
 import com.eduplay.moblie.ui.viewmodel.AuthViewModel.ForgotPasswordStatus
 import com.eduplay.moblie.ui.viewmodel.AuthViewModel.ForgotPasswordStatus.NONE
@@ -291,8 +292,8 @@ private fun LoginForm(
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             val image = if (passwordVisible)
-                Icons.Filled.Visibility
-            else Icons.Filled.VisibilityOff
+                Icons.Filled.VisibilityOff
+            else Icons.Filled.Visibility
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                 Icon(
                     imageVector = image, if (passwordVisible)
@@ -439,8 +440,8 @@ private fun RegistrationForm(
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             val image = if (passwordVisible)
-                Icons.Filled.Visibility
-            else Icons.Filled.VisibilityOff
+                Icons.Filled.VisibilityOff
+            else Icons.Filled.Visibility
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                 Icon(
                     imageVector = image, if (passwordVisible)
@@ -481,8 +482,8 @@ private fun RegistrationForm(
         visualTransformation = if (repeatPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             val image = if (repeatPasswordVisible)
-                Icons.Filled.Visibility
-            else Icons.Filled.VisibilityOff
+                Icons.Filled.VisibilityOff
+            else Icons.Filled.Visibility
             IconButton(onClick = { repeatPasswordVisible = !repeatPasswordVisible }) {
                 Icon(
                     imageVector = image, if (repeatPasswordVisible)
@@ -508,6 +509,21 @@ private fun RegistrationForm(
             .padding(bottom = 5.dp)
             .testTag("registration_repeat_password_field")
     )
+    if (authResult.value == AuthResult.USER_EXISTS) {
+        Text(
+            stringResource(R.string.user_with_email_exists),
+            style = typography.labelSmall.copy(colorScheme.danger),
+            modifier = Modifier.padding(horizontal = 5.dp)
+
+        )
+    }
+    if (authResult.value == AuthResult.UNSAFE_PASSWORD) {
+        Text(
+            stringResource(R.string.password_len),
+            style = typography.labelSmall.copy(colorScheme.danger),
+            modifier = Modifier.padding(horizontal = 5.dp)
+        )
+    }
 
     var agreed by remember { mutableStateOf(false) }
     val linkColor = colorScheme.primary
