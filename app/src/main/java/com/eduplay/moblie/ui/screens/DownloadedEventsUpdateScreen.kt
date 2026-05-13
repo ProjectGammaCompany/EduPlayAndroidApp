@@ -112,7 +112,9 @@ fun DownloadedEventsUpdateScreen(
                     Row(Modifier.fillMaxSize()) {
                         IconButton(
                             onClick = { onChooseEvent(it.id) },
-                            modifier = Modifier.testTag("download_btn_${it.id}")
+                            modifier = Modifier
+                                .testTag("download_btn_${it.id}")
+                                .align(Alignment.CenterVertically)
                         ) {
                             Icon(
                                 ImageVector.vectorResource(R.drawable.download),
@@ -121,7 +123,9 @@ fun DownloadedEventsUpdateScreen(
                         }
                         IconButton(
                             onClick = { onDeleteEvent(it.id) },
-                            modifier = Modifier.testTag("delete_btn_${it.id}")
+                            modifier = Modifier
+                                .testTag("delete_btn_${it.id}")
+                                .align(Alignment.CenterVertically)
                         ) {
                             Icon(
                                 ImageVector.vectorResource(R.drawable.delete),
