@@ -723,9 +723,9 @@ private fun OptionList(options: List<DisplayOption>?) {
 }
 
 
-@Composable
-@Preview
-fun PersonalStatsPreview() {
+//@Composable
+//@Preview
+//fun PersonalStatsPreview() {
 //    val tasks = SingleUserStat.SingleUserTask(
 //        id = "1",
 //        name = "task1",
@@ -748,4 +748,4 @@ fun PersonalStatsPreview() {
 //    PersonalStats(
 //        MutableStateFlow(blocks).asStateFlow()
 //    )
-}
+//}
