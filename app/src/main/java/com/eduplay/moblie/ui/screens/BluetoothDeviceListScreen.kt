@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -41,8 +42,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.eduplay.moblie.R
+import com.eduplay.moblie.ui.theme.danger
 
 @Composable
 fun BluetoothDeviceListScreen(
@@ -51,7 +54,10 @@ fun BluetoothDeviceListScreen(
     devicesConnectionStatus: SnapshotStateMap<String, Boolean>,
     onProceed: () -> Unit,
     innerPaddingValues: PaddingValues,
-    onReturn: () -> Unit
+    onReturn: () -> Unit,
+    needLocation: State<Boolean>,
+    deviceNameTooLong: State<Boolean>,
+    onScanAgain: () -> Unit
 ) {
     val context = LocalContext.current
     val failedDevices = remember { mutableStateListOf<String?>() }
@@ -106,6 +112,40 @@ fun BluetoothDeviceListScreen(
                 .align(Alignment.CenterHorizontally)
                 .padding(10.dp)
         )
+        if (needLocation.value) {
+            Text(
+                text = stringResource(R.string.ble_need_location),
+                style = typography.bodyMedium.copy(
+                    color = colorScheme.danger,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+            )
+        }
+        if (deviceNameTooLong.value) {
+            Text(
+                text = stringResource(R.string.ble_device_name_too_long),
+                style = typography.bodyMedium.copy(
+                    color = colorScheme.danger,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+            )
+        }
+        if (needLocation.value || deviceNameTooLong.value) {
+            TextButton(
+                onScanAgain,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+            ) {
+                Text(stringResource(R.string.scan_again))
+            }
+        }
         val infiniteTransition = rememberInfiniteTransition()
         val angle by infiniteTransition.animateFloat(
             initialValue = 0F, targetValue = 360F, animationSpec = infiniteRepeatable(
@@ -135,9 +175,11 @@ fun BluetoothDeviceListScreen(
             )
         }
 
-        LazyColumn(Modifier
-            .weight(4f)
-            .testTag("bluetooth_device_list")) {
+        LazyColumn(
+            Modifier
+                .weight(4f)
+                .testTag("bluetooth_device_list")
+        ) {
             items(foundDevices.entries.toList()) {
                 TextButton(
                     onClick = {

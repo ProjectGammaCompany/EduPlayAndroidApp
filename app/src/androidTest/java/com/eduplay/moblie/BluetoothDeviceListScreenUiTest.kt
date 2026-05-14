@@ -2,7 +2,9 @@ package com.eduplay.moblie
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -24,6 +26,8 @@ class BluetoothDeviceListScreenUiTest {
     var onProceed: () -> Unit = {}
     var innerPaddingValues = PaddingValues()
     var onReturn: () -> Unit = {}
+    val needLocation: State<Boolean> = mutableStateOf(false)
+    val deviceNameTooLong: State<Boolean> = mutableStateOf(false)
 
 
 
@@ -35,7 +39,10 @@ class BluetoothDeviceListScreenUiTest {
             devicesConnectionStatus = devicesConnectionStatus,
             onProceed = onProceed,
             innerPaddingValues = innerPaddingValues,
-            onReturn = onReturn
+            onReturn = onReturn,
+            needLocation = needLocation,
+            deviceNameTooLong = deviceNameTooLong,
+            onScanAgain = {}
         )
     }
 

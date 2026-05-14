@@ -161,4 +161,7 @@
     <string name="no_results">Нет результатов</string>
     <string name="user_with_email_exists">Уже существует пользователь с такой электронной почтой</string>
     <string name="password_len">Парольдолжен содержать минимум 5 символов</string>
+    <string name="ble_need_location">Убедитесь что геолокация включена.</string>
+    <string name="ble_device_name_too_long">Возможно имя вашего устройства слишком длинное. Убедитесь что оно не длиннее 10 символов.</string>
+    <string name="scan_again">Повторить поиск устройств</string>
 </resources>

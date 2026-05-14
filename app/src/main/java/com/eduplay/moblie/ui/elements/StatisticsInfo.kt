@@ -90,7 +90,9 @@ fun StatisticsInfo(
     stats: State<ResultStats>,
     sortEventStatsByColumn: (EditorStatColumns, Boolean) -> Unit,
     eventId: String,
-    singleStatViewmodel: SingleUserStatViewModel = hiltViewModel()
+    getStat: (String, String)->Unit,
+    blocks: StateFlow<SingleUserStat>,
+    options: StateFlow<Map<String, List<SingleUserStatViewModel.DisplayOption>>>
 ) {
     var showPersonalStats by remember { mutableStateOf(false) }
     Column(
@@ -102,7 +104,7 @@ fun StatisticsInfo(
         val currentUserName = remember { mutableStateOf("") }
         val currentUserGroup = remember { mutableStateOf<String?>(null) }
         val onUserClick = { userId: String, userName: String, group: String? ->
-            singleStatViewmodel.getStat(eventId, userId)
+            getStat(eventId, userId)
             currentUserName.value = userName
             currentUserGroup.value = group
             showPersonalStats = true
@@ -111,8 +113,8 @@ fun StatisticsInfo(
             AllUserResults(stats, sortEventStatsByColumn, onUserClick)
         } else {
             PersonalStats(
-                singleStatViewmodel.blocks,
-                singleStatViewmodel.options,
+                blocks,
+                options,
                 currentUserName,
                 currentUserGroup,
                 { showPersonalStats = false }

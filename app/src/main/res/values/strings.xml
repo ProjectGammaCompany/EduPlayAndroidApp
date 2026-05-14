@@ -160,4 +160,7 @@
     <string name="no_results">No results recieved</string>
     <string name="user_with_email_exists">There is already a user with such email</string>
     <string name="password_len">Password must be at least 5 characters long</string>
+    <string name="ble_need_location">Make shure Location is turned on.</string>
+    <string name="ble_device_name_too_long">Name of your device might be too long, it should be no longer than 10 characters.</string>
+    <string name="scan_again">Scan again</string>
 </resources>

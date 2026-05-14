@@ -38,8 +38,6 @@ import java.util.UUID
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
-//TODO("слишком длинное название устройства")
-//TODO("отображение для включите локацию")
 @OptIn(ExperimentalAtomicApi::class, ExperimentalPermissionsApi::class)
 class BluetoothViewModel(
     private val adapter: State<BluetoothAdapter?>,
@@ -58,6 +56,7 @@ class BluetoothViewModel(
     val devicesScore = mutableStateMapOf<String, Int>()
     var askForPermissions = mutableStateOf(false)
     val needLocation = mutableStateOf(false)
+    val deviceNameTooLong = mutableStateOf(false)
 
     fun discoverDevices(
         context: Context,
@@ -141,6 +140,7 @@ class BluetoothViewModel(
 
         val scanCallback: ScanCallback = object : ScanCallback() {
         }
+        isScanning.value = false
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.BLUETOOTH_SCAN
@@ -150,6 +150,7 @@ class BluetoothViewModel(
         }
         scanner.stopScan(scanCallback)
         stopSocketConnection()
+        stopAdvertising()
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
@@ -174,6 +175,7 @@ class BluetoothViewModel(
             override fun onStartFailure(errorCode: Int) {
                 super.onStartFailure(errorCode)
                 Log.e("advert", "cant start $errorCode")
+                deviceNameTooLong.value = true
             }
 
             override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
@@ -183,6 +185,23 @@ class BluetoothViewModel(
         }
 
         advertiser?.startAdvertising(settings, data, scanResponse, callback)
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
+    private fun stopAdvertising() {
+        val callback: AdvertiseCallback = object : AdvertiseCallback() {
+            override fun onStartFailure(errorCode: Int) {
+                super.onStartFailure(errorCode)
+                Log.e("advert", "cant stop $errorCode")
+                deviceNameTooLong.value = true
+            }
+
+            override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
+                super.onStartSuccess(settingsInEffect)
+                Log.e("advert", "stop")
+            }
+        }
+        adapter.value?.bluetoothLeAdvertiser?.stopAdvertising(callback)
     }
 
     private var serverSocket: BluetoothServerSocket? = null
@@ -226,6 +245,7 @@ class BluetoothViewModel(
 
     fun stopSocketConnection() {
         isReceivingConnections.store(false)
+        stopAdvertising()
 //        serverSocket?.close()
 //        serverSocket = null
     }

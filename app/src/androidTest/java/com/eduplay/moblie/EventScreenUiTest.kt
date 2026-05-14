@@ -20,13 +20,17 @@ import coil3.network.NetworkHeaders
 import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.SingleUserStat
 import com.eduplay.moblie.ui.screens.EventScreen
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
+import com.eduplay.moblie.ui.viewmodel.SingleUserStatViewModel
 import com.eduplay.moblie.useCases.managers.OfflineModeManager
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.SpyK
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
@@ -80,10 +84,15 @@ class EventScreenUiTest {
                 groups = null
             )
         )
-        val sortEventsByColumn = { _:EventScreenViewModel.EditorStatColumns, _:Boolean ->}
+        val sortEventsByColumn = { _: EventScreenViewModel.EditorStatColumns, _: Boolean -> }
+        val getStats = { _: String, _: String -> }
+        val blocks =
+            MutableStateFlow<SingleUserStat>(SingleUserStat(blocks = listOf())).asStateFlow()
+        val options =
+            MutableStateFlow<Map<String, List<SingleUserStatViewModel.DisplayOption>>>(mapOf()).asStateFlow()
     }
 
-    @get:Rule
+    @get:Rule()
     val composeTestRule = createComposeRule()
 
     @SpyK
@@ -140,7 +149,10 @@ class EventScreenUiTest {
             appMode = eventData.appMode,
             needsUpdate = eventData.needsUpdate,
             groupEditorStats = eventData.groupEditorStats,
-            sortEventsByColumn = eventData.sortEventsByColumn
+            sortEventsByColumn = eventData.sortEventsByColumn,
+            getStat = eventData.getStats,
+            blocks = eventData.blocks,
+            options = eventData.options
         )
     }
 
@@ -327,7 +339,7 @@ class EventScreenUiTest {
     @Test
     fun check_contains_general_info_for_player() {
         composeTestRule.apply {
-            val tags = mutableStateListOf("tag 1",  "tag 2",  "tag 3")
+            val tags = mutableStateListOf("tag 1", "tag 2", "tag 3")
             val info = mutableStateListOf<Pair<Int, String?>>(
                 Pair(R.string.rating, 3.54.toString()),
                 Pair(R.string.opens, LocalDateTime.now().toString()),
@@ -599,7 +611,7 @@ class EventScreenUiTest {
     }
 
     @Test
-    fun creator_mode_check_event_general_info_is_displayed_when_privacy_general_info_is_clicked() {
+    fun creator_mode_check_event_general_info_is_displayed_when_general_info_is_clicked() {
         composeTestRule.apply {
             every { eventData.isCompleted } returns mutableStateOf(true)
             every { eventData.eventCreatorMode } returns mutableStateOf(true)
@@ -681,8 +693,6 @@ class EventScreenUiTest {
             onNodeWithTag("rate_bar", useUnmergedTree = true).assertIsDisplayed()
         }
     }
-
-
 
 
 }

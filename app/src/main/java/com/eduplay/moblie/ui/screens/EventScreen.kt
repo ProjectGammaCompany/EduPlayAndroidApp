@@ -102,6 +102,7 @@ import com.eduplay.moblie.R
 import com.eduplay.moblie.models.EventGroup
 import com.eduplay.moblie.repository.responseTypes.JoinCodeInfo
 import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.ResultStats
+import com.eduplay.moblie.repository.webrepository.responseTypes.EventEditorStats.SingleUserStat
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
 import com.eduplay.moblie.ui.elements.JoinGroupDialog
 import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
@@ -111,12 +112,15 @@ import com.eduplay.moblie.ui.viewmodel.BluetoothViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel
 import com.eduplay.moblie.ui.viewmodel.EventScreenViewModel.EditorStatColumns
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
-import com.eduplay.moblie.useCases.bluetoothInteractions.BluetoothConnectionFragment
+import com.eduplay.moblie.ui.viewmodel.SingleUserStatViewModel
 import com.eduplay.moblie.useCases.DateConverter
+import com.eduplay.moblie.useCases.bluetoothInteractions.BluetoothConnectionFragment
 import com.eduplay.moblie.useCases.managers.OfflineModeManager
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import java.io.File
+import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -133,7 +137,8 @@ fun EventScreen(
     isCompetitionMode: State<Boolean>,
     toggleCompetitionMode: (Boolean) -> Unit,
     bluetoothViewModel: BluetoothViewModel,
-    onDownloadEvent: (String, String) -> ComponentName?
+    onDownloadEvent: (String, String) -> ComponentName?,
+    singleStatViewmodel: SingleUserStatViewModel = hiltViewModel()
 ) {
     var dataFetched by remember { mutableStateOf(false) }
     var noInternet by remember { mutableStateOf(false) }
@@ -253,8 +258,12 @@ fun EventScreen(
         }
     }
 
-    LaunchedEffect(canShowConnectionList) {
+    var reconnection by remember { mutableStateOf(0) }
+    LaunchedEffect(canShowConnectionList, reconnection) {
         if (canShowConnectionList && adapter.value != null) {
+            if (reconnection > 0) {
+                bluetoothViewModel.stopScan(context)
+            }
             bluetoothViewModel.discoverDevices(context, onConnectionTookTooLong)
         } else if (canShowConnectionList && adapter.value == null) {
             requireAdapter = true
@@ -311,7 +320,10 @@ fun EventScreen(
             devicesConnectionStatus = bluetoothViewModel.devicesConnectionStatus,
             onProceed = proceedWithBluetooth,
             innerPaddingValues = innerPaddingValues,
-            onReturn = onStopShowingDeviceList
+            onReturn = onStopShowingDeviceList,
+            needLocation = bluetoothViewModel.needLocation,
+            deviceNameTooLong = bluetoothViewModel.deviceNameTooLong,
+            onScanAgain = { reconnection++ }
         )
     }
 
@@ -366,8 +378,11 @@ fun EventScreen(
             imageHeaderViewModel.appMode,
             viewModel.needsUpdate,
             viewModel.editorEventStats,
-            viewModel::sortEventStatsByColumn
-        )
+            viewModel::sortEventStatsByColumn,
+            singleStatViewmodel::getStat,
+            singleStatViewmodel.blocks,
+            singleStatViewmodel.options
+            )
     }
 }
 
@@ -412,7 +427,10 @@ fun EventScreen(
     appMode: State<Flow<OfflineModeManager.AppModes>>,
     needsUpdate: State<Boolean>,
     groupEditorStats: State<ResultStats>,
-    sortEventsByColumn: (EditorStatColumns, Boolean) -> Unit
+    sortEventsByColumn: (EditorStatColumns, Boolean) -> Unit,
+    getStat: (String, String) -> Unit,
+    blocks: StateFlow<SingleUserStat>,
+    options: StateFlow<Map<String, List<SingleUserStatViewModel.DisplayOption>>>
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     val onEditEvent = {
@@ -491,7 +509,10 @@ fun EventScreen(
                     groupEvent,
                     groupEditorStats,
                     sortEventsByColumn,
-                    eventId
+                    eventId,
+                    getStat,
+                    blocks,
+                    options
                 )
             } else {
                 GeneralUserBody(
@@ -1117,7 +1138,10 @@ private fun EventCreatorBody(
     groupEvent: State<Boolean>,
     groupEditorStats: State<ResultStats>,
     sortEventsByColumn: (EditorStatColumns, Boolean) -> Unit,
-    eventId: String
+    eventId: String,
+    getStat: (String, String) -> Unit,
+    blocks: StateFlow<SingleUserStat>,
+    options: StateFlow<Map<String, List<SingleUserStatViewModel.DisplayOption>>>
 ) {
     val tabs = remember<List<Int>> {
         listOf<Int>(
@@ -1152,7 +1176,15 @@ private fun EventCreatorBody(
 
     when (selectedTabIdx) {
         0 -> GeneralInfo(tags, info, description)
-        1 -> StatisticsInfo(groupEditorStats, sortEventsByColumn, eventId)
+        1 -> StatisticsInfo(
+            groupEditorStats,
+            sortEventsByColumn,
+            eventId,
+            getStat,
+            blocks,
+            options
+        )
+
         2 -> PrivacySettings(password, groups, joinCode, privateEvent, groupEvent)
         else -> Box {}
     }
