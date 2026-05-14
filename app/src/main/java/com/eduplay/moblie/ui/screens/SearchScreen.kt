@@ -60,8 +60,8 @@ import coil3.network.NetworkHeaders
 import com.eduplay.moblie.R
 import com.eduplay.moblie.models.QuestShortInfo
 import com.eduplay.moblie.ui.elements.AuthScreenNavigator
-import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.EventElement
+import com.eduplay.moblie.ui.elements.NoInternetConnectionToast
 import com.eduplay.moblie.ui.elements.TryAgainLaterToast
 import com.eduplay.moblie.ui.viewmodel.EventListViewModel
 import com.eduplay.moblie.ui.viewmodel.ImageHeaderViewModel
@@ -177,15 +177,30 @@ private fun SearchScreen(
                                 isFavorite.value,
                                 textFieldState.text.toString()
                             )
+                            advancedSearch = false
                         },
                         expanded = true,
                         onExpandedChange = { },
                         placeholder = { Text(stringResource(R.string.search_events)) },
                         trailingIcon = {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = stringResource(R.string.search_events)
-                            )
+                            IconButton(
+                                onClick = {
+                                    searched = true
+                                    onSearch(
+                                        chosenTags.toList(),
+                                        isDecliningOrder.value,
+                                        isActive.value,
+                                        isFavorite.value,
+                                        textFieldState.text.toString()
+                                    )
+                                    advancedSearch = false
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = stringResource(R.string.search_events)
+                                )
+                            }
                         },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = colorScheme.primaryContainer
