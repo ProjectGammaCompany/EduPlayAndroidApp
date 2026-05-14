@@ -99,48 +99,6 @@ fun StatisticsInfo(
             .padding(5.dp)
             .testTag("statistics_section")
     ) {
-        // switch by buttons
-//        Row(
-//            horizontalArrangement = Arrangement.SpaceEvenly,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(horizontal = 5.dp, vertical = 3.dp)
-//                .clip(RoundedCornerShape(50.dp))
-//                .background(colorScheme.primaryContainer)
-//                .padding(horizontal = 3.dp)
-//        ) {
-//
-//            TextButton(
-//                onClick = { showPersonalStats = false },
-//                colors = ButtonColors(
-//                    containerColor = if (showPersonalStats) colorScheme.primaryContainer else colorScheme.background,
-//                    contentColor = if (showPersonalStats) colorScheme.onPrimaryContainer else colorScheme.onBackground,
-//                    disabledContainerColor = colorScheme.primaryContainer,
-//                    disabledContentColor = colorScheme.primaryContainer
-//                ),
-//                contentPadding = PaddingValues(vertical = 0.dp),
-//                modifier = Modifier
-//                    .padding(horizontal = 3.dp)
-//                    .weight(1f)
-//            ) {
-//                Text("full stat")
-//            }
-//            TextButton(
-//                onClick = { showPersonalStats = true },
-//                colors = ButtonColors(
-//                    containerColor = if (!showPersonalStats) colorScheme.primaryContainer else colorScheme.background,
-//                    contentColor = if (!showPersonalStats) colorScheme.onPrimaryContainer else colorScheme.onBackground,
-//                    disabledContainerColor = colorScheme.primaryContainer,
-//                    disabledContentColor = colorScheme.primaryContainer
-//                ),
-//                modifier = Modifier
-//                    .padding(horizontal = 3.dp)
-//                    .weight(1f)
-//            ) {
-//                Text("user stat")
-//
-//            }
-//        }
         val currentUserName = remember { mutableStateOf("") }
         val currentUserGroup = remember { mutableStateOf<String?>(null) }
         val onUserClick = { userId: String, userName: String, group: String? ->
@@ -659,6 +617,7 @@ private fun TaskAnswerStat(task: SingleUserStat.SingleUserTask, options: List<Di
                 }
 
                 Text(statusText)
+                Text(text = "${stringResource(R.string.points)}: ${task.userPoints}/${task.points}")
             }
             IconButton(
                 onClick = { taskExpanded = !taskExpanded },

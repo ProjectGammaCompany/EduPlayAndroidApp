@@ -19,6 +19,9 @@
       <SelectionState runConfigName="UpdateEventsPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="check_update_button_updates_its_event()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>
