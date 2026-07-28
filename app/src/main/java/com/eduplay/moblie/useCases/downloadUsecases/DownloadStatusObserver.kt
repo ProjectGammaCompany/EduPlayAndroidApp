@@ -12,9 +12,9 @@ object DownloadStatusObserver {
         downloading[eventUrl] = eventId
     }
 
-    fun updateDownloaded(eventUrl: String) {
+    fun updateDownloaded(eventUrl: String, success: Boolean) {
         val eventId = downloading.remove(eventUrl)
-        if (eventId != null)
+        if (eventId != null && success)
             downloaded.add(eventId)
     }
 

@@ -86,9 +86,9 @@ class EventDownloadService : Service() {
                 toastFail()
                 stopSelf(msg.arg1)
             }
-            parseFile(eventFile)
+            val successParsing = parseFile(eventFile)
             eventFile.delete()
-            downloadStatusKeeper.updateDownloaded(eventUrl)
+            downloadStatusKeeper.updateDownloaded(eventUrl, successParsing)
 
             stopSelf(msg.arg1)
         }
@@ -126,7 +126,8 @@ class EventDownloadService : Service() {
     override fun onDestroy() {
     }
 
-    private fun parseFile(eventFile: File) {
+    private fun parseFile(eventFile: File): Boolean {
+        var parsedCorrectly = true
         val json = eventFile.readText()
         val event = Gson().fromJson<FullEventData>(json, FullEventData::class.java)
         val fileLocations = mutableMapOf<String, Task.TaskFile>()
@@ -148,49 +149,56 @@ class EventDownloadService : Service() {
             }
             // add event
             val tags = event.event.tags.filter { allTags[it] != null }.map { allTags[it]!!.name }
-            val eventEntity = EventEntity(
-                event.event,
-                fileLocations[event.event.cover]?.name ?: "",
-                tags
-            )
-            repository.addEvent(eventEntity)
 
-            // add eventBlocks
-            for (block in event.blocks) {
-                repository.addBlock(BlockEntity(block))
-            }
+            try {
+                val eventEntity = EventEntity(
+                    event.event,
+                    fileLocations[event.event.cover]?.name ?: "",
+                    tags
+                )
+                repository.addEvent(eventEntity)
 
-            //add conditions
-            for (condition in event.conditions) {
-                repository.addCondition(ConditionEntity(condition))
-            }
-
-            //add groups
-            for (group in event.groups) {
-                repository.addGroup(GroupEntity(group))
-            }
-
-            //add tasks
-            for (task in event.tasks) {
-                val files: List<String> = task.files
-                    .filter {
-                        fileLocations[it] != null
-                    }.map {
-                        fileLocations[it]!!.name
-                    }.toList()
-                repository.addTask(TaskEntity(task), files, event.event.eventId)
-            }
-
-            for (option in event.options) {
-                repository.addOption(OptionEntity(option))
-            }
-
-            for (answer in event.correctAnswers) {
-                for (value in answer.values) {
-                    repository.addAnswer(CorrectAnswerEntity(answer.taskId, value))
+                // add eventBlocks
+                for (block in event.blocks) {
+                    repository.addBlock(BlockEntity(block))
                 }
+
+                //add conditions
+                for (condition in event.conditions) {
+                    repository.addCondition(ConditionEntity(condition))
+                }
+
+                //add groups
+                for (group in event.groups) {
+                    repository.addGroup(GroupEntity(group))
+                }
+
+                //add tasks
+                for (task in event.tasks) {
+                    val files: List<String> = task.files
+                        .filter {
+                            fileLocations[it] != null
+                        }.map {
+                            fileLocations[it]!!.name
+                        }.toList()
+                    repository.addTask(TaskEntity(task), files, event.event.eventId)
+                }
+
+                for (option in event.options) {
+                    repository.addOption(OptionEntity(option))
+                }
+
+                for (answer in event.correctAnswers) {
+                    for (value in answer.values) {
+                        repository.addAnswer(CorrectAnswerEntity(answer.taskId, value))
+                    }
+                }
+            } catch (e: IllegalStateException) {
+                Log.e("FAILED_DOWNLOAD", e.message ?: "", e)
+                repository.deleteEvent(event.event.eventId)
+                parsedCorrectly = false
             }
         }
-
+        return parsedCorrectly
     }
 }

@@ -230,8 +230,9 @@ fun EventScreen(
     val turnOnBluetooth = {
         if (!isCompetitionMode.value) {
             requireAdapter = true
-            toggleCompetitionMode(true)
             bluetoothViewModel.askForPermissions.value = true
+            toggleCompetitionMode(true)
+
         } else {
             if (adapter.value != null) {
                 try {
@@ -245,7 +246,7 @@ fun EventScreen(
 
     LaunchedEffect(fragment, requireAdapter) {
         if (requireAdapter && fragment != null) {
-            fragment?.startBluetooth(
+            val result = fragment?.startBluetooth(
                 manager,
                 adapter,
                 updateManger,
@@ -255,6 +256,9 @@ fun EventScreen(
                 onConnectionTookTooLong = onConnectionTookTooLong
             )
             requireAdapter = false
+            if (!(result ?: false)) {
+                toggleCompetitionMode(false)
+            }
         }
     }
 

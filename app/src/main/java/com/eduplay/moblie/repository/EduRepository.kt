@@ -301,7 +301,7 @@ class EduRepository @Inject constructor(
         eventId: String, blockId: String, taskId: String, answers: List<String>
     ): AnswerResult {
         return getRepository().postTaskAnswer(
-            eventId, blockId, taskId, answers.map { it.lowercase() }.toList()
+            eventId, blockId, taskId, answers.map { it.lowercase().trim() }.toList()
         )
     }
 

@@ -34,7 +34,13 @@ fun BluetoothPermissionElement(
     val advertisePermission =
         rememberPermissionState(permission = Manifest.permission.BLUETOOTH_ADVERTISE)
     var askAdvertisePermission by remember { mutableStateOf(false) }
-
+    val context = LocalContext.current
+    if (askForPermissions.value) {
+        askScanPermission = !context.hasPermission(bluetoothScanPermission)
+        askConnectPermission = !context.hasPermission(bluetoothConnectPermission)
+        askLocationPermission = !context.hasPermission(fineLocationPermission)
+        askAdvertisePermission = !context.hasPermission(advertisePermission)
+    }
     LaunchedEffect(
         askScanPermission,
         askConnectPermission,
@@ -57,13 +63,5 @@ fun BluetoothPermissionElement(
             advertisePermission.launchPermissionRequest()
             askAdvertisePermission = false
         }
-    }
-
-    val context = LocalContext.current
-    if (askForPermissions.value) {
-        askScanPermission = !context.hasPermission(bluetoothScanPermission)
-        askConnectPermission = !context.hasPermission(bluetoothConnectPermission)
-        askLocationPermission = !context.hasPermission(fineLocationPermission)
-        askAdvertisePermission = !context.hasPermission(advertisePermission)
     }
 }

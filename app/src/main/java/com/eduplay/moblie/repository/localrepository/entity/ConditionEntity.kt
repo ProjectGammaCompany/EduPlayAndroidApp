@@ -47,7 +47,7 @@ data class ConditionEntity(
         conditionId = condition.conditionId,
         prevBlockId = condition.prevBlockId,
         nextBlockId = condition.nextBlockId,
-        groupName = condition.groupName,
+        groupName = condition.groupName?.firstOrNull(),
         min = if (condition.min != -1) condition.min else null,
         max = if (condition.max != -1) condition.max else null
     )

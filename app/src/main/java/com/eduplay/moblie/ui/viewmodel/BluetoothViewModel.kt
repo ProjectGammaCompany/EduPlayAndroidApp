@@ -236,6 +236,10 @@ class BluetoothViewModel(
                     if (socket != null && !connectedDevices.keys.contains(socket.remoteDevice)) {
                         connectedDevices[socket.remoteDevice] = socket
                         devicesConnectionStatus[socket.remoteDevice.address] = true
+                        val device = socket.remoteDevice
+                        val deviceName = device?.name ?: "unknown"
+                        if (device != null && device.address != null && deviceName != null)
+                            foundDevices.put(device.address!!, deviceName)
                         listenToSocket(socket)
                     }
                 }
@@ -243,6 +247,7 @@ class BluetoothViewModel(
         }
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
     fun stopSocketConnection() {
         isReceivingConnections.store(false)
         stopAdvertising()
@@ -279,7 +284,6 @@ class BluetoothViewModel(
 
     @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     private fun connectSockets(address: String, onCouldNotConnect: () -> Unit) {
-        adapter.value?.cancelDiscovery()
         viewModelScope.launch(Dispatchers.IO) {
             val device = adapter.value?.getRemoteDevice(address)
             if (device == null) {
@@ -292,8 +296,8 @@ class BluetoothViewModel(
                 var connectionTries = 0
                 var connected = false
                 while (!connected && connectionTries < 3) {
-                    val bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid)
                     try {
+                        val bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid)
                         Log.d("CONNECT", "$address ${device.address}")
                         bluetoothSocket.connect()
                         connectedDevices[device] = bluetoothSocket
@@ -359,12 +363,16 @@ class BluetoothViewModel(
 
     fun stopAllSocketConnections() {
         devicesConnectionStatus.clear()
+        devicesScore.clear()
         foundDevices.clear()
         devicesScore.clear()
-        for (socket in connectedDevices.values) {
-            exchangeUseCase.cancel(socket)
+        try {
+            for (socket in connectedDevices.values) {
+                exchangeUseCase.cancel(socket)
+            }
+        } catch (e: Exception) {
+            Log.e("DISCONNECT", e.message ?: "", e)
         }
+        connectedDevices.clear()
     }
-
-
 }
